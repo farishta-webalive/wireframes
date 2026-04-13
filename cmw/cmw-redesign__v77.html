@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Complex Metalworkers — Steel Stairs & Balustrades Melbourne</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --orange:#FF991B;
+  --orange-dark:#e0830a;
+  --navy:#1A496D;
+  --navy-dark:#123249;
+  --charcoal:#4D515A;
+  --light:#F7F8FA;
+  --white:#fff;
+  --border:#e5e7eb;
+  --text:#2d3035;
+}
+html{scroll-behavior:smooth}
+body{font-family:'Inter',sans-serif;color:var(--text);background:var(--white);line-height:1.7}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(255,255,255,0.97);backdrop-filter:blur(8px);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1200px;margin:0 auto;padding:0 1.5rem;display:flex;align-items:center;justify-content:space-between;height:70px;gap:2rem}
+.nav-logo{display:flex;align-items:center;text-decoration:none;flex-shrink:0}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links > li > a{font-size:0.875rem;font-weight:500;color:var(--charcoal);text-decoration:none;transition:color 0.2s}
+.nav-links > li > a:hover{color:var(--navy)}
+
+/* Dropdown */
+.has-dropdown{position:relative}
+.has-dropdown > a{display:flex;align-items:center;gap:0.3rem}
+.has-dropdown > a::after{content:'▾';font-size:0.6rem;opacity:0.6;margin-left:1px}
+.dropdown-menu{display:none;position:absolute;top:calc(100% + 0.5rem);left:0;background:#fff;border:1px solid var(--border);border-radius:10px;min-width:210px;box-shadow:0 8px 28px rgba(0,0,0,0.09);padding:0.5rem 0;z-index:200}
+.has-dropdown:hover .dropdown-menu{display:block}
+.dropdown-menu a{display:block;padding:0.6rem 1.25rem;font-size:0.84rem;font-weight:500;color:var(--charcoal);text-decoration:none;transition:background 0.15s,color 0.15s}
+.dropdown-menu a:hover{background:var(--light);color:var(--navy)}
+
+/* Nav right */
+.nav-right{display:flex;align-items:center;gap:1.25rem;flex-shrink:0}
+.nav-phone{font-size:0.84rem;font-weight:500;color:var(--charcoal);text-decoration:none;transition:color 0.2s;white-space:nowrap}
+.nav-phone:hover{color:var(--navy)}
+.nav-cta{background:var(--orange);color:#fff;padding:0.55rem 1.4rem;border-radius:6px;font-size:0.875rem;font-weight:600;text-decoration:none;transition:background 0.2s;white-space:nowrap}
+.nav-cta:hover{background:var(--orange-dark)}
+
+/* HERO */
+.hero{min-height:100vh;position:relative;display:flex;align-items:center;overflow:hidden;padding-top:70px;padding-left:1.5rem;padding-right:1.5rem}
+.hero-bg{position:absolute;inset:0;background-image:url('https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/steel-stair-img4.jpg');background-size:cover;background-position:center}
+.hero-overlay{position:absolute;inset:0;background:linear-gradient(105deg,rgba(26,73,109,0.93) 40%,rgba(26,73,109,0.55) 75%,rgba(26,73,109,0.1) 100%)}
+.hero-content{position:relative;max-width:1200px;margin:0 auto;padding:5rem 0;z-index:2;width:100%}
+.hero-badge{display:inline-flex;align-items:center;gap:0.5rem;background:rgba(255,153,27,0.15);border:1px solid rgba(255,153,27,0.4);color:#FFB851;font-size:0.72rem;font-weight:600;letter-spacing:0.12em;text-transform:uppercase;padding:0.4rem 1rem;border-radius:30px;margin-bottom:1.5rem}
+.hero-badge span{width:6px;height:6px;border-radius:50%;background:var(--orange);display:block}
+.hero h1{font-family:'Playfair Display',serif;font-size:clamp(3rem,5.5vw,5rem);font-weight:700;color:#fff;line-height:1.12;max-width:680px;margin-bottom:1.5rem}
+.hero h1 em{color:var(--orange);font-style:normal}
+.hero p{font-size:1.05rem;color:rgba(255,255,255,0.82);max-width:500px;margin-bottom:2.5rem;line-height:1.75}
+.hero-btns{display:flex;flex-wrap:wrap;gap:1rem}
+.btn-primary{background:var(--orange);color:#fff;padding:0.85rem 2rem;border-radius:7px;font-weight:600;font-size:0.95rem;text-decoration:none;transition:background 0.2s,transform 0.15s}
+.btn-primary:hover{background:var(--orange-dark);transform:translateY(-1px)}
+.btn-outline{background:transparent;color:#fff;border:1.5px solid rgba(255,255,255,0.5);padding:0.85rem 2rem;border-radius:7px;font-weight:600;font-size:0.95rem;text-decoration:none;transition:border-color 0.2s,background 0.2s}
+.btn-outline:hover{border-color:#fff;background:rgba(255,255,255,0.08)}
+.hero-stats{display:flex;flex-wrap:wrap;gap:2.5rem;margin-top:4rem;padding-top:3rem;border-top:1px solid rgba(255,255,255,0.15)}
+.hero-stat .num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:#fff}
+.hero-stat .num span{color:var(--orange)}
+.hero-stat .lbl{font-size:0.78rem;color:rgba(255,255,255,0.6);font-weight:500;letter-spacing:0.06em;text-transform:uppercase;margin-top:0.1rem}
+
+/* SECTION BASE */
+.section{padding:6rem 1.5rem}
+.container{max-width:1200px;margin:0 auto}
+.section-label{font-size:0.72rem;font-weight:700;letter-spacing:0.18em;text-transform:uppercase;color:var(--orange);margin-bottom:0.75rem}
+.section-title{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,3.5vw,3.2rem);font-weight:700;color:var(--navy);line-height:1.2;margin-bottom:1.25rem}
+.section-lead{font-size:1.05rem;color:var(--charcoal);max-width:560px;line-height:1.8}
+
+/* ABOUT */
+.about{background:var(--white)}
+.about-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:center}
+.about-text .section-lead{margin-bottom:2rem}
+.about-highlights{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:2.5rem}
+.highlight-card{background:var(--light);border-left:3px solid var(--orange);padding:1.1rem 1.2rem;border-radius:0 8px 8px 0}
+.highlight-card h4{font-size:0.95rem;font-weight:600;color:var(--navy);margin-bottom:0.2rem}
+.highlight-card p{font-size:0.8rem;color:var(--charcoal);line-height:1.5}
+.about-images{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem}
+.about-images img{width:100%;height:200px;object-fit:cover;border-radius:8px}
+.about-images img:first-child{grid-column:1/-1;height:260px}
+
+/* SERVICES */
+.services{background:var(--light)}
+.services-header{text-align:center;margin-bottom:3.5rem}
+.services-header .section-lead{margin:0 auto}
+.services-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.svc-card{background:var(--white);border:1px solid var(--border);border-radius:12px;overflow:hidden;transition:box-shadow 0.25s,transform 0.2s}
+.svc-card:hover{box-shadow:0 10px 40px rgba(26,73,109,0.1);transform:translateY(-3px)}
+.svc-img{height:200px;overflow:hidden}
+.svc-img img{width:100%;height:100%;object-fit:cover;transition:transform 0.4s}
+.svc-card:hover .svc-img img{transform:scale(1.05)}
+.svc-body{padding:1.5rem}
+.svc-icon{width:38px;height:38px;border-radius:8px;background:rgba(255,153,27,0.12);display:flex;align-items:center;justify-content:center;margin-bottom:1rem}
+.svc-icon svg{width:18px;height:18px;fill:var(--orange)}
+.svc-body h3{font-family:'Playfair Display',serif;font-size:1.35rem;font-weight:600;color:var(--navy);margin-bottom:0.5rem}
+.svc-body p{font-size:0.85rem;color:var(--charcoal);line-height:1.7}
+
+/* GALLERY */
+.gallery{background:var(--white)}
+.gallery-header{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:2.5rem;flex-wrap:wrap;gap:1rem}
+.gallery-tabs{display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:1.5rem}
+.tab-btn{padding:0.5rem 1.2rem;border:1.5px solid var(--border);border-radius:30px;font-size:0.85rem;font-weight:500;color:var(--charcoal);background:var(--white);cursor:pointer;transition:all 0.2s}
+.tab-btn.active{background:var(--navy);color:#fff;border-color:var(--navy)}
+.tab-btn:hover:not(.active){border-color:var(--navy);color:var(--navy)}
+.gallery-panel{display:none;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1rem}
+.gallery-panel.active{display:grid}
+.gallery-panel.full{grid-template-columns:1fr}
+.gimg{position:relative;overflow:hidden;border-radius:10px;cursor:pointer}
+.gimg img{width:100%;height:260px;object-fit:cover;display:block;transition:transform 0.4s}
+.gimg:hover img{transform:scale(1.05)}
+.gimg-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(26,73,109,0.7),transparent);opacity:0;transition:opacity 0.3s;display:flex;align-items:flex-end;padding:1.2rem}
+.gimg:hover .gimg-overlay{opacity:1}
+.gimg-overlay span{color:#fff;font-size:0.8rem;font-weight:500}
+
+/* WHY */
+.why{background:var(--navy);color:#fff;padding:6rem 1.5rem}
+.why-grid{display:grid;grid-template-columns:1fr 2fr;gap:5rem;align-items:center}
+.why-left .section-label{color:rgba(255,153,27,0.8)}
+.why-left .section-title{color:#fff}
+.why-left .section-lead{color:rgba(255,255,255,0.7)}
+.why-cards{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.why-card{background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:1.5rem}
+.why-card .num{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:700;color:var(--orange);margin-bottom:0.5rem}
+.why-card h4{font-size:0.95rem;font-weight:600;color:#fff;margin-bottom:0.35rem}
+.why-card p{font-size:0.82rem;color:rgba(255,255,255,0.6);line-height:1.6}
+
+/* CONTACT */
+.contact{background:var(--light);padding:6rem 1.5rem}
+.contact-grid{display:grid;grid-template-columns:1fr 1fr;gap:5rem;align-items:start}
+.contact-info .section-lead{margin-bottom:2.5rem}
+.contact-items{display:flex;flex-direction:column;gap:1.25rem}
+.contact-item{display:flex;gap:1rem;align-items:flex-start}
+.citem-icon{width:42px;height:42px;flex-shrink:0;border-radius:8px;background:var(--white);border:1px solid var(--border);display:flex;align-items:center;justify-content:center}
+.citem-icon svg{width:18px;height:18px;fill:var(--navy)}
+.citem-label{font-size:0.72rem;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:var(--orange);margin-bottom:0.2rem}
+.citem-val{font-size:0.95rem;color:var(--text);font-weight:500}
+.citem-val a{color:var(--text);text-decoration:none}
+.citem-val a:hover{color:var(--navy);text-decoration:underline}
+.sabba-badge{margin-top:2.5rem;display:flex;align-items:center;gap:1rem;padding:1rem 1.25rem;background:var(--white);border:1px solid var(--border);border-radius:10px;max-width:320px}
+.sabba-badge img{height:50px;width:auto}
+.sabba-badge p{font-size:0.78rem;color:var(--charcoal);line-height:1.5}
+.contact-form{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:2.5rem}
+.contact-form h3{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--navy);margin-bottom:0.5rem}
+.contact-form p{font-size:0.85rem;color:var(--charcoal);margin-bottom:2rem}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+.form-group{margin-bottom:1rem;display:flex;flex-direction:column;gap:0.4rem}
+label{font-size:0.8rem;font-weight:600;color:var(--charcoal)}
+input,textarea,select{width:100%;padding:0.7rem 1rem;border:1.5px solid var(--border);border-radius:7px;font-size:0.9rem;font-family:'Inter',sans-serif;color:var(--text);background:var(--light);transition:border-color 0.2s,background 0.2s;outline:none}
+input:focus,textarea:focus,select:focus{border-color:var(--navy);background:var(--white)}
+textarea{resize:vertical;min-height:110px}
+.form-submit{width:100%;padding:0.9rem;background:var(--orange);color:#fff;border:none;border-radius:7px;font-size:0.95rem;font-weight:600;cursor:pointer;font-family:'Inter',sans-serif;transition:background 0.2s}
+.form-submit:hover{background:var(--orange-dark)}
+
+/* FOOTER */
+footer{background:var(--navy-dark);color:rgba(255,255,255,0.7);padding:3rem 1.5rem 2rem}
+.footer-inner{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:2fr 1fr 1fr;gap:3rem;margin-bottom:2.5rem}
+.footer-logo-main{font-family:'Playfair Display',serif;font-size:1.3rem;font-weight:700;color:#fff;display:block;margin-bottom:0.3rem}
+.footer-logo-sub{font-size:0.6rem;font-weight:600;color:rgba(255,153,27,0.7);letter-spacing:0.18em;text-transform:uppercase;display:block;margin-bottom:1rem}
+.footer-desc{font-size:0.85rem;line-height:1.7;color:rgba(255,255,255,0.55);max-width:280px}
+.footer-col h5{font-size:0.75rem;font-weight:700;letter-spacing:0.14em;text-transform:uppercase;color:rgba(255,255,255,0.4);margin-bottom:1rem}
+.footer-links{list-style:none;display:flex;flex-direction:column;gap:0.5rem}
+.footer-links a{font-size:0.875rem;color:rgba(255,255,255,0.65);text-decoration:none;transition:color 0.2s}
+.footer-links a:hover{color:var(--orange)}
+.footer-bottom{max-width:1200px;margin:0 auto;padding-top:1.5rem;border-top:1px solid rgba(255,255,255,0.08);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:1rem}
+.footer-bottom p{font-size:0.78rem;color:rgba(255,255,255,0.4)}
+.footer-bottom a{color:rgba(255,255,255,0.55);text-decoration:none;transition:color 0.2s}
+.footer-bottom a:hover{color:#fff}
+
+/* MOBILE */
+@media(max-width:900px){
+  .about-grid,.contact-grid,.why-grid,.footer-inner{grid-template-columns:1fr}
+  .about-images img:first-child{height:200px}
+  .services-grid{grid-template-columns:1fr}
+  .why-cards{grid-template-columns:1fr}
+  .form-row{grid-template-columns:1fr}
+  .nav-links,.nav-phone{display:none}
+  .hero h1{font-size:2.5rem}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <svg version="1.1" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 60" height="44" style="display:block"><path fill="#FDFCF9" opacity="1.000000" stroke="none" d="M121.000000,61.000000 C80.666672,61.000000 40.833344,61.000000 1.000011,61.000000 C1.000007,41.000008 1.000007,21.000015 1.000004,1.000016 C50.999985,1.000011 100.999969,1.000011 150.999969,1.000005 C150.999969,20.999985 150.999969,40.999969 150.999985,60.999977 C141.166672,61.000000 131.333328,61.000000 121.000000,61.000000 M56.253334,23.595163 C57.168240,24.730820 58.083149,25.866474 59.277180,27.591028 C60.511745,29.068729 61.746311,30.546431 63.253868,32.626385 C64.439323,33.771996 65.624771,34.917610 66.959511,36.748714 C68.623917,39.119213 70.288330,41.489708 72.260246,44.298168 C74.238663,42.110291 75.744690,40.444820 77.817368,39.159573 C78.777283,40.202579 79.737198,41.245590 80.867683,42.473934 C86.382187,35.747204 91.634247,29.340620 97.436165,23.283890 C98.626282,24.520603 99.816391,25.757317 101.291550,27.591604 C102.812683,29.075310 104.333809,30.559013 105.996780,32.701897 C107.002930,34.129169 108.009079,35.556438 109.291954,37.594318 C111.036446,39.709705 112.780937,41.825096 114.924576,44.424496 C116.587982,42.057415 117.884705,40.212124 119.774048,38.781212 C120.875992,39.953438 121.977943,41.125664 123.342537,42.577290 C130.831711,33.078571 138.102997,23.876730 145.350266,14.656017 C149.256195,9.686499 149.156509,9.076938 143.804260,4.712678 C140.972015,8.052512 138.130264,11.403536 135.152847,13.928866 C134.839432,10.764052 133.423111,10.275042 131.160263,12.397982 C130.000443,13.486092 129.048035,14.795270 127.420799,16.299164 C126.280464,17.868742 125.140137,19.438318 123.471558,21.372595 C122.327087,22.906975 121.182617,24.441353 119.455208,25.647900 C113.614433,18.564018 107.773666,11.480138 101.813324,4.251238 C98.731544,7.867058 96.061455,10.999842 93.213989,13.299185 C92.478073,10.051544 90.867737,9.211543 88.606033,11.979955 C86.549301,14.497478 84.842712,17.301060 82.395798,20.282619 C80.538368,21.889990 78.680931,23.497360 76.258141,24.756092 C70.793610,17.984560 65.329071,11.213029 59.674652,4.206191 C55.968033,8.575369 52.575378,12.574462 48.828232,15.847713 C47.672256,15.174788 46.516281,14.501863 45.372684,13.202617 C40.771000,2.648403 21.751410,1.326437 14.300427,12.937177 C12.251831,12.761088 8.992795,11.714111 8.377521,12.569273 C6.388920,15.333206 5.372221,18.796406 3.509336,22.381252 C3.661543,23.579199 3.813751,24.777147 3.964422,26.791153 C4.309491,28.860870 4.654560,30.930588 5.079309,33.687897 C6.734499,35.772095 8.389688,37.856289 10.441394,40.515732 C15.370422,43.501560 20.368973,45.959713 26.849724,42.515530 C34.790764,43.019009 41.037838,40.158718 45.720810,33.574200 C48.407215,29.796965 51.616096,26.391317 55.297848,22.928890 C55.535500,22.952227 55.773148,22.975561 56.253334,23.595163 z"/><path fill="#50555D" opacity="1.000000" stroke="none" d="M96.886307,22.934036 C91.634247,29.340620 86.382187,35.747204 80.867683,42.473934 C79.737198,41.245590 78.777283,40.202579 77.428696,38.700397 C76.252914,37.433250 75.465805,36.625278 74.557175,35.485905 C72.988457,33.382656 71.541260,31.610804 69.974014,29.529377 C67.927620,27.094278 66.001289,24.968754 64.003990,22.625851 C63.768822,22.117365 63.520027,21.959854 63.042965,21.621681 C61.887512,19.842470 60.875748,18.377518 59.489784,16.370750 C57.699581,18.726366 56.144672,20.772375 54.589764,22.818386 C51.616096,26.391317 48.407215,29.796965 45.720810,33.574200 C41.037838,40.158718 34.790764,43.019009 26.182600,42.317787 C22.726223,40.667603 19.936968,39.215164 16.998306,37.491768 C15.706808,35.824089 14.564715,34.427380 13.343968,32.676571 C12.810526,31.209957 12.355739,30.097441 11.922591,28.635025 C11.693787,27.164469 11.443341,26.043808 11.258659,24.567055 C11.265055,23.492186 11.205687,22.773413 11.320442,21.735210 C12.666306,18.610420 13.838049,15.805060 15.009790,12.999701 C21.751410,1.326437 40.771000,2.648403 45.106476,13.694131 C43.217789,15.528399 41.595306,16.871151 39.697510,17.983723 C37.894642,16.589491 36.500313,15.160433 34.813801,14.312580 C30.299841,12.043303 25.941280,12.446796 22.208565,16.027092 C19.217382,18.896133 17.995310,22.465576 19.604214,26.425716 C21.431620,30.923668 24.664339,33.704872 30.228710,33.489452 C33.488655,32.020752 36.404198,30.405937 39.566097,28.520985 C42.935875,24.358418 46.059299,20.465986 49.182724,16.573553 C52.575378,12.574462 55.968033,8.575369 59.674652,4.206191 C65.329071,11.213029 70.793610,17.984560 76.684570,25.257587 C78.249413,27.071096 79.387817,28.383108 80.900871,30.126904 C82.888741,27.507088 84.625046,25.218801 86.641235,22.710619 C89.077866,19.704689 91.234619,16.918657 93.391365,14.132626 C96.061455,10.999842 98.731544,7.867058 101.813324,4.251238 C107.773666,11.480138 113.614433,18.564018 119.879494,26.145510 C121.240845,27.679243 122.177910,28.715368 123.372185,30.035889 C124.529922,28.429337 125.446144,27.157919 126.634529,25.673513 C128.328094,23.530924 129.749496,21.601322 131.454681,19.474636 C132.921814,17.769886 134.105179,16.262222 135.288528,14.754559 C138.130264,11.403536 140.972015,8.052512 143.804260,4.712678 C149.156509,9.076938 149.256195,9.686499 145.350266,14.656017 C138.102997,23.876730 130.831711,33.078571 123.342537,42.577290 C121.977943,41.125664 120.875992,39.953438 119.418961,38.323746 C118.469620,37.254028 117.875366,36.641781 117.157333,35.716484 C115.778900,33.938801 114.524254,32.474171 113.133553,30.699760 C111.468452,28.600166 109.939400,26.810352 108.248985,24.703812 C106.092079,21.868656 104.096535,19.350227 101.757980,16.398905 C99.916794,18.868769 98.401550,20.901403 96.886307,22.934036 z"/><path fill="#FBFBFC" opacity="1.000000" stroke="none" d="M39.697510,17.983723 C39.001995,20.224432 38.031166,22.234961 36.728424,24.752487 C34.225777,27.954103 32.055042,30.648718 29.884312,33.343334 C24.664339,33.704872 21.431620,30.923668 19.604214,26.425716 C17.995310,22.465576 19.217382,18.896133 22.208565,16.027092 C25.941280,12.446796 30.299841,12.043303 34.813801,14.312580 C36.500313,15.160433 37.894642,16.589491 39.697510,17.983723 z"/></svg>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#">Home</a></li>
+      <li><a href="#about">About</a></li>
+      <li class="has-dropdown">
+        <a href="#services">Services</a>
+        <div class="dropdown-menu">
+          <a href="#services">Steel Stairs</a>
+          <a href="#services">Central Spine Stairs</a>
+          <a href="#services">Flat Bar Stringers</a>
+          <a href="#services">Stainless Balustrades</a>
+          <a href="#services">Glass Balustrades</a>
+        </div>
+      </li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-right">
+      <a href="tel:0393151400" class="nav-phone">03 9315 1400</a>
+      <a href="#contact" class="nav-cta">Get a Quote</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="hero-overlay"></div>
+  <div class="hero-content">
+    <div class="hero-badge"><span></span>Melbourne's Steel Fabrication Specialists</div>
+    <h1>Steel Stair Specialists: <em>Architectural Metal Workers</em></h1>
+    <p>Manufacturers and Installers of Steel Stairs and Balustrade. Design service available.</p>
+    <div class="hero-btns">
+      <a href="#gallery" class="btn-primary">View Our Work</a>
+      <a href="#contact" class="btn-outline">Request a Quote</a>
+    </div>
+
+  </div>
+</section>
+
+<!-- ABOUT -->
+<section class="section about" id="about">
+  <div class="container">
+    <div class="about-grid">
+      <div class="about-text">
+        <p class="section-label">Who We Are</p>
+        <h2 class="section-title">Steel Stairs & Balustrade Systems, Melbourne</h2>
+        <p class="section-lead">We are an innovative steel fabrication company based in Melbourne, Australia. Our speciality is in the design, manufacture and installation of steel stairs and balustrade systems for the domestic and commercial market. We produce budget factory stairs through to the highest quality architectural stairs. Our work is mainly throughout Melbourne, but we have done and are capable of interstate work.</p>
+        <p style="font-size:0.92rem;color:var(--charcoal);line-height:1.8;margin-bottom:1.5rem">The majority of our balustrades are stainless steel, and we have experience in glass, either co-ordinating with glaziers or installing glass ourselves. We are known through the steel fabrication industry for the high quality of our workmanship, but we vary this according to the environment that our work is going into, and the budget that is available.</p>
+        <p style="font-size:0.92rem;color:var(--charcoal);line-height:1.8;margin-bottom:1.5rem">We build our staircases to the Building Code of Australia.</p>
+        <p style="font-size:0.92rem;color:var(--charcoal);line-height:1.8">This web site is set up to market our company and to educate potential clients about stairs, minimizing the confusion when discussing their projects with us. Try to look at the other pages within the web site to familiarize yourself with the terms and criteria that apply to stairs then you can call, fax or email us.</p>
+
+      </div>
+      <div class="about-images">
+        <img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/steel-stair-img1.jpg" alt="Steel staircase"/>
+        <img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/steel-stair-img2.jpg" alt="Steel staircase detail"/>
+        <img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/steel-stair-img3.jpg" alt="Balustrade system"/>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- SERVICES -->
+<section class="section services" id="services">
+  <div class="container">
+    <div class="services-header">
+      <p class="section-label">What We Build</p>
+      <h2 class="section-title">Our Specialisations</h2>
+      <p class="section-lead">From elegant central spine staircases to precision flat bar stringers — every system is designed, fabricated and installed in-house.</p>
+    </div>
+    <div class="services-grid">
+      <div class="svc-card">
+        <div class="svc-img"><img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/central-spine-img1.png" alt="Central Spine Stairs"/></div>
+        <div class="svc-body">
+          <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M3 20h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18v-2H3v2zm0-4h18V6H3v2zm0-6v2h18V2H3z"/></svg></div>
+          <h3>Central Spine Stairs</h3>
+          <p>A single central stringer supports each tread, creating an open, floating aesthetic. Available in a wide range of finishes for maximum architectural impact.</p>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-img"><img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/flat-bar-stringers-img1.png" alt="Flat Bar Stringers"/></div>
+        <div class="svc-body">
+          <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M21 3H3v2h18V3zM3 7h18v2H3V7zm0 4h18v2H3v-2zm0 4h18v2H3v-2zm0 4h18v2H3v-2z"/></svg></div>
+          <h3>Flat Bar Stringers</h3>
+          <p>Twin flat bar stringers running along the sides — a clean, modern look suited to both residential and commercial applications across Melbourne.</p>
+        </div>
+      </div>
+      <div class="svc-card">
+        <div class="svc-img"><img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/steel-stair-img4.jpg" alt="Balustrade Systems"/></div>
+        <div class="svc-body">
+          <div class="svc-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg></div>
+          <h3>Balustrade Systems</h3>
+          <p>Stainless steel balustrades and glass panels, either co-ordinated with specialist glaziers or installed by our team for a seamless finish.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- GALLERY -->
+<section class="section gallery" id="gallery">
+  <div class="container">
+    <div class="gallery-header">
+      <div>
+        <p class="section-label">Project Gallery</p>
+        <h2 class="section-title">Central Spine Gallery</h2>
+      </div>
+    </div>
+    <div class="gallery-panel active" id="tab-all" style="display:grid">
+      <div class="gimg"><img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/central-spine-img1.png" alt=""/><div class="gimg-overlay"><span>Central Spine — Residential</span></div></div>
+      <div class="gimg"><img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/central-spine-img2.png" alt=""/><div class="gimg-overlay"><span>Central Spine — Detail</span></div></div>
+      <div class="gimg"><img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/central-spine-img3.png" alt=""/><div class="gimg-overlay"><span>Central Spine — Side View</span></div></div>
+      <div class="gimg"><img src="https://wsrv.nl/?url=complexmetalworkers.com.au/template/1413fc17/images/central-spine-img4.png" alt=""/><div class="gimg-overlay"><span>Central Spine — Full Run</span></div></div>
+    </div>
+  </div>
+</section>
+
+
+
+<!-- CONTACT -->
+<section class="contact" id="contact">
+  <div class="container">
+    <div class="contact-grid">
+      <div class="contact-info">
+        <p class="section-label">Get In Touch</p>
+        <h2 class="section-title">Ready to Start Your Project?</h2>
+        <p class="section-lead">Call, fax or email us — we're happy to discuss your project, walk you through stair options, and provide an obligation-free quote.</p>
+        <div class="contact-items">
+          <div class="contact-item">
+            <div class="citem-icon"><svg viewBox="0 0 24 24"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg></div>
+            <div><div class="citem-label">Address</div><div class="citem-val">28 Enterprise Way, Sunshine West 3020 VIC AU</div></div>
+          </div>
+          <div class="contact-item">
+            <div class="citem-icon"><svg viewBox="0 0 24 24"><path d="M6.62 10.79a15.053 15.053 0 006.59 6.59l2.2-2.2c.27-.27.67-.36 1.02-.24 1.12.37 2.33.57 3.57.57.55 0 1 .45 1 1V20c0 .55-.45 1-1 1-9.39 0-17-7.61-17-17 0-.55.45-1 1-1h3.5c.55 0 1 .45 1 1 0 1.25.2 2.45.57 3.57.11.35.03.74-.25 1.02l-2.2 2.2z"/></svg></div>
+            <div><div class="citem-label">Telephone</div><div class="citem-val"><a href="tel:0393151400">03 9315 1400</a></div></div>
+          </div>
+          <div class="contact-item">
+            <div class="citem-icon"><svg viewBox="0 0 24 24"><path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/></svg></div>
+            <div><div class="citem-label">Email</div><div class="citem-val"><a href="mailto:sales@complexmetalworkers.com.au">sales@complexmetalworkers.com.au</a></div></div>
+          </div>
+          <div class="contact-item">
+            <div class="citem-icon"><svg viewBox="0 0 24 24"><path d="M19 8H5c-1.66 0-3 1.34-3 3v6h4v4h12v-4h4v-6c0-1.66-1.34-3-3-3zm-3 11H8v-5h8v5zm3-7c-.55 0-1-.45-1-1s.45-1 1-1 1 .45 1 1-.45 1-1 1zm-1-9H6v4h12V3z"/></svg></div>
+            <div><div class="citem-label">Fax</div><div class="citem-val">03 9315 1588</div></div>
+          </div>
+        </div>
+        <div class="sabba-badge">
+          <img src="https://wsrv.nl/?url=complexmetalworkers.com.au/resources/1413fc17/image-widget/828A7CDE-7E7B-489A-A612-EEEB0CA83947/member-sabba.png" alt="SABBA Member" onerror="this.style.display='none'"/>
+          <p>Proud member of the Steel &amp; Balustrade &amp; Balcony Association</p>
+        </div>
+      </div>
+      <div class="contact-form">
+        <h3>Send Us a Message</h3>
+        <p>We'll get back to you within one business day.</p>
+        <div class="form-row">
+          <div class="form-group"><label>First Name</label><input type="text" placeholder="John"/></div>
+          <div class="form-group"><label>Last Name</label><input type="text" placeholder="Smith"/></div>
+        </div>
+        <div class="form-group"><label>Email Address</label><input type="email" placeholder="john@example.com"/></div>
+        <div class="form-group"><label>Phone Number</label><input type="tel" placeholder="03 xxxx xxxx"/></div>
+        <div class="form-group">
+          <label>Project Type</label>
+          <select>
+            <option value="">Select a service...</option>
+            <option>Steel Stairs — Domestic</option>
+            <option>Steel Stairs — Commercial</option>
+            <option>Central Spine Staircase</option>
+            <option>Flat Bar Stringer Staircase</option>
+            <option>Stainless Steel Balustrade</option>
+            <option>Glass Balustrade</option>
+            <option>Other / Not Sure</option>
+          </select>
+        </div>
+        <div class="form-group"><label>Project Details</label><textarea placeholder="Tell us about your project — location, dimensions, budget, or anything else that helps us understand your needs."></textarea></div>
+        <button class="form-submit" onclick="this.textContent='Message Sent! ✓';this.style.background='var(--navy)';setTimeout(()=>{this.textContent='Send Enquiry →';this.style.background='';},3000)">Send Enquiry →</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div>
+      <span class="footer-logo-main">Complex Metal Works</span>
+      <span class="footer-logo-sub">Steel Stairs &amp; Balustrades — Melbourne</span>
+      <p class="footer-desc">Melbourne's trusted specialist in steel stair design, fabrication, and installation for domestic and commercial projects since establishment.</p>
+    </div>
+    <div class="footer-col">
+      <h5>Navigation</h5>
+      <ul class="footer-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#about">About Us</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#gallery">Gallery</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+    </div>
+    <div class="footer-col">
+      <h5>Contact</h5>
+      <ul class="footer-links">
+        <li><a href="tel:0393151400">03 9315 1400</a></li>
+        <li><a href="mailto:sales@complexmetalworkers.com.au">sales@complexmetalworkers.com.au</a></li>
+        <li><a href="#">28 Enterprise Way, Sunshine West 3020</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    <p>© 2026 Complex Metalworkers Pty Ltd. All rights reserved. Sunshine West VIC 3020.</p>
+    <p>Website by <a href="#">WebAlive</a></p>
+  </div>
+</footer>
+
+<script>
+function showTab(id,btn){
+  document.querySelectorAll('.gallery-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+id).classList.add('active');
+  btn.classList.add('active');
+}
+window.addEventListener('scroll',()=>{
+  document.querySelector('nav').style.boxShadow=scrollY>20?'0 2px 20px rgba(0,0,0,0.08)':'none';
+});
+</script>
+</body>
+</html>
