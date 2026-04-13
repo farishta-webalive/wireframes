@@ -1,0 +1,324 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Genotype Health — Interactive Wireframe v4</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Playfair+Display:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{--tl:#16898f;--td:#126d72;--sg:#b2d9c7;--sm:#d4ece3;--cr:#fff9ef;--nv:#444776;--wh:#fff;--g0:#fafbfc;--g1:#f1f3f5;--g2:#e4e7eb;--g3:#d1d5db;--g4:#9ca3af;--g5:#6b7280;--g6:#4b5563;--g7:#374151;--g9:#111827;--ok:#10b981;--er:#ef4444;--df:'Playfair Display',serif;--bf:'DM Sans',sans-serif}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}html{scroll-behavior:smooth}body{font-family:var(--bf);color:var(--g7);background:var(--wh)}::-webkit-scrollbar{width:4px}::-webkit-scrollbar-thumb{background:var(--g3);border-radius:2px}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+@keyframes widgetIn{from{opacity:0;transform:translateY(24px) scale(.94)}to{opacity:1;transform:translateY(0) scale(1)}}
+@keyframes chatIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+@keyframes pulse{0%,100%{box-shadow:0 4px 20px rgba(22,137,143,.3)}50%{box-shadow:0 4px 30px rgba(22,137,143,.55)}}
+.page{display:none;min-height:100vh}.page.active{display:block}
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:1000;padding:14px 40px;display:flex;justify-content:space-between;align-items:center;transition:all .3s}
+.nav.stuck{background:rgba(255,255,255,.93);backdrop-filter:blur(12px);border-bottom:1px solid var(--g2);padding:10px 40px}
+.nav.inner{background:var(--wh);border-bottom:1px solid var(--g2)}
+.nl{display:flex;align-items:center;gap:8px;cursor:pointer}.nli{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--tl),var(--nv));display:flex;align-items:center;justify-content:center;color:var(--wh);font-weight:800;font-size:17px;font-family:var(--df)}
+.nlt{font-weight:700;font-size:15px;font-family:var(--df);color:var(--wh);transition:color .3s}.nav.stuck .nlt,.nav.inner .nlt{color:var(--nv)}
+.nks{display:flex;gap:20px;align-items:center}.nk{font-size:13px;font-weight:500;color:rgba(255,255,255,.8);cursor:pointer;transition:color .3s}.nav.stuck .nk,.nav.inner .nk{color:var(--g6)}
+.nc{font-size:13px;font-weight:600;color:var(--wh);cursor:pointer;position:relative}.nav.stuck .nc,.nav.inner .nc{color:var(--tl)}
+.ncb{position:absolute;top:-6px;right:-10px;background:var(--er);color:var(--wh);border-radius:50%;width:16px;height:16px;font-size:10px;display:none;align-items:center;justify-content:center;font-weight:700}.ncb.show{display:flex}
+.nbtn{padding:8px 20px;border-radius:8px;background:var(--tl);color:var(--wh);border:none;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--bf)}
+/* Hero */
+.hero{min-height:100vh;display:flex;align-items:center;background:linear-gradient(155deg,var(--nv) 0%,var(--td) 50%,var(--tl) 100%);padding:0 80px;position:relative;overflow:hidden}
+.hc{max-width:560px;z-index:1;position:relative}.he{font-size:12px;font-weight:600;color:var(--sg);letter-spacing:2px;text-transform:uppercase;margin-bottom:14px}
+.hero h1{font-size:46px;font-weight:800;color:var(--wh);font-family:var(--df);line-height:1.15;margin-bottom:18px}.hero h1 span{color:var(--sg)}
+.hero p{font-size:15.5px;color:rgba(255,255,255,.7);line-height:1.7;margin-bottom:28px}.hbs{display:flex;gap:12px}
+.hb1{padding:13px 28px;border-radius:9px;background:var(--wh);color:var(--nv);border:none;font-size:14px;font-weight:700;cursor:pointer;font-family:var(--bf)}
+.hb2{padding:13px 28px;border-radius:9px;background:transparent;color:var(--wh);border:1.5px solid rgba(255,255,255,.3);font-size:14px;font-weight:600;cursor:pointer}
+.svs{padding:80px;background:var(--cr)}.svs h2{font-size:30px;font-weight:800;color:var(--nv);font-family:var(--df);text-align:center;margin-bottom:40px}
+.sg{max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.sc{background:var(--wh);border-radius:14px;padding:24px 20px;border:1px solid var(--g2);cursor:pointer;transition:all .3s}.sc:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(22,137,143,.1)}
+.sci{font-size:28px;margin-bottom:10px}.sc h3{font-size:14px;font-weight:700;color:var(--nv);font-family:var(--df);margin-bottom:6px;line-height:1.3}.sc p{font-size:12.5px;color:var(--g5);line-height:1.5}
+/* Tests */
+.th{padding:60px 80px;background:linear-gradient(135deg,var(--cr),var(--sm));text-align:center;padding-top:130px}.th .ey{font-size:11px;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.th h1{font-size:34px;font-weight:800;color:var(--nv);font-family:var(--df);margin-bottom:12px}.th p{font-size:15px;color:var(--g6);max-width:600px;margin:0 auto}
+.tg{padding:50px 80px;max-width:1000px;margin:0 auto;display:grid;grid-template-columns:repeat(3,1fr);gap:20px}.tg.tw{grid-template-columns:1fr 1fr;max-width:700px}
+.tc{background:var(--wh);border-radius:16px;padding:24px;border:1.5px solid var(--g2);transition:all .3s;cursor:pointer}.tc:hover{border-color:var(--tl);box-shadow:0 8px 24px rgba(22,137,143,.12)}
+.tcc{font-size:9px;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}.tc h3{font-size:16px;font-weight:700;color:var(--nv);font-family:var(--df);margin-bottom:6px}
+.tcp{font-size:22px;font-weight:800;color:var(--tl);margin-bottom:10px}.tcp span{font-size:12px;color:var(--g4);font-weight:500}.tc>p{font-size:12.5px;color:var(--g5);line-height:1.5;margin-bottom:12px}
+.tts{display:flex;gap:4px;flex-wrap:wrap}.tt{background:var(--cr);border-radius:5px;padding:2px 8px;font-size:10px;color:var(--nv);font-weight:500}
+/* Product */
+.pp{padding-top:90px}.pb{background:none;border:none;color:var(--tl);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--bf);margin:0 0 20px 80px}
+.pl{display:grid;grid-template-columns:1fr 1fr;gap:40px;max-width:800px;margin:0 auto;padding:0 80px 60px}
+.pv{background:linear-gradient(135deg,var(--sm),var(--cr));border-radius:20px;padding:40px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.pvi{font-size:60px;margin-bottom:16px}.ps{display:grid;grid-template-columns:1fr 1fr;gap:10px;width:100%}
+.psi{background:var(--wh);border-radius:10px;padding:10px;text-align:center}.psv{font-size:15px;font-weight:800;color:var(--nv)}.psl{font-size:9.5px;color:var(--g4)}
+.pic{font-size:10px;font-weight:700;color:var(--tl);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.pi h1{font-size:28px;font-weight:800;color:var(--nv);font-family:var(--df);margin-bottom:10px}
+.pip{font-size:28px;font-weight:800;color:var(--tl);margin-bottom:16px}.pip span{font-size:14px;color:var(--g4);font-weight:500}
+.pi>p{font-size:14px;color:var(--g6);line-height:1.7;margin-bottom:20px}
+.pin{background:var(--cr);border-radius:10px;padding:14px;margin-bottom:20px;font-size:13px;color:var(--g6);line-height:1.6}
+.bac{width:100%;padding:14px;background:linear-gradient(135deg,var(--tl),var(--td));color:var(--wh);border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;font-family:var(--bf);box-shadow:0 4px 16px rgba(22,137,143,.35)}
+/* Cart & Checkout */
+.cp{padding-top:90px}.cc{max-width:600px;margin:0 auto;padding:40px 80px}.cc h1,.kc h1{font-size:28px;font-weight:800;color:var(--nv);font-family:var(--df);margin-bottom:24px}
+.ci{display:flex;justify-content:space-between;align-items:center;padding:16px;background:var(--wh);border-radius:12px;border:1px solid var(--g2);margin-bottom:10px}
+.cin{font-size:14px;font-weight:700;color:var(--nv)}.cim{font-size:11px;color:var(--g4)}.cip{font-size:17px;font-weight:800;color:var(--tl)}
+.cir{background:none;border:none;color:var(--er);cursor:pointer;font-size:14px;margin-left:12px}
+.ctl{display:flex;justify-content:space-between;padding:16px 0;border-top:1px solid var(--g2);margin-top:10px}
+.btn{width:100%;padding:14px;background:linear-gradient(135deg,var(--tl),var(--td));color:var(--wh);border:none;border-radius:10px;font-size:15px;font-weight:700;cursor:pointer;margin-top:10px;box-shadow:0 4px 16px rgba(22,137,143,.35);font-family:var(--bf)}
+.kp{padding-top:90px}.kc{max-width:500px;margin:0 auto;padding:40px 80px}
+.ks{background:var(--cr);border-radius:12px;padding:16px;margin-bottom:20px}
+.ksi{display:flex;justify-content:space-between;margin-bottom:6px}.ksi span:first-child{font-size:13px;color:var(--nv);font-weight:600}.ksi span:last-child{font-size:13px;font-weight:700;color:var(--tl)}
+.kst{border-top:1px solid var(--sg);margin-top:8px;padding-top:8px;display:flex;justify-content:space-between}
+.fg{margin-bottom:16px}.fl{font-size:12px;font-weight:600;color:var(--nv);margin-bottom:4px;display:block}
+.fi{width:100%;padding:10px 14px;border-radius:8px;border:1.5px solid var(--g2);font-size:13px;font-family:var(--bf);color:var(--g7);outline:none;box-sizing:border-box}.fi:focus{border-color:var(--tl)}
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+/* Chat Widget */
+.fab{position:fixed;bottom:24px;right:24px;z-index:9998;width:56px;height:56px;border-radius:50%;background:linear-gradient(135deg,var(--tl),var(--nv));border:none;cursor:pointer;box-shadow:0 6px 24px rgba(22,137,143,.4);display:flex;align-items:center;justify-content:center;animation:pulse 3s ease-in-out infinite;transition:transform .2s}.fab:hover{transform:scale(1.07)}
+.fab svg{width:22px;height:22px}.fabd{position:absolute;top:-1px;right:-1px;width:13px;height:13px;border-radius:50%;background:var(--er);border:2px solid var(--wh)}
+.cw{position:fixed;bottom:24px;right:24px;width:390px;max-width:calc(100vw - 32px);height:min(540px,calc(100vh - 48px));border-radius:20px;overflow:hidden;z-index:9999;box-shadow:0 20px 60px rgba(0,0,0,.18),0 0 0 1px rgba(0,0,0,.05);display:none;flex-direction:column;background:var(--g0);animation:widgetIn .4s cubic-bezier(.22,1,.36,1)}.cw.open{display:flex}
+.cwh{background:linear-gradient(135deg,var(--tl),var(--nv));padding:12px 14px 10px;flex-shrink:0}.cwht{display:flex;justify-content:space-between;align-items:center}
+.cwl{display:flex;align-items:center;gap:8px}.cwi{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--wh);font-weight:800;font-family:var(--df);border:1px solid rgba(255,255,255,.18)}
+.cwn{color:var(--wh);font-weight:700;font-size:13px;font-family:var(--df)}.cws{color:rgba(255,255,255,.6);font-size:10px;display:flex;align-items:center;gap:3px}.cwsd{width:5px;height:5px;border-radius:50%;background:var(--ok)}
+.cwx{width:26px;height:26px;border-radius:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.12);cursor:pointer;color:var(--wh);font-size:13px;display:flex;align-items:center;justify-content:center}
+.cwpb{margin-top:8px;font-size:10px;color:rgba(255,255,255,.6)}
+.cwb{flex:1;overflow-y:auto;padding:10px 0 6px}.cwib{padding:8px 12px;border-top:1px solid var(--g2);background:var(--wh);flex-shrink:0}
+.cwir{display:flex;gap:6px}.cww{flex:1;display:flex;background:var(--g0);border-radius:9px;padding:7px 10px;border:1.5px solid var(--g2)}
+.cww input{flex:1;border:none;outline:none;background:transparent;font-size:12px;font-family:var(--bf);color:var(--g7)}
+.cwsb{width:32px;height:32px;border-radius:8px;background:linear-gradient(135deg,var(--tl),var(--td));border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+/* Chat messages */
+.cp1{display:flex;justify-content:center;margin:10px 0}.cp1i{background:var(--sm);border-radius:20px;padding:4px 13px;font-size:10.5px;color:var(--td);font-weight:600}
+.bm{display:flex;gap:8px;align-items:flex-end;margin:0 12px 12px;animation:chatIn .3s ease}.ba{width:28px;height:28px;border-radius:50%;background:linear-gradient(135deg,var(--tl),var(--nv));display:flex;align-items:center;justify-content:center;font-size:13px;color:var(--wh);font-weight:800;font-family:var(--df);flex-shrink:0}
+.bb{background:var(--wh);border-radius:14px 14px 14px 4px;padding:11px 14px;max-width:82%;box-shadow:0 1px 3px rgba(0,0,0,.05);font-size:12.5px;line-height:1.6;color:var(--g7)}
+.um{display:flex;justify-content:flex-end;margin:0 12px 12px;animation:chatIn .25s ease}.ub{background:linear-gradient(135deg,var(--tl),var(--td));border-radius:14px 14px 4px 14px;padding:10px 14px;max-width:76%;font-size:12.5px;line-height:1.55;color:var(--wh)}
+.cbs{display:flex;gap:5px;flex-wrap:wrap;padding:0 48px;margin-bottom:12px;animation:chatIn .35s ease}
+.cb{padding:8px 15px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid var(--g3);background:var(--wh);color:var(--tl);transition:all .2s;font-family:var(--bf);display:inline-flex;align-items:center;gap:4px;white-space:nowrap}
+.cb:hover{background:var(--tl);color:var(--wh);border-color:var(--tl)}.cb.p{background:var(--tl);color:var(--wh);border-color:var(--tl)}.cb.p:hover{background:var(--td)}
+.cd{margin:0 48px 12px;background:var(--wh);border-radius:12px;padding:14px;border:1px solid var(--g2);box-shadow:0 1px 3px rgba(0,0,0,.04);animation:chatIn .3s ease}
+.fqi{width:100%;padding:10px 12px;border:none;background:transparent;cursor:pointer;text-align:left;display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--nv);font-family:var(--bf);border-bottom:1px solid var(--g1)}.fqi:last-of-type{border-bottom:none}
+.fqi.act{background:var(--cr)}.fqa{color:var(--tl);font-size:9px;transition:transform .2s}.fqi.act .fqa{transform:rotate(180deg)}
+.fqd{display:none;padding:0 12px 10px;font-size:11.5px;line-height:1.6;color:var(--g6);background:var(--cr)}.fqi.act+.fqd{display:block}
+/* Counsel Modal */
+.cov{position:fixed;inset:0;z-index:10000;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(4px)}.cov.open{display:flex}
+.com{width:500px;max-width:95vw;max-height:90vh;background:var(--g0);border-radius:20px;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.25);display:flex;flex-direction:column}
+.coh{background:linear-gradient(135deg,var(--tl),var(--nv));padding:16px 20px 12px;flex-shrink:0}.coht{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.coti{color:var(--wh);font-weight:700;font-size:15px;font-family:var(--df)}.cox{background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:6px;width:28px;height:28px;cursor:pointer;color:var(--wh);font-size:14px;display:flex;align-items:center;justify-content:center}
+.copr{display:flex;justify-content:space-between;margin-bottom:3px}.copl{font-size:10px;font-weight:600;color:rgba(255,255,255,.75);text-transform:uppercase;letter-spacing:.4px}.copp{font-size:10px;color:rgba(255,255,255,.45)}
+.copb{height:3px;background:rgba(255,255,255,.12);border-radius:2px}.copf{height:100%;border-radius:2px;background:rgba(255,255,255,.65);transition:width .5s cubic-bezier(.22,1,.36,1)}
+.cob{flex:1;overflow-y:auto;padding:16px 20px 8px}
+.cm{display:flex;gap:10px;align-items:flex-end;margin-bottom:14px;animation:chatIn .3s ease}.cmav{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,var(--tl),var(--nv));display:flex;align-items:center;justify-content:center;font-size:15px;color:var(--wh);font-weight:800;font-family:var(--df);flex-shrink:0}
+.cmb{background:var(--wh);border-radius:16px 16px 16px 4px;padding:14px 16px;max-width:85%;box-shadow:0 1px 4px rgba(0,0,0,.06);font-size:13px;line-height:1.65;color:var(--g7)}
+.cobs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;animation:chatIn .35s ease}
+.cob1{padding:9px 18px;border-radius:22px;font-size:13px;font-weight:600;cursor:pointer;border:1.5px solid var(--g3);background:var(--wh);color:var(--tl);transition:all .2s;font-family:var(--bf);display:inline-flex;align-items:center;gap:5px}
+.cob1:hover{background:var(--tl);color:var(--wh);border-color:var(--tl)}.cob1.p{background:var(--tl);color:var(--wh);border-color:var(--tl)}.cob1.p:hover{background:var(--td)}
+.cocd{background:var(--wh);border-radius:12px;padding:16px;border:1px solid var(--g2);margin-bottom:14px;animation:chatIn .3s ease}
+.cni{padding:12px 14px;cursor:pointer;display:flex;gap:10px;align-items:flex-start;border-bottom:1px solid var(--g1);transition:background .2s}.cni:last-child{border-bottom:none}.cni.ck{background:rgba(178,217,199,.08)}
+.cnb{width:20px;height:20px;border-radius:5px;border:2px solid var(--g3);display:flex;align-items:center;justify-content:center;flex-shrink:0;transition:all .2s}.cni.ck .cnb{border-color:var(--tl);background:var(--tl)}
+.cnc{color:var(--wh);font-size:12px;font-weight:800;display:none}.cni.ck .cnc{display:block}
+.cnt{font-size:12.5px;font-weight:700;color:var(--nv);margin-bottom:2px}.cnx{font-size:11px;color:var(--g5);line-height:1.5}
+.cfl{font-size:11px;font-weight:600;color:var(--nv);margin-bottom:3px;display:block}
+.cfi{width:100%;padding:9px 12px;border-radius:8px;border:1.5px solid var(--g2);font-size:12.5px;font-family:var(--bf);color:var(--g7);outline:none;box-sizing:border-box}.cfi:focus{border-color:var(--tl)}
+.csb{width:100%;margin-top:10px;padding:10px;background:linear-gradient(135deg,var(--tl),var(--td));color:var(--wh);border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:var(--bf)}
+.tg1{padding:5px 12px;border-radius:16px;font-size:11px;font-weight:500;border:1.5px solid var(--g2);background:var(--wh);color:var(--g6);cursor:pointer;font-family:var(--bf);transition:all .15s;display:inline-block;margin:2px}.tg1.act{border-color:var(--tl);background:rgba(22,137,143,.07);color:var(--tl)}
+.fmd{margin-bottom:6px;padding:8px;background:var(--cr);border-radius:6px}.fmn{font-size:11px;font-weight:700;color:var(--td);margin-bottom:4px}
+.fmf{display:grid;gap:5px}.fmfi{padding:6px 8px;border-radius:6px;border:1.5px solid var(--g2);font-size:11px;font-family:var(--bf);color:var(--g7);outline:none;width:100%;box-sizing:border-box}
+.sn{font-size:10px;color:var(--g4);font-style:italic;margin-bottom:8px}
+</style>
+</head>
+<body>
+<!-- NAV -->
+<nav class="nav" id="mainNav">
+  <div class="nl" onclick="nav('home')"><div class="nli">G</div><span class="nlt">Genotype Health</span></div>
+  <div class="nks">
+    <span class="nk" onclick="nav('proactive')">Proactive Tests</span>
+    <span class="nk" onclick="nav('reproductive')">Reproductive</span>
+    <span class="nk" onclick="nav('home')">About</span>
+    <span class="nc" onclick="nav('cart')">🛒 <span class="ncb" id="cBadge">0</span></span>
+    <button class="nbtn" onclick="nav('proactive')">Explore Tests</button>
+  </div>
+</nav>
+<!-- HOME -->
+<div class="page active" id="page-home">
+  <section class="hero">
+    <div class="hc">
+      <div class="he">Clinical-Grade Genetic Testing</div>
+      <h1>Understand Your Genetics.<br><span>Protect Your Future.</span></h1>
+      <p>Evidence-based testing with expert guidance — for individuals, families, and clinicians.</p>
+      <div class="hbs"><button class="hb1" onclick="nav('proactive')">Explore Our Tests</button><button class="hb2">Talk to a Counsellor</button></div>
+    </div>
+  </section>
+  <section class="svs"><h2>Explore Our Services</h2>
+    <div class="sg">
+      <div class="sc" onclick="nav('proactive')"><div class="sci">🧬</div><h3>Proactive Screening</h3><p>Identify disease risk before symptoms.</p></div>
+      <div class="sc" onclick="nav('reproductive')"><div class="sci">👶</div><h3>Carrier Screening</h3><p>Understand risks before starting a family.</p></div>
+      <div class="sc"><div class="sci">👩‍⚕️</div><h3>Genetic Counselling</h3><p>Expert guidance on results.</p></div>
+      <div class="sc"><div class="sci">🩺</div><h3>For Clinicians</h3><p>Integrated diagnostic support.</p></div>
+    </div>
+  </section>
+</div>
+<!-- PROACTIVE -->
+<div class="page" id="page-proactive"><div class="th"><div class="ey">Our Tests</div><h1>Proactive Health Screening</h1><p>Identify risk for adult-onset, medically actionable diseases before symptoms appear.</p></div><div class="tg" id="pGrid"></div></div>
+<!-- REPRODUCTIVE -->
+<div class="page" id="page-reproductive"><div class="th"><div class="ey">Our Tests</div><h1>Reproductive Carrier Screening</h1><p>Find out if you or your partner carry genes for inherited conditions.</p></div><div class="tg tw" id="rGrid"></div></div>
+<!-- PRODUCT -->
+<div class="page pp" id="page-product"><button class="pb" id="pBack">← Back</button><div class="pl"><div class="pv"><div class="pvi">🧬</div><div class="ps" id="pStats"></div></div><div class="pi" id="pInfo"></div></div></div>
+<!-- CART -->
+<div class="page cp" id="page-cart"><div class="cc" id="cContent"></div></div>
+<!-- CHECKOUT -->
+<div class="page kp" id="page-checkout"><div class="kc" id="kContent"></div></div>
+<!-- CHAT FAB -->
+<button class="fab" id="chatFab" onclick="tChat()"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg><div class="fabd"></div></button>
+<!-- CHAT WIDGET -->
+<div class="cw" id="chatW">
+  <div class="cwh"><div class="cwht"><div class="cwl"><div class="cwi">G</div><div><div class="cwn">Genotype Health</div><div class="cws"><div class="cwsd"></div> Online</div></div></div><button class="cwx" onclick="tChat()">✕</button></div><div class="cwpb" id="cwPB">📍 Home</div></div>
+  <div class="cwb" id="cwB"></div>
+  <div class="cwib"><div class="cwir"><div class="cww"><input placeholder="Type a message…"></div><button class="cwsb"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></button></div></div>
+</div>
+<!-- COUNSEL OVERLAY -->
+<div class="cov" id="coOv">
+  <div class="com"><div class="coh"><div class="coht"><div class="coti">🎓 Pre-test Counselling</div><button class="cox" onclick="coClose()">✕</button></div><div class="copr"><span class="copl" id="coL">Welcome</span><span class="copp" id="coP">0%</span></div><div class="copb"><div class="copf" id="coF" style="width:0%"></div></div></div><div class="cob" id="coB"></div></div>
+</div>
+
+<script>
+// === DATA ===
+const P=[
+  {id:"comprehensive",nm:"Comprehensive Proactive Screen",cat:"proactive",pr:595,gn:78,cn:45,tm:"3 weeks",ds:"Our most thorough proactive screening — hereditary cancers, cardiac conditions & pharmacogenomics.",tg:["78 genes","45 conditions","PGx","GC session"]},
+  {id:"cancer",nm:"Cancer Risk Screen",cat:"proactive",pr:395,gn:34,cn:18,tm:"3 weeks",ds:"Focused hereditary cancer syndromes — breast, ovarian & colorectal.",tg:["34 genes","18 syndromes","Action plan","GC session"]},
+  {id:"cardio",nm:"Cardio Screening",cat:"proactive",pr:345,gn:28,cn:14,tm:"3 weeks",ds:"Targeted cardiovascular risk screening — hereditary cardiac conditions.",tg:["28 genes","14 conditions","PGx","GC session"]},
+  {id:"carrier-comp",nm:"Comprehensive Carrier Screen",cat:"reproductive",pr:495,gn:301,cn:280,tm:"3 weeks",ds:"Family planning — covers 280+ inherited conditions.",tg:["301 genes","280+ conditions","Couple testing","GC session"]},
+  {id:"carrier-essential",nm:"Essential Carrier Screen",cat:"reproductive",pr:295,gn:52,cn:47,tm:"3 weeks",ds:"Targeted carrier screening per ACOG/ACMG guidelines.",tg:["52 genes","47 conditions","Guideline-aligned","GC session"]}
+];
+const REC={cardio:{none:"Cardio",cardio:"Cardio",cancer:"Comprehensive",other:"Comprehensive"},cancer:{none:"Cancer",cardio:"Comprehensive",cancer:"Cancer",other:"Comprehensive"},general:{none:"Comprehensive",cardio:"Comprehensive",cancer:"Comprehensive",other:"Comprehensive"}};
+const FQ=[{q:"What is genetic testing?",a:"Analyses your DNA to identify genetic markers that influence your health."},{q:"How is the sample collected?",a:"Cheek swab — wipe inside cheek, seal tube, send back. Works even if sick or on medication."},{q:"How accurate?",a:"99% accurate — AI capabilities + expert human oversight."},{q:"How long for results?",a:"3 weeks turnaround."},{q:"Is my data safe?",a:"HIPAA-compliant, encrypted, never shared without consent."},{q:"Traits & ancestry?",a:"We focus solely on evidence-based clinical testing — trait tests lack scientific evidence."}];
+const FM=["Mother","Father","Sibling","Grandparent (Mother's)","Grandparent (Father's)","Aunt/Uncle (Mother's)","Aunt/Uncle (Father's)","Cousin (Mother's)","Cousin (Father's)"];
+const AQ=[{q:"High risk vs certainty?",a:"High risk = more likely than average. Most results are risk, not certainty."},{q:"Will testing show unexpected conditions?",a:"Sometimes — tests may reveal 'secondary findings' about other conditions."},{q:"What if they find something?",a:"You'll schedule with our GC who guides you through the findings."},{q:"Will my children inherit it?",a:"Not necessarily — ~50% chance per child. Depends on dominant vs recessive."},{q:"Should relatives get tested?",a:"If significant, close relatives may carry it. Reduced-cost for up to 5 family members."},{q:"What about family planning?",a:"GC can discuss prenatal testing, IVF with genetic screening, or adoption options."},{q:"Do you test ancestry/traits?",a:"No — we focus solely on evidence-based clinical testing."},{q:"If higher risk, can anything be done?",a:"Often yes — more frequent screenings, preventive meds, lifestyle changes, or preventive surgery."},{q:"Will knowing help me?",a:"Yes — empowers earlier screenings, proactive lifestyle, and informed decisions."},{q:"What if there's no treatment?",a:"Personal choice. Some seek knowledge for life planning or informing relatives. Your GC can help decide."}];
+const FSP=[{k:"genetic",lb:"Family diagnosed with a genetic condition?",fl:["Condition","Age diagnosed"]},{k:"cancer",lb:"Family diagnosed with cancer?",fl:["Cancer type","Age diagnosed"]},{k:"cardio",lb:"Family with cardiovascular diseases?",fl:["Condition","Age diagnosed"]},{k:"alzheimer",lb:"Family with Alzheimer's/Dementia?",fl:["Age diagnosed"]},{k:"death60",lb:"Family died before age 60?",fl:["Age at death","Related condition?"]}];
+const FSR=[{k:"genetic",lb:"Family with a genetic condition?",fl:["Condition","Age diagnosed"]},{k:"death60",lb:"Family died before age 60?",fl:["Age at death","Related condition?"]}];
+
+let cart=[],curP="home",chO=false,chS="init",chC=null,chF=null;
+let coS=0,coC={c:false,t:false,s:false},coFS=0,coFH={},pprod=null;
+
+// === NAV ===
+function nav(pg,pid){curP=pg;document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));let el=document.getElementById('page-'+pg);if(el)el.classList.add('active');window.scrollTo(0,0);document.getElementById('mainNav').classList.toggle('inner',pg!=='home');if(chO)tChat();chS="init";chC=null;chF=null;if(pg==='product'&&pid)rProd(pid);if(pg==='cart')rCart();if(pg==='checkout')rChk();if(pg==='proactive')setTimeout(()=>{if(!chO)tChat()},1200);uBadge();}
+function uBadge(){let b=document.getElementById('cBadge');b.textContent=cart.length;b.classList.toggle('show',cart.length>0);}
+
+// === RENDER GRIDS ===
+function rGrids(){['proactive','reproductive'].forEach(c=>{let g=document.getElementById(c==='proactive'?'pGrid':'rGrid');g.innerHTML=P.filter(p=>p.cat===c).map(p=>`<div class="tc" onclick="nav('product','${p.id}')"><div class="tcc">${p.cat==='proactive'?'Proactive Health':'Reproductive'}</div><h3>${p.nm}</h3><div class="tcp">$${p.pr} <span>AUD</span></div><p>${p.ds}</p><div class="tts">${p.tg.map(t=>`<span class="tt">${t}</span>`).join('')}</div></div>`).join('')});}
+function rProd(id){let p=P.find(x=>x.id===id);if(!p)return;document.getElementById('pBack').onclick=()=>nav(p.cat==='proactive'?'proactive':'reproductive');document.getElementById('pStats').innerHTML=[['🧬',p.gn,'Genes'],['🩺',p.cn,'Conditions'],['⏱️',p.tm,'Turnaround'],['📋','Included','GC Session']].map(([i,v,l])=>`<div class="psi"><div>${i}</div><div class="psv">${v}</div><div class="psl">${l}</div></div>`).join('');document.getElementById('pInfo').innerHTML=`<div class="pic">${p.cat==='proactive'?'Proactive Health':'Reproductive Health'}</div><h1>${p.nm}</h1><div class="pip">$${p.pr} <span>AUD</span></div><p>${p.ds}</p><div class="pin"><strong style="color:var(--nv)">Includes:</strong> Test kit, free shipping, lab analysis (Europe), report, 15-min GC session.</div><button class="bac" onclick="aCart('${p.id}')">Add to Cart 🛒</button>`;}
+function aCart(id){let p=P.find(x=>x.id===id);if(p){cart.push(p);nav('cart');}}
+function rmCart(i){cart.splice(i,1);rCart();uBadge();}
+function rCart(){let e=document.getElementById('cContent'),t=cart.reduce((s,i)=>s+i.pr,0);if(!cart.length){e.innerHTML=`<h1>Your Cart</h1><div style="text-align:center;padding:40px;color:var(--g4)"><div style="font-size:40px;margin-bottom:12px">🛒</div><p>Cart is empty.</p><br><button class="nbtn" onclick="nav('proactive')">Browse Tests</button></div>`;return;}e.innerHTML=`<h1>Your Cart</h1>`+cart.map((i,j)=>`<div class="ci"><div><div class="cin">${i.nm}</div><div class="cim">${i.gn} genes · ${i.cn} conditions</div></div><div style="display:flex;align-items:center"><span class="cip">$${i.pr}</span><button class="cir" onclick="rmCart(${j})">✕</button></div></div>`).join('')+`<div class="ctl"><span style="font-size:16px;font-weight:700;color:var(--nv)">Total</span><span style="font-size:20px;font-weight:800;color:var(--tl)">$${t} AUD</span></div><button class="btn" onclick="nav('checkout')">Proceed to Checkout 💳</button>`;}
+function rChk(){let e=document.getElementById('kContent'),t=cart.reduce((s,i)=>s+i.pr,0);e.innerHTML=`<h1>Checkout</h1><div class="ks">${cart.map(i=>`<div class="ksi"><span>${i.nm}</span><span>$${i.pr}</span></div>`).join('')}<div class="kst"><strong style="color:var(--nv)">Total</strong><span style="color:var(--tl);font-size:18px;font-weight:800">$${t} AUD</span></div></div><div class="fg"><label class="fl">Card Number</label><input class="fi" placeholder="4242 4242 4242 4242"></div><div class="fr"><div class="fg"><label class="fl">Expiry</label><input class="fi" placeholder="MM/YY"></div><div class="fg"><label class="fl">CVC</label><input class="fi" placeholder="123"></div></div><div style="font-size:11px;color:var(--g4);margin-bottom:16px">🔒 Secure payment via Nuvei</div><button class="btn" onclick="doPay()">Pay $${t} AUD</button>`;}
+function doPay(){pprod=cart[0]||P[0];document.getElementById('kContent').innerHTML=`<div style="text-align:center;padding:40px"><div style="font-size:48px;margin-bottom:12px">✅</div><h2 style="font-size:18px;font-weight:700;color:var(--nv);font-family:var(--df);margin-bottom:8px">Payment Successful!</h2><p style="font-size:13px;color:var(--g5)">Loading pre-test counselling…</p></div>`;setTimeout(()=>{cart=[];uBadge();nav('home');coOpen();},1500);}
+
+// === CHATBOT (Part 1) ===
+function tChat(){chO=!chO;document.getElementById('chatW').classList.toggle('open',chO);document.getElementById('chatFab').style.display=chO?'none':'flex';if(chO)rCh();}
+function sCh(s){chS=s;rCh();}function sCC(c){chC=c;chF=null;rCh();}function sCF(f){chF=f;rCh();}
+function tFaq(el){el.classList.toggle('act');}
+
+function rCh(){
+  let b=document.getElementById('cwB'),pn={home:"Home Page",proactive:"Proactive Tests",reproductive:"Reproductive Tests",product:"Product Detail",cart:"Your Cart",checkout:"Checkout"};
+  document.getElementById('cwPB').textContent='📍 '+pn[curP];
+  let h='';
+  const pl=t=>`<div class="cp1"><div class="cp1i">${t}</div></div>`;
+  const bm=m=>`<div class="bm"><div class="ba">G</div><div class="bb">${m}</div></div>`;
+  const um=m=>`<div class="um"><div class="ub">${m}</div></div>`;
+  const bs=a=>`<div class="cbs">${a.map(x=>`<button class="cb${x.p?' p':''}" onclick="${x.a||''}">${x.i?'<span>'+x.i+'</span>':''}${x.l}</button>`).join('')}</div>`;
+
+  if(chS==='init'){
+    const gs={home:{m:"Welcome to Genotype Health! I can help you find the right genetic test.",b:[{l:"Proactive tests",i:"🧬",a:"nav('proactive');tChat()"},{l:"Family planning",i:"👶",a:"nav('reproductive');tChat()"},{l:"I have questions",i:"❓",a:"sCh('faqs')"}]},proactive:{m:"Need help deciding which proactive health test is right for you? I can recommend one based on your concerns.",b:[{l:"Help me choose",i:"✨",p:1,a:"sCh('interest')"},{l:"Questions first",i:"❓",a:"sCh('faqs')"},{l:"I'll browse",i:"⏭️",a:"tChat()"}]},reproductive:{m:"Looking at carrier screening? I can recommend the right test for your family planning.",b:[{l:"Help me choose",i:"✨",p:1,a:"sCh('rec_carrier')"},{l:"Questions",i:"❓",a:"sCh('faqs')"}]},product:{m:"Want to know more about this test?",b:[{l:"Gene coverage",i:"🧬",a:"sCh('faqs')"},{l:"Process",i:"📦",a:"sCh('faqs')"}]},cart:{m:"Ready to check out?",b:[{l:"Checkout",i:"💳",p:1,a:"nav('checkout');tChat()"},{l:"Question",i:"❓",a:"sCh('faqs')"}]},checkout:{m:"Almost there! Questions about payment?",b:[{l:"Payment info",i:"💳",a:"sCh('faqs')"},{l:"Data security",i:"🔒",a:"sCh('faqs')"}]}};
+    let g=gs[curP]||gs.home;
+    h+=pl('📍 '+pn[curP])+bm(g.m)+bs(g.b);
+  }
+  if(chS==='faqs'){
+    h+=pl('Step 2 — FAQs & Genetic Education')+bm("Common questions — tap to expand, or skip ahead:")+`<div class="cd">${FQ.map(f=>`<button class="fqi" onclick="tFaq(this)">${f.q}<span class="fqa">▼</span></button><div class="fqd">${f.a}</div>`).join('')}</div>`+bm('<div style="display:flex;gap:6px;align-items:center;margin-bottom:4px"><span style="background:var(--sg);border-radius:4px;padding:1px 7px;font-size:9px;font-weight:700;color:var(--td);text-transform:uppercase">KB</span><span style="font-size:11px;color:var(--g4)">OMIM · GeneCards</span></div>Search a gene or condition:')+`<div style="margin:0 48px 12px"><div style="display:flex;gap:6px;background:var(--wh);border-radius:10px;padding:6px 10px;border:1.5px solid var(--sg)"><input style="flex:1;border:none;outline:none;font-size:12px;font-family:var(--bf);color:var(--g7);background:transparent" placeholder="e.g. BRCA1, Cystic Fibrosis…"><button style="background:var(--tl);color:var(--wh);border:none;border-radius:6px;padding:4px 12px;font-size:11px;font-weight:600;cursor:pointer">Search</button></div></div>`;
+    if(curP==='proactive')h+=bs([{l:"Help me choose",i:"✨",p:1,a:"sCh('interest')"},{l:"Back",i:"←",a:"sCh('init')"}]);
+    else h+=bs([{l:"Back",i:"←",a:"sCh('init')"}]);
+  }
+  if(chS==='interest'){h+=pl('Step 3 — Needs Assessment')+bm("What best describes your interest?")+bs([{l:"Improve my own health",i:"💪",p:1,a:"sCh('concern')"},{l:"Planning a child",i:"👶",a:"nav('reproductive');tChat();setTimeout(()=>{tChat();sCh('rec_carrier')},1500)"},{l:"Diagnostic tests",i:"🩺",a:"sCh('diagnostic')"}]);}
+  if(chS==='diagnostic'){h+=pl('Step 3 — Diagnostic Redirect')+um("I need diagnostic tests")+bm("Diagnostic tests must be ordered by a clinician. Visit our <strong>Diagnostic page</strong> or I can connect you with our team.")+bs([{l:"Message our team",i:"👤"},{l:"Back",i:"←",a:"sCh('init')"}]);}
+  if(chS==='concern'){
+    h+=pl('Step 4 — Main Concern')+um("Improve my own health")+bm("What is your main health concern?")+bs([{l:"Cardiovascular",i:"❤️",p:chC==='cardio',a:"sCC('cardio')"},{l:"Cancer risk",i:"🎗️",p:chC==='cancer',a:"sCC('cancer')"},{l:"General health",i:"🌿",p:chC==='general',a:"sCC('general')"}]);
+    if(chC){h+=pl('Step 4 — Family History Check')+bm("Any significant health issues in your immediate family?")+bs([{l:"None",p:chF==='none',a:"sCF('none')"},{l:"Cardiovascular",p:chF==='cardio',a:"sCF('cardio')"},{l:"Cancers",p:chF==='cancer',a:"sCF('cancer')"},{l:"Other issues",p:chF==='other',a:"sCF('other')"}]);}
+    if(chC&&chF){
+      let rk=REC[chC]?.[chF]||"Comprehensive",rc=P.find(p=>p.nm.toLowerCase().includes(rk.toLowerCase()))||P[0];
+      h+=pl('Step 4 — Test Recommendation')+bm(`Based on the matrix, I recommend:<br><br><strong style="color:var(--nv)">${rc.nm}</strong><br>$${rc.pr} AUD · ${rc.gn} genes · ${rc.cn} conditions`)+bs([{l:"Purchase test",i:"🛒",p:1,a:`aCart('${rc.id}');tChat()`},{l:"View details",i:"👁️",a:`nav('product','${rc.id}');tChat()`}]);
+    }
+  }
+  if(chS==='rec_carrier'){h+=pl('Step 4 — Carrier Recommendation')+bm("For family planning, I recommend <strong>Comprehensive Carrier Screen</strong> ($495 AUD) — covers 280+ inherited conditions.")+bs([{l:"Purchase test",i:"🛒",p:1,a:"aCart('carrier-comp');tChat()"},{l:"View details",i:"👁️",a:"nav('product','carrier-comp');tChat()"},{l:"Back",i:"←",a:"sCh('init')"}]);}
+
+  b.innerHTML=h;b.scrollTop=b.scrollHeight;
+}
+
+// === COUNSELLING (Part 2-4) ===
+const CL=["Step 6: Pre-Test Counselling","Step 6: Testing Process","Step 6: Accuracy","Step 6: Sample Collection","Step 6: Turnaround","Step 7: Genetic Education","Step 7: Results Interpretation","Step 7: Actionability Q&A","Step 8: Informed Consent","Step 9: Account Creation","Step 10: Medical History","Step 10: Family History","Step 11: Family Tree","Step 12: Kit Dispatch","Step 13: CRM Notification","Session Complete"];
+function coOpen(){coS=0;coC={c:false,t:false,s:false};coFS=0;coFH={};document.getElementById('coOv').classList.add('open');rCo();}
+function coClose(){document.getElementById('coOv').classList.remove('open');}
+function coGo(s){coS=s;rCo();}
+
+function rCo(){
+  let b=document.getElementById('coB'),pct=Math.round((coS/15)*100);
+  document.getElementById('coL').textContent=CL[coS]||'';document.getElementById('coP').textContent=pct+'%';document.getElementById('coF').style.width=pct+'%';
+  let isR=pprod?.cat==='reproductive',h='';
+  const cm=m=>`<div class="cm"><div class="cmav">G</div><div class="cmb">${m}</div></div>`;
+  const cbs=a=>`<div class="cobs">${a.map(x=>`<button class="cob1${x.p?' p':''}" onclick="${x.a}">${x.i?x.i+' ':''}${x.l}</button>`).join('')}</div>`;
+  const sn=t=>`<div class="sn">${t}</div>`;
+  let fs=isR?FSR:FSP;
+
+  switch(coS){
+  case 0: // 2.2-2.3 Intro
+    h=cm(`<strong style="color:var(--nv)">Pre-test Counselling</strong><br><br>Thank you for your purchase! This session covers important information before your test (~10–15 min).`)+sn('Step 6 of 13 — Pre-Test Counselling')+cbs([{l:"▶ Continue counselling",p:1,a:"coGo(1)"},{l:"⏭️ Skip — give consent now",a:"coGo(8)"},{l:"🕐 Come back later",a:"coClose()"}]);break;
+  case 1: // 2.4 Process
+    h=sn('Step 6 — Testing Process')+cm(`<strong style="color:var(--nv)">How testing works:</strong><br><br><strong style="color:var(--tl)">📦</strong> We send a sample collection kit — collect when ready, send back. Shipping included.<br><br><strong style="color:var(--tl)">🧪</strong> Swab inside cheek, seal tube.<br><br><strong style="color:var(--tl)">🔬</strong> Processed by our lab partner in Europe.<br><br><strong style="color:var(--tl)">👩‍⚕️</strong> If findings → schedule with GC for guidance + action plan.`)+cbs([{l:"→ Continue",p:1,a:"coGo(2)"}]);break;
+  case 2: // 2.5 Accuracy
+    h=sn('Step 6 — Accuracy')+cm(`<strong style="color:var(--nv)">How accurate are genetic tests?</strong><br><br>Our tests are 99% accurate with reports of unmatched clinical quality. This is achieved through a seamless combination of AI capabilities and expert human oversight.`)+cbs([{l:"→ Continue",p:1,a:"coGo(3)"}]);break;
+  case 3: // 2.6 Sample collection
+    h=sn('Step 6 — Sample Collection')+cm(`<strong style="color:var(--nv)">How is the sample collected?</strong><br><br>We send a collection kit with simple instructions. Swab the inside of your cheek, put the swab back in the tube and seal it. Send it back — that's it. Can be done at any time, even if sick or on medications.`)+cbs([{l:"→ Continue",p:1,a:"coGo(4)"}]);break;
+  case 4: // 2.7 Turnaround
+    h=sn('Step 6 — Turnaround Time')+cm(`<strong style="color:var(--nv)">How long does it take?</strong><br><br>Results turnaround time is <strong>3 weeks</strong>.`)+cbs([{l:"→ Continue",p:1,a:"coGo(5)"}]);break;
+  case 5: // 2.8 Genetic education
+    h=sn('Step 7 — Genetic Education')+cm(`<strong style="color:var(--nv)">What is genetic testing?</strong><br><br>Analyses your DNA to identify genetic markers influencing health. Proactive screening reveals higher risk — enabling personal action plans.<br><br>Diagnostic testing is used for precision medicine treatment plans.<br><br><strong style="color:var(--nv)">It can help by:</strong><br>• Diagnosing or confirming genetic conditions<br>• Guiding healthcare decisions<br>• Informing treatment recommendations<br>• Supporting family planning<br>• Informing family members`)+cbs([{l:"→ Continue",p:1,a:"coGo(6)"}]);break;
+  case 6: // 2.9/2.10 Results (conditional)
+    h=sn('Step 7 — Results Interpretation'+(isR?' (Carrier)':' (Proactive)'));
+    if(isR){h+=cm(`<strong style="color:var(--nv)">Carrier Screening Results</strong><br><br>Our tests assess if you are a carrier for genetic conditions. If both you and your partner are carriers for the same condition, it may increase the likelihood of passing it to your children.<br><br>Should any significant findings arise, our experienced genetic counsellors will provide comprehensive guidance and personalised support.`);}
+    else{h+=cm(`<strong style="color:var(--nv)">Proactive Screening Results</strong><br><br>A positive result does <strong>not</strong> mean you currently have or will definitely develop a disease. The goal is to empower you with knowledge to take informed steps for risk mitigation and disease prevention.`);}
+    h+=cbs([{l:"→ Continue",p:1,a:"coGo(7)"}]);break;
+  case 7: // 2.11 Additional Q&A
+    h=sn('Step 7 — Actionability Q&A')+cm("Browse additional questions below. When ready, continue to consent.")+`<div class="cocd" style="padding:0;overflow:hidden">${AQ.map(q=>`<button class="fqi" onclick="tFaq(this)">${q.q}<span class="fqa">▼</span></button><div class="fqd">${q.a}</div>`).join('')}</div>`+cbs([{l:"→ Continue to consent",p:1,a:"coGo(8)"}]);break;
+  case 8: // 2.12 Consent
+    h=sn('Step 8 — Informed Consent')+cm("Please confirm the following:")+`<div class="cocd" style="padding:0;overflow:hidden">${[{k:'c',t:'Pre-test Counselling Acknowledgement',x:'I have received (or will complete) pre-test counselling and wish to proceed.'},{k:'t',t:'Terms & Conditions',x:'I agree to terms including account creation.'},{k:'s',t:'Data Storage Consent',x:'I consent to secure storage of my personal and health information.'}].map(c=>`<div class="cni${coC[c.k]?' ck':''}" onclick="coTC('${c.k}')"><div class="cnb"><span class="cnc">✓</span></div><div><div class="cnt">${c.t}</div><div class="cnx">${c.x}</div></div></div>`).join('')}</div>`;
+    if(coC.c&&coC.t&&coC.s)h+=cbs([{l:"✅ Accept & continue",p:1,a:"coGo(9)"}]);
+    h+=cbs([{l:"✕ Decline — issue refund",a:"coDecline()"}]);break;
+  case 9: // 2.13 Account creation
+    h=sn('Step 9 — Account Creation')+cm("Create your Genotype Health account:")+`<div class="cocd"><div style="font-size:13px;font-weight:700;color:var(--nv);font-family:var(--df);margin-bottom:10px">Create Account</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px"><div><label class="cfl">First Name *</label><input class="cfi" placeholder="Jane"></div><div><label class="cfl">Last Name *</label><input class="cfi" placeholder="Smith"></div></div><div style="margin-bottom:8px"><label class="cfl">Email *</label><input class="cfi" type="email" placeholder="jane@example.com"></div><div style="margin-bottom:8px"><label class="cfl">Password *</label><input class="cfi" type="password" placeholder="Min 8 characters"></div><div style="margin-bottom:8px"><label class="cfl">Phone</label><input class="cfi" placeholder="+61 400 000 000"></div>${isR?'<div style="margin-top:12px;padding:10px;background:var(--cr);border-radius:8px;font-size:11px;color:var(--td)"><strong>Couple Test:</strong> Your partner will also need to create an account and complete intake (Step 2.14). An invite link will be sent.</div>':''}<button class="csb" onclick="coGo(10)">Create Account & Continue →</button></div>`;break;
+  case 10: // 3.1/3.3 Personal medical history
+    h=sn(isR?'Step 10 — Medical History (Carrier)':'Step 10 — Medical History (Proactive)')+cm(`I'll now collect your medical information.${isR?' For couple tests, both partners complete this.':''}`)+`<div class="cocd"><div style="font-size:13px;font-weight:700;color:var(--nv);font-family:var(--df);margin-bottom:10px">Personal Details</div><div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px"><div><label class="cfl">Date of Birth *</label><input class="cfi" type="date"></div><div><label class="cfl">Gender at Birth *</label><select class="cfi"><option>Select…</option><option>Male</option><option>Female</option><option>Other</option></select></div></div><div style="font-size:13px;font-weight:700;color:var(--nv);font-family:var(--df);margin-bottom:8px;border-top:1px solid var(--g1);padding-top:10px">Medical History</div>`;
+    // Sequential questions
+    ['Diagnosed with a genetic condition? → Name & age',
+     ...(isR?[]:['Diagnosed with cancer? → Type & age','Cardiovascular diseases? → Name & age']),
+     'Other medical conditions? → Name & age','Symptoms you\'re concerned about?'].forEach(q=>{h+=`<div style="margin-bottom:8px"><label class="cfl">${q}</label><input class="cfi" placeholder="Details…"></div>`;});
+    if(isR){h+=`<div style="border-top:1px solid var(--g1);padding-top:10px;margin-top:10px"><div style="font-size:13px;font-weight:700;color:var(--nv);font-family:var(--df);margin-bottom:8px">Reproductive History</div><div style="margin-bottom:6px"><label class="cfl">Do you have children? (current/previous partner)</label><input class="cfi" placeholder="e.g. Yes — 2 with current partner"></div><div style="margin-bottom:6px"><label class="cfl">Tried to get pregnant?</label><input class="cfi" placeholder="e.g. Yes — 6 months"></div></div>`;}
+    h+=`<button class="csb" onclick="coGo(11)">Continue to Family History →</button></div>`;break;
+  case 11:{ // 3.2/3.4 Family history
+    let sec=fs[coFS],isL=coFS>=fs.length-1,sel=coFH[sec.k]||[];
+    h=sn(`Step 10 — Family History (${coFS+1}/${fs.length})`)+cm(`<strong style="color:var(--nv)">${sec.lb}</strong><br>Select all family members that apply:`)+`<div class="cocd"><div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:8px">${FM.map(f=>`<button class="tg1${sel.includes(f)?' act':''}" onclick="coTFM('${sec.k}','${f}')">${f}</button>`).join('')}</div><button class="tg1${!sel.length?' act':''}" onclick="coCFS('${sec.k}')">None</button>${sel.length?`<div style="margin-top:10px;border-top:1px solid var(--g1);padding-top:8px"><div style="font-size:10.5px;font-weight:600;color:var(--nv);margin-bottom:6px">Details for each:</div>${sel.map(f=>`<div class="fmd"><div class="fmn">${f}</div><div class="fmf" style="grid-template-columns:repeat(${sec.fl.length},1fr)">${sec.fl.map(fl=>`<input class="fmfi" placeholder="${fl}">`).join('')}</div></div>`).join('')}</div>`:''}<button class="csb" onclick="${isL?'coGo(12)':'coNFS()'}">
+    ${isL?'Submit Family History →':`Next Section (${coFS+2}/${fs.length}) →`}</button></div>`;break;}
+  case 12: // 3.5 Family tree
+    h=sn('Step 11 — Family Tree Generation')+cm(`<div style="background:rgba(22,137,143,.06);border:1px solid var(--sg);border-radius:8px;padding:10px;font-size:12px"><strong style="color:var(--nv)">🌳 Family Tree Generated</strong><br><br>An icon-based family tree has been built from your responses. This is attached to your <strong>clinical notes</strong> (not displayed to you in the chat).<br><br><em style="color:var(--g5);font-size:11px">Icons assigned per Genotype Health spec; tree attached to patient record.</em></div>`)+cbs([{l:"→ Continue",p:1,a:"coGo(13)"}]);break;
+  case 13: // Step 12: Kit dispatch
+    h=sn('Step 12 — Kit Dispatch')+cm(`<strong style="color:var(--nv)">📦 Your sample collection kit will be sent to you shortly.</strong><br><br>Estimated delivery: 3–5 business days.<br><br>We'll email you tracking information once the kit has been dispatched.`)+cbs([{l:"→ Continue",p:1,a:"coGo(14)"}]);break;
+  case 14: // Step 13: CRM Notification
+    h=sn('Step 13 — CRM Notification')+cm(`<div style="background:rgba(22,137,143,.06);border:1px solid var(--sg);border-radius:8px;padding:12px;font-size:12px"><strong style="color:var(--nv)">🔗 System Actions Completed:</strong><br><br>✅ CRM notified: session completed<br>📎 Family history attached to patient record<br>📎 Clinical notes attached to patient record<br>🌳 Family tree attached to patient record<br><br><em style="color:var(--g5);font-size:11px">All collected data has been securely transmitted to the Genotype Health CRM via API.</em></div>`)+cbs([{l:"→ Finish",p:1,a:"coGo(15)"}]);break;
+  case 15: // Session Complete
+    h=sn('Session Complete')+cm(`<div style="text-align:center;padding:8px 0"><div style="font-size:40px;margin-bottom:8px">🎉</div><div style="font-size:16px;font-weight:700;color:var(--nv);font-family:var(--df);margin-bottom:6px">All done! Thank you.</div><div style="font-size:12.5px;color:var(--g6);line-height:1.6;margin-bottom:12px">Your pre-test counselling and intake are complete.</div><div style="background:var(--cr);border-radius:8px;padding:10px;text-align:left;font-size:11.5px;color:var(--g6);line-height:1.7"><strong style="color:var(--nv)">Your journey:</strong><br>📦 Kit dispatched → 🧪 Collect sample → 📮 Post back → 🔬 Lab (~3 wks) → 📋 Results + GC session</div><div style="margin-top:10px;font-size:11px;color:var(--g5)">Questions? Contact us at <strong style="color:var(--tl)">support@genotypehealth.com</strong> or call <strong style="color:var(--tl)">1800 GTH AUS</strong></div></div>`)+cbs([{l:"Close",p:1,a:"coClose()"}]);break;
+  }
+  b.innerHTML=h;b.scrollTop=b.scrollHeight;
+}
+function coTC(k){coC[k]=!coC[k];rCo();}
+function coTFM(sk,m){if(!coFH[sk])coFH[sk]=[];let i=coFH[sk].indexOf(m);if(i>=0)coFH[sk].splice(i,1);else coFH[sk].push(m);rCo();}
+function coCFS(sk){coFH[sk]=[];rCo();}
+function coNFS(){coFS++;rCo();}
+function coDecline(){if(confirm('Are you sure? A full refund will be issued.')){coClose();alert('Refund initiated. Your order has been cancelled.');}}
+
+// === INIT ===
+window.addEventListener('scroll',()=>{document.getElementById('mainNav').classList.toggle('stuck',window.scrollY>50);});
+rGrids();
+</script>
+</body>
+</html>
