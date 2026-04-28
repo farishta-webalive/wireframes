@@ -11,6 +11,7 @@ Shared repository for hosting interactive HTML wireframes via GitHub Pages. Each
 | Genotype Health | `/gth` | [farishta-webalive.github.io/wireframes/gth/](https://farishta-webalive.github.io/wireframes/gth/) |
 | CMW | `/cmw` | [farishta-webalive.github.io/wireframes/cmw/](https://farishta-webalive.github.io/wireframes/cmw/) |
 | Melbourne Pest Control | `/mpc` | [farishta-webalive.github.io/wireframes/mpc/](https://farishta-webalive.github.io/wireframes/mpc/) |
+| Renologic Homeowner Platform | `/rhp` | [farishta-webalive.github.io/wireframes/rhp/](https://farishta-webalive.github.io/wireframes/rhp/) |
 
 ---
 
