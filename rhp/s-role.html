@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RenoLogic — Homeowner Platform — s-role</title>
+
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-overlay" id="notif-overlay" onclick="closeNotifPanel(event)">
+  <div class="notif-drawer" role="dialog" aria-modal="true" aria-label="Notifications" onclick="event.stopPropagation()">
+
+    <div class="notif-drawer-header">
+      <span class="notif-drawer-title">Notifications <span class="notif-badge" id="notif-panel-badge" style="position:relative;top:auto;right:auto;margin-left:6px">3</span></span>
+      <div class="notif-header-actions">
+        <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+        <button class="notif-close" onclick="closeNotifPanelBtn()" aria-label="Close notifications">✕</button>
+      </div>
+    </div>
+
+    <div class="notif-tabs">
+      <button class="notif-tab active" onclick="filterNotifs(this,'all')">All</button>
+      <button class="notif-tab" onclick="filterNotifs(this,'unread')">Unread</button>
+      <button class="notif-tab" onclick="filterNotifs(this,'jobs')">Jobs</button>
+      <button class="notif-tab" onclick="filterNotifs(this,'payments')">Payments</button>
+    </div>
+
+    <div class="notif-list" id="notif-list">
+
+      <!-- Unread: Evidence submitted -->
+      <div class="notif-item unread" data-id="n1" data-cat="jobs" onclick="readNotif(this,'s15')">
+        <div class="notif-unread-dot"></div>
+        <div class="notif-item-icon ni-orange">📸</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Evidence submitted — M3 Joinery &amp; Cabinetry</div>
+          <div class="notif-item-sub">Pacific Build Co uploaded 2 new files to Surry Hills Kitchen Reno</div>
+        </div>
+        <div class="notif-item-time">2h ago</div>
+      </div>
+
+      <!-- Unread: Variation recorded -->
+      <div class="notif-item unread" data-id="n2" data-cat="jobs" onclick="readNotif(this,'s21')">
+        <div class="notif-unread-dot"></div>
+        <div class="notif-item-icon ni-amber">📝</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Variation recorded — additional power point</div>
+          <div class="notif-item-sub">Mark R. recorded a scope variation on Surry Hills Kitchen Reno. Your acknowledgement is requested.</div>
+        </div>
+        <div class="notif-item-time">5h ago</div>
+      </div>
+
+      <!-- Unread: Contractor interest -->
+      <div class="notif-item unread" data-id="n3" data-cat="jobs" onclick="readNotif(this,'s13')">
+        <div class="notif-unread-dot"></div>
+        <div class="notif-item-icon ni-blue">👋</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">3 contractors expressed interest</div>
+          <div class="notif-item-sub">Pacific Build Co, Blue Sky Renovations, and Coastal Plumbing have expressed interest in Bondi Bathroom Refresh</div>
+        </div>
+        <div class="notif-item-time">Yesterday</div>
+      </div>
+
+      <!-- Read: M2 marked complete -->
+      <div class="notif-item" data-id="n4" data-cat="jobs" onclick="readNotif(this,'s17')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-green">✅</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Milestone marked complete — M2 Plumbing Rough-in</div>
+          <div class="notif-item-sub">Pacific Build Co marked Plumbing Rough-in as complete on Surry Hills Kitchen Reno</div>
+        </div>
+        <div class="notif-item-time">Apr 25</div>
+      </div>
+
+      <!-- Read: Payment recorded -->
+      <div class="notif-item" data-id="n5" data-cat="payments" onclick="readNotif(this,'s19')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-green">💰</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Payment recorded — M2 Plumbing Rough-in</div>
+          <div class="notif-item-sub">$9,400 recorded as paid on Surry Hills Kitchen Reno. Record-keeping only — no funds transferred by RenoLogic.</div>
+        </div>
+        <div class="notif-item-time">Apr 24</div>
+      </div>
+
+      <!-- Read: Quote accepted -->
+      <div class="notif-item" data-id="n6" data-cat="jobs" onclick="readNotif(this,'s16')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-green">📋</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Quote accepted — Surry Hills Kitchen Reno</div>
+          <div class="notif-item-sub">Your quote acceptance has been permanently recorded. Pacific Build Co has been notified.</div>
+        </div>
+        <div class="notif-item-time">Apr 18</div>
+      </div>
+
+      <!-- Read: Contractor selected -->
+      <div class="notif-item" data-id="n7" data-cat="jobs" onclick="readNotif(this,'s15')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-orange">🔨</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Contractor selected — Pacific Build Co</div>
+          <div class="notif-item-sub">Your selection of Pacific Build Co for Surry Hills Kitchen Reno has been permanently recorded.</div>
+        </div>
+        <div class="notif-item-time">Apr 14</div>
+      </div>
+
+      <!-- Read: M1 payment recorded -->
+      <div class="notif-item" data-id="n8" data-cat="payments" onclick="readNotif(this,'s19')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-green">💰</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Payment recorded — M1 Framing &amp; Demolition</div>
+          <div class="notif-item-sub">$8,200 recorded as paid on Surry Hills Kitchen Reno.</div>
+        </div>
+        <div class="notif-item-time">Apr 20</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CO MODALS -->
+<div id="modal-co-mark-paid" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcomp">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mcomp">Record Payment</h2>
+    <div class="disclaimer-panel mb-16">You are recording that payment for <strong>M3 — Cabinetry ($12,800)</strong> has been received outside this platform. This is a <strong>record-keeping action only</strong>. RenoLogic does not process or verify this payment.</div>
+    <p class="modal-body">Once recorded, this cannot be reversed. Both you and the homeowner will see this payment status.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="coMarkPaid()">Record as Paid</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-co-mark-paid')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-co-mark-complete" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcmc">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mcmc">Mark Milestone Complete</h2>
+    <p class="modal-body">You are marking <strong>Cabinetry</strong> as complete. This records that the work has been completed. It does not release funds or trigger any financial action.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmCoMarkComplete()">Confirm Complete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-co-mark-complete')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-co-submit-quote" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcsq">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mcsq">Submit This Quote?</h2>
+    <p class="modal-body">You are submitting this quote to <strong>Sarah Chen</strong>. Once submitted, the homeowner will be notified and can accept or decline. You cannot edit the quote after submission.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmSubmitQuote()">Confirm Submission</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-co-submit-quote')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-co-invite-team" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcit">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mcit">Invite Team Member</h2>
+    <div class="form-stack">
+      <div class="input-group"><label for="inv-name">Full Name</label><input type="text" id="inv-name" placeholder="e.g. Sam Lee"></div>
+      <div class="input-group"><label for="inv-email">Email Address</label><input type="email" id="inv-email" placeholder="sam@pacificbuild.com.au"></div>
+      <div class="input-group"><label for="inv-role">Sub-role</label><select id="inv-role"><option value="">Select role...</option><option>Project Manager</option><option>Estimator</option><option>Admin</option><option>Site Manager</option></select></div>
+    </div>
+    <div class="modal-actions mt-16">
+      <button class="btn btn-accent" onclick="sendTeamInvite()">Send Invitation</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-co-invite-team')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- PM MARK COMPLETE MODAL -->
+<div id="modal-pm-complete" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mpc-title">
+  <div class="modal-sheet">
+    <div style="background:var(--color-primary);color:#fff;border-radius:var(--r-sm);padding:16px 20px;margin-bottom:16px;font-size:14px;line-height:1.55">
+      You are marking <strong>Plumbing &amp; Waterproofing</strong> as complete. This records that the work has been completed. It does not release funds or trigger any financial action.
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:16px;font-weight:600;margin-bottom:4px">Plumbing &amp; Waterproofing</div>
+      <div style="font-size:16px;color:var(--color-muted)">$6,000 · Surry Hills Kitchen Reno</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmPmMarkComplete()">Confirm Complete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-pm-complete')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ES SUBMIT QUOTE MODAL -->
+<div id="modal-es-submit" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mes">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mes">Submit This Quote?</h2>
+    <p class="modal-body" id="es-submit-copy">You are submitting this quote for <strong id="es-submit-amount">$14,800</strong> <span id="es-submit-gst">ex GST</span> to <strong id="es-submit-hw">Sarah</strong>. Once submitted, the homeowner will be notified and can accept or decline. You cannot edit the quote after submission.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmEstimatorSubmit()">Confirm Submission</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-es-submit')">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- MODALS -->
+<div id="modal-select" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mst">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mst">Confirm Contractor Selection</h2>
+    <p class="modal-body">You are about to select <strong>Pacific Build Co</strong> for <strong>Surry Hills Kitchen Reno</strong>. This action is permanently recorded and cannot be reversed. It does not constitute a contract — it allows the contractor to submit a quote for your review.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmContractorSelection()">Confirm Selection</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-select')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-accept-quote" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="maq">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="maq">Accept This Quote?</h2>
+    <p class="modal-body">You are about to accept this quote for <strong>$34,800 ex. GST</strong>. Once accepted, this cannot be reversed and the contractor will be notified.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmAcceptQuote()">Confirm Acceptance</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-accept-quote')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-decline-quote" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mdq">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mdq">Decline This Quote?</h2>
+    <p class="modal-body">You are about to decline this quote. This action cannot be reversed. The quote will be retained in your project record.</p>
+    <div class="modal-actions">
+      <button class="btn btn-error" onclick="confirmDeclineQuote()">Confirm Decline</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-decline-quote')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-ack" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mack">
+  <div class="modal-sheet">
+    <div class="disclaimer-panel mb-16">Acknowledging this milestone is a recorded action only. It does <strong>not</strong> release funds, trigger any payment, or constitute legal acceptance of the work completed. Your acknowledgement has <strong>no financial or contractual effect</strong>.</div>
+    <h2 class="modal-title" id="mack">Plumbing Rough-in</h2>
+    <p class="modal-body" style="margin-bottom:8px">Recorded value: <strong>$9,400</strong></p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-accent btn-full" onclick="confirmAcknowledge()">Confirm Acknowledgement</button>
+      <button class="btn btn-ghost btn-full" onclick="closeModal('modal-ack')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mark as Paid modal -->
+<div id="modal-mark-paid" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mmp">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mmp">Record Payment</h2>
+    <div class="disclaimer-panel mb-16">You are recording that payment for <strong>M3 — Joinery &amp; Cabinetry ($10,500)</strong> has been made outside this platform. This is a <strong>record-keeping action only</strong>. RenoLogic does not process or verify this payment.</div>
+    <p class="modal-body">Once recorded, this cannot be reversed. Both you and the contractor will see this payment status.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmMarkPaid()">Record as Paid</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-mark-paid')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- S01 LANDING -->
+<section id="s-role" class="screen active">
+<div class="rs-shell">
+  <!-- Decorative background -->
+  <div class="rs-bg-grid"></div>
+  <div class="rs-bg-glow rs-bg-glow-1"></div>
+  <div class="rs-bg-glow rs-bg-glow-2"></div>
+
+  <!-- Top brand strip -->
+  <header class="rs-header">
+    <a class="rs-brand" href="#" onclick="goTo('s01');return false" aria-label="RenoLogic home">
+      <img src="assets/renologic-logo.png" alt="RenoLogic">
+    </a>
+    <button class="rs-back" onclick="goTo('s01')">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+      <span>Back to home</span>
+    </button>
+  </header>
+
+  <!-- Card -->
+  <main class="rs-main">
+    <div class="rs-card">
+      <div class="rs-eyebrow">
+        <span class="rs-eyebrow-dot"></span>
+        <span>Sign in</span>
+      </div>
+      <h1 class="rs-title">Welcome back.<br><span class="rs-title-muted">Who are you logging in as?</span></h1>
+      <p class="rs-sub">Choose your role to continue. Each role has its own dashboard and permissions.</p>
+
+      <!-- Homeowner -->
+      <div class="rs-role-section">
+        <div class="rs-role-section-label">Project Owner</div>
+        <button class="rs-role rs-role-ho" onclick="goTo('s10')">
+          <span class="rs-role-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          </span>
+          <span class="rs-role-body">
+            <span class="rs-role-name">Homeowner</span>
+            <span class="rs-role-desc">I posted a job and I'm tracking my renovation.</span>
+          </span>
+          <span class="rs-role-arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </button>
+      </div>
+
+      <!-- Contractor sub-roles -->
+      <div class="rs-divider">
+        <span class="rs-divider-line"></span>
+        <span class="rs-divider-label">Contractor sub-roles</span>
+        <span class="rs-divider-line"></span>
+      </div>
+
+      <div class="rs-role-grid">
+        <button class="rs-role rs-role-co" onclick="goTo('cs12')">
+          <span class="rs-role-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          </span>
+          <span class="rs-role-body">
+            <span class="rs-role-name">Contractor Owner</span>
+            <span class="rs-role-desc">I run the firm, manage the team, and oversee all projects.</span>
+          </span>
+          <span class="rs-role-arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </button>
+
+        <button class="rs-role rs-role-est" onclick="goTo('es01')">
+          <span class="rs-role-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="2" width="16" height="20" rx="2"/><line x1="8" y1="6" x2="16" y2="6"/><line x1="8" y1="10" x2="16" y2="10"/><line x1="8" y1="14" x2="13" y2="14"/></svg>
+          </span>
+          <span class="rs-role-body">
+            <span class="rs-role-name">Estimator</span>
+            <span class="rs-role-desc">I build quotes and milestones for assigned projects.</span>
+          </span>
+          <span class="rs-role-arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </button>
+
+        <button class="rs-role rs-role-pm" onclick="goTo('pm01')">
+          <span class="rs-role-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2h-4"/><path d="M9 11V5a3 3 0 0 1 6 0v6"/><line x1="12" y1="15" x2="12" y2="18"/></svg>
+          </span>
+          <span class="rs-role-body">
+            <span class="rs-role-name">Project Manager</span>
+            <span class="rs-role-desc">I monitor active projects and progress milestones.</span>
+          </span>
+          <span class="rs-role-arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </button>
+
+        <button class="rs-role rs-role-adm" onclick="goTo('ad01')">
+          <span class="rs-role-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><polyline points="9 12 11 14 15 10"/></svg>
+          </span>
+          <span class="rs-role-body">
+            <span class="rs-role-name">Admin</span>
+            <span class="rs-role-desc">I manage firm certificates, licences, and insurance.</span>
+          </span>
+          <span class="rs-role-arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </button>
+
+        <button class="rs-role rs-role-sm" onclick="goTo('sm01')">
+          <span class="rs-role-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 20a8 8 0 0 1 16 0"/><circle cx="10" cy="9" r="4"/><path d="M22 20l-3-3"/><circle cx="18" cy="14" r="2"/></svg>
+          </span>
+          <span class="rs-role-body">
+            <span class="rs-role-name">Site Manager</span>
+            <span class="rs-role-desc">I upload evidence on site to document progress.</span>
+          </span>
+          <span class="rs-role-arrow">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </span>
+        </button>
+      </div>
+
+      <p class="rs-foot">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+        <span>Contractor Owner, Estimator, Project Manager, Admin, and Site Manager are sub-roles within the same firm. Your role is assigned by your firm's Owner.</span>
+      </p>
+    </div>
+
+    <p class="rs-cta-line">
+      Don't have an account?
+      <a href="#" onclick="goTo('s02');return false">Create one</a>
+    </p>
+  </main>
+</div>
+</section>
+<script src="assets/app.js"></script>
+</body>
+</html>

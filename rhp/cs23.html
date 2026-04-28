@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>RenoLogic — Homeowner Platform — cs23</title>
+
+<link rel="stylesheet" href="assets/styles.css">
+</head>
+<body>
+<!-- TOAST -->
+<div id="toast" role="status" aria-live="polite"></div>
+
+
+<!-- NOTIFICATION PANEL -->
+<div class="notif-overlay" id="notif-overlay" onclick="closeNotifPanel(event)">
+  <div class="notif-drawer" role="dialog" aria-modal="true" aria-label="Notifications" onclick="event.stopPropagation()">
+
+    <div class="notif-drawer-header">
+      <span class="notif-drawer-title">Notifications <span class="notif-badge" id="notif-panel-badge" style="position:relative;top:auto;right:auto;margin-left:6px">3</span></span>
+      <div class="notif-header-actions">
+        <button class="notif-mark-all" onclick="markAllRead()">Mark all read</button>
+        <button class="notif-close" onclick="closeNotifPanelBtn()" aria-label="Close notifications">✕</button>
+      </div>
+    </div>
+
+    <div class="notif-tabs">
+      <button class="notif-tab active" onclick="filterNotifs(this,'all')">All</button>
+      <button class="notif-tab" onclick="filterNotifs(this,'unread')">Unread</button>
+      <button class="notif-tab" onclick="filterNotifs(this,'jobs')">Jobs</button>
+      <button class="notif-tab" onclick="filterNotifs(this,'payments')">Payments</button>
+    </div>
+
+    <div class="notif-list" id="notif-list">
+
+      <!-- Unread: Evidence submitted -->
+      <div class="notif-item unread" data-id="n1" data-cat="jobs" onclick="readNotif(this,'s15')">
+        <div class="notif-unread-dot"></div>
+        <div class="notif-item-icon ni-orange">📸</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Evidence submitted — M3 Joinery &amp; Cabinetry</div>
+          <div class="notif-item-sub">Pacific Build Co uploaded 2 new files to Surry Hills Kitchen Reno</div>
+        </div>
+        <div class="notif-item-time">2h ago</div>
+      </div>
+
+      <!-- Unread: Variation recorded -->
+      <div class="notif-item unread" data-id="n2" data-cat="jobs" onclick="readNotif(this,'s21')">
+        <div class="notif-unread-dot"></div>
+        <div class="notif-item-icon ni-amber">📝</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Variation recorded — additional power point</div>
+          <div class="notif-item-sub">Mark R. recorded a scope variation on Surry Hills Kitchen Reno. Your acknowledgement is requested.</div>
+        </div>
+        <div class="notif-item-time">5h ago</div>
+      </div>
+
+      <!-- Unread: Contractor interest -->
+      <div class="notif-item unread" data-id="n3" data-cat="jobs" onclick="readNotif(this,'s13')">
+        <div class="notif-unread-dot"></div>
+        <div class="notif-item-icon ni-blue">👋</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">3 contractors expressed interest</div>
+          <div class="notif-item-sub">Pacific Build Co, Blue Sky Renovations, and Coastal Plumbing have expressed interest in Bondi Bathroom Refresh</div>
+        </div>
+        <div class="notif-item-time">Yesterday</div>
+      </div>
+
+      <!-- Read: M2 marked complete -->
+      <div class="notif-item" data-id="n4" data-cat="jobs" onclick="readNotif(this,'s17')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-green">✅</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Milestone marked complete — M2 Plumbing Rough-in</div>
+          <div class="notif-item-sub">Pacific Build Co marked Plumbing Rough-in as complete on Surry Hills Kitchen Reno</div>
+        </div>
+        <div class="notif-item-time">Apr 25</div>
+      </div>
+
+      <!-- Read: Payment recorded -->
+      <div class="notif-item" data-id="n5" data-cat="payments" onclick="readNotif(this,'s19')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-green">💰</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Payment recorded — M2 Plumbing Rough-in</div>
+          <div class="notif-item-sub">$9,400 recorded as paid on Surry Hills Kitchen Reno. Record-keeping only — no funds transferred by RenoLogic.</div>
+        </div>
+        <div class="notif-item-time">Apr 24</div>
+      </div>
+
+      <!-- Read: Quote accepted -->
+      <div class="notif-item" data-id="n6" data-cat="jobs" onclick="readNotif(this,'s16')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-green">📋</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Quote accepted — Surry Hills Kitchen Reno</div>
+          <div class="notif-item-sub">Your quote acceptance has been permanently recorded. Pacific Build Co has been notified.</div>
+        </div>
+        <div class="notif-item-time">Apr 18</div>
+      </div>
+
+      <!-- Read: Contractor selected -->
+      <div class="notif-item" data-id="n7" data-cat="jobs" onclick="readNotif(this,'s15')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-orange">🔨</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Contractor selected — Pacific Build Co</div>
+          <div class="notif-item-sub">Your selection of Pacific Build Co for Surry Hills Kitchen Reno has been permanently recorded.</div>
+        </div>
+        <div class="notif-item-time">Apr 14</div>
+      </div>
+
+      <!-- Read: M1 payment recorded -->
+      <div class="notif-item" data-id="n8" data-cat="payments" onclick="readNotif(this,'s19')">
+        <div class="notif-read-dot"></div>
+        <div class="notif-item-icon ni-green">💰</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">Payment recorded — M1 Framing &amp; Demolition</div>
+          <div class="notif-item-sub">$8,200 recorded as paid on Surry Hills Kitchen Reno.</div>
+        </div>
+        <div class="notif-item-time">Apr 20</div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- CO MODALS -->
+<div id="modal-co-mark-paid" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcomp">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mcomp">Record Payment</h2>
+    <div class="disclaimer-panel mb-16">You are recording that payment for <strong>M3 — Cabinetry ($12,800)</strong> has been received outside this platform. This is a <strong>record-keeping action only</strong>. RenoLogic does not process or verify this payment.</div>
+    <p class="modal-body">Once recorded, this cannot be reversed. Both you and the homeowner will see this payment status.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="coMarkPaid()">Record as Paid</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-co-mark-paid')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-co-mark-complete" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcmc">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mcmc">Mark Milestone Complete</h2>
+    <p class="modal-body">You are marking <strong>Cabinetry</strong> as complete. This records that the work has been completed. It does not release funds or trigger any financial action.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmCoMarkComplete()">Confirm Complete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-co-mark-complete')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-co-submit-quote" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcsq">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mcsq">Submit This Quote?</h2>
+    <p class="modal-body">You are submitting this quote to <strong>Sarah Chen</strong>. Once submitted, the homeowner will be notified and can accept or decline. You cannot edit the quote after submission.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmSubmitQuote()">Confirm Submission</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-co-submit-quote')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-co-invite-team" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcit">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mcit">Invite Team Member</h2>
+    <div class="form-stack">
+      <div class="input-group"><label for="inv-name">Full Name</label><input type="text" id="inv-name" placeholder="e.g. Sam Lee"></div>
+      <div class="input-group"><label for="inv-email">Email Address</label><input type="email" id="inv-email" placeholder="sam@pacificbuild.com.au"></div>
+      <div class="input-group"><label for="inv-role">Sub-role</label><select id="inv-role"><option value="">Select role...</option><option>Project Manager</option><option>Estimator</option><option>Admin</option><option>Site Manager</option></select></div>
+    </div>
+    <div class="modal-actions mt-16">
+      <button class="btn btn-accent" onclick="sendTeamInvite()">Send Invitation</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-co-invite-team')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- PM MARK COMPLETE MODAL -->
+<div id="modal-pm-complete" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mpc-title">
+  <div class="modal-sheet">
+    <div style="background:var(--color-primary);color:#fff;border-radius:var(--r-sm);padding:16px 20px;margin-bottom:16px;font-size:14px;line-height:1.55">
+      You are marking <strong>Plumbing &amp; Waterproofing</strong> as complete. This records that the work has been completed. It does not release funds or trigger any financial action.
+    </div>
+    <div style="margin-bottom:16px">
+      <div style="font-size:16px;font-weight:600;margin-bottom:4px">Plumbing &amp; Waterproofing</div>
+      <div style="font-size:16px;color:var(--color-muted)">$6,000 · Surry Hills Kitchen Reno</div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmPmMarkComplete()">Confirm Complete</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-pm-complete')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ES SUBMIT QUOTE MODAL -->
+<div id="modal-es-submit" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mes">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mes">Submit This Quote?</h2>
+    <p class="modal-body" id="es-submit-copy">You are submitting this quote for <strong id="es-submit-amount">$14,800</strong> <span id="es-submit-gst">ex GST</span> to <strong id="es-submit-hw">Sarah</strong>. Once submitted, the homeowner will be notified and can accept or decline. You cannot edit the quote after submission.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmEstimatorSubmit()">Confirm Submission</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-es-submit')">Cancel</button>
+    </div>
+  </div>
+</div>
+<!-- MODALS -->
+<div id="modal-select" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mst">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mst">Confirm Contractor Selection</h2>
+    <p class="modal-body">You are about to select <strong>Pacific Build Co</strong> for <strong>Surry Hills Kitchen Reno</strong>. This action is permanently recorded and cannot be reversed. It does not constitute a contract — it allows the contractor to submit a quote for your review.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmContractorSelection()">Confirm Selection</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-select')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-accept-quote" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="maq">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="maq">Accept This Quote?</h2>
+    <p class="modal-body">You are about to accept this quote for <strong>$34,800 ex. GST</strong>. Once accepted, this cannot be reversed and the contractor will be notified.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmAcceptQuote()">Confirm Acceptance</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-accept-quote')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-decline-quote" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mdq">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mdq">Decline This Quote?</h2>
+    <p class="modal-body">You are about to decline this quote. This action cannot be reversed. The quote will be retained in your project record.</p>
+    <div class="modal-actions">
+      <button class="btn btn-error" onclick="confirmDeclineQuote()">Confirm Decline</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-decline-quote')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div id="modal-ack" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mack">
+  <div class="modal-sheet">
+    <div class="disclaimer-panel mb-16">Acknowledging this milestone is a recorded action only. It does <strong>not</strong> release funds, trigger any payment, or constitute legal acceptance of the work completed. Your acknowledgement has <strong>no financial or contractual effect</strong>.</div>
+    <h2 class="modal-title" id="mack">Plumbing Rough-in</h2>
+    <p class="modal-body" style="margin-bottom:8px">Recorded value: <strong>$9,400</strong></p>
+    <div style="display:flex;flex-direction:column;gap:10px">
+      <button class="btn btn-accent btn-full" onclick="confirmAcknowledge()">Confirm Acknowledgement</button>
+      <button class="btn btn-ghost btn-full" onclick="closeModal('modal-ack')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- Mark as Paid modal -->
+<div id="modal-mark-paid" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mmp">
+  <div class="modal-sheet">
+    <h2 class="modal-title" id="mmp">Record Payment</h2>
+    <div class="disclaimer-panel mb-16">You are recording that payment for <strong>M3 — Joinery &amp; Cabinetry ($10,500)</strong> has been made outside this platform. This is a <strong>record-keeping action only</strong>. RenoLogic does not process or verify this payment.</div>
+    <p class="modal-body">Once recorded, this cannot be reversed. Both you and the contractor will see this payment status.</p>
+    <div class="modal-actions">
+      <button class="btn btn-accent" onclick="confirmMarkPaid()">Record as Paid</button>
+      <button class="btn btn-outline" onclick="closeModal('modal-mark-paid')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- S01 LANDING -->
+<section id="cs23" class="screen active"><div class="app-layout"><header class="app-topbar" aria-label="App header"><span class="app-topbar-logo"><img class="brand-logo brand-logo-top" src="assets/renologic-logo.png" alt="RenoLogic"></span><div class="topbar-actions"><button class="icon-btn notif-bell-btn" aria-label="Notifications" onclick="openNotifPanel()"><span class="notif-bell-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="notif-badge">2</span></button><div class="avatar" style="background:#FF7A1A" title="Mark Chen">MC</div></div></header><aside class="sidebar"><div class="co-sidebar-logo"><img class="brand-logo brand-logo-side" src="assets/renologic-logo.png" alt="RenoLogic"><button class="sidebar-bell-btn notif-bell-btn" aria-label="Notifications" onclick="openNotifPanel()"><span class="notif-bell-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></span><span class="notif-badge">2</span></button></div><nav class="sidebar-nav"><button class="sidebar-link" onclick="goTo('cs12')"><span class="sidebar-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Dashboard</button><button class="sidebar-link" onclick="goTo('cs13')"><span class="sidebar-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Browse Jobs</button><button class="sidebar-link" onclick="goTo('cs16')"><span class="sidebar-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>My Projects</button><button class="sidebar-link active" aria-current="page" onclick="goTo('cs23')"><span class="sidebar-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Team</button><button class="sidebar-link" onclick="goTo('cs24')"><span class="sidebar-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="9" y1="13" x2="15" y2="13"/><line x1="9" y1="17" x2="15" y2="17"/></svg></span>Certs & Insurance</button><button class="sidebar-link" onclick="goTo('cs25')"><span class="sidebar-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>Subscription</button><button class="sidebar-link" onclick="goTo('cs26')"><span class="sidebar-link-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Profile</button></nav><div class="sidebar-footer"><div class="sidebar-user"><div class="avatar" style="background:#FF7A1A" onclick="goTo('cs26')" title="My Profile">MC</div><div class="sidebar-user-info" onclick="goTo('cs26')" style="cursor:pointer"><div class="sidebar-user-name">Mark Chen</div><div class="sidebar-user-role">Contractor Owner</div></div></div></div></aside><main class="app-content">
+<!-- TEAM HERO -->
+<div class="team-hero">
+  <div class="team-hero-bg"></div>
+  <div class="team-hero-inner">
+    <div class="team-hero-left">
+      <div class="team-hero-eyebrow">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+        <span>Team</span>
+      </div>
+      <h1 class="team-hero-title">Pacific Build Co</h1>
+      <p class="team-hero-sub">Manage who can access projects, upload evidence, and act on behalf of your firm.</p>
+    </div>
+    <div class="team-hero-right">
+      <button class="btn btn-accent team-hero-cta" onclick="openModal('modal-co-invite-team')">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Invite Team Member
+      </button>
+    </div>
+  </div>
+  <div class="team-hero-stats">
+    <div class="team-hero-stat">
+      <span class="team-hero-stat-val">5</span>
+      <span class="team-hero-stat-lbl">Total members</span>
+    </div>
+    <div class="team-hero-stat">
+      <span class="team-hero-stat-val">1</span>
+      <span class="team-hero-stat-lbl">Owner</span>
+    </div>
+    <div class="team-hero-stat">
+      <span class="team-hero-stat-val">4</span>
+      <span class="team-hero-stat-lbl">Sub-roles assigned</span>
+    </div>
+    <div class="team-hero-stat">
+      <span class="team-hero-stat-val">0</span>
+      <span class="team-hero-stat-lbl">Pending invites</span>
+    </div>
+  </div>
+</div>
+
+<!-- TEAM TABLE -->
+<div class="team-panel">
+  <div class="team-panel-head">
+    <div>
+      <h2 class="team-panel-title">Members</h2>
+      <p class="team-panel-sub">5 members · 4 with sub-roles</p>
+    </div>
+    <div class="team-panel-search">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="text" placeholder="Search by name or email" oninput="filterTeam(this.value)">
+    </div>
+  </div>
+  <div class="team-list" id="team-list-co">
+    <div class="team-card" data-name="Mark Chen mark@pacificbuild.com.au owner">
+      <div class="team-card-avatar" style="background:linear-gradient(135deg,#FF6F1A,#F59E0B)">MC</div>
+      <div class="team-card-info">
+        <div class="team-card-name">Mark Chen <span class="team-card-you">You</span></div>
+        <div class="team-card-email">mark@pacificbuild.com.au</div>
+      </div>
+      <div class="team-card-role">
+        <span class="team-role-pill team-role-owner">
+          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+          Owner
+        </span>
+      </div>
+      <div class="team-card-meta">Since Apr 2026</div>
+    </div>
+    <div class="team-card" data-name="Jenna Park jenna@pacificbuild.com.au pm project manager">
+      <div class="team-card-avatar" style="background:linear-gradient(135deg,#5C6BC0,#3F51B5)">JP</div>
+      <div class="team-card-info">
+        <div class="team-card-name">Jenna Park</div>
+        <div class="team-card-email">jenna@pacificbuild.com.au</div>
+      </div>
+      <div class="team-card-role">
+        <span class="team-role-pill team-role-pm">Project Manager</span>
+      </div>
+      <button class="team-card-remove" onclick="showToast('Confirm dialog to remove Jenna Park')" aria-label="Remove Jenna Park">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        Remove
+      </button>
+    </div>
+    <div class="team-card" data-name="Tom Yates tom@pacificbuild.com.au estimator">
+      <div class="team-card-avatar" style="background:linear-gradient(135deg,#FBC02D,#F57F17);color:#1E1E1E">TY</div>
+      <div class="team-card-info">
+        <div class="team-card-name">Tom Yates</div>
+        <div class="team-card-email">tom@pacificbuild.com.au</div>
+      </div>
+      <div class="team-card-role">
+        <span class="team-role-pill team-role-est">Estimator</span>
+      </div>
+      <button class="team-card-remove" onclick="showToast('Confirm dialog to remove Tom Yates')" aria-label="Remove Tom Yates">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        Remove
+      </button>
+    </div>
+    <div class="team-card" data-name="Dan Wu dan@pacificbuild.com.au site manager">
+      <div class="team-card-avatar" style="background:linear-gradient(135deg,#43A047,#1B5E20)">DW</div>
+      <div class="team-card-info">
+        <div class="team-card-name">Dan Wu</div>
+        <div class="team-card-email">dan@pacificbuild.com.au</div>
+      </div>
+      <div class="team-card-role">
+        <span class="team-role-pill team-role-sm">Site Manager</span>
+      </div>
+      <button class="team-card-remove" onclick="showToast('Confirm dialog to remove Dan Wu')" aria-label="Remove Dan Wu">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        Remove
+      </button>
+    </div>
+    <div class="team-card" data-name="Priya Nair priya@pacificbuild.com.au admin">
+      <div class="team-card-avatar" style="background:linear-gradient(135deg,#616161,#424242)">PN</div>
+      <div class="team-card-info">
+        <div class="team-card-name">Priya Nair</div>
+        <div class="team-card-email">priya@pacificbuild.com.au</div>
+      </div>
+      <div class="team-card-role">
+        <span class="team-role-pill team-role-adm">Admin</span>
+      </div>
+      <button class="team-card-remove" onclick="showToast('Confirm dialog to remove Priya Nair')" aria-label="Remove Priya Nair">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/></svg>
+        Remove
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- SUBSCRIPTION NOTICE -->
+<div class="team-notice">
+  <span class="team-notice-icon">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+  </span>
+  <div>
+    <div class="team-notice-title">Subscription required for team access</div>
+    <div class="team-notice-sub">If your subscription lapses, all team access suspends until you reactivate.</div>
+  </div>
+</div>
+
+<!-- PERMISSIONS -->
+<details class="team-perms">
+  <summary class="team-perms-summary">
+    <div class="team-perms-summary-left">
+      <span class="team-perms-icon">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      </span>
+      <div>
+        <div class="team-perms-title">Sub-role permissions</div>
+        <div class="team-perms-sub">What each role can do across projects</div>
+      </div>
+    </div>
+    <svg class="team-perms-chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+  </summary>
+  <div class="team-perms-body">
+    <table class="team-perm-table">
+      <thead>
+        <tr>
+          <th>Permission</th>
+          <th><span class="team-role-pill team-role-pm team-role-pill-sm">PM</span></th>
+          <th><span class="team-role-pill team-role-est team-role-pill-sm">Estimator</span></th>
+          <th><span class="team-role-pill team-role-adm team-role-pill-sm">Admin</span></th>
+          <th><span class="team-role-pill team-role-sm team-role-pill-sm">Site Mgr</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td>View jobs</td><td class="tp-yes">●</td><td class="tp-no">—</td><td class="tp-no">—</td><td class="tp-no">—</td></tr>
+        <tr><td>Mark milestone complete</td><td class="tp-yes">●</td><td class="tp-no">—</td><td class="tp-no">—</td><td class="tp-no">—</td></tr>
+        <tr><td>Create / edit quote</td><td class="tp-no">—</td><td class="tp-yes">●</td><td class="tp-no">—</td><td class="tp-no">—</td></tr>
+        <tr><td>Upload evidence</td><td class="tp-yes">●</td><td class="tp-no">—</td><td class="tp-no">—</td><td class="tp-yes">●</td></tr>
+        <tr><td>Upload certs / insurance</td><td class="tp-no">—</td><td class="tp-no">—</td><td class="tp-yes">●</td><td class="tp-no">—</td></tr>
+        <tr><td>Post comments</td><td class="tp-no">—</td><td class="tp-no">—</td><td class="tp-no">—</td><td class="tp-no">—</td></tr>
+      </tbody>
+    </table>
+  </div>
+</details>
+
+</main><nav class="bottom-nav" aria-label="Bottom navigation"><button class="bottom-nav-item" onclick="goTo('cs12')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Dashboard</button><button class="bottom-nav-item" onclick="goTo('cs13')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Browse</button><button class="bottom-nav-item" onclick="goTo('cs16')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>Projects</button><button class="bottom-nav-item active" aria-current="page" onclick="goTo('cs23')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Team</button><button class="bottom-nav-item" onclick="goTo('cs26')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Account</button></nav></div></section>
+<script src="assets/app.js"></script>
+</body>
+</html>
