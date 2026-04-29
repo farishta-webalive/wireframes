@@ -1271,7 +1271,7 @@ const FacilityChip = {
         <div v-if="open"
              role="menu"
              @click.stop
-             class="absolute left-1/2 -translate-x-1/2 mt-2 w-96 bg-white border border-slate-200 rounded-md shadow-lg z-40 overflow-hidden text-left">
+             class="absolute right-0 mt-2 w-96 bg-white border border-slate-200 rounded-md shadow-lg z-40 overflow-hidden text-left">
           <div class="px-4 py-3 border-b border-slate-100">
             <div class="text-sm font-medium text-slate-900">Switch site</div>
             <div class="text-xs text-slate-500">{{ facilities.length }} sites you have access to</div>
@@ -1390,9 +1390,7 @@ const TopNav = {
       <div class="flex items-center gap-2 min-w-0">
         <img src="assets/steritech-logo-white.png" alt="Steritech" class="h-7 w-auto shrink-0" draggable="false"/>
       </div>
-      <div class="flex-1 flex justify-center min-w-0">
-        <FacilityChip />
-      </div>
+      <div class="flex-1"></div>
       <button class="hidden sm:inline-flex p-2 rounded hover:bg-navy-800 relative focus-ring">
         <Icon name="bell" :size="18" />
         <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-teal-400"></span>
@@ -1409,6 +1407,7 @@ const TopNav = {
         <button @click="setMode('multi')"  :class="['px-2.5 py-1 rounded-full transition', mode==='multi'  ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Multi</button>
         <button @click="setMode('zero')"   :class="['px-2.5 py-1 rounded-full transition', mode==='zero'   ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Zero</button>
       </div>
+      <FacilityChip />
       <div class="hidden sm:block w-px h-6 bg-navy-700"></div>
       <div class="flex items-center gap-2 pl-1">
         <div class="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center text-xs font-semibold">{{ initials }}</div>
