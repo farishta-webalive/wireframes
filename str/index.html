@@ -4774,26 +4774,62 @@ const OnboardingIncompletePage = {
     signOut(){ state.authed = false; this.$router.push('/login'); }
   },
   template:`
-  <div class="min-h-screen bg-slate-50 flex items-center justify-center py-10 px-6">
-    <div class="mx-auto max-w-6xl w-full">
-      <div class="flex items-center gap-3 mb-8">
-        <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-10 w-auto" draggable="false"/>
-        <div>
-          <div class="font-semibold text-navy-900">Steritech</div>
-          <div class="text-xs text-slate-500">Account access</div>
-        </div>
-      </div>
-      <div class="bg-white border border-slate-200 rounded-xl shadow-card p-12 text-center">
-        <div class="w-14 h-14 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center mx-auto mb-5">
-          <Icon name="clock" :size="26"/>
-        </div>
-        <h1 class="font-semibold text-navy-900 text-2xl leading-tight tracking-tight">Account setup in progress</h1>
-        <p class="mt-3 text-sm text-slate-500 max-w-md mx-auto">Your account is still being set up. Please contact your Steritech admin for access.</p>
-        <div class="mt-8 flex justify-center">
-          <Btn kind="secondary" icon="log-out" @click="signOut">Sign out</Btn>
-        </div>
-      </div>
+  <div class="min-h-screen flex flex-col bg-slate-100 text-slate-800 text-base">
+    <h1 class="sr-only">Steritech Customer Portal — account setup in progress</h1>
+
+    <div class="flex flex-col items-center text-center pt-8 sm:pt-12 px-5 sm:px-6">
+      <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-12 w-auto mb-3" draggable="false"/>
+      <div class="text-[17px] font-semibold text-navy-900 tracking-tight">Steritech Customer Portal</div>
+      <div class="text-sm text-slate-500 mt-0.5">Account access</div>
     </div>
+
+    <main class="flex-1 flex items-center justify-center px-5 sm:px-6 py-8">
+      <div class="w-full max-w-md">
+        <section class="bg-white border border-slate-200 rounded-md" role="status">
+          <div class="px-5 sm:px-6 pt-5 pb-4 border-b border-amber-200 bg-amber-50 rounded-t-md flex items-start gap-3">
+            <span class="shrink-0 mt-0.5 h-9 w-9 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center">
+              <Icon name="clock" :size="20"/>
+            </span>
+            <div class="text-left">
+              <h2 class="text-lg font-semibold text-navy-900 leading-tight">Account setup in progress</h2>
+              <p class="text-sm text-amber-900/80 mt-0.5">Hang tight &mdash; your customer record is being provisioned.</p>
+            </div>
+          </div>
+
+          <div class="px-5 sm:px-6 py-5 text-left space-y-4">
+            <p class="text-base text-slate-700 leading-relaxed">
+              Your customer record is being created in Microsoft Dynamics 365 Business Central. This usually takes up to one business day.
+            </p>
+            <div>
+              <div class="text-xs uppercase tracking-wide text-slate-500 font-medium mb-2">While you wait</div>
+              <ul class="space-y-2.5 text-sm text-slate-700">
+                <li class="flex gap-2.5"><Icon name="check" :size="16" cls="mt-0.5 shrink-0 text-emerald-600"/><span>Forms and order submission unlock once your BC Customer Number is assigned to your profile.</span></li>
+                <li class="flex gap-2.5"><Icon name="mail" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><span>You will receive an email at the address on file when billing is enabled.</span></li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="px-5 sm:px-6 py-3.5 bg-slate-50 border-t border-slate-100 rounded-b-md flex flex-col-reverse sm:flex-row sm:items-center sm:justify-between gap-2">
+            <Btn kind="ghost" icon="log-out" @click="signOut">Sign out</Btn>
+            <a href="mailto:support@steritech.com.au?subject=Onboarding%20%E2%80%94%20account%20setup%20pending" class="inline-flex items-center justify-center gap-2 font-medium rounded-lg transition-colors focus-ring text-base px-5 py-2.5 bg-teal-500 text-white hover:bg-teal-600 border border-transparent">
+              <Icon name="mail" :size="16"/>
+              Email your admin
+            </a>
+          </div>
+        </section>
+
+        <div class="pt-5 text-center text-xs text-slate-500 leading-relaxed">
+          <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <a href="#" class="hover:text-slate-700">Terms of use</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="#" class="hover:text-slate-700">Privacy</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="#" class="hover:text-slate-700">Help &amp; FAQs</a>
+          </div>
+          <div class="mt-1.5 text-slate-400">&copy; Steritech Pty Ltd &middot; Customer Portal v2.0</div>
+        </div>
+      </div>
+    </main>
   </div>`
 };
 
