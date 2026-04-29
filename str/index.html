@@ -1764,19 +1764,19 @@ const SignupPage = {
 
             <div class="px-5 sm:px-7 py-6 space-y-5">
               <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
+                <div class="md:col-span-2">
                   <label for="signup-company" class="block text-sm font-medium text-slate-800 mb-1.5">Company name <span class="text-red-600" aria-hidden="true">*</span></label>
                   <input id="signup-company" v-model="f.company" :readonly="invited" required aria-required="true" placeholder="e.g. BioSeq Pty Ltd"
+                         :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
+                </div>
+                <div class="md:col-span-2">
+                  <label for="signup-contact" class="block text-sm font-medium text-slate-800 mb-1.5">Primary contact <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-contact" v-model="f.contact" :readonly="invited" required aria-required="true" placeholder="Full name" autocomplete="name"
                          :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
                 </div>
                 <div>
                   <label for="signup-abn" class="block text-sm font-medium text-slate-800 mb-1.5">ABN <span class="text-red-600" aria-hidden="true">*</span></label>
                   <input id="signup-abn" v-model="f.abn" :readonly="invited" required aria-required="true" placeholder="00 000 000 000" inputmode="numeric"
-                         :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
-                </div>
-                <div>
-                  <label for="signup-contact" class="block text-sm font-medium text-slate-800 mb-1.5">Primary contact <span class="text-red-600" aria-hidden="true">*</span></label>
-                  <input id="signup-contact" v-model="f.contact" :readonly="invited" required aria-required="true" placeholder="Full name" autocomplete="name"
                          :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
                 </div>
                 <div>
