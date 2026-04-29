@@ -222,24 +222,24 @@ const seedCustomers = [
 // 13 forms across 4 facilities (FRM-0359 is shared MER + NAR -> 14 rows)
 // `shared_with`: facilities sharing the same canonical schema (Prompt 7). Empty = facility-exclusive.
 const FORM_CATALOG = [
-  { facility:'MER', key:'fresh-produce-dom',  code:'ICA-55',   name:'Fresh Produce Irradiation — Domestic', treatment:'Gamma', shared_with:[] },
-  { facility:'MER', key:'fresh-produce-exp',  code:'FRM-0118', name:'Fresh Produce Irradiation — Export',   treatment:'Gamma', shared_with:[] },
-  { facility:'MER', key:'bee-equipment',      code:'FRM-0121', name:'Bee Equipment Irradiation',            treatment:'Gamma', shared_with:[] },
-  { facility:'MER', key:'rfi-general',        code:'RFI',      name:'Request for Irradiation — General',    treatment:'Gamma', shared_with:[] },
-  { facility:'MER', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', treatment:'GMP', shared_with:['MER','NAR'] },
+  { facility:'MER', key:'fresh-produce-dom',  code:'ICA-55',   name:'Fresh Produce Irradiation — Domestic', description:'Use this to send fresh produce for ICA-55 gamma irradiation within Australia.', treatment:'Gamma', shared_with:[] },
+  { facility:'MER', key:'fresh-produce-exp',  code:'FRM-0118', name:'Fresh Produce Irradiation — Export',   description:'Use this to send fresh produce for gamma irradiation before export.', treatment:'Gamma', shared_with:[] },
+  { facility:'MER', key:'bee-equipment',      code:'FRM-0121', name:'Bee Equipment Irradiation',            description:'Use this to send hive boxes, frames, and other beekeeping equipment for gamma sterilisation.', treatment:'Gamma', shared_with:[] },
+  { facility:'MER', key:'rfi-general',        code:'RFI',      name:'Request for Irradiation — General',    description:'Use this for general gamma irradiation requests that do not fit a more specific form.', treatment:'Gamma', shared_with:[] },
+  { facility:'MER', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', description:'Use this to send TGA-listed herbal medicine for GMP-certified packing and labelling.', treatment:'GMP', shared_with:['MER','NAR'] },
 
-  { facility:'DAN', key:'bee-equipment',      code:'FRM-0088', name:'Bee Equipment',                        treatment:'Gamma', shared_with:[] },
-  { facility:'DAN', key:'irradiation',        code:'FRM-0091', name:'Irradiation Treatment',                treatment:'Gamma' },
-  { facility:'DAN', key:'eto-treatment',      code:'FRM-0092', name:'Ethylene Oxide Treatment',             treatment:'ETO'   },
+  { facility:'DAN', key:'bee-equipment',      code:'FRM-0088', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Dandenong.', treatment:'Gamma', shared_with:[] },
+  { facility:'DAN', key:'irradiation',        code:'FRM-0091', name:'Irradiation Treatment',                description:'Use this for general goods needing gamma irradiation at Dandenong.', treatment:'Gamma' },
+  { facility:'DAN', key:'eto-treatment',      code:'FRM-0092', name:'Ethylene Oxide Treatment',             description:'Use this for ethylene oxide sterilisation of medical and industrial product.', treatment:'ETO'   },
 
-  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            treatment:'Gamma+ETO' },
-  { facility:'WPK', key:'bee-equipment',      code:'FRM-0038', name:'Bee Equipment',                        treatment:'Gamma' },
+  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for treatment requests at Wetherill Park — gamma or ethylene oxide.', treatment:'Gamma+ETO' },
+  { facility:'WPK', key:'bee-equipment',      code:'FRM-0038', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Wetherill Park.', treatment:'Gamma' },
 
-  { facility:'NAR', key:'fresh-produce',      code:'FRM-0202', name:'Fresh Produce Irradiation',            treatment:'Gamma' },
-  { facility:'NAR', key:'treatment',          code:'FRM-0203', name:'Treatment',                            treatment:'Gamma' },
-  { facility:'NAR', key:'bee-equipment',      code:'FRM-0240', name:'Bee Equipment',                        treatment:'Gamma' },
-  { facility:'NAR', key:'blood-serum',        code:'FRM-0241', name:'Blood Serum',                          treatment:'Gamma' },
-  { facility:'NAR', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', treatment:'GMP', shared_with:['MER','NAR'] },
+  { facility:'NAR', key:'fresh-produce',      code:'FRM-0202', name:'Fresh Produce Irradiation',            description:'Use this to send fresh produce for gamma irradiation at Narangba.', treatment:'Gamma' },
+  { facility:'NAR', key:'treatment',          code:'FRM-0203', name:'Treatment',                            description:'Use this for general goods needing gamma irradiation at Narangba.', treatment:'Gamma' },
+  { facility:'NAR', key:'bee-equipment',      code:'FRM-0240', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Narangba.', treatment:'Gamma' },
+  { facility:'NAR', key:'blood-serum',        code:'FRM-0241', name:'Blood Serum',                          description:'Use this to send bovine or other animal blood serum for gamma sterilisation.', treatment:'Gamma' },
+  { facility:'NAR', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', description:'Use this to send TGA-listed herbal medicine for GMP-certified packing and labelling.', treatment:'GMP', shared_with:['MER','NAR'] },
 ];
 
 /* Treatment chip styles — single source of truth used by TreatmentChip
@@ -2531,7 +2531,7 @@ const FormPickerPage = {
   <div class="max-w-3xl mx-auto px-6 py-10 text-base text-slate-800">
     <div class="mb-6">
       <h1 class="text-xl font-medium text-slate-900 leading-tight">All forms</h1>
-      <p class="text-sm text-slate-600 mt-1">Browse every form available to your sites. To start a new request, use <router-link to="/start" class="text-teal-600 hover:underline font-medium">Start a Request</router-link>.</p>
+      <p class="text-sm text-slate-600 mt-1 leading-relaxed">These are all the forms you can send us. Pick the one that matches your job. Not sure which one? <router-link to="/start" class="text-teal-600 hover:underline font-medium">Use Start a Request</router-link> and we will guide you through it.</p>
     </div>
 
     <div class="flex items-center justify-between gap-3 mb-6 flex-wrap">
@@ -2556,15 +2556,16 @@ const FormPickerPage = {
 
     <div v-for="g in sitesGroup" :key="g.code" v-show="g.forms.length" class="mb-8">
       <h2 v-if="!isSingle"
-          class="text-sm font-semibold uppercase tracking-wide text-slate-700 pb-2 border-b border-slate-200">
-        {{ g.name }}, {{ g.state }}
+          class="text-base font-semibold text-slate-700 pb-2 border-b border-slate-200">
+        Forms at {{ g.name }}, {{ g.state }}
       </h2>
       <ul class="divide-y divide-slate-200">
         <li v-for="r in g.forms" :key="r.code+'-'+g.code"
-            class="flex items-center justify-between gap-4 py-3 px-1 hover:bg-slate-50">
+            class="flex items-start justify-between gap-4 py-4 px-1 hover:bg-slate-50">
           <div class="min-w-0 flex-1">
-            <div class="text-base text-slate-900 leading-snug">{{ r.name }}</div>
-            <div class="mt-0.5 text-sm text-slate-500">
+            <p class="text-base text-slate-900 leading-snug">{{ r.name }}</p>
+            <p v-if="r.description" class="mt-0.5 text-sm text-slate-600 leading-snug">{{ r.description }}</p>
+            <p class="mt-1 text-xs text-slate-500">
               <span>{{ treatmentLabels[r.treatment] || r.treatment }}</span>
               <span aria-hidden="true" class="mx-1.5">&middot;</span>
               <span>{{ schemaStats({ ...r, facility: g.code }).sections }} sections</span>
@@ -2572,10 +2573,10 @@ const FormPickerPage = {
                 <span aria-hidden="true" class="mx-1.5">&middot;</span>
                 <span>Shared form</span>
               </template>
-            </div>
+            </p>
           </div>
           <router-link :to="'/forms/'+g.code+'/'+r.key"
-                       class="text-sm font-medium text-teal-600 hover:underline whitespace-nowrap py-2 -my-2 focus-ring">
+                       class="text-sm font-medium text-teal-600 hover:underline whitespace-nowrap py-2 -my-2 focus-ring shrink-0 mt-0.5">
             Start &rarr;
           </router-link>
         </li>
