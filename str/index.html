@@ -2463,7 +2463,7 @@ const StartRequestPage = {
     </section>
 
     <p class="pt-2 text-sm text-slate-500">
-      Want to browse the full catalogue? <router-link to="/forms" class="text-teal-600 hover:underline font-medium">See all forms &rarr;</router-link>
+      Want to browse every form? <router-link to="/forms" class="text-slate-700 hover:text-slate-900 underline underline-offset-4 font-medium">Browse all forms</router-link>.
     </p>
   </div>`,
 };
@@ -2471,191 +2471,53 @@ const StartRequestPage = {
 /* ---------- Page: Form picker ----------------------------------------------- */
 
 const FormPickerPage = {
-  components:{ Icon, Btn, TreatmentChip },
-  data(){ return { filter: state.profile.currentFacility, q:'' }; },
+  components:{ Icon },
+  data(){ return { filter: 'ALL', q:'' }; },
   computed:{
     state(){ return state; },
     myFacilities(){ return FACILITIES.filter(f => state.profile.facilities.includes(f.code)); },
     isSingle(){ return this.myFacilities.length <= 1; },
+    treatmentLabels(){ return TREATMENT_LABELS; },
     activeFacilityCode(){
-      // Single users always lock to their facility; multi users use the dropdown.
       if (this.isSingle && this.myFacilities[0]) return this.myFacilities[0].code;
       return this.filter === 'ALL' ? null : this.filter;
     },
-    /* Treatment types relevant to the current view.
-       - Specific facility: just the services that facility offers (+ Gamma+ETO if both present).
-       - ALL view: union of services across the user's bound facilities. */
-    activeTreatments(){
-      const codes = this.activeFacilityCode
-        ? [this.activeFacilityCode]
-        : state.profile.facilities;
-      const set = new Set();
-      codes.forEach(c => {
-        const f = FACILITIES.find(x => x.code === c);
-        if (f) f.services.forEach(s => set.add(s));
-      });
-      // Combined "Gamma+ETO" only applies where the same facility offers BOTH.
-      const hasCombined = codes.some(c => {
-        const f = FACILITIES.find(x => x.code === c);
-        return f && f.services.includes('Gamma') && f.services.includes('ETO');
-      });
-      const order = ['Gamma','ETO','GMP','Gamma+ETO'];
-      return order.filter(t => set.has(t) || (t === 'Gamma+ETO' && hasCombined));
-    },
-    facLabel(){
-      if (this.filter==='ALL') return 'All facilities';
-      const f = FACILITIES.find(x => x.code === this.filter);
-      return f ? `${f.name} ${f.state}` : this.filter;
-    },
-    headerLabel(){
-      if (this.isSingle && this.myFacilities[0]) {
-        const f = this.myFacilities[0];
-        return `${f.name} ${f.state}`;
-      }
-      return this.facLabel;
-    },
-    /* Build deduped picker rows.
-       - Each catalog row that's not in shared_with gets emitted for its own facility.
-       - Shared rows are collapsed: emit ONE row per code, anchored to the active facility,
-         carrying the full list of badges.
-       Visibility:
-       - Single facility: scope to that facility (or any shared form that includes it).
-       - Multi + ALL: union of all bound facilities; shared forms collapse to one card.
-       - Multi + specific facility: same single-facility logic for that pick.
-    */
-    pickerRows(){
-      const facCode = this.activeFacilityCode; // null = ALL (multi-user union view)
-      const boundSet = new Set(state.profile.facilities);
-      const rows = [];
-      const sharedSeen = new Set(); // dedupe shared forms by code+key
-
-      for (const f of FORM_CATALOG) {
-        const sharedWith = (f.shared_with && f.shared_with.length) ? f.shared_with : null;
-
-        if (sharedWith) {
-          const dedupeKey = `${f.code}|${f.key}`;
-          if (sharedSeen.has(dedupeKey)) continue;
-
-          if (facCode) {
-            // Specific facility view — show only if facCode is in shared_with.
-            if (!sharedWith.includes(facCode)) continue;
-            sharedSeen.add(dedupeKey);
-            rows.push({
-              ...f,
-              facility: facCode,                     // route + Start button anchor
-              badges: sharedWith.slice(),
-              isShared: true,
-            });
-          } else {
-            // ALL view — show once if any of the user's bound facilities overlaps shared_with.
-            const overlaps = sharedWith.some(s => boundSet.has(s));
-            if (!overlaps) continue;
-            sharedSeen.add(dedupeKey);
-            // Anchor route to first bound facility that has the shared schema.
-            const anchor = sharedWith.find(s => boundSet.has(s)) || f.facility;
-            rows.push({
-              ...f,
-              facility: anchor,
-              badges: sharedWith.slice(),
-              isShared: true,
-            });
-          }
-        } else {
-          // Exclusive form — single badge for its own facility.
-          if (facCode) {
-            if (f.facility !== facCode) continue;
-          } else {
-            if (!boundSet.has(f.facility)) continue;
-          }
-          rows.push({ ...f, badges: [f.facility], isShared: false });
-        }
-      }
-
-      // Search filter
+    /* Site-grouped, search-filtered list. Shared forms are repeated per applicable site
+       (architect: repetition beats clever badges for an older audience). */
+    sitesGroup(){
+      const facCode = this.activeFacilityCode;
+      const visibleFacs = facCode
+        ? this.myFacilities.filter(f => f.code === facCode)
+        : this.myFacilities;
       const q = this.q.trim().toLowerCase();
-      const matched = q ? rows.filter(r => (r.name + r.code).toLowerCase().includes(q)) : rows;
-      return matched;
-    },
-    groups(){
-      // Build groups only for treatments offered at the active facility (or union for ALL view).
-      const g = {};
-      this.activeTreatments.forEach(t => { g[t] = []; });
-      for (const r of this.pickerRows) {
-        if (g[r.treatment]) g[r.treatment].push(r);
+      const matches = (text) => !q || text.toLowerCase().includes(q);
+
+      const result = [];
+      for (const fac of visibleFacs) {
+        const forms = [];
+        for (const f of FORM_CATALOG) {
+          const sharedWith = (f.shared_with && f.shared_with.length) ? f.shared_with : null;
+          if (sharedWith) {
+            if (sharedWith.includes(fac.code)) {
+              forms.push({ ...f, facility: fac.code, isShared: true });
+            }
+          } else {
+            if (f.facility === fac.code) {
+              forms.push({ ...f, isShared: false });
+            }
+          }
+        }
+        // Search across form name + code + site name + state
+        const filtered = forms.filter(r => matches(r.name + ' ' + r.code + ' ' + fac.name + ' ' + fac.state));
+        filtered.sort((a,b) => a.name.localeCompare(b.name));
+        result.push({ ...fac, forms: filtered });
       }
-      // Alphabetical within each group
-      for (const k of Object.keys(g)) g[k].sort((a,b) => a.name.localeCompare(b.name));
-      return g;
+      return result;
+    },
+    totalMatches(){
+      return this.sitesGroup.reduce((sum, g) => sum + g.forms.length, 0);
     }
   },
-  template:`
-  <div class="p-8 space-y-6 max-w-6xl mx-auto">
-    <div class="flex items-start justify-between flex-wrap gap-4">
-      <div>
-        <div class="text-xs font-semibold text-teal-600 uppercase tracking-wider mb-1">Submit Request</div>
-        <h1 class="text-2xl font-semibold text-navy-900">Submit a Request — {{ headerLabel }}</h1>
-        <p class="text-sm text-slate-500 mt-1">Pick a form to start a new request. Forms shared across facilities show a single card with multiple location badges.</p>
-      </div>
-      <div class="flex gap-2 items-center">
-        <div class="relative">
-          <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-          <input v-model="q" placeholder="Search forms…" class="pl-9 pr-3 py-2 w-64 rounded-lg border border-slate-300 text-sm focus-ring"/>
-        </div>
-        <select v-if="!isSingle" v-model="filter" class="px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring bg-white">
-          <option value="ALL">All facilities</option>
-          <option v-for="f in myFacilities" :key="f.code" :value="f.code">{{ f.name }} ({{ f.code }})</option>
-        </select>
-      </div>
-    </div>
-
-    <!-- Treatment legend (filtered to services offered at the selected facility) -->
-    <div class="flex flex-wrap items-center gap-2 text-xs">
-      <span class="text-slate-500 mr-1">Treatment types available here:</span>
-      <TreatmentChip v-for="t in activeTreatments" :key="t" :treatment="t"/>
-      <span v-if="!activeTreatments.length" class="text-slate-400 italic">No services configured for this facility.</span>
-    </div>
-
-    <!-- Grouped cards -->
-    <div v-for="(forms, treatment) in groups" :key="treatment" v-show="forms.length">
-      <div class="flex items-center gap-3 mb-3">
-        <TreatmentChip :treatment="treatment"/>
-        <div class="text-xs text-slate-500">{{ forms.length }} form{{ forms.length>1?'s':'' }}</div>
-        <div class="flex-1 h-px bg-slate-200"></div>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div v-for="r in forms" :key="r.code+'-'+r.facility"
-             class="bg-white border border-slate-200 rounded-lg shadow-card p-5 hover:border-teal-500 hover:shadow-md transition-all flex flex-col">
-          <div class="flex items-start justify-between mb-2 gap-2">
-            <div class="flex flex-wrap items-center gap-1.5">
-              <span v-for="b in r.badges" :key="b"
-                    :class="['inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full',
-                              r.isShared ? 'bg-teal-50 text-teal-700 ring-1 ring-teal-200' : 'bg-slate-100 text-slate-600']">
-                <Icon name="map-pin" :size="11"/> {{ b }}
-              </span>
-              <span class="text-[11px] font-mono text-slate-500 ml-1">{{ r.code }}</span>
-            </div>
-            <TreatmentChip :treatment="r.treatment" small/>
-          </div>
-          <div class="font-semibold text-navy-900 text-sm leading-snug mt-1">{{ r.name }}</div>
-          <div v-if="r.isShared" class="mt-1 text-[11px] text-slate-500">Shared form — same definition across {{ r.badges.length }} facilities</div>
-
-          <div class="mt-3 pt-3 border-t border-slate-100 text-[11px] text-slate-500 flex items-center gap-3">
-            <span class="inline-flex items-center gap-1"><Icon name="list-checks" :size="12"/>{{ schemaStats(r).sections }} sections</span>
-            <span class="inline-flex items-center gap-1"><Icon name="layout-list" :size="12"/>{{ schemaStats(r).fields }} fields</span>
-          </div>
-          <div class="mt-3 flex">
-            <Btn as="router-link" :to="{ path:'/forms/'+r.facility+'/'+r.key }" kind="primary" size="sm" iconRight="arrow-right" class="ml-auto">Start</Btn>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div v-if="pickerRows.length===0" class="bg-white border border-slate-200 rounded-lg p-12 text-center">
-      <Icon name="search-x" :size="32" cls="text-slate-300 mx-auto mb-3"/>
-      <div class="font-medium text-navy-900">No forms match.</div>
-      <div class="text-sm text-slate-500">Try another search term or facility filter.</div>
-    </div>
-  </div>`,
   methods:{
     schemaStats(r){
       const s = SCHEMAS[`${r.facility}/${r.key}`];
@@ -2664,7 +2526,62 @@ const FormPickerPage = {
       for (const sec of s.sections) fields += (sec.fields?.length || 0) + (sec.repeater?.columns.length || 0);
       return { sections: s.sections.length, fields };
     }
-  }
+  },
+  template:`
+  <div class="max-w-3xl mx-auto px-6 py-10 text-base text-slate-800">
+    <div class="mb-6">
+      <h1 class="text-xl font-medium text-slate-900 leading-tight">All forms</h1>
+      <p class="text-sm text-slate-600 mt-1">Browse every form available to your sites. To start a new request, use <router-link to="/start" class="text-teal-600 hover:underline font-medium">Start a Request</router-link>.</p>
+    </div>
+
+    <div class="flex items-center justify-between gap-3 mb-6 flex-wrap">
+      <div class="relative w-full sm:w-80">
+        <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+        <input v-model="q"
+               placeholder="Search by form or site"
+               aria-label="Search forms"
+               class="pl-9 pr-3 h-11 w-full rounded-md border border-slate-300 text-base focus-ring"/>
+      </div>
+      <select v-if="!isSingle" v-model="filter"
+              aria-label="Filter by site"
+              class="h-11 px-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+        <option value="ALL">All sites</option>
+        <option v-for="f in myFacilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
+      </select>
+    </div>
+
+    <div v-if="totalMatches === 0" class="py-10 text-center text-sm text-slate-600">
+      No forms match your search.
+    </div>
+
+    <div v-for="g in sitesGroup" :key="g.code" v-show="g.forms.length" class="mb-8">
+      <h2 v-if="!isSingle"
+          class="text-sm font-semibold uppercase tracking-wide text-slate-700 pb-2 border-b border-slate-200">
+        {{ g.name }}, {{ g.state }}
+      </h2>
+      <ul class="divide-y divide-slate-200">
+        <li v-for="r in g.forms" :key="r.code+'-'+g.code"
+            class="flex items-center justify-between gap-4 py-3 px-1 hover:bg-slate-50">
+          <div class="min-w-0 flex-1">
+            <div class="text-base text-slate-900 leading-snug">{{ r.name }}</div>
+            <div class="mt-0.5 text-sm text-slate-500">
+              <span>{{ treatmentLabels[r.treatment] || r.treatment }}</span>
+              <span aria-hidden="true" class="mx-1.5">&middot;</span>
+              <span>{{ schemaStats({ ...r, facility: g.code }).sections }} sections</span>
+              <template v-if="r.isShared">
+                <span aria-hidden="true" class="mx-1.5">&middot;</span>
+                <span>Shared form</span>
+              </template>
+            </div>
+          </div>
+          <router-link :to="'/forms/'+g.code+'/'+r.key"
+                       class="text-sm font-medium text-teal-600 hover:underline whitespace-nowrap py-2 -my-2 focus-ring">
+            Start &rarr;
+          </router-link>
+        </li>
+      </ul>
+    </div>
+  </div>`,
 };
 
 /* ---------- Page: Dynamic Form Renderer ------------------------------------- */
