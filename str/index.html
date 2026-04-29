@@ -2472,7 +2472,7 @@ const StartRequestPage = {
 
 const FormPickerPage = {
   components:{ Icon },
-  data(){ return { filter: 'ALL', q:'' }; },
+  data(){ return { filter: state.profile.currentFacility || 'ALL', q:'' }; },
   computed:{
     state(){ return state; },
     myFacilities(){ return FACILITIES.filter(f => state.profile.facilities.includes(f.code)); },
@@ -2481,6 +2481,10 @@ const FormPickerPage = {
     activeFacilityCode(){
       if (this.isSingle && this.myFacilities[0]) return this.myFacilities[0].code;
       return this.filter === 'ALL' ? null : this.filter;
+    },
+    filterLabel(){
+      const f = FACILITIES.find(x => x.code === this.filter);
+      return f ? `${f.name}, ${f.state}` : '';
     },
     /* Site-grouped, search-filtered list. Shared forms are repeated per applicable site
        (architect: repetition beats clever badges for an older audience). */
@@ -2534,7 +2538,7 @@ const FormPickerPage = {
       <p class="text-sm text-slate-600 mt-1 leading-relaxed">These are all the forms you can send us. Pick the one that matches your job. Not sure which one? <router-link to="/start" class="text-teal-600 hover:underline font-medium">Use Start a Request</router-link> and we will guide you through it.</p>
     </div>
 
-    <div class="flex items-center justify-between gap-3 mb-6 flex-wrap">
+    <div class="flex items-center justify-between gap-3 mb-2 flex-wrap">
       <div class="relative w-full sm:w-80">
         <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
         <input v-model="q"
@@ -2549,6 +2553,10 @@ const FormPickerPage = {
         <option v-for="f in myFacilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
       </select>
     </div>
+    <p v-if="!isSingle" class="text-sm text-slate-500 mb-6">
+      <template v-if="filter === 'ALL'">Showing forms for all sites you have access to.</template>
+      <template v-else>Showing forms for <span class="text-slate-700 font-medium">{{ filterLabel }}</span>. Switch sites or view all using the dropdown above.</template>
+    </p>
 
     <div v-if="totalMatches === 0" class="py-10 text-center text-sm text-slate-600">
       No forms match your search.
@@ -2564,15 +2572,8 @@ const FormPickerPage = {
             class="flex items-start justify-between gap-4 py-4 px-1 hover:bg-slate-50">
           <div class="min-w-0 flex-1">
             <p class="text-base text-slate-900 leading-snug">{{ r.name }}</p>
-            <p v-if="r.description" class="mt-0.5 text-sm text-slate-600 leading-snug">{{ r.description }}</p>
-            <p class="mt-1 text-xs text-slate-500">
-              <span>{{ treatmentLabels[r.treatment] || r.treatment }}</span>
-              <span aria-hidden="true" class="mx-1.5">&middot;</span>
-              <span>{{ schemaStats({ ...r, facility: g.code }).sections }} sections</span>
-              <template v-if="r.isShared">
-                <span aria-hidden="true" class="mx-1.5">&middot;</span>
-                <span>Shared form</span>
-              </template>
+            <p v-if="r.description" class="mt-0.5 text-sm text-slate-600 leading-snug">
+              {{ r.description }}<span v-if="r.isShared" class="text-slate-400"> &middot; Shared form</span>
             </p>
           </div>
           <router-link :to="'/forms/'+g.code+'/'+r.key"
