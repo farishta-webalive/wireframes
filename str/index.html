@@ -2061,15 +2061,15 @@ const DashboardPage = {
       </div>
     </div>
 
-    <section class="bg-white border border-slate-200 rounded-md">
-      <div class="flex items-center justify-between px-5 sm:px-6 py-3.5 border-b border-slate-100">
-        <h2 class="text-lg font-semibold text-navy-900">Recent orders</h2>
+    <section class="bg-white border-t border-b border-slate-200">
+      <div class="flex items-center justify-between px-5 sm:px-6 py-3.5 border-b border-slate-200">
+        <h2 class="text-base font-medium text-slate-900">Recent orders</h2>
         <router-link to="/orders" class="text-sm text-teal-600 hover:underline py-2 -my-2">View all orders &rarr;</router-link>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-base">
           <caption class="sr-only">Your most recent treatment requests</caption>
-          <thead class="bg-slate-50 text-left text-xs text-slate-500 uppercase tracking-wider">
+          <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
             <tr>
               <th scope="col" class="px-5 sm:px-6 py-3 font-medium whitespace-nowrap">Order ID</th>
               <th scope="col" class="px-3 py-3 font-medium whitespace-nowrap">PO Number</th>
@@ -2080,18 +2080,10 @@ const DashboardPage = {
               <th scope="col" class="px-3 sm:px-6 py-3 font-medium text-right">Action</th>
             </tr>
           </thead>
-          <tbody class="divide-y divide-slate-100">
-            <template v-if="loading">
-              <tr v-for="n in 5" :key="n">
-                <td class="px-5 sm:px-6 py-3"><Skel w="120px"/></td>
-                <td class="px-3 py-3"><Skel w="80px"/></td>
-                <td class="px-3 py-3"><Skel w="160px"/></td>
-                <td class="px-3 py-3"><Skel w="40px"/></td>
-                <td class="px-3 py-3"><Skel w="40px"/></td>
-                <td class="px-3 py-3"><Skel w="90px" h="20px"/></td>
-                <td class="px-3 sm:px-6 py-3"><Skel w="50px"/></td>
-              </tr>
-            </template>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="7" class="px-5 sm:px-6 py-6 text-sm text-slate-500 text-center">Loading orders&hellip;</td>
+            </tr>
             <tr v-else-if="recentOrders.length === 0">
               <td colspan="7" class="px-5 sm:px-6 py-10 text-center text-slate-500">
                 <Icon name="package" :size="28" cls="mx-auto mb-2 text-slate-300"/>
@@ -2099,14 +2091,11 @@ const DashboardPage = {
                 <div class="text-sm mt-0.5">Start one above.</div>
               </td>
             </tr>
-            <tr v-else v-for="o in recentOrders" :key="o.id"
-                class="hover:bg-slate-50 cursor-pointer focus:bg-slate-50 focus:outline-none"
-                tabindex="0"
-                @click="$router.push('/orders/'+o.id)"
-                @keydown.enter="$router.push('/orders/'+o.id)"
-                :aria-label="'Open order ' + o.id">
-              <td class="px-5 sm:px-6 py-4 font-mono text-sm text-navy-900 whitespace-nowrap">{{ o.id }}</td>
-              <td class="px-3 py-4 font-mono text-sm text-slate-700 whitespace-nowrap">{{ o.po }}</td>
+            <tr v-else v-for="o in recentOrders" :key="o.id" class="even:bg-slate-50/60">
+              <td class="px-5 sm:px-6 py-4 text-sm whitespace-nowrap">
+                <router-link :to="'/orders/'+o.id" class="font-medium text-blue-700 hover:underline focus-ring">{{ o.id }}</router-link>
+              </td>
+              <td class="px-3 py-4 text-sm text-slate-700 whitespace-nowrap">{{ o.po }}</td>
               <td class="px-3 py-4">
                 <div class="inline-flex items-center gap-2 min-w-0">
                   <span :class="['inline-block h-2.5 w-2.5 rounded-full shrink-0', treatmentStyles[o.treatment].dot]" aria-hidden="true"></span>
