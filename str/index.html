@@ -1502,30 +1502,21 @@ const LoginPage = {
   },
   template:`
   <div class="min-h-screen flex flex-col bg-slate-100 text-slate-800 text-base">
-    <header class="bg-white border-b border-slate-200">
-      <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
-        <div class="flex items-center gap-3">
-          <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-9 w-auto" draggable="false"/>
-          <div class="hidden sm:block">
-            <div class="text-[15px] font-semibold text-navy-900 leading-tight">Steritech Customer Portal</div>
-            <div class="text-xs text-slate-500">Treatment requests · Order tracking · Account management</div>
-          </div>
-        </div>
-        <div class="flex items-center gap-5 text-sm">
-          <a href="tel:1300783745" class="hidden md:inline-flex items-center gap-1.5 text-slate-700 hover:text-navy-900">
-            <Icon name="phone" :size="16"/>
-            <span>1300 STERILE</span>
-          </a>
-          <a href="#" class="text-teal-600 hover:underline font-medium">Help &amp; FAQs</a>
-        </div>
-      </div>
-    </header>
-
-    <main class="flex-1 w-full max-w-xl mx-auto px-5 sm:px-6 py-10 sm:py-14 space-y-5">
+    <main class="flex-1 w-full max-w-xl mx-auto px-5 sm:px-6 pt-8 sm:pt-14 pb-10 space-y-5">
         <h1 class="sr-only">Steritech Customer Portal sign-in</h1>
+
+        <div class="flex flex-col items-center text-center pb-2">
+          <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-14 w-auto mb-3" draggable="false"/>
+          <div class="text-[17px] font-semibold text-navy-900 tracking-tight">Steritech Customer Portal</div>
+          <div class="text-sm text-slate-500 mt-0.5">Sign in to manage treatment requests &amp; orders</div>
+        </div>
+
         <section class="bg-white border border-slate-200 rounded-md">
           <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
-            <h2 class="text-lg font-semibold text-navy-900">Sign in to your account</h2>
+            <div class="flex items-center gap-2 text-navy-900">
+              <Icon name="lock" :size="18" cls="text-slate-500"/>
+              <h2 class="text-lg font-semibold">Sign in to your account</h2>
+            </div>
             <p class="text-sm text-slate-600 mt-1">Use the email address provided when your account was set up.</p>
           </div>
           <form @submit.prevent="submit" class="px-5 sm:px-7 py-6 space-y-5">
@@ -1580,18 +1571,20 @@ const LoginPage = {
             Browse the <a href="#" class="text-teal-600 hover:underline">help &amp; FAQs</a> first &mdash; most questions are answered there.
           </div>
         </aside>
-    </main>
 
-    <footer class="bg-white border-t border-slate-200 mt-auto">
-      <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
-        <div>© Steritech Pty Ltd · Customer Portal v2.0</div>
-        <div class="flex items-center gap-5">
-          <a href="#" class="hover:text-slate-700">Terms of use</a>
-          <a href="#" class="hover:text-slate-700">Privacy</a>
-          <a href="#" class="hover:text-slate-700">Service notices</a>
+        <div class="pt-2 text-center text-xs text-slate-500 leading-relaxed">
+          <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <a href="#" class="hover:text-slate-700">Terms of use</a>
+            <span aria-hidden="true">·</span>
+            <a href="#" class="hover:text-slate-700">Privacy</a>
+            <span aria-hidden="true">·</span>
+            <a href="#" class="hover:text-slate-700">Service notices</a>
+            <span aria-hidden="true">·</span>
+            <a href="#" class="hover:text-slate-700">Help &amp; FAQs</a>
+          </div>
+          <div class="mt-1.5 text-slate-400">© Steritech Pty Ltd · Customer Portal v2.0</div>
         </div>
-      </div>
-    </footer>
+    </main>
   </div>`
 };
 
