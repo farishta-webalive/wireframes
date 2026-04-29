@@ -1722,10 +1722,10 @@ const SignupPage = {
   },
   template:`
   <div class="min-h-screen flex flex-col bg-slate-100 text-slate-800 text-base">
-    <main class="flex-1 w-full max-w-xl lg:max-w-5xl mx-auto px-5 sm:px-6 pt-8 sm:pt-12 pb-10 space-y-5">
+    <main class="flex-1 w-full max-w-xl lg:max-w-4xl mx-auto px-5 sm:px-6 pt-8 sm:pt-12 pb-10 space-y-5">
         <h1 class="sr-only">Create a Steritech Customer Portal account</h1>
 
-        <div class="flex flex-col items-center text-center pb-2 w-full lg:max-w-xl lg:mx-auto">
+        <div class="flex flex-col items-center text-center pb-2">
           <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-14 w-auto mb-3" draggable="false"/>
           <div class="text-[17px] font-semibold text-navy-900 tracking-tight">Steritech Customer Portal</div>
           <div class="text-sm text-slate-500 mt-0.5">{{ invited ? 'Confirm your account details to get started' : 'Request a new customer account' }}</div>
@@ -1740,14 +1740,14 @@ const SignupPage = {
           <Icon name="chevrons-up-down" :size="12" cls="text-slate-400"/>
         </button>
 
-        <div v-if="!invited" class="text-sm text-slate-600 flex items-baseline gap-2 w-full lg:max-w-xl lg:mx-auto">
+        <div v-if="!invited" class="text-sm text-slate-600 flex items-baseline gap-2">
           <span class="font-medium text-navy-900">Step {{ step }} of 2</span>
           <span aria-hidden="true">&middot;</span>
           <span>{{ step === 1 ? 'Your details and facility' : 'Review and confirm' }}</span>
         </div>
 
         <form v-if="step === 1" @submit.prevent="submit" class="space-y-5">
-          <div class="grid lg:grid-cols-2 gap-5 items-start">
+          <div class="grid lg:grid-cols-2 gap-6 items-stretch">
           <section class="bg-white border border-slate-200 rounded-md">
             <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
               <div class="flex items-center gap-2 text-navy-900">
@@ -1885,7 +1885,7 @@ const SignupPage = {
           </section>
           </div>
 
-          <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-2 w-full lg:max-w-xl lg:mx-auto">
+          <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-2">
             <router-link to="/login" class="text-sm text-slate-600 hover:text-teal-600 inline-flex items-center gap-1.5 py-2 -my-2">
               <Icon name="arrow-left" :size="14"/> Back to sign in
             </router-link>
@@ -1893,7 +1893,7 @@ const SignupPage = {
           </div>
         </form>
 
-        <div v-if="step === 2 && !invited" class="space-y-5 w-full lg:max-w-2xl lg:mx-auto">
+        <div v-if="step === 2 && !invited" class="space-y-5">
           <section class="bg-white border border-slate-200 rounded-md">
             <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
               <div class="flex items-center gap-2 text-navy-900">
@@ -1961,7 +1961,7 @@ const SignupPage = {
           </div>
         </div>
 
-        <div class="pt-2 text-center text-xs text-slate-500 leading-relaxed w-full lg:max-w-xl lg:mx-auto">
+        <div class="pt-2 text-center text-xs text-slate-500 leading-relaxed">
           <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
             <a href="#" class="hover:text-slate-700">Terms of use</a>
             <span aria-hidden="true">&middot;</span>
