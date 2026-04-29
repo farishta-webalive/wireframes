@@ -2018,100 +2018,103 @@ const DashboardPage = {
     }
   },
   template:`
-  <div class="p-8 space-y-8 max-w-[1400px]">
+  <div class="p-6 sm:p-8 max-w-7xl space-y-7 text-base text-slate-800">
     <!-- Greeting -->
-    <div class="flex items-start justify-between gap-6 flex-wrap">
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4">
       <div>
-        <div class="text-xs font-semibold text-teal-600 uppercase tracking-wider mb-1">Customer dashboard</div>
-        <h1 class="text-2xl font-semibold text-navy-900">Welcome back, {{ state.profile.contact.split(' ')[0] }}.</h1>
-        <p class="text-sm text-slate-500 mt-1">Submitting at <span class="font-medium text-navy-900">{{ fac.name }}, {{ fac.state }}</span>. Switch facilities from the top bar.</p>
+        <h1 class="text-2xl font-semibold text-navy-900 leading-tight">Welcome back, {{ state.profile.contact.split(' ')[0] }}.</h1>
+        <p class="text-sm text-slate-600 mt-1.5">Here is what is happening with your treatment requests today.</p>
       </div>
-      <div class="flex gap-2">
-        <Btn as="router-link" :to="{ path:'/start' }" icon="file-plus-2">New treatment request</Btn>
-      </div>
+      <Btn as="router-link" :to="{ path:'/start' }" icon="file-plus-2" size="lg">Start a request</Btn>
     </div>
 
     <!-- Stat tiles -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <template v-if="loading">
-        <div v-for="n in 3" :key="n" class="bg-white border border-slate-200 rounded-lg shadow-card p-5 space-y-3">
-          <div class="flex items-start justify-between">
-            <Skel w="120px" h="10px"/>
-            <Skel w="32px" h="32px" cls="rounded-lg"/>
-          </div>
+        <div v-for="n in 3" :key="n" class="bg-white border border-slate-200 rounded-md p-5 space-y-3">
+          <Skel w="140px" h="12px"/>
           <Skel w="60px" h="28px"/>
-          <Skel w="90px" h="10px"/>
         </div>
       </template>
-      <div v-else v-for="s in stats" :key="s.label" class="bg-white border border-slate-200 rounded-lg shadow-card p-5">
-        <div class="flex items-start justify-between">
-          <div class="text-xs font-medium text-slate-500">{{ s.label }}</div>
-          <div :class="['w-8 h-8 rounded-lg flex items-center justify-center', {
-            'bg-teal-50 text-teal-600': s.tint==='teal',
-            'bg-sky-50 text-sky-600': s.tint==='sky',
-            'bg-amber-50 text-amber-600': s.tint==='amber',
-            'bg-violet-50 text-violet-600': s.tint==='violet'
-          }]"><Icon :name="s.icon" :size="18"/></div>
+      <div v-else v-for="s in stats" :key="s.label" class="bg-white border border-slate-200 rounded-md p-5">
+        <div class="flex items-start justify-between gap-3">
+          <div class="text-sm font-medium text-slate-600">{{ s.label }}</div>
+          <Icon :name="s.icon" :size="18" cls="text-slate-400 shrink-0"/>
         </div>
-        <div class="mt-3 text-3xl font-semibold text-navy-900 tabular-nums">{{ s.value }}</div>
-        <div class="text-xs text-slate-500 mt-1">{{ s.sub }}</div>
+        <div class="mt-3 text-3xl font-semibold text-navy-900 tabular-nums leading-none">{{ s.value }}</div>
       </div>
     </div>
 
     <!-- Quick-submit cards -->
-    <div>
-      <div class="flex items-center justify-between mb-3">
+    <section>
+      <div class="flex items-end justify-between mb-3 gap-4">
         <div>
-          <h2 class="text-base font-semibold text-navy-900">Quick submit at {{ fac.name }}</h2>
-          <p class="text-xs text-slate-500">Most-used forms for this facility. <router-link to="/forms" class="text-teal-600 hover:underline">See all forms →</router-link></p>
+          <h2 class="text-lg font-semibold text-navy-900">Common requests at {{ fac.name }}</h2>
+          <p class="text-sm text-slate-600 mt-0.5">Forms you submit most often at this site.</p>
         </div>
+        <router-link to="/forms" class="text-sm text-teal-600 hover:underline shrink-0 py-2 -my-2">See all forms &rarr;</router-link>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <router-link v-for="f in quick" :key="f.facility+f.key"
                      :to="'/forms/'+f.facility+'/'+f.key"
-                     class="bg-white border border-slate-200 rounded-lg shadow-card p-5 hover:border-teal-500 hover:shadow-md transition-all group block">
-          <div class="flex items-start justify-between">
-            <TreatmentChip :treatment="f.treatment" />
-            <Icon name="arrow-up-right" :size="16" cls="text-slate-300 group-hover:text-teal-500"/>
+                     class="bg-white border border-slate-200 rounded-md p-5 hover:border-slate-400 hover:bg-slate-50/40 transition-colors group block focus-ring">
+          <div class="flex items-start justify-between gap-2">
+            <TreatmentChip :treatment="f.treatment" :small="true"/>
+            <Icon name="arrow-right" :size="16" cls="text-slate-300 group-hover:text-navy-900"/>
           </div>
-          <div class="mt-4 font-semibold text-navy-900 text-sm leading-snug">{{ f.name }}</div>
-          <div class="mt-1 text-[11px] text-slate-500 font-mono">{{ f.code }}</div>
+          <div class="mt-4 font-semibold text-navy-900 leading-snug">{{ f.name }}</div>
+          <div class="mt-1 text-xs text-slate-500 font-mono">{{ f.code }}</div>
         </router-link>
       </div>
-    </div>
+    </section>
 
     <!-- Recent activity -->
-    <div class="bg-white border border-slate-200 rounded-lg shadow-card">
-      <div class="flex items-center justify-between px-6 py-4 border-b border-slate-100">
-        <h2 class="text-base font-semibold text-navy-900">Recent activity</h2>
-        <router-link to="/orders" class="text-sm text-teal-600 hover:underline">View all orders →</router-link>
+    <section class="bg-white border border-slate-200 rounded-md">
+      <div class="flex items-center justify-between px-5 sm:px-6 py-4 border-b border-slate-100">
+        <h2 class="text-lg font-semibold text-navy-900">Recent activity</h2>
+        <router-link to="/orders" class="text-sm text-teal-600 hover:underline py-2 -my-2">View all orders &rarr;</router-link>
       </div>
-      <table class="w-full text-sm">
+      <div class="overflow-x-auto">
+      <table class="w-full text-base">
+        <caption class="sr-only">Five most recent treatment requests</caption>
         <thead class="bg-slate-50 text-left text-xs text-slate-500 uppercase tracking-wider">
-          <tr><th class="px-6 py-3">Reference</th><th class="px-6 py-3">Facility</th><th class="px-6 py-3">Form</th><th class="px-6 py-3">Submitted</th><th class="px-6 py-3">Status</th><th></th></tr>
+          <tr>
+            <th scope="col" class="px-5 sm:px-6 py-3 font-medium">Reference</th>
+            <th scope="col" class="px-3 py-3 font-medium">Site</th>
+            <th scope="col" class="px-3 py-3 font-medium">Form</th>
+            <th scope="col" class="px-3 py-3 font-medium">Submitted</th>
+            <th scope="col" class="px-3 py-3 font-medium">Status</th>
+            <th scope="col" class="px-3 py-3"><span class="sr-only">Open</span></th>
+          </tr>
         </thead>
         <tbody class="divide-y divide-slate-100">
           <template v-if="loading">
             <tr v-for="n in 5" :key="n">
-              <td class="px-6 py-3"><Skel w="120px"/></td>
-              <td class="px-6 py-3"><Skel w="24px" h="20px"/></td>
-              <td class="px-6 py-3"><Skel w="240px"/></td>
-              <td class="px-6 py-3"><Skel w="80px"/></td>
-              <td class="px-6 py-3"><Skel w="90px" h="20px"/></td>
-              <td class="px-6 py-3"></td>
+              <td class="px-5 sm:px-6 py-3"><Skel w="120px"/></td>
+              <td class="px-3 py-3"><Skel w="32px" h="20px"/></td>
+              <td class="px-3 py-3"><Skel w="240px"/></td>
+              <td class="px-3 py-3"><Skel w="80px"/></td>
+              <td class="px-3 py-3"><Skel w="90px" h="20px"/></td>
+              <td class="px-3 py-3"></td>
             </tr>
           </template>
-          <tr v-else v-for="o in recent" :key="o.id" class="hover:bg-slate-50 cursor-pointer" @click="$router.push('/orders/'+o.id)">
-            <td class="px-6 py-3 font-mono text-xs text-navy-900">{{ o.id }}</td>
-            <td class="px-6 py-3"><span class="inline-flex items-center gap-1 text-xs"><span class="w-5 h-5 rounded bg-slate-100 flex items-center justify-center text-[10px] font-semibold text-slate-600">{{ o.facility }}</span></span></td>
-            <td class="px-6 py-3"><div class="flex items-center gap-2"><TreatmentChip :treatment="o.treatment" small/><span class="text-slate-700">{{ o.formName }}</span></div></td>
-            <td class="px-6 py-3 text-slate-500">{{ fmtDate(o.submitted) }}</td>
-            <td class="px-6 py-3"><StatusBadge :status="o.status"/></td>
-            <td class="px-6 py-3 text-right"><Icon name="chevron-right" :size="16" cls="text-slate-400"/></td>
+          <tr v-else v-for="o in recent" :key="o.id" class="hover:bg-slate-50 cursor-pointer" @click="$router.push('/orders/'+o.id)" tabindex="0" @keydown.enter="$router.push('/orders/'+o.id)" :aria-label="'Open order '+o.id">
+            <td class="px-5 sm:px-6 py-4 font-mono text-sm text-navy-900 whitespace-nowrap">{{ o.id }}</td>
+            <td class="px-3 py-4 text-sm text-slate-600 whitespace-nowrap">{{ o.facility }}</td>
+            <td class="px-3 py-4">
+              <div class="flex items-center gap-2 min-w-0">
+                <TreatmentChip :treatment="o.treatment" :small="true"/>
+                <span class="text-navy-900 truncate">{{ o.formName }}</span>
+              </div>
+            </td>
+            <td class="px-3 py-4 text-sm text-slate-600 whitespace-nowrap">{{ fmtDate(o.submitted) }}</td>
+            <td class="px-3 py-4 whitespace-nowrap"><StatusBadge :status="o.status"/></td>
+            <td class="px-3 py-4 text-right"><Icon name="chevron-right" :size="16" cls="text-slate-400" aria-hidden="true"/></td>
           </tr>
         </tbody>
       </table>
-    </div>
+      </div>
+    </section>
   </div>`,
   methods:{ fmtDate }
 };
