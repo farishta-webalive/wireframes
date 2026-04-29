@@ -2215,28 +2215,27 @@ const DashboardPage = {
 */
 
 const StartRequestPage = {
-  components:{ Icon, Btn, TreatmentChip },
+  components:{ Icon, Btn },
   data(){
     return {
       step: 1,
-      facility: null,    // facility code, e.g. 'MER'
-      treatment: null,   // 'Gamma' | 'ETO' | 'GMP' | 'Gamma+ETO'
+      facility: null,
+      treatment: null,
     };
   },
   computed:{
     state(){ return state; },
     myFacilities(){ return FACILITIES.filter(f => state.profile.facilities.includes(f.code)); },
     activeFacility(){ return FACILITIES.find(f => f.code === this.facility) || null; },
-    /* Treatment options for the selected facility, in canonical order. */
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
     treatmentOptions(){
       if (!this.activeFacility) return [];
       const set = new Set(this.activeFacility.services);
       const order = ['Gamma','ETO','GMP','Gamma+ETO'];
-      // Surface the combined chip only if WPK-style facility offers both.
       const hasCombined = set.has('Gamma') && set.has('ETO');
       return order.filter(t => set.has(t) || (t === 'Gamma+ETO' && hasCombined));
     },
-    /* Forms in this (facility, treatment) bucket — handles shared-with collapse. */
     matchingForms(){
       if (!this.facility || !this.treatment) return [];
       const fac = this.facility;
@@ -2251,23 +2250,18 @@ const StartRequestPage = {
           const dedupe = `${f.code}|${f.key}`;
           if (seen.has(dedupe)) continue;
           seen.add(dedupe);
-          rows.push({ ...f, facility: fac, badges: sharedWith.slice(), isShared: true });
+          rows.push({ ...f, facility: fac, isShared: true });
         } else {
           if (f.facility !== fac) continue;
-          rows.push({ ...f, badges: [f.facility], isShared: false });
+          rows.push({ ...f, isShared: false });
         }
       }
       rows.sort((a,b) => a.name.localeCompare(b.name));
       return rows;
     },
-    /* Visible-step list — only show steps the user has to answer.
-       Used to render breadcrumb pills with proper numbering (1, 2, 3 / 1, 2 / 1). */
     visibleSteps(){
-      const out = [{ id:1, key:'facility', label:'Facility' }];
-      // step 2 (treatment) hidden when facility resolves to a single treatment
+      const out = [{ id:1, key:'facility', label:'Site' }];
       const facCount = this.myFacilities.length;
-      // We can't fully know step 2/3 visibility before facility is chosen, but
-      // for users with one facility we can pre-resolve.
       if (facCount <= 1 && this.myFacilities[0]) {
         const services = this.myFacilities[0].services;
         const hasCombined = services.includes('Gamma') && services.includes('ETO');
@@ -2278,12 +2272,19 @@ const StartRequestPage = {
         out.push({ id:2, key:'treatment', label:'Treatment' });
         out.push({ id:3, key:'form', label:'Form' });
       }
-      // Renumber so labels read 1/2/3 even when step 2 is omitted
       return out.map((s,i) => ({ ...s, num: i+1 }));
     },
+    currentStepLabel(){
+      const s = this.visibleSteps.find(x => x.id === this.step);
+      return s ? s.label : '';
+    },
+    currentStepNumber(){
+      const s = this.visibleSteps.find(x => x.id === this.step);
+      return s ? s.num : 1;
+    },
+    totalSteps(){ return this.visibleSteps.length; }
   },
   watch:{
-    /* When facility settles, decide whether to skip ahead. */
     facility(code){
       if (!code) return;
       const opts = this.treatmentOptions;
@@ -2296,7 +2297,6 @@ const StartRequestPage = {
     },
   },
   mounted(){
-    // Auto-skip step 1 for single-facility users
     if (this.myFacilities.length === 1) {
       this.facility = this.myFacilities[0].code;
     }
@@ -2310,7 +2310,6 @@ const StartRequestPage = {
     advanceFromTreatment(){
       const forms = this.matchingForms;
       if (forms.length === 1) {
-        // Auto-route — no form-pick step needed
         this.go(forms[0]);
       } else {
         this.step = 3;
@@ -2321,7 +2320,6 @@ const StartRequestPage = {
     },
     back(){
       if (this.step === 3) {
-        // Back to treatment if there were >1 treatments; otherwise back to facility
         if (this.treatmentOptions.length > 1) { this.treatment = null; this.step = 2; }
         else { this.facility = null; this.step = 1; }
       } else if (this.step === 2) {
@@ -2331,10 +2329,10 @@ const StartRequestPage = {
     },
     treatmentBlurb(t){
       switch(t){
-        case 'Gamma':      return 'Gamma irradiation — fresh produce, bee equipment, general goods.';
-        case 'ETO':        return 'Ethylene oxide — sterilisation of medical and industrial product.';
-        case 'GMP':        return 'GMP-compliant packing & labelling — herbal medicine and TGA-listed goods.';
-        case 'Gamma+ETO':  return 'Combined gamma + ETO — choose treatment within the form itself.';
+        case 'Gamma':      return 'For fresh produce, bee equipment, and general goods.';
+        case 'ETO':        return 'For sterilising medical and industrial product.';
+        case 'GMP':        return 'GMP-compliant packing and labelling for herbal medicine and TGA-listed goods.';
+        case 'Gamma+ETO':  return 'Combined gamma and ethylene oxide treatment, picked inside the form itself.';
         default:           return '';
       }
     },
@@ -2354,135 +2352,133 @@ const StartRequestPage = {
       for (const sec of s.sections) fields += (sec.fields?.length || 0) + (sec.repeater?.columns.length || 0);
       return { sections: s.sections.length, fields };
     },
+    initial(name){ return (name || '?').charAt(0).toUpperCase(); },
+    avatarColor(code){
+      return ({
+        'MER': 'bg-navy-800',
+        'DAN': 'bg-teal-600',
+        'WPK': 'bg-slate-600',
+        'NAR': 'bg-emerald-700',
+      })[code] || 'bg-slate-600';
+    }
   },
   template:`
-  <div class="p-8 max-w-4xl mx-auto">
-    <!-- Header -->
-    <div class="mb-6">
-      <div class="text-xs font-semibold text-teal-600 uppercase tracking-wider mb-1">New Request</div>
-      <h1 class="text-2xl font-semibold text-navy-900">Start a Request</h1>
-      <p class="text-sm text-slate-500 mt-1">Answer a couple of quick questions and we'll load the right form.</p>
+  <div class="p-6 sm:p-8 max-w-4xl mx-auto text-base text-slate-800">
+
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
+      <div>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Start a request</h1>
+        <p class="text-sm text-slate-600 mt-0.5">Answer a couple of quick questions and we will load the right form for you.</p>
+      </div>
+      <Btn v-if="step > 1" @click="back" kind="ghost" size="sm" icon="arrow-left">Back</Btn>
     </div>
 
-    <!-- Stepper / breadcrumb -->
-    <ol class="flex items-center gap-2 mb-8 text-xs">
-      <li v-for="(s, idx) in visibleSteps" :key="s.key" class="flex items-center gap-2">
-        <button type="button"
-                @click="s.id < step ? (s.key === 'facility' ? (facility=null, step=1) : s.key === 'treatment' ? (treatment=null, step=2) : null) : null"
-                :disabled="s.id >= step"
-                :class="['inline-flex items-center gap-2 px-3 py-1.5 rounded-full font-medium transition-colors',
-                          s.id === step ? 'bg-teal-50 text-teal-700 ring-1 ring-teal-300' :
-                          s.id < step  ? 'bg-white text-slate-600 ring-1 ring-slate-200 hover:bg-slate-50 cursor-pointer' :
-                                          'bg-slate-50 text-slate-400 ring-1 ring-slate-200']">
-          <span :class="['w-5 h-5 rounded-full inline-flex items-center justify-center text-[10px] font-semibold',
-                          s.id === step ? 'bg-teal-500 text-white' :
-                          s.id < step  ? 'bg-slate-200 text-slate-700' : 'bg-slate-200 text-slate-400']">
-            <Icon v-if="s.id < step" name="check" :size="11"/>
-            <span v-else>{{ s.num }}</span>
-          </span>
-          {{ s.label }}
-          <span v-if="s.id < step && s.key === 'facility' && facility" class="text-teal-700 font-semibold">· {{ facility }}</span>
-          <span v-if="s.id < step && s.key === 'treatment' && treatment" class="text-teal-700 font-semibold">· {{ treatment }}</span>
-        </button>
-        <Icon v-if="idx < visibleSteps.length - 1" name="chevron-right" :size="14" cls="text-slate-300"/>
-      </li>
-    </ol>
+    <div class="text-sm text-slate-600 flex items-baseline gap-2 mb-6">
+      <span class="font-medium text-navy-900">Step {{ currentStepNumber }} of {{ totalSteps }}</span>
+      <span aria-hidden="true">&middot;</span>
+      <span>{{ currentStepLabel }}</span>
+    </div>
 
-    <!-- STEP 1: Facility -->
     <section v-if="step === 1" class="space-y-4">
       <div>
-        <h2 class="text-lg font-semibold text-navy-900">Which facility is this request for?</h2>
-        <p class="text-sm text-slate-500 mt-1">You have access to {{ myFacilities.length }} facilit{{ myFacilities.length === 1 ? 'y' : 'ies' }}.</p>
+        <h2 class="text-lg font-semibold text-navy-900">Which site is this request for?</h2>
+        <p class="text-sm text-slate-600 mt-0.5">You have access to {{ myFacilities.length }} {{ myFacilities.length === 1 ? 'site' : 'sites' }}.</p>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <button v-for="f in myFacilities" :key="f.code"
-                @click="pickFacility(f.code)"
-                class="bg-white border border-slate-200 rounded-lg p-5 text-left hover:border-teal-500 hover:shadow-md transition-all flex items-start gap-4 focus-ring">
-          <div class="w-12 h-12 rounded-lg bg-teal-50 text-teal-700 flex items-center justify-center font-semibold shrink-0">{{ f.code }}</div>
-          <div class="flex-1 min-w-0">
-            <div class="font-semibold text-navy-900">{{ f.name }} <span class="text-slate-400 font-normal">{{ f.state }}</span></div>
-            <div class="text-xs text-slate-500 mt-0.5 truncate">{{ f.address }}</div>
-            <div class="mt-2 flex flex-wrap gap-1.5">
-              <TreatmentChip v-for="s in f.services" :key="s" :treatment="s" small/>
-            </div>
-          </div>
-          <Icon name="arrow-right" :size="18" cls="text-slate-300 mt-2"/>
-        </button>
-      </div>
-    </section>
-
-    <!-- STEP 2: Treatment type -->
-    <section v-if="step === 2" class="space-y-4">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h2 class="text-lg font-semibold text-navy-900">What kind of treatment do you need?</h2>
-          <p class="text-sm text-slate-500 mt-1">Available services at <span class="font-semibold text-navy-900">{{ activeFacility && activeFacility.name }} {{ activeFacility && activeFacility.state }}</span>.</p>
-        </div>
-        <Btn @click="back" kind="ghost" size="sm" icon="arrow-left">Back</Btn>
-      </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <button v-for="t in treatmentOptions" :key="t"
-                @click="pickTreatment(t)"
-                class="bg-white border border-slate-200 rounded-lg p-5 text-left hover:border-teal-500 hover:shadow-md transition-all flex items-start gap-4 focus-ring">
-          <div class="w-12 h-12 rounded-lg bg-slate-50 text-navy-700 flex items-center justify-center shrink-0">
-            <Icon :name="treatmentIcon(t)" :size="22"/>
-          </div>
-          <div class="flex-1 min-w-0">
-            <div class="flex items-center gap-2">
-              <TreatmentChip :treatment="t"/>
-            </div>
-            <div class="text-sm text-slate-600 mt-2">{{ treatmentBlurb(t) }}</div>
-          </div>
-          <Icon name="arrow-right" :size="18" cls="text-slate-300 mt-2"/>
-        </button>
-      </div>
-    </section>
-
-    <!-- STEP 3: Form -->
-    <section v-if="step === 3" class="space-y-4">
-      <div class="flex items-start justify-between gap-4">
-        <div>
-          <h2 class="text-lg font-semibold text-navy-900">Which form do you want to fill in?</h2>
-          <p class="text-sm text-slate-500 mt-1">
-            <TreatmentChip :treatment="treatment" small/>
-            <span class="ml-2">at <span class="font-semibold text-navy-900">{{ activeFacility && activeFacility.name }} {{ activeFacility && activeFacility.state }}</span></span>
-          </p>
-        </div>
-        <Btn @click="back" kind="ghost" size="sm" icon="arrow-left">Back</Btn>
-      </div>
-      <div class="space-y-2">
-        <button v-for="r in matchingForms" :key="r.code+'-'+r.facility"
-                @click="go(r)"
-                class="w-full bg-white border border-slate-200 rounded-lg p-4 text-left hover:border-teal-500 hover:shadow-md transition-all flex items-center gap-4 focus-ring">
-          <div class="flex-1 min-w-0">
-            <div class="flex flex-wrap items-center gap-1.5 mb-1">
-              <span v-for="b in r.badges" :key="b"
-                    :class="['inline-flex items-center gap-1 text-[11px] font-semibold px-2 py-0.5 rounded-full',
-                              r.isShared ? 'bg-teal-50 text-teal-700 ring-1 ring-teal-200' : 'bg-slate-100 text-slate-600']">
-                <Icon name="map-pin" :size="11"/> {{ b }}
+      <ul class="space-y-2.5">
+        <li v-for="f in myFacilities" :key="f.code">
+          <button @click="pickFacility(f.code)"
+                  type="button"
+                  class="w-full bg-white border border-slate-200 rounded-md p-4 text-left hover:border-slate-400 hover:bg-slate-50/40 transition-colors flex items-center gap-4 focus-ring">
+            <span :class="['shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-full text-white text-base font-semibold', avatarColor(f.code)]"
+                  aria-hidden="true">{{ initial(f.name) }}</span>
+            <span class="flex-1 min-w-0">
+              <span class="block text-base font-semibold text-navy-900">{{ f.name }}, {{ f.state }}</span>
+              <span class="block text-sm text-slate-500 truncate">{{ f.address }}</span>
+              <span class="mt-1.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-sm text-slate-600">
+                <span v-for="s in f.services" :key="s" class="inline-flex items-center gap-1.5">
+                  <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[s].dot]" aria-hidden="true"></span>
+                  {{ treatmentLabels[s] || s }}
+                </span>
               </span>
-              <span class="text-[11px] font-mono text-slate-500 ml-1">{{ r.code }}</span>
-              <span v-if="r.isShared" class="text-[11px] text-slate-500">· Shared form</span>
-            </div>
-            <div class="font-semibold text-navy-900 leading-snug">{{ r.name }}</div>
-            <div class="mt-1 text-[11px] text-slate-500 flex items-center gap-3">
-              <span class="inline-flex items-center gap-1"><Icon name="list-checks" :size="12"/>{{ schemaStats(r).sections }} sections</span>
-              <span class="inline-flex items-center gap-1"><Icon name="layout-list" :size="12"/>{{ schemaStats(r).fields }} fields</span>
-            </div>
-          </div>
-          <Icon name="arrow-right" :size="18" cls="text-slate-300"/>
-        </button>
-        <div v-if="matchingForms.length === 0" class="bg-slate-50 border border-dashed border-slate-300 rounded-lg p-8 text-center">
-          <Icon name="search-x" :size="28" cls="text-slate-300 mx-auto mb-2"/>
-          <div class="text-sm text-slate-500">No forms configured for this combination.</div>
-        </div>
+            </span>
+            <Icon name="arrow-right" :size="18" cls="text-slate-300 shrink-0"/>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <section v-if="step === 2" class="space-y-4">
+      <div>
+        <h2 class="text-lg font-semibold text-navy-900">What kind of treatment do you need?</h2>
+        <p class="text-sm text-slate-600 mt-0.5">Available services at <span class="font-medium text-navy-900">{{ activeFacility && activeFacility.name }}, {{ activeFacility && activeFacility.state }}</span>.</p>
+      </div>
+      <ul class="space-y-2.5">
+        <li v-for="t in treatmentOptions" :key="t">
+          <button @click="pickTreatment(t)"
+                  type="button"
+                  class="w-full bg-white border border-slate-200 rounded-md p-4 text-left hover:border-slate-400 hover:bg-slate-50/40 transition-colors flex items-center gap-4 focus-ring">
+            <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700">
+              <Icon :name="treatmentIcon(t)" :size="20"/>
+            </span>
+            <span class="flex-1 min-w-0">
+              <span class="flex items-center gap-2">
+                <span :class="['inline-block h-2.5 w-2.5 rounded-full shrink-0', treatmentStyles[t].dot]" aria-hidden="true"></span>
+                <span class="text-base font-semibold text-navy-900">{{ treatmentLabels[t] || t }}</span>
+              </span>
+              <span class="block text-sm text-slate-600 mt-1 leading-snug">{{ treatmentBlurb(t) }}</span>
+            </span>
+            <Icon name="arrow-right" :size="18" cls="text-slate-300 shrink-0"/>
+          </button>
+        </li>
+      </ul>
+    </section>
+
+    <section v-if="step === 3" class="space-y-4">
+      <div>
+        <h2 class="text-lg font-semibold text-navy-900">Which form do you want to fill in?</h2>
+        <p class="text-sm text-slate-600 mt-0.5 inline-flex flex-wrap items-center gap-x-2 gap-y-1">
+          <span class="inline-flex items-center gap-1.5">
+            <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[treatment].dot]" aria-hidden="true"></span>
+            {{ treatmentLabels[treatment] || treatment }}
+          </span>
+          <span aria-hidden="true">&middot;</span>
+          <span>at <span class="font-medium text-navy-900">{{ activeFacility && activeFacility.name }}, {{ activeFacility && activeFacility.state }}</span></span>
+        </p>
+      </div>
+      <ul v-if="matchingForms.length" class="space-y-2.5">
+        <li v-for="r in matchingForms" :key="r.code+'-'+r.facility">
+          <button @click="go(r)"
+                  type="button"
+                  class="w-full bg-white border border-slate-200 rounded-md p-4 text-left hover:border-slate-400 hover:bg-slate-50/40 transition-colors flex items-center gap-4 focus-ring">
+            <span class="flex-1 min-w-0">
+              <span class="block text-base font-semibold text-navy-900 leading-snug">{{ r.name }}</span>
+              <span class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-600">
+                <span class="inline-flex items-center gap-1.5">
+                  <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[r.treatment].dot]" aria-hidden="true"></span>
+                  {{ treatmentLabels[r.treatment] || r.treatment }}
+                </span>
+                <span aria-hidden="true" class="text-slate-300">&middot;</span>
+                <span class="font-mono text-xs text-slate-500">{{ r.code }}</span>
+                <span v-if="r.isShared" aria-hidden="true" class="text-slate-300">&middot;</span>
+                <span v-if="r.isShared" class="text-xs text-slate-500">Shared form</span>
+              </span>
+              <span class="mt-1 flex items-center gap-3 text-xs text-slate-500">
+                <span class="inline-flex items-center gap-1"><Icon name="list-checks" :size="12"/>{{ schemaStats(r).sections }} sections</span>
+                <span class="inline-flex items-center gap-1"><Icon name="layout-list" :size="12"/>{{ schemaStats(r).fields }} fields</span>
+              </span>
+            </span>
+            <Icon name="arrow-right" :size="18" cls="text-slate-300 shrink-0"/>
+          </button>
+        </li>
+      </ul>
+      <div v-else class="bg-white border border-slate-200 rounded-md p-8 text-center">
+        <Icon name="search-x" :size="28" cls="text-slate-300 mx-auto mb-2"/>
+        <div class="text-sm text-slate-600">No forms configured for this combination.</div>
       </div>
     </section>
 
-    <!-- Footer hint -->
-    <div class="mt-10 pt-6 border-t border-slate-100 text-xs text-slate-400 flex items-center gap-2">
-      <Icon name="info" :size="13"/>
-      <span>Need to browse the full catalogue? <router-link to="/forms" class="text-teal-600 hover:underline">See all forms →</router-link></span>
+    <div class="mt-10 pt-6 border-t border-slate-200 text-sm text-slate-500">
+      Want to browse the full catalogue? <router-link to="/forms" class="text-teal-600 hover:underline font-medium">See all forms &rarr;</router-link>
     </div>
   </div>`,
 };
