@@ -3069,7 +3069,7 @@ const FormRenderer = {
     },
     rowInputCls(sec, i, c){
       const err = this.submitAttempted && this.rowErrors[sec.repeater.key+'.'+i]?.[c.key];
-      const base = 'w-full rounded border px-2 py-1.5 text-sm focus-ring';
+      const base = 'w-full rounded-md border px-2 py-2 text-sm focus-ring';
       const color = err ? 'border-red-400 bg-red-50/40' : 'border-slate-300';
       return `${base} ${color}`;
     },
@@ -3386,24 +3386,27 @@ const FormRenderer = {
                   <!-- Computed (auto-calculated, readonly) -->
                   <input v-else-if="f.type==='computed'"
                          :id="'fld-'+f.key" :value="computedValue(f)" readonly
-                         :class="['w-full rounded-lg border px-3 py-2 text-sm focus-ring border-slate-200 bg-slate-50 text-slate-700', f.tabular ? 'tabular-nums' : '']"/>
+                         :class="['w-full h-11 rounded-md border border-slate-200 bg-slate-50 px-3 text-base text-slate-700 focus-ring', f.tabular ? 'tabular-nums' : '']"/>
 
                   <!-- File upload (multi) -->
                   <div v-else-if="f.type==='file-multi'" :id="'fld-'+f.key" class="space-y-2">
-                    <label class="flex flex-col items-center justify-center gap-1 px-6 py-6 rounded-lg border-2 border-dashed border-slate-300 bg-slate-50/40 hover:bg-slate-50 cursor-pointer transition-colors">
-                      <Icon name="upload-cloud" :size="22" cls="text-slate-400"/>
-                      <div class="text-sm text-teal-600 font-medium">Click to upload <span class="text-slate-500 font-normal">or drag and drop</span></div>
-                      <div class="text-[11px] text-slate-400">{{ f.acceptLabel || 'PNG, JPG or PDF' }}</div>
+                    <label class="flex items-center gap-3 px-4 py-4 rounded-md border border-dashed border-slate-300 bg-slate-50 hover:bg-slate-100/60 cursor-pointer transition-colors">
+                      <Icon name="upload-cloud" :size="20" cls="text-slate-400 shrink-0"/>
+                      <div class="text-sm text-slate-700 flex-1">
+                        <span class="text-teal-600 font-medium">Choose files</span> or drag and drop
+                      </div>
+                      <div class="text-xs text-slate-500 shrink-0">{{ f.acceptLabel || 'PNG, JPG or PDF' }}</div>
                       <input type="file" multiple :accept="f.accept || '.png,.jpg,.jpeg,.pdf'"
                              @change="onFileSelect(f, $event)" class="hidden"/>
                     </label>
                     <div v-if="(data[f.key] || []).length" class="space-y-1">
                       <div v-for="(file,i) in data[f.key]" :key="i"
-                           class="flex items-center gap-3 px-3 py-2 rounded-lg border border-slate-200 bg-white text-sm">
-                        <Icon :name="file.type === 'application/pdf' ? 'file-text' : 'image'" :size="14" cls="text-slate-400"/>
+                           class="flex items-center gap-3 px-3 py-2 rounded-md border border-slate-200 bg-white text-sm">
+                        <Icon :name="file.type === 'application/pdf' ? 'file-text' : 'image'" :size="14" cls="text-slate-500"/>
                         <span class="flex-1 truncate text-slate-700">{{ file.name }}</span>
-                        <span class="text-[11px] text-slate-400 tabular-nums">{{ fmtFileSize(file.size) }}</span>
-                        <button type="button" @click="removeFile(f, i)" class="p-1 rounded hover:bg-red-50 text-slate-400 hover:text-red-600">
+                        <span class="text-xs text-slate-500 tabular-nums">{{ fmtFileSize(file.size) }}</span>
+                        <button type="button" @click="removeFile(f, i)" aria-label="Remove file"
+                                class="p-1 rounded hover:bg-red-50 text-slate-500 hover:text-red-600">
                           <Icon name="x" :size="14"/>
                         </button>
                       </div>
@@ -3411,19 +3414,19 @@ const FormRenderer = {
                   </div>
 
                   <!-- Radio -->
-                  <div v-else-if="f.type==='radio'" class="flex flex-wrap gap-2" :id="'fld-'+f.key">
+                  <div v-else-if="f.type==='radio'" class="space-y-2" :id="'fld-'+f.key" role="radiogroup">
                     <label v-for="opt in f.options" :key="opt"
-                           :class="['flex items-center gap-2 px-3 py-2 rounded-lg border cursor-pointer text-sm',
-                                    data[f.key]===opt ? 'border-teal-500 bg-teal-50 text-teal-700' : 'border-slate-300 hover:bg-slate-50']">
-                      <input type="radio" :value="opt" v-model="data[f.key]" class="accent-teal-500"/>
-                      {{ opt }}
+                           class="flex items-center gap-3 py-1 cursor-pointer text-base text-slate-800">
+                      <input type="radio" :value="opt" v-model="data[f.key]" class="h-4 w-4 accent-teal-600"/>
+                      <span>{{ opt }}</span>
                     </label>
                   </div>
 
                   <!-- Checkbox -->
-                  <div v-else-if="f.type==='checkbox'" class="space-y-1.5" :id="'fld-'+f.key">
-                    <label v-for="opt in f.options" :key="opt" class="flex items-center gap-2 text-sm text-slate-700">
-                      <input type="checkbox" :value="opt" v-model="data[f.key]" class="rounded accent-teal-500"/>{{ opt }}
+                  <div v-else-if="f.type==='checkbox'" class="space-y-2" :id="'fld-'+f.key">
+                    <label v-for="opt in f.options" :key="opt" class="flex items-center gap-3 py-1 text-base text-slate-800">
+                      <input type="checkbox" :value="opt" v-model="data[f.key]" class="h-4 w-4 rounded accent-teal-600"/>
+                      <span>{{ opt }}</span>
                     </label>
                   </div>
 
@@ -3475,16 +3478,16 @@ const FormRenderer = {
                   <!-- Declaration checkbox alternative -->
                   <label v-else-if="f.type==='signature' && declarationOpts.type==='checkbox'"
                          :for="'fld-'+f.key"
-                         class="flex items-start gap-3 px-4 py-3 rounded-lg border border-slate-300 bg-slate-50/40 cursor-pointer hover:bg-slate-50">
+                         class="flex items-start gap-3 px-4 py-3 rounded-md border border-slate-300 bg-slate-50 cursor-pointer hover:bg-slate-100/60">
                     <input :id="'fld-'+f.key" type="checkbox"
                            :checked="data[f.key]==='YES'"
                            @change="data[f.key] = $event.target.checked ? 'YES' : 'NO'"
-                           class="mt-0.5 rounded accent-teal-500"/>
-                    <span class="text-sm text-navy-900">I agree to the declaration above.</span>
+                           class="mt-0.5 h-4 w-4 rounded accent-teal-600"/>
+                    <span class="text-base text-slate-800">I agree to the declaration above.</span>
                   </label>
 
-                  <div v-if="submitAttempted && errors[f.key]" class="mt-1 text-xs text-red-600 flex items-center gap-1">
-                    <Icon name="alert-circle" :size="12"/>{{ errors[f.key] }}
+                  <div v-if="submitAttempted && errors[f.key]" role="alert" class="mt-1 text-sm text-red-600 flex items-center gap-1">
+                    <Icon name="alert-circle" :size="14"/>{{ errors[f.key] }}
                   </div>
                 </div>
               </div>
@@ -3493,9 +3496,9 @@ const FormRenderer = {
               <div v-if="sec.repeater" class="-mx-6">
                 <div class="overflow-x-auto scroll-thin">
                   <table class="w-full text-sm">
-                    <thead class="bg-slate-50 border-y border-slate-100 text-xs text-slate-500 uppercase tracking-wider">
+                    <thead class="bg-slate-50 border-y border-slate-200 text-[13px] text-slate-600">
                       <tr>
-                        <th class="px-6 py-2 text-left" v-for="c in sec.repeater.columns" :key="c.key" :class="c.w">{{ c.label }}</th>
+                        <th class="px-6 py-2.5 text-left font-medium" v-for="c in sec.repeater.columns" :key="c.key" :class="c.w">{{ c.label }}</th>
                         <th class="w-10 sticky right-0 bg-slate-50"></th>
                       </tr>
                     </thead>
@@ -3596,14 +3599,12 @@ const FormRenderer = {
                       <div class="space-y-4">
                         <div v-for="(ps, psIdx) in data[sec.palletRepeater.key]" :key="ps.id">
                           <div v-if="ps.kind === group.kind"
-                               :class="['rounded-lg border overflow-hidden',
-                                        group.kind === 'irradiated' ? 'border-teal-200' : 'border-amber-200']">
+                               class="rounded-md border border-slate-200 overflow-hidden">
                             <!-- Pallet space header strip -->
-                            <div :class="['px-4 py-3 border-b flex items-center gap-4',
-                                          group.kind === 'irradiated' ? 'bg-teal-50/60 border-teal-100' : 'bg-amber-50/60 border-amber-100']">
+                            <div class="px-4 py-3 border-b border-slate-100 bg-slate-50 flex items-center gap-4">
                               <div class="flex items-center gap-2">
-                                <span :class="['w-6 h-6 rounded-full flex items-center justify-center text-xs font-semibold',
-                                              group.kind === 'irradiated' ? 'bg-teal-500 text-white' : 'bg-amber-500 text-white']">
+                                <span :class="['inline-block h-2 w-2 rounded-full', group.kind === 'irradiated' ? 'bg-teal-500' : 'bg-amber-500']" aria-hidden="true"></span>
+                                <span class="w-6 h-6 rounded-full bg-slate-200 text-slate-700 flex items-center justify-center text-xs font-semibold">
                                   {{ data[sec.palletRepeater.key].filter((p,j) => p.kind === group.kind && j <= psIdx).length }}
                                 </span>
                                 <span class="text-sm font-semibold text-navy-900">
@@ -3636,7 +3637,8 @@ const FormRenderer = {
                               <!-- Remove pallet space -->
                               <button type="button" @click="removePalletSpace(psIdx)"
                                       :disabled="data[sec.palletRepeater.key].length <= (sec.palletRepeater.minPalletSpaces || 1)"
-                                      class="p-1.5 rounded hover:bg-white/60 text-slate-400 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed">
+                                      aria-label="Remove pallet space"
+                                      class="p-1.5 rounded hover:bg-slate-200 text-slate-500 hover:text-red-600 disabled:opacity-30 disabled:cursor-not-allowed">
                                 <Icon name="x" :size="16"/>
                               </button>
                             </div>
@@ -3644,11 +3646,11 @@ const FormRenderer = {
                             <!-- Commodities table -->
                             <div class="overflow-x-auto scroll-thin bg-white">
                               <table class="w-full text-sm">
-                                <thead class="bg-slate-50 border-b border-slate-100 text-[11px] text-slate-500 uppercase tracking-wider">
+                                <thead class="bg-slate-50 border-b border-slate-200 text-[13px] text-slate-600">
                                   <tr>
-                                    <th class="pl-4 pr-2 py-2 text-left w-8">#</th>
-                                    <th class="px-3 py-2 text-left" v-for="cf in sec.palletRepeater.commodityFields" :key="cf.key" :class="cf.w">
-                                      {{ cf.label }}<span v-if="cf.required" class="text-red-500">*</span>
+                                    <th class="pl-4 pr-2 py-2 text-left font-medium w-8">#</th>
+                                    <th class="px-3 py-2 text-left font-medium" v-for="cf in sec.palletRepeater.commodityFields" :key="cf.key" :class="cf.w">
+                                      {{ cf.label }}<span v-if="cf.required" class="text-red-600" aria-hidden="true">*</span>
                                     </th>
                                     <th class="w-10 sticky right-0 bg-slate-50"></th>
                                   </tr>
@@ -3702,12 +3704,14 @@ const FormRenderer = {
                 <!-- Add pallet space buttons -->
                 <div class="flex flex-wrap gap-2 pt-2">
                   <button type="button" @click="addPalletSpace('irradiated')"
-                          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-teal-200 text-teal-700 hover:bg-teal-50 text-sm font-medium">
-                    <Icon name="plus" :size="14"/> {{ sec.palletRepeater.addIrradiatedLabel || 'Add Pallet Space' }}
+                          class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium">
+                    <span class="inline-block h-2 w-2 rounded-full bg-teal-500" aria-hidden="true"></span>
+                    <Icon name="plus" :size="14"/> {{ sec.palletRepeater.addIrradiatedLabel || 'Add pallet space' }}
                   </button>
                   <button type="button" @click="addPalletSpace('non_irradiated')"
-                          class="inline-flex items-center gap-1.5 px-3 py-2 rounded-lg border border-amber-200 text-amber-700 hover:bg-amber-50 text-sm font-medium">
-                    <Icon name="plus" :size="14"/> {{ sec.palletRepeater.addNonIrradiatedLabel || 'Add Non-Irradiated Pallet Space' }}
+                          class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium">
+                    <span class="inline-block h-2 w-2 rounded-full bg-amber-500" aria-hidden="true"></span>
+                    <Icon name="plus" :size="14"/> {{ sec.palletRepeater.addNonIrradiatedLabel || 'Add non-irradiated pallet space' }}
                   </button>
                 </div>
               </template>
@@ -3732,37 +3736,36 @@ const FormRenderer = {
 
     <!-- Mid-form facility switch modal -->
     <transition name="fade">
-      <div v-if="switchModal" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="cancelSwitch">
-        <div class="bg-white rounded-xl shadow-md w-full max-w-md overflow-hidden">
+      <div v-if="switchModal" role="dialog" aria-modal="true"
+           class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="cancelSwitch">
+        <div class="bg-white rounded-md border border-slate-200 shadow-lg w-full max-w-md overflow-hidden">
           <!-- Unavailable -->
           <template v-if="switchModal.kind === 'unavailable'">
             <div class="px-6 py-5">
               <div class="flex items-start gap-3">
-                <div class="w-9 h-9 rounded-full bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
-                  <Icon name="alert-triangle" :size="18"/>
-                </div>
+                <Icon name="alert-triangle" :size="20" cls="text-amber-600 shrink-0 mt-0.5"/>
                 <div class="min-w-0">
-                  <h3 class="font-semibold text-navy-900">{{ switchModal.targetName.split(',')[0] }} doesn't offer this form</h3>
-                  <p class="mt-1 text-sm text-slate-600">This form isn't available at {{ switchModal.targetName }}. Stay on the current facility, or pick a different form from the catalog.</p>
+                  <h3 class="text-base font-semibold text-navy-900">{{ switchModal.targetName.split(',')[0] }} does not offer this form</h3>
+                  <p class="mt-1 text-sm text-slate-600 leading-relaxed">This form is not available at {{ switchModal.targetName }}. Stay on the current site, or pick a different form from the catalog.</p>
                 </div>
               </div>
             </div>
-            <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end">
+            <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end">
               <Btn kind="primary" @click="cancelSwitch">OK</Btn>
             </div>
           </template>
           <!-- Confirm switch -->
           <template v-else>
             <div class="px-6 py-5">
-              <h3 class="font-semibold text-navy-900">Switch to {{ switchModal.targetName }}?</h3>
-              <p class="mt-2 text-sm text-slate-600">
+              <h3 class="text-base font-semibold text-navy-900">Switch to {{ switchModal.targetName }}?</h3>
+              <p class="mt-2 text-sm text-slate-600 leading-relaxed">
                 Switching will require <span class="font-medium text-navy-900">{{ switchModal.delta.length }}</span>
                 new field<span v-if="switchModal.delta.length !== 1">s</span> and discard
                 <span class="font-medium text-navy-900">{{ switchModal.removed.length }}</span>
-                field<span v-if="switchModal.removed.length !== 1">s</span> that don't apply at {{ switchModal.targetName.split(',')[0] }}. Your other answers will be preserved.
+                field<span v-if="switchModal.removed.length !== 1">s</span> that do not apply at {{ switchModal.targetName.split(',')[0] }}. Your other answers will be preserved.
               </p>
             </div>
-            <div class="px-6 py-3 bg-slate-50 border-t border-slate-100 flex items-center justify-end gap-2">
+            <div class="px-6 py-3 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2">
               <Btn kind="ghost" @click="cancelSwitch">Cancel</Btn>
               <Btn kind="primary" iconRight="arrow-right" @click="confirmSwitch">Switch</Btn>
             </div>
