@@ -1740,14 +1740,6 @@ const SignupPage = {
           <Icon name="chevrons-up-down" :size="12" cls="text-slate-400"/>
         </button>
 
-        <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-md px-4 py-3 flex gap-3" role="note">
-          <Icon name="info" :size="18" cls="mt-0.5 shrink-0"/>
-          <div class="text-sm">
-            <div class="font-medium">Business Central record will be created</div>
-            <div class="text-amber-800/80 text-xs mt-0.5">A customer record is created in Microsoft Dynamics 365 Business Central and a BC Customer Number is assigned. You will see it on your profile within one business day.</div>
-          </div>
-        </div>
-
         <div v-if="!invited" class="text-sm text-slate-600 flex items-baseline gap-2">
           <span class="font-medium text-navy-900">Step {{ step }} of 2</span>
           <span aria-hidden="true">&middot;</span>
@@ -1947,8 +1939,8 @@ const SignupPage = {
                 <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50 text-sm font-medium text-navy-900">What happens after you confirm</div>
                 <ul class="px-4 py-4 text-sm text-slate-700 space-y-3">
                   <li class="flex gap-2.5"><Icon name="check" :size="16" cls="mt-0.5 shrink-0 text-emerald-600"/><div><span class="font-medium text-navy-900">Account created.</span> You will be signed in and can browse forms for {{ assignedFacility.name }}.</div></li>
-                  <li class="flex gap-2.5"><Icon name="clock" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><div><span class="font-medium text-navy-900">BC record provisioned within one business day.</span> A Microsoft Dynamics 365 BC customer record is created and a BC Customer Number is added to your profile.</div></li>
-                  <li class="flex gap-2.5"><Icon name="mail" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><div><span class="font-medium text-navy-900">Email confirmation when billing is enabled.</span> Submitting orders unlocks once your BC record is active. We will email you when that is done.</div></li>
+                  <li class="flex gap-2.5"><Icon name="clock" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><div><span class="font-medium text-navy-900">Account activated within one business day.</span> Our team finishes setting up your account so you can start submitting orders.</div></li>
+                  <li class="flex gap-2.5"><Icon name="mail" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><div><span class="font-medium text-navy-900">Email confirmation once you are ready to go.</span> We will email you the moment your account is fully active.</div></li>
                 </ul>
               </div>
 
