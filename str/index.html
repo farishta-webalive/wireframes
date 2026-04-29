@@ -316,31 +316,31 @@ const seedConsignees = [
 const seedOrders = [
   { id:'STR-25-018342', facility:'MER', formCode:'ICA-55',   formName:'Fresh Produce Irradiation — Domestic', treatment:'Gamma',
     submitted:'2026-04-18', po:'PO-88421', consignor:'Sunraysia Orchards', consignee:'Yum Foods Distribution',
-    goods:'Dried mango, 12 pallets', spaces:12, cheps:12, doseKGy:6, status:'In treatment',  bcSync:'synced',  exsitedId:'EXS-402918', bcId:'SO-2026-41882', collection:'2026-04-24' },
+    goods:'Dried mango, 12 pallets', spaces:12, cheps:12, doseKGy:6, status:'Created',  bcSync:'synced',  exsitedId:'EXS-402918', bcId:'SO-2026-41882', collection:'2026-04-24' },
   { id:'STR-25-018339', facility:'MER', formCode:'FRM-0121', formName:'Bee Equipment Irradiation',            treatment:'Gamma',
     submitted:'2026-04-17', po:'PO-88420', consignor:'Top End Apiaries',   consignee:'Golden Hive Co-op',
-    goods:'Hive boxes + frames, 4 pallets', spaces:4, cheps:4, doseKGy:15, status:'Awaiting collection', bcSync:'syncing', exsitedId:'EXS-402917', bcId:'—', collection:'2026-04-23' },
+    goods:'Hive boxes + frames, 4 pallets', spaces:4, cheps:4, doseKGy:15, status:'Accepted', bcSync:'syncing', exsitedId:'EXS-402917', bcId:'—', collection:'2026-04-23' },
   { id:'STR-25-018336', facility:'DAN', formCode:'FRM-0092', formName:'Ethylene Oxide Treatment',             treatment:'ETO',
     submitted:'2026-04-16', po:'PO-41199', consignor:'Bellarine Botanics', consignee:'Auspharm Wholesalers',
-    goods:'Herbal tea sachets, 800 cartons', spaces:18, cheps:18, doseKGy:null, status:'In progress',      bcSync:'pending', exsitedId:'EXS-402913', bcId:'—', collection:'2026-04-22' },
+    goods:'Herbal tea sachets, 800 cartons', spaces:18, cheps:18, doseKGy:null, status:'Scheduled for Processing', bcSync:'pending', exsitedId:'EXS-402913', bcId:'—', collection:'2026-04-22' },
   { id:'STR-25-018330', facility:'NAR', formCode:'FRM-0241', formName:'Blood Serum',                          treatment:'Gamma',
     submitted:'2026-04-15', po:'PO-00553', consignor:'Queensland Biolab',   consignee:'BioSeq Pty Ltd',
-    goods:'Bovine serum, 36 IBC totes', spaces:36, cheps:0, doseKGy:25, status:'Submitted',     bcSync:'failed',  exsitedId:'EXS-402908', bcId:'—', collection:'2026-04-21' },
+    goods:'Bovine serum, 36 IBC totes', spaces:36, cheps:0, doseKGy:25, status:'On Hold',     bcSync:'failed',  exsitedId:'EXS-402908', bcId:'—', collection:'2026-04-21' },
   { id:'STR-25-018327', facility:'WPK', formCode:'FRM-0217', formName:'Treatment',                            treatment:'Gamma+ETO',
     submitted:'2026-04-13', po:'PO-77410', consignor:'Kingsgrove Medical',  consignee:'NSW Health Logistics',
-    goods:'Surgical packs, 18 pallets', spaces:18, cheps:18, doseKGy:25, status:'Completed',     bcSync:'synced',  exsitedId:'EXS-402891', bcId:'SO-2026-41812', collection:'2026-04-20' },
+    goods:'Surgical packs, 18 pallets', spaces:18, cheps:18, doseKGy:25, status:'Late Arrival',     bcSync:'synced',  exsitedId:'EXS-402891', bcId:'SO-2026-41812', collection:'2026-04-20' },
   { id:'STR-25-018321', facility:'MER', formCode:'FRM-0118', formName:'Fresh Produce Irradiation — Export',   treatment:'Gamma',
     submitted:'2026-04-10', po:'PO-88418', consignor:'Sunraysia Orchards',  consignee:'Pacific Produce USA',
-    goods:'Table grapes, 22 pallets', spaces:22, cheps:22, doseKGy:0.4, status:'Completed',   bcSync:'synced',  exsitedId:'EXS-402877', bcId:'SO-2026-41788', collection:'2026-04-16' },
+    goods:'Table grapes, 22 pallets', spaces:22, cheps:22, doseKGy:0.4, status:'In Process',   bcSync:'synced',  exsitedId:'EXS-402877', bcId:'SO-2026-41788', collection:'2026-04-16' },
   { id:'STR-25-018314', facility:'NAR', formCode:'FRM-0240', formName:'Bee Equipment',                        treatment:'Gamma',
     submitted:'2026-04-08', po:'PO-00549', consignor:'Sunshine Coast Apiary',consignee:'Golden Hive Co-op',
-    goods:'Wooden supers, 6 pallets', spaces:6, cheps:6, doseKGy:15, status:'Completed',    bcSync:'synced',  exsitedId:'EXS-402869', bcId:'SO-2026-41770', collection:'2026-04-14' },
+    goods:'Wooden supers, 6 pallets', spaces:6, cheps:6, doseKGy:15, status:'Ready for Invoicing',    bcSync:'synced',  exsitedId:'EXS-402869', bcId:'SO-2026-41770', collection:'2026-04-14' },
   { id:'STR-25-018308', facility:'DAN', formCode:'FRM-0091', formName:'Irradiation Treatment',                treatment:'Gamma',
     submitted:'2026-04-05', po:'PO-41196', consignor:'Bellarine Botanics', consignee:'Chemist Warehouse DC',
     goods:'Cosmetic raw powders, 40 drums', spaces:8, cheps:8, doseKGy:10, status:'Completed', bcSync:'dead',   exsitedId:'EXS-402855', bcId:'—', collection:'2026-04-11' },
   { id:'STR-25-018301', facility:'MER', formCode:'FRM-0359', formName:'Packing and Labelling — Herbal Medicine', treatment:'GMP',
     submitted:'2026-04-03', po:'PO-88414', consignor:'Bellarine Botanics', consignee:'Auspharm Wholesalers',
-    goods:'Capsule bottles + labels, 14 pallets', spaces:14, cheps:14, doseKGy:null, status:'Completed', bcSync:'synced', exsitedId:'EXS-402841', bcId:'SO-2026-41748', collection:'2026-04-09' },
+    goods:'Capsule bottles + labels, 14 pallets', spaces:14, cheps:14, doseKGy:null, status:'Cancelled', bcSync:'synced', exsitedId:'EXS-402841', bcId:'SO-2026-41748', collection:'2026-04-09' },
   { id:'STR-25-018297', facility:'NAR', formCode:'FRM-0203', formName:'Treatment',                            treatment:'Gamma',
     submitted:'2026-04-02', po:'PO-00544', consignor:'Toowoomba Pet Co.',   consignee:'Petbarn DC Brisbane',
     goods:'Rawhide chews, 30 pallets', spaces:30, cheps:30, doseKGy:25, status:'Completed',    bcSync:'synced',  exsitedId:'EXS-402833', bcId:'SO-2026-41741', collection:'2026-04-08' },
@@ -349,13 +349,13 @@ const seedOrders = [
 /* ---------- Order messages seed (customer ↔ admin thread per order) -------- */
 
 const seedMessages = {
-  // STR-25-018342 — In treatment, customer asking about timing
+  // STR-25-018342 — Created, customer asking about timing
   'STR-25-018342': [
     { id:'m1', from:'customer', author:'Alex Nguyen',     ts:'2026-04-18T10:24', body:'Hi team — pallets 7 and 8 have a different lot number from the rest. Should I split them onto a separate consignment or is one PO fine?' },
     { id:'m2', from:'admin',    author:'Steritech Mernda', ts:'2026-04-18T11:02', body:'One PO is fine. Just note the second lot in the description and we\u2019ll record it against the same RPI.' },
     { id:'m3', from:'customer', author:'Alex Nguyen',     ts:'2026-04-18T11:14', body:'Perfect, thanks. Updated the description.' },
   ],
-  // STR-25-018339 — Awaiting collection
+  // STR-25-018339 — Accepted
   'STR-25-018339': [
     { id:'m1', from:'customer', author:'Jake Marsh',      ts:'2026-04-23T08:02', body:'Are we ok to collect tomorrow morning instead of this afternoon? Truck got delayed in Albury.' },
     { id:'m2', from:'admin',    author:'Steritech Mernda', ts:'2026-04-23T08:31', body:'No problem \u2014 we\u2019ll hold the consignment until 10am Friday. Please bring the original release docket.' },
@@ -989,12 +989,16 @@ const StatusBadge = {
       // pulse:true → animated dot for in-flight statuses
       // icon (lucide name) replaces the dot when set
       return ({
-        'Draft':               { fill:'bg-slate-100',    text:'text-slate-700',    ring:'ring-slate-200/80',    dot:'bg-slate-400',    icon:'pencil',         pulse:false },
-        'Submitted':           { fill:'bg-slate-50',     text:'text-slate-700',    ring:'ring-slate-200',       dot:'bg-slate-500',    icon:null,             pulse:false },
-        'In progress':         { fill:'bg-sky-50',       text:'text-sky-800',      ring:'ring-sky-200',         dot:'bg-sky-500',      icon:null,             pulse:true  },
-        'In treatment':        { fill:'bg-violet-50',    text:'text-violet-800',   ring:'ring-violet-200',      dot:'bg-violet-500',   icon:null,             pulse:true  },
-        'Awaiting collection': { fill:'bg-amber-50',     text:'text-amber-800',    ring:'ring-amber-200',       dot:'bg-amber-500',    icon:null,             pulse:true  },
-        'Completed':           { fill:'bg-emerald-50',   text:'text-emerald-800',  ring:'ring-emerald-200',     dot:'bg-emerald-600',  icon:'check',          pulse:false },
+        'Draft':                    { fill:'bg-slate-100',    text:'text-slate-700',    ring:'ring-slate-200/80',    dot:'bg-slate-400',    icon:'pencil',         pulse:false },
+        'Created':                  { fill:'bg-slate-50',     text:'text-slate-700',    ring:'ring-slate-200',       dot:'bg-slate-500',    icon:null,             pulse:false },
+        'Cancelled':                { fill:'bg-red-50',       text:'text-red-800',      ring:'ring-red-200',         dot:'bg-red-500',      icon:'x-circle',       pulse:false },
+        'Accepted':                 { fill:'bg-sky-50',       text:'text-sky-800',      ring:'ring-sky-200',         dot:'bg-sky-500',      icon:null,             pulse:false },
+        'On Hold':                  { fill:'bg-amber-50',     text:'text-amber-800',    ring:'ring-amber-200',       dot:'bg-amber-500',    icon:'pause-circle',   pulse:false },
+        'Late Arrival':             { fill:'bg-orange-50',    text:'text-orange-800',   ring:'ring-orange-200',      dot:'bg-orange-500',   icon:'alert-triangle', pulse:false },
+        'Scheduled for Processing': { fill:'bg-indigo-50',    text:'text-indigo-800',   ring:'ring-indigo-200',      dot:'bg-indigo-500',   icon:null,             pulse:false },
+        'In Process':               { fill:'bg-violet-50',    text:'text-violet-800',   ring:'ring-violet-200',      dot:'bg-violet-500',   icon:null,             pulse:true  },
+        'Ready for Invoicing':      { fill:'bg-teal-50',      text:'text-teal-800',     ring:'ring-teal-200',        dot:'bg-teal-500',     icon:null,             pulse:false },
+        'Completed':                { fill:'bg-emerald-50',   text:'text-emerald-800',  ring:'ring-emerald-200',     dot:'bg-emerald-600',  icon:'check',          pulse:false },
       })[this.status] || { fill:'bg-slate-50', text:'text-slate-700', ring:'ring-slate-200', dot:'bg-slate-400', icon:null, pulse:false };
     },
     sizeCls(){
@@ -2006,8 +2010,9 @@ const DashboardPage = {
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
     activeOrders(){
-      const active = ['Submitted','In progress','In treatment','Awaiting collection'];
-      return state.orders.filter(o => active.includes(o.status));
+      // Active = anything not in a terminal state (Cancelled / Completed).
+      const terminal = ['Cancelled','Completed'];
+      return state.orders.filter(o => !terminal.includes(o.status));
     },
     completedOrders(){
       return state.orders.filter(o => o.status === 'Completed');
@@ -3073,7 +3078,7 @@ const FormRenderer = {
           consignee: this.resolveSourceLabel('consignees', this.data.consignee),
           goods: this.data.description || '—',
           doseKGy: this.data.doseKGy || null,
-          status: 'Submitted',
+          status: 'Created',
           bcSync: 'pending',
           exsitedId: 'EXS-' + Math.floor(400000 + Math.random()*10000),
           bcId: '—',
@@ -4036,14 +4041,24 @@ const OrderDetailPage = {
       if (this.order.bcSync === 'syncing')  e.push({ ts:this.order.submitted+'T09:14', label:'Business Central sync in progress', icon:'refresh-cw', done:false, pulse:true });
       if (this.order.bcSync === 'failed')   e.push({ ts:this.order.submitted+'T09:18', label:'BC sync failed — will retry', icon:'x-circle', done:false, fail:true });
       if (this.order.bcSync === 'dead')     e.push({ ts:this.order.submitted+'T09:40', label:'BC sync moved to dead-letter queue', icon:'alert-octagon', done:false, fail:true });
-      if (['In treatment','Awaiting collection','Completed'].includes(this.order.status))
-        e.push({ ts: this.order.collection+'T06:00', label:'Goods received at facility', icon:'package-check', done:true });
-      if (['In treatment','Completed'].includes(this.order.status))
-        e.push({ ts: this.order.collection+'T11:30', label:'Treatment started', icon:'radiation', done:true });
-      if (this.order.status === 'Awaiting collection')
-        e.push({ ts: this.order.collection+'T15:00', label:'Awaiting customer collection', icon:'truck', done:false });
+      // Map new domain statuses to timeline milestones.
+      // Cancelled is a terminal branch and produces no in-process events.
+      if (['Accepted','Scheduled for Processing','In Process','Ready for Invoicing','Completed','Late Arrival','On Hold'].includes(this.order.status))
+        e.push({ ts: this.order.collection+'T06:00', label:'Accepted by facility', icon:'check-circle', done:true });
+      if (this.order.status === 'On Hold')
+        e.push({ ts: this.order.collection+'T07:00', label:'Order placed on hold', icon:'pause-circle', done:false });
+      if (this.order.status === 'Late Arrival')
+        e.push({ ts: this.order.collection+'T07:30', label:'Arrival flagged late', icon:'alert-triangle', done:false });
+      if (['Scheduled for Processing','In Process','Ready for Invoicing','Completed'].includes(this.order.status))
+        e.push({ ts: this.order.collection+'T08:30', label:'Scheduled for processing', icon:'calendar', done:true });
+      if (['In Process','Ready for Invoicing','Completed'].includes(this.order.status))
+        e.push({ ts: this.order.collection+'T11:30', label:'Treatment in process', icon:'radiation', done:true, pulse: this.order.status === 'In Process' });
+      if (['Ready for Invoicing','Completed'].includes(this.order.status))
+        e.push({ ts: this.order.collection+'T15:00', label:'Ready for invoicing', icon:'receipt', done:true });
       if (this.order.status === 'Completed')
-        e.push({ ts: this.order.collection+'T16:00', label:'Released to consignee', icon:'badge-check', done:true });
+        e.push({ ts: this.order.collection+'T16:00', label:'Completed and released to consignee', icon:'badge-check', done:true });
+      if (this.order.status === 'Cancelled')
+        e.push({ ts: this.order.collection+'T08:00', label:'Order cancelled', icon:'x-circle', done:false, fail:true });
       return e;
     }
   },
