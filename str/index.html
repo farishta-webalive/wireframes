@@ -1500,22 +1500,6 @@ const LoginPage = {
       this.$router.push('/dashboard');
     }
   },
-  computed:{
-    siteStatus(){
-      return [
-        { code:'MER', name:'Merrifield',     state:'VIC', status:'Operational' },
-        { code:'DAN', name:'Dandenong',      state:'VIC', status:'Operational' },
-        { code:'WPK', name:'Wetherill Park', state:'NSW', status:'Operational' },
-        { code:'NAR', name:'Narangba',       state:'QLD', status:'Operational' },
-      ];
-    },
-    lastChecked(){
-      const d = new Date();
-      const hh = String(d.getHours()).padStart(2,'0');
-      const mm = String(d.getMinutes()).padStart(2,'0');
-      return hh+':'+mm+' AEST';
-    }
-  },
   template:`
   <div class="min-h-screen flex flex-col bg-slate-100 text-slate-800 text-base">
     <header class="bg-white border-b border-slate-200">
@@ -1537,16 +1521,12 @@ const LoginPage = {
       </div>
     </header>
 
-    <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-10 lg:py-14">
-      <div class="mb-8">
-        <h1 class="text-2xl font-semibold text-navy-900">Sign in to your account</h1>
-        <p class="text-[15px] text-slate-600 mt-1">Use the email address provided when your account was set up.</p>
-      </div>
-
+    <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-12 lg:py-16">
       <div class="grid lg:grid-cols-5 gap-6 items-start">
         <section class="lg:col-span-3 bg-white border border-slate-200 rounded-lg shadow-card">
-          <div class="px-7 pt-6 pb-2 border-b border-slate-100">
-            <h2 class="text-lg font-semibold text-navy-900">Sign in</h2>
+          <div class="px-7 pt-6 pb-4 border-b border-slate-100">
+            <h2 class="text-lg font-semibold text-navy-900">Sign in to your account</h2>
+            <p class="text-sm text-slate-600 mt-1">Use the email address provided when your account was set up.</p>
           </div>
           <form @submit.prevent="submit" class="px-7 py-6 space-y-5">
             <div>
@@ -1576,38 +1556,27 @@ const LoginPage = {
           </div>
         </section>
 
-        <aside class="lg:col-span-2 space-y-5">
-          <div class="bg-white border border-slate-200 rounded-lg shadow-card">
-            <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
-              <h3 class="text-sm font-semibold text-navy-900">Facility status</h3>
-              <span class="text-xs text-slate-500">Last checked {{ lastChecked }}</span>
+        <aside class="lg:col-span-2 bg-white border border-slate-200 rounded-lg shadow-card">
+          <div class="px-5 pt-6 pb-4 border-b border-slate-100">
+            <h3 class="text-lg font-semibold text-navy-900">Trouble signing in?</h3>
+            <p class="text-sm text-slate-600 mt-1">Call your home facility's customer service desk. We'll reset your password and walk you through the portal.</p>
+          </div>
+          <div class="px-5 py-5 space-y-4">
+            <div>
+              <div class="text-xs uppercase tracking-wide text-slate-500 font-medium mb-1">Customer service</div>
+              <a href="tel:1300783745" class="inline-flex items-center gap-2 text-base font-semibold text-navy-900 hover:underline">
+                <Icon name="phone" :size="18"/> 1300 STERILE
+              </a>
+              <div class="text-xs text-slate-500 mt-0.5">1300 783 745 · Mon–Fri 7am–6pm AEST</div>
             </div>
-            <table class="w-full text-sm">
-              <tbody>
-                <tr v-for="s in siteStatus" :key="s.code" class="border-b border-slate-100 last:border-0">
-                  <td class="px-5 py-2.5 text-slate-800 font-medium">{{ s.name }}</td>
-                  <td class="px-2 py-2.5 text-slate-500 text-xs">{{ s.state }}</td>
-                  <td class="px-5 py-2.5 text-right">
-                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
-                      <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
-                      {{ s.status }}
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-            <div class="px-5 py-2.5 bg-slate-50 border-t border-slate-100 rounded-b-lg text-xs text-slate-500">
-              View detailed <a class="text-teal-600 hover:underline cursor-pointer">service notices</a>.
+            <div class="border-t border-slate-100 pt-4">
+              <div class="text-xs uppercase tracking-wide text-slate-500 font-medium mb-1">Email</div>
+              <a class="text-sm text-teal-600 hover:underline cursor-pointer break-all">support@steritech.com.au</a>
+              <div class="text-xs text-slate-500 mt-0.5">Reply within one business day</div>
             </div>
           </div>
-
-          <div class="bg-white border border-slate-200 rounded-lg shadow-card p-5">
-            <h3 class="text-sm font-semibold text-navy-900">Trouble signing in?</h3>
-            <p class="text-sm text-slate-600 mt-1.5 leading-relaxed">Call your home facility's customer service desk. We can reset your password and walk you through the portal.</p>
-            <a href="tel:1300783745" class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-navy-900 hover:underline">
-              <Icon name="phone" :size="16"/> 1300 STERILE (1300 783 745)
-            </a>
-            <div class="text-xs text-slate-500 mt-1">Mon–Fri 7am–6pm AEST</div>
+          <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 rounded-b-lg text-xs text-slate-500">
+            Browse the <a class="text-teal-600 hover:underline cursor-pointer">help &amp; FAQs</a> first &mdash; most questions are answered there.
           </div>
         </aside>
       </div>
