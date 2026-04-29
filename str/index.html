@@ -1721,249 +1721,268 @@ const SignupPage = {
     },
   },
   template:`
-  <div class="min-h-screen bg-slate-50 py-10 px-6">
-    <div class="mx-auto max-w-6xl">
-      <!-- Brand row -->
-      <div class="flex items-center gap-3 mb-6">
-        <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-10 w-auto" draggable="false"/>
-        <div>
-          <div class="font-semibold text-navy-900">Steritech</div>
-          <div class="text-xs text-slate-500">{{ invited ? 'Confirm your account details' : 'Create a new customer account' }}</div>
+  <div class="min-h-screen flex flex-col bg-slate-100 text-slate-800 text-base">
+    <main class="flex-1 w-full max-w-xl mx-auto px-5 sm:px-6 pt-8 sm:pt-12 pb-10 space-y-5">
+        <h1 class="sr-only">Create a Steritech Customer Portal account</h1>
+
+        <div class="flex flex-col items-center text-center pb-2">
+          <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-14 w-auto mb-3" draggable="false"/>
+          <div class="text-[17px] font-semibold text-navy-900 tracking-tight">Steritech Customer Portal</div>
+          <div class="text-sm text-slate-500 mt-0.5">{{ invited ? 'Confirm your account details to get started' : 'Request a new customer account' }}</div>
         </div>
-        <!-- Prototype-only state simulator. Not part of the real auth UI. -->
+
         <button type="button" @click="toggleDemoInvite"
-          class="ml-auto inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-slate-500 hover:text-teal-600 border border-dashed border-slate-300 hover:border-teal-400 rounded-md px-2.5 py-1.5 transition"
+          class="self-end inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-500 hover:text-teal-600 border border-dashed border-slate-300 hover:border-teal-400 rounded-md px-2 py-1 transition focus-ring"
           :title="invited ? 'Switch to self-signup view' : 'Simulate arriving via an invite link'">
           <Icon name="eye" :size="12"/>
           <span>Demo:</span>
           <span class="text-slate-700 normal-case font-sans tracking-normal">{{ invited ? 'Invited' : 'Self-signup' }}</span>
           <Icon name="chevrons-up-down" :size="12" cls="text-slate-400"/>
         </button>
-      </div>
 
-      <!-- BC notice -->
-      <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-4 mb-6 flex gap-3">
-        <Icon name="info" :size="18" cls="mt-0.5 shrink-0"/>
-        <div class="text-sm">
-          <div class="font-medium">Business Central customer record will be created</div>
-          <div class="text-amber-800/80 text-xs mt-0.5">On approval, a customer record is created in Microsoft Dynamics 365 Business Central and a BC Customer Number is assigned. You'll see it on your profile within 1 business day.</div>
-        </div>
-      </div>
-
-      <!-- Step indicator (self-signup only, while reviewing) -->
-      <div v-if="!invited" class="flex items-center gap-3 mb-6 text-xs">
-        <div :class="['flex items-center gap-2 px-3 py-1.5 rounded-full border', step === 1 ? 'bg-teal-50 border-teal-200 text-teal-800' : 'bg-white border-slate-200 text-slate-500']">
-          <span :class="['w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold', step === 1 ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-500']">{{ step > 1 ? '✓' : '1' }}</span>
-          <span class="font-medium">Your details</span>
-        </div>
-        <div class="h-px flex-none w-8 bg-slate-200"></div>
-        <div :class="['flex items-center gap-2 px-3 py-1.5 rounded-full border', step === 2 ? 'bg-teal-50 border-teal-200 text-teal-800' : 'bg-white border-slate-200 text-slate-500']">
-          <span :class="['w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-semibold', step === 2 ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-500']">2</span>
-          <span class="font-medium">Review &amp; confirm</span>
-        </div>
-      </div>
-
-      <form v-if="step === 1" @submit.prevent="submit" class="space-y-8">
-
-        <!-- Step 1: Account details -->
-        <section class="bg-white border border-slate-200 rounded-xl shadow-card p-8">
-          <div class="mb-5">
-            <div class="text-xs font-semibold text-teal-600 uppercase tracking-wider mb-1">Step 1</div>
-            <h2 class="font-semibold text-navy-900 text-2xl leading-tight tracking-tight">{{ invited ? 'Confirm your details' : 'Account details' }}</h2>
-            <p class="mt-1 text-sm text-slate-500">{{ invited ? 'These were prefilled from your invitation. Just set a password to finish.' : 'Tell us about your company and primary contact.' }}</p>
+        <div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-md px-4 py-3 flex gap-3" role="note">
+          <Icon name="info" :size="18" cls="mt-0.5 shrink-0"/>
+          <div class="text-sm">
+            <div class="font-medium">Business Central record will be created</div>
+            <div class="text-amber-800/80 text-xs mt-0.5">A customer record is created in Microsoft Dynamics 365 Business Central and a BC Customer Number is assigned. You will see it on your profile within one business day.</div>
           </div>
+        </div>
 
-          <!-- Prefilled-from-invite banner -->
-          <div v-if="invited" class="mb-5 bg-slate-50 border border-slate-200 text-slate-700 rounded-lg p-3 flex gap-3 items-start">
-            <Icon name="check-circle" :size="16" cls="mt-0.5 shrink-0 text-teal-600"/>
-            <div class="text-sm">
-              <div>Prefilled from your invitation. <button type="button" class="text-teal-700 hover:underline font-medium" @click="$root.$el && void 0">Something wrong? Contact us.</button></div>
+        <div v-if="!invited" class="text-sm text-slate-600 flex items-baseline gap-2">
+          <span class="font-medium text-navy-900">Step {{ step }} of 2</span>
+          <span aria-hidden="true">&middot;</span>
+          <span>{{ step === 1 ? 'Your details and facility' : 'Review and confirm' }}</span>
+        </div>
+
+        <form v-if="step === 1" @submit.prevent="submit" class="space-y-5">
+          <section class="bg-white border border-slate-200 rounded-md">
+            <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-2 text-navy-900">
+                <Icon name="building-2" :size="18" cls="text-slate-500"/>
+                <h2 class="text-lg font-semibold">{{ invited ? 'Confirm your details' : 'Account details' }}</h2>
+              </div>
+              <p class="text-sm text-slate-600 mt-1">{{ invited ? 'These were prefilled from your invitation. Set a password to finish.' : 'Tell us about your company and primary contact.' }}</p>
             </div>
-          </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div><label class="block text-xs font-medium text-slate-700 mb-1">Company name</label><input v-model="f.company" :readonly="invited" required :class="['w-full rounded-lg border px-3 py-2 text-sm focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300']" placeholder="Pty Ltd"/></div>
-            <div><label class="block text-xs font-medium text-slate-700 mb-1">ABN</label><input v-model="f.abn" :readonly="invited" required :class="['w-full rounded-lg border px-3 py-2 text-sm focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300']" placeholder="00 000 000 000"/></div>
-            <div><label class="block text-xs font-medium text-slate-700 mb-1">Contact name</label><input v-model="f.contact" :readonly="invited" required :class="['w-full rounded-lg border px-3 py-2 text-sm focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300']"/></div>
-            <div><label class="block text-xs font-medium text-slate-700 mb-1">Phone</label><input v-model="f.phone" :readonly="invited" required :class="['w-full rounded-lg border px-3 py-2 text-sm focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300']" placeholder="+61 …"/></div>
-            <div class="md:col-span-2"><label class="block text-xs font-medium text-slate-700 mb-1">Email</label><input v-model="f.email" type="email" :readonly="invited" required :class="['w-full rounded-lg border px-3 py-2 text-sm focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300']"/></div>
-            <div class="md:col-span-2"><label class="block text-xs font-medium text-slate-700 mb-1">{{ invited ? 'Set a password' : 'Password' }}</label><input v-model="f.password" type="password" required class="w-full rounded-lg border border-slate-300 px-3 py-2 text-sm focus-ring" :placeholder="invited ? 'Choose a password to finish setup' : ''"/></div>
-            <div class="md:col-span-2">
-              <label class="block text-xs font-medium text-slate-700 mb-1">Business address</label>
-              <input v-model="f.address" :readonly="invited" required :class="['w-full rounded-lg border px-3 py-2 text-sm focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300']" placeholder="Street, Suburb, State, Postcode"/>
-              <div v-if="!invited" class="mt-1 text-[11px] text-slate-500">Used to suggest your nearest facility — try typing VIC, NSW, or QLD.</div>
+            <div v-if="invited" class="mx-5 sm:mx-7 mt-5 bg-slate-50 border border-slate-200 text-slate-700 rounded-md p-3 flex gap-3 items-start">
+              <Icon name="check-circle" :size="16" cls="mt-0.5 shrink-0 text-teal-600"/>
+              <div class="text-sm">Prefilled from your invitation. <a href="mailto:support@steritech.com.au" class="text-teal-700 hover:underline font-medium">Something wrong? Contact us.</a></div>
             </div>
-          </div>
-        </section>
 
-        <!-- Step 2: Choose facility -->
-        <section class="bg-white border border-slate-200 rounded-xl shadow-card p-8">
-          <div class="mb-5">
-            <div class="text-xs font-semibold text-teal-600 uppercase tracking-wider mb-1">Step 2</div>
-            <h2 class="font-semibold text-navy-900 text-2xl leading-tight tracking-tight">{{ invited ? 'Your assigned facility' : 'Choose facility' }}</h2>
-            <p class="mt-1 text-sm text-slate-500">{{ invited ? 'This is the facility your account manager assigned. You\u2019ll see its forms and services after signing in.' : 'We\u2019ll show you the forms and services available at this facility.' }}</p>
-          </div>
-
-          <!-- Invited: read-only summary card. No grid, no choice. -->
-          <template v-if="invited">
-            <div class="rounded-xl border border-slate-200 bg-slate-50/60 p-6">
-              <div class="flex items-start gap-5">
-                <div class="shrink-0 w-12 h-12 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
-                  <Icon name="map-pin" :size="22" cls="text-teal-600"/>
+            <div class="px-5 sm:px-7 py-6 space-y-5">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <label for="signup-company" class="block text-sm font-medium text-slate-800 mb-1.5">Company name <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-company" v-model="f.company" :readonly="invited" required aria-required="true" placeholder="e.g. BioSeq Pty Ltd"
+                         :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
                 </div>
-                <div class="flex-1 min-w-0">
-                  <div class="flex items-center gap-2">
-                    <div class="text-[11px] font-mono text-slate-500 tracking-wider">{{ assignedFacility.code }}</div>
-                    <span class="inline-flex items-center gap-1 text-[11px] font-medium text-sky-800 bg-sky-100 border border-sky-200 rounded-full px-2 py-0.5">
-                      <Icon name="lock" :size="10"/> Set by admin
-                    </span>
+                <div>
+                  <label for="signup-abn" class="block text-sm font-medium text-slate-800 mb-1.5">ABN <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-abn" v-model="f.abn" :readonly="invited" required aria-required="true" placeholder="00 000 000 000" inputmode="numeric"
+                         :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
+                </div>
+                <div>
+                  <label for="signup-contact" class="block text-sm font-medium text-slate-800 mb-1.5">Primary contact <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-contact" v-model="f.contact" :readonly="invited" required aria-required="true" placeholder="Full name" autocomplete="name"
+                         :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
+                </div>
+                <div>
+                  <label for="signup-phone" class="block text-sm font-medium text-slate-800 mb-1.5">Phone <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-phone" v-model="f.phone" :readonly="invited" required aria-required="true" type="tel" autocomplete="tel" placeholder="+61 ..."
+                         :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
+                </div>
+              </div>
+
+              <div>
+                <label for="signup-email" class="block text-sm font-medium text-slate-800 mb-1.5">Email address <span class="text-red-600" aria-hidden="true">*</span></label>
+                <input id="signup-email" v-model="f.email" :readonly="invited" required aria-required="true" type="email" autocomplete="email" placeholder="name@company.com.au"
+                       :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
+                <p class="mt-1 text-sm text-slate-500">You will use this email to sign in. Invoices and order updates will go here too.</p>
+              </div>
+
+              <div>
+                <label for="signup-password" class="block text-sm font-medium text-slate-800 mb-1.5">{{ invited ? 'Set a password' : 'Choose a password' }} <span class="text-red-600" aria-hidden="true">*</span></label>
+                <input id="signup-password" v-model="f.password" required aria-required="true" type="password" autocomplete="new-password"
+                       :placeholder="invited ? 'Choose a password to finish setup' : 'At least 8 characters'"
+                       class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 focus-ring"/>
+              </div>
+
+              <div>
+                <label for="signup-address" class="block text-sm font-medium text-slate-800 mb-1.5">Business address <span class="text-red-600" aria-hidden="true">*</span></label>
+                <input id="signup-address" v-model="f.address" :readonly="invited" required aria-required="true" autocomplete="street-address" placeholder="Street, Suburb, State, Postcode"
+                       :class="['w-full h-11 rounded-md border px-3 text-base focus-ring', invited ? 'border-slate-200 bg-slate-50 text-slate-700' : 'border-slate-300 text-slate-900']"/>
+                <p v-if="!invited" class="mt-1 text-sm text-slate-500">Used to suggest your nearest facility &mdash; try typing VIC, NSW, or QLD.</p>
+              </div>
+            </div>
+          </section>
+
+          <section class="bg-white border border-slate-200 rounded-md">
+            <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-2 text-navy-900">
+                <Icon name="map-pin" :size="18" cls="text-slate-500"/>
+                <h2 class="text-lg font-semibold">{{ invited ? 'Your assigned facility' : 'Choose your home facility' }}</h2>
+              </div>
+              <p class="text-sm text-slate-600 mt-1">{{ invited ? 'Your account manager assigned this facility. You can request a change later.' : 'You will see the forms and services available at this facility after signing in.' }}</p>
+            </div>
+
+            <div v-if="invited" class="px-5 sm:px-7 py-6">
+              <div class="rounded-md border border-slate-200 bg-slate-50 p-5">
+                <div class="flex flex-wrap items-center gap-2 mb-1">
+                  <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ assignedFacility.code }}</span>
+                  <span class="inline-flex items-center gap-1 text-[11px] font-medium text-sky-800 bg-sky-100 border border-sky-200 rounded-full px-2 py-0.5">
+                    <Icon name="lock" :size="10"/> Set by admin
+                  </span>
+                </div>
+                <div class="text-base font-semibold text-navy-900">{{ assignedFacility.name }}, {{ assignedFacility.state }}</div>
+                <div class="mt-3">
+                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium mb-1.5">Services available here</div>
+                  <div class="flex flex-wrap gap-1.5">
+                    <TreatmentChip v-for="s in services[assignedFacility.code]" :key="s" :treatment="s" :small="true"/>
                   </div>
-                  <div class="mt-1 font-semibold text-navy-900 text-xl leading-tight">{{ assignedFacility.name }}</div>
-                  <div class="text-sm text-slate-600">{{ assignedFacility.state }}</div>
-                  <div class="mt-4">
-                    <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-1.5">Services available here</div>
-                    <div class="flex flex-wrap gap-1.5">
-                      <TreatmentChip v-for="s in services[assignedFacility.code]" :key="s" :treatment="s" :small="true"/>
+                </div>
+                <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-500">
+                  Assigned by <span class="font-medium text-slate-700">{{ invite.invitedBy }}</span>. Need a different facility? <a href="mailto:support@steritech.com.au" class="text-teal-600 hover:underline">Contact your account manager</a>.
+                </div>
+              </div>
+            </div>
+
+            <div v-else class="px-5 sm:px-7 py-6 space-y-4">
+              <div v-if="!addressHasSignal" class="bg-slate-50 border border-slate-200 text-slate-600 rounded-md px-3 py-2.5 flex gap-2 items-start text-sm" role="note">
+                <Icon name="info" :size="16" cls="mt-0.5 shrink-0 text-slate-400"/>
+                <div>Enter your business address above to see distances and get a recommendation.</div>
+              </div>
+              <div v-else-if="autoSelectedNote || (autoFromAddress && !manualPick)" class="bg-teal-50 border border-teal-200 text-teal-900 rounded-md px-3 py-2.5 flex gap-2 items-start text-sm" role="status" aria-live="polite">
+                <Icon name="info" :size="16" cls="mt-0.5 shrink-0 text-teal-700"/>
+                <div>Auto-selected based on your address &mdash; you can change this later in Settings.</div>
+              </div>
+
+              <fieldset class="space-y-2.5">
+                <legend class="sr-only">Available facilities</legend>
+                <label v-for="fac in facilities" :key="fac.code"
+                  :for="'signup-fac-'+fac.code"
+                  :class="['flex items-start gap-3 rounded-md border p-4 cursor-pointer transition',
+                    effectiveSelected === fac.code
+                      ? 'border-teal-500 bg-teal-50/40'
+                      : 'border-slate-200 bg-white hover:border-slate-300']">
+                  <input type="radio" name="signup-facility" :id="'signup-fac-'+fac.code" :value="fac.code"
+                         :checked="effectiveSelected === fac.code"
+                         @change="pickCard(fac.code)"
+                         class="mt-1 h-4 w-4 text-teal-600 border-slate-300 focus:ring-teal-500"/>
+                  <div class="flex-1 min-w-0">
+                    <div class="flex flex-wrap items-baseline gap-x-2">
+                      <span class="text-base font-semibold text-navy-900">{{ fac.name }}</span>
+                      <span class="text-sm text-slate-500">{{ fac.state }}</span>
+                      <span class="text-xs font-mono text-slate-400">{{ fac.code }}</span>
+                      <span v-if="!manualPick && autoFromAddress === fac.code" class="ml-auto inline-flex items-center gap-1 text-[11px] font-medium text-teal-800 bg-teal-100 border border-teal-200 rounded-full px-2 py-0.5">
+                        Suggested
+                      </span>
+                    </div>
+                    <div class="text-sm text-slate-600 mt-0.5 inline-flex items-center gap-1">
+                      <Icon name="map-pin" :size="12" cls="text-slate-400"/>
+                      <template v-if="addressHasSignal">~{{ distance[fac.code] }} km from your address</template>
+                      <template v-else>{{ fac.address.split(',').slice(-2,-1)[0]?.trim() || fac.state }}</template>
+                    </div>
+                    <div class="mt-2 flex flex-wrap gap-1.5">
+                      <TreatmentChip v-for="s in services[fac.code]" :key="s" :treatment="s" :small="true"/>
                     </div>
                   </div>
-                  <div class="mt-4 text-xs text-slate-500">
-                    Assigned by <span class="font-medium text-slate-700">{{ invite.invitedBy }}</span>. Need a different facility? Contact your Steritech account manager.
+                </label>
+              </fieldset>
+            </div>
+          </section>
+
+          <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-2">
+            <router-link to="/login" class="text-sm text-slate-600 hover:text-teal-600 inline-flex items-center gap-1.5 py-2 -my-2">
+              <Icon name="arrow-left" :size="14"/> Back to sign in
+            </router-link>
+            <Btn size="lg" :block="true" iconRight="arrow-right" @click="submit" class="sm:!w-auto">{{ invited ? 'Set password and continue' : 'Review your details' }}</Btn>
+          </div>
+        </form>
+
+        <div v-if="step === 2 && !invited" class="space-y-5">
+          <section class="bg-white border border-slate-200 rounded-md">
+            <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-2 text-navy-900">
+                <Icon name="clipboard-check" :size="18" cls="text-slate-500"/>
+                <h2 class="text-lg font-semibold">Review and confirm</h2>
+              </div>
+              <p class="text-sm text-slate-600 mt-1">Please double-check your details before we create your account. Changes after this need a Steritech admin.</p>
+            </div>
+
+            <div class="px-5 sm:px-7 py-6 space-y-5">
+              <div class="rounded-md border border-slate-200">
+                <div class="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+                  <div class="text-sm font-medium text-navy-900">Company and contact</div>
+                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium inline-flex items-center gap-1 py-1 -my-1">
+                    <Icon name="pencil" :size="12"/> Edit
+                  </button>
+                </div>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 px-4 py-4 text-sm">
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Company</dt><dd class="text-navy-900 font-medium">{{ f.company || '&mdash;' }}</dd></div>
+                  <div><dt class="text-xs text-slate-500 mb-0.5">ABN</dt><dd class="text-navy-900 font-mono text-xs">{{ f.abn || '&mdash;' }}</dd></div>
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Contact</dt><dd class="text-navy-900 font-medium">{{ f.contact || '&mdash;' }}</dd></div>
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Phone</dt><dd class="text-navy-900">{{ f.phone || '&mdash;' }}</dd></div>
+                  <div class="sm:col-span-2"><dt class="text-xs text-slate-500 mb-0.5">Email (sign-in)</dt><dd class="text-navy-900">{{ f.email || '&mdash;' }}</dd></div>
+                  <div class="sm:col-span-2"><dt class="text-xs text-slate-500 mb-0.5">Business address</dt><dd class="text-navy-900">{{ f.address || '&mdash;' }}</dd></div>
+                </dl>
+              </div>
+
+              <div class="rounded-md border border-slate-200">
+                <div class="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50">
+                  <div class="text-sm font-medium text-navy-900">Home facility</div>
+                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium inline-flex items-center gap-1 py-1 -my-1">
+                    <Icon name="pencil" :size="12"/> Change
+                  </button>
+                </div>
+                <div class="px-4 py-4">
+                  <div class="text-base font-semibold text-navy-900">{{ assignedFacility.name }}, {{ assignedFacility.state }}</div>
+                  <div class="text-xs font-mono text-slate-500 mt-0.5">{{ assignedFacility.code }}</div>
+                  <div class="mt-2 flex flex-wrap gap-1.5">
+                    <TreatmentChip v-for="s in services[assignedFacility.code]" :key="s" :treatment="s" :small="true"/>
                   </div>
                 </div>
               </div>
-            </div>
-          </template>
 
-          <!-- Self-signup: full picker grid + auto-selected note. -->
-          <template v-else>
-            <div v-if="!addressHasSignal" class="mb-4 bg-slate-50 border border-slate-200 text-slate-600 rounded-lg p-3 flex gap-3 items-start">
-              <Icon name="info" :size="16" cls="mt-0.5 shrink-0 text-slate-400"/>
-              <div class="text-sm">Enter your business address above to see distance to each facility and get a recommendation.</div>
-            </div>
-            <div v-else-if="autoSelectedNote || (autoFromAddress && !manualPick)" class="mb-4 bg-teal-50 border border-teal-200 text-teal-900 rounded-lg p-3 flex gap-3 items-start">
-              <Icon name="info" :size="16" cls="mt-0.5 shrink-0 text-teal-700"/>
-              <div class="text-sm">Auto-selected based on your address — change later in Settings.</div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <button v-for="fac in facilities" :key="fac.code" type="button"
-                @click="pickCard(fac.code)"
-                :class="['text-left rounded-xl border-2 p-5 transition relative cursor-pointer',
-                  effectiveSelected === fac.code
-                    ? 'border-teal-500 bg-teal-50/40 shadow-card'
-                    : 'border-slate-200 bg-white hover:border-slate-300']">
-                <!-- Selected check -->
-                <div v-if="effectiveSelected === fac.code" class="absolute top-3 right-3 w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center">
-                  <Icon name="check" :size="14"/>
-                </div>
-                <div class="text-[11px] font-mono text-slate-500 tracking-wider">{{ fac.code }}</div>
-                <div class="mt-1 font-semibold text-navy-900 text-base leading-tight">{{ fac.name }}</div>
-                <div class="text-xs text-slate-500">{{ fac.state }}</div>
-                <div class="mt-3 inline-flex items-center gap-1 text-xs text-slate-600">
-                  <Icon name="map-pin" :size="12" cls="text-slate-400"/>
-                  <template v-if="addressHasSignal">~{{ distance[fac.code] }} km from your address</template>
-                  <template v-else><span class="text-slate-500">{{ fac.address.split(',').slice(-2,-1)[0]?.trim() || fac.state }}</span></template>
-                </div>
-                <div class="mt-3 flex flex-wrap gap-1.5">
-                  <TreatmentChip v-for="s in services[fac.code]" :key="s" :treatment="s" :small="true"/>
-                </div>
-              </button>
-            </div>
-          </template>
-        </section>
-
-        <!-- Submit -->
-        <div class="flex items-center justify-between">
-          <router-link to="/login" class="text-sm text-slate-600 hover:text-teal-600">← Back to sign in</router-link>
-          <Btn size="lg" iconRight="arrow-right" @click="submit">{{ invited ? 'Set password & continue' : 'Review your details' }}</Btn>
-        </div>
-      </form>
-
-      <!-- Step 2: Acknowledgement / review (self-signup only) -->
-      <div v-if="step === 2 && !invited" class="space-y-6">
-        <section class="bg-white border border-slate-200 rounded-xl shadow-card p-8">
-          <div class="mb-6">
-            <div class="text-xs font-semibold text-teal-600 uppercase tracking-wider mb-1">Step 2 of 2</div>
-            <h2 class="font-semibold text-navy-900 text-2xl leading-tight tracking-tight">Review &amp; confirm</h2>
-            <p class="mt-1 text-sm text-slate-500">Please double-check your details before we create your account. Any changes after this need a Steritech admin.</p>
-          </div>
-
-          <!-- Account summary -->
-          <div class="rounded-xl border border-slate-200 divide-y divide-slate-100">
-            <div class="flex items-center justify-between px-5 py-4">
-              <div class="text-sm font-medium text-navy-900">Company &amp; contact</div>
-              <button type="button" @click="editFromReview" class="text-xs text-teal-700 hover:underline font-medium inline-flex items-center gap-1">
-                <Icon name="pencil" :size="12"/> Edit
-              </button>
-            </div>
-            <dl class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3 px-5 py-4 text-sm">
-              <div><dt class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Company</dt><dd class="text-navy-900">{{ f.company || '—' }}</dd></div>
-              <div><dt class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">ABN</dt><dd class="text-navy-900 font-mono text-xs">{{ f.abn || '—' }}</dd></div>
-              <div><dt class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Contact</dt><dd class="text-navy-900">{{ f.contact || '—' }}</dd></div>
-              <div><dt class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Phone</dt><dd class="text-navy-900">{{ f.phone || '—' }}</dd></div>
-              <div class="md:col-span-2"><dt class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Email (sign-in)</dt><dd class="text-navy-900">{{ f.email || '—' }}</dd></div>
-              <div class="md:col-span-2"><dt class="text-[11px] font-medium text-slate-500 uppercase tracking-wider">Business address</dt><dd class="text-navy-900">{{ f.address || '—' }}</dd></div>
-            </dl>
-          </div>
-
-          <!-- Facility summary -->
-          <div class="mt-5 rounded-xl border border-slate-200">
-            <div class="flex items-center justify-between px-5 py-4 border-b border-slate-100">
-              <div class="text-sm font-medium text-navy-900">Selected facility</div>
-              <button type="button" @click="editFromReview" class="text-xs text-teal-700 hover:underline font-medium inline-flex items-center gap-1">
-                <Icon name="pencil" :size="12"/> Change
-              </button>
-            </div>
-            <div class="px-5 py-4 flex items-start gap-4">
-              <div class="shrink-0 w-10 h-10 rounded-lg bg-teal-50 border border-teal-200 flex items-center justify-center">
-                <Icon name="map-pin" :size="18" cls="text-teal-600"/>
+              <div class="rounded-md border border-slate-200">
+                <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50 text-sm font-medium text-navy-900">What happens after you confirm</div>
+                <ul class="px-4 py-4 text-sm text-slate-700 space-y-3">
+                  <li class="flex gap-2.5"><Icon name="check" :size="16" cls="mt-0.5 shrink-0 text-emerald-600"/><div><span class="font-medium text-navy-900">Account created.</span> You will be signed in and can browse forms for {{ assignedFacility.name }}.</div></li>
+                  <li class="flex gap-2.5"><Icon name="clock" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><div><span class="font-medium text-navy-900">BC record provisioned within one business day.</span> A Microsoft Dynamics 365 BC customer record is created and a BC Customer Number is added to your profile.</div></li>
+                  <li class="flex gap-2.5"><Icon name="mail" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><div><span class="font-medium text-navy-900">Email confirmation when billing is enabled.</span> Submitting orders unlocks once your BC record is active. We will email you when that is done.</div></li>
+                </ul>
               </div>
-              <div class="flex-1 min-w-0">
-                <div class="text-[11px] font-mono text-slate-500 tracking-wider">{{ assignedFacility.code }}</div>
-                <div class="font-semibold text-navy-900">{{ assignedFacility.name }}, {{ assignedFacility.state }}</div>
-                <div class="mt-2 flex flex-wrap gap-1.5">
-                  <TreatmentChip v-for="s in services[assignedFacility.code]" :key="s" :treatment="s" :small="true"/>
+
+              <label for="signup-ack" class="flex items-start gap-3 p-4 rounded-md border border-slate-200 bg-slate-50 cursor-pointer">
+                <input id="signup-ack" type="checkbox" v-model="acknowledged" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"/>
+                <div class="text-sm text-slate-700">
+                  I confirm the details above are correct and I am authorised to create a Steritech account on behalf of <span class="font-medium text-navy-900">{{ f.company || 'this company' }}</span>.
                 </div>
-              </div>
+              </label>
             </div>
+          </section>
+
+          <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-2">
+            <Btn kind="ghost" icon="arrow-left" @click="editFromReview">Back to edit</Btn>
+            <Btn size="lg" :block="true" iconRight="check" :disabled="!acknowledged" @click="finalizeAccount" class="sm:!w-auto">Confirm and create account</Btn>
           </div>
-
-          <!-- What happens next -->
-          <div class="mt-6">
-            <div class="text-[11px] font-medium text-slate-500 uppercase tracking-wider mb-3">What happens next</div>
-            <ol class="space-y-3">
-              <li class="flex gap-3">
-                <span class="shrink-0 w-6 h-6 rounded-full bg-teal-600 text-white text-[11px] font-semibold flex items-center justify-center">1</span>
-                <div class="text-sm text-slate-700"><span class="font-medium text-navy-900">Account created.</span> You'll be signed in immediately and can browse forms for {{ assignedFacility.name }}.</div>
-              </li>
-              <li class="flex gap-3">
-                <span class="shrink-0 w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[11px] font-semibold flex items-center justify-center">2</span>
-                <div class="text-sm text-slate-700"><span class="font-medium text-navy-900">Business Central record provisioned.</span> Within 1 business day a Microsoft Dynamics 365 BC customer record is created and a BC Customer Number is assigned to your profile.</div>
-              </li>
-              <li class="flex gap-3">
-                <span class="shrink-0 w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[11px] font-semibold flex items-center justify-center">3</span>
-                <div class="text-sm text-slate-700"><span class="font-medium text-navy-900">First submission unlocks billing.</span> Submitting orders is enabled once the BC record is active. We'll email you when that's done.</div>
-              </li>
-            </ol>
-          </div>
-
-          <!-- Acknowledgement checkbox -->
-          <label class="mt-6 flex items-start gap-3 p-4 rounded-lg border border-slate-200 bg-slate-50 cursor-pointer">
-            <input type="checkbox" v-model="acknowledged" class="mt-0.5 w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"/>
-            <div class="text-sm text-slate-700">
-              I confirm the details above are correct and I'm authorised to create a Steritech account on behalf of <span class="font-medium text-navy-900">{{ f.company || 'this company' }}</span>.
-            </div>
-          </label>
-        </section>
-
-        <div class="flex items-center justify-between">
-          <Btn kind="ghost" icon="arrow-left" @click="editFromReview">Back to edit</Btn>
-          <Btn size="lg" iconRight="check" :disabled="!acknowledged" @click="finalizeAccount">Confirm &amp; create account</Btn>
         </div>
-      </div>
-    </div>
+
+        <div class="pt-2 text-center text-xs text-slate-500 leading-relaxed">
+          <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
+            <a href="#" class="hover:text-slate-700">Terms of use</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="#" class="hover:text-slate-700">Privacy</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="#" class="hover:text-slate-700">Service notices</a>
+            <span aria-hidden="true">&middot;</span>
+            <a href="#" class="hover:text-slate-700">Help &amp; FAQs</a>
+          </div>
+          <div class="mt-1.5 text-slate-400">&copy; Steritech Pty Ltd &middot; Customer Portal v2.0</div>
+        </div>
+    </main>
   </div>`,
 };
+
 
 /* ---------- Page: Dashboard ------------------------------------------------- */
 
