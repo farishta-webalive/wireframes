@@ -1498,83 +1498,131 @@ const LoginPage = {
       state.authed = true;
       state.role = 'customer';
       this.$router.push('/dashboard');
-    },
-    pulseGlyph(p){ return p==='high' ? '●●●' : p==='med' ? '●●○' : '●○○'; }
+    }
   },
   computed:{
-    today(){
+    siteStatus(){
       return [
-        { code:'MER', stat:'12 cycles in flight',          pulse:'high' },
-        { code:'DAN', stat:'7 pickups scheduled today',    pulse:'med'  },
-        { code:'WPK', stat:'2 awaiting your sign-off',     pulse:'low'  },
-        { code:'NAR', stat:'1 GMP audit window this week', pulse:'low'  },
+        { code:'MER', name:'Merrifield',     state:'VIC', status:'Operational' },
+        { code:'DAN', name:'Dandenong',      state:'VIC', status:'Operational' },
+        { code:'WPK', name:'Wetherill Park', state:'NSW', status:'Operational' },
+        { code:'NAR', name:'Narangba',       state:'QLD', status:'Operational' },
       ];
+    },
+    lastChecked(){
+      const d = new Date();
+      const hh = String(d.getHours()).padStart(2,'0');
+      const mm = String(d.getMinutes()).padStart(2,'0');
+      return hh+':'+mm+' AEST';
     }
   },
   template:`
-  <div class="min-h-screen flex flex-col bg-navy-900 text-white relative overflow-hidden">
-    <div aria-hidden="true" class="absolute inset-0 opacity-[0.05]" style="background-image: radial-gradient(circle at 1px 1px, white 1px, transparent 0); background-size: 24px 24px;"></div>
-    <div aria-hidden="true" class="absolute -top-40 -right-40 h-[520px] w-[520px] rounded-full bg-teal-600/15 blur-3xl"></div>
-
-    <header class="relative flex items-center justify-between px-6 sm:px-10 lg:px-14 pt-7 pb-3">
-      <img src="assets/steritech-logo-white.png" alt="Steritech" class="h-8 w-auto" draggable="false"/>
-      <div class="hidden sm:flex items-center gap-2 text-[10px] uppercase tracking-[0.22em] text-navy-100/55">
-        <span class="inline-block h-1.5 w-1.5 rounded-full bg-emerald-400 animate-syncpulse"></span>
-        Portal v2 · au-east · all systems nominal
+  <div class="min-h-screen flex flex-col bg-slate-100 text-slate-800 text-base">
+    <header class="bg-white border-b border-slate-200">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-9 w-auto" draggable="false"/>
+          <div class="hidden sm:block">
+            <div class="text-[15px] font-semibold text-navy-900 leading-tight">Steritech Customer Portal</div>
+            <div class="text-xs text-slate-500">Treatment requests · Order tracking · Account management</div>
+          </div>
+        </div>
+        <div class="flex items-center gap-5 text-sm">
+          <a href="tel:1300783745" class="hidden md:inline-flex items-center gap-1.5 text-slate-700 hover:text-navy-900">
+            <Icon name="phone" :size="16"/>
+            <span>1300 STERILE</span>
+          </a>
+          <a class="text-teal-600 hover:underline cursor-pointer font-medium">Help &amp; FAQs</a>
+        </div>
       </div>
     </header>
 
-    <main class="relative flex-1 grid lg:grid-cols-12 gap-x-10 gap-y-12 px-6 sm:px-10 lg:px-14 pb-10 pt-6">
-      <section class="lg:col-span-7 lg:col-start-1 flex flex-col justify-center max-w-2xl">
-        <div class="text-[11px] uppercase tracking-[0.3em] text-teal-300/90 mb-5">Irradiation · Ethylene Oxide · GMP Packing</div>
-        <h1 class="text-[2.5rem] lg:text-[3.25rem] font-semibold leading-[1.04] tracking-tight">
-          One desk for<br/>
-          <span class="text-teal-400">every cycle, every chamber,</span><br/>
-          <span class="text-teal-400">every facility.</span>
-        </h1>
+    <main class="flex-1 max-w-5xl w-full mx-auto px-6 py-10 lg:py-14">
+      <div class="mb-8">
+        <h1 class="text-2xl font-semibold text-navy-900">Sign in to your account</h1>
+        <p class="text-[15px] text-slate-600 mt-1">Use the email address provided when your account was set up.</p>
+      </div>
 
-        <div class="mt-12 max-w-md border-l border-teal-500/30 pl-6 space-y-4">
-          <div class="flex items-center gap-2 text-[11px] uppercase tracking-[0.22em] text-navy-100/45">
-            <span>Today across your sites</span>
-            <span class="font-mono text-navy-100/30">·</span>
-            <span class="font-mono text-navy-100/35">{{ new Date().toISOString().slice(0,10) }}</span>
+      <div class="grid lg:grid-cols-5 gap-6 items-start">
+        <section class="lg:col-span-3 bg-white border border-slate-200 rounded-lg shadow-card">
+          <div class="px-7 pt-6 pb-2 border-b border-slate-100">
+            <h2 class="text-lg font-semibold text-navy-900">Sign in</h2>
           </div>
-          <ul class="space-y-2.5">
-            <li v-for="t in today" :key="t.code" class="flex items-baseline gap-4 text-[13px] text-navy-100/85">
-              <span class="font-mono font-semibold text-teal-300 w-10 shrink-0">{{ t.code }}</span>
-              <span class="font-mono text-[10px] text-teal-400/70 w-9 shrink-0 tracking-wider">{{ pulseGlyph(t.pulse) }}</span>
-              <span class="leading-snug">{{ t.stat }}</span>
-            </li>
-          </ul>
-        </div>
-      </section>
-
-      <aside class="lg:col-span-4 lg:col-start-9 flex lg:items-end">
-        <form @submit.prevent="submit" class="w-full bg-white/[0.04] backdrop-blur-sm border border-white/10 rounded-2xl p-7 ring-1 ring-white/5 shadow-2xl shadow-black/20">
-          <div class="text-[11px] uppercase tracking-[0.25em] text-teal-300/90 mb-1">Customer sign-in</div>
-          <h2 class="text-xl font-semibold mb-6 leading-tight">Pick up where you<br/>left off.</h2>
-          <div class="space-y-4">
+          <form @submit.prevent="submit" class="px-7 py-6 space-y-5">
             <div>
-              <label class="block text-[10px] font-medium text-navy-100/65 mb-1.5 uppercase tracking-[0.12em]">Work email</label>
-              <input v-model="email" type="email" class="w-full rounded-lg bg-navy-800/70 border border-white/10 px-3 py-2.5 text-sm text-white placeholder:text-navy-100/35 focus-ring" />
+              <label class="block text-sm font-medium text-slate-800 mb-1.5">Email address <span class="text-red-600">*</span></label>
+              <input v-model="email" type="email" required autocomplete="username"
+                     class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 placeholder:text-slate-400 focus-ring" />
+              <p class="mt-1 text-sm text-slate-500">Same email you use for invoices and order updates.</p>
             </div>
             <div>
               <div class="flex items-center justify-between mb-1.5">
-                <label class="text-[10px] font-medium text-navy-100/65 uppercase tracking-[0.12em]">Password</label>
-                <a class="text-[11px] text-teal-300 hover:underline cursor-pointer">Reset</a>
+                <label class="text-sm font-medium text-slate-800">Password <span class="text-red-600">*</span></label>
+                <a class="text-sm text-teal-600 hover:underline cursor-pointer">Forgot your password?</a>
               </div>
-              <input v-model="password" type="password" class="w-full rounded-lg bg-navy-800/70 border border-white/10 px-3 py-2.5 text-sm text-white focus-ring" />
+              <input v-model="password" type="password" required autocomplete="current-password"
+                     class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 focus-ring" />
             </div>
-            <label class="flex items-center gap-2 text-[11px] text-navy-100/60 select-none"><input type="checkbox" class="rounded border-white/20 bg-navy-800/70"/> Keep me on this device</label>
-            <div v-if="err" class="text-xs text-red-300">{{ err }}</div>
-            <Btn size="lg" :block="true" iconRight="arrow-right">Sign in</Btn>
+            <label class="flex items-center gap-2.5 text-sm text-slate-700 select-none">
+              <input type="checkbox" class="h-4 w-4 rounded border-slate-300"/> Remember this computer
+            </label>
+            <div v-if="err" class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{{ err }}</div>
+            <div class="pt-1">
+              <Btn size="lg" :block="true">Sign in</Btn>
+            </div>
+          </form>
+          <div class="px-7 py-4 bg-slate-50 border-t border-slate-100 rounded-b-lg text-sm text-slate-700">
+            Don't have an account yet? <router-link to="/signup" class="text-teal-600 hover:underline font-medium">Request access</router-link> — your home facility will set you up.
           </div>
-          <div class="mt-6 pt-5 border-t border-white/10 text-[12px] text-navy-100/60 text-center">
-            New customer? <router-link to="/signup" class="text-teal-300 hover:underline font-medium">Request access</router-link>
+        </section>
+
+        <aside class="lg:col-span-2 space-y-5">
+          <div class="bg-white border border-slate-200 rounded-lg shadow-card">
+            <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+              <h3 class="text-sm font-semibold text-navy-900">Facility status</h3>
+              <span class="text-xs text-slate-500">Last checked {{ lastChecked }}</span>
+            </div>
+            <table class="w-full text-sm">
+              <tbody>
+                <tr v-for="s in siteStatus" :key="s.code" class="border-b border-slate-100 last:border-0">
+                  <td class="px-5 py-2.5 text-slate-800 font-medium">{{ s.name }}</td>
+                  <td class="px-2 py-2.5 text-slate-500 text-xs">{{ s.state }}</td>
+                  <td class="px-5 py-2.5 text-right">
+                    <span class="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-700">
+                      <span class="h-2 w-2 rounded-full bg-emerald-500"></span>
+                      {{ s.status }}
+                    </span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+            <div class="px-5 py-2.5 bg-slate-50 border-t border-slate-100 rounded-b-lg text-xs text-slate-500">
+              View detailed <a class="text-teal-600 hover:underline cursor-pointer">service notices</a>.
+            </div>
           </div>
-        </form>
-      </aside>
+
+          <div class="bg-white border border-slate-200 rounded-lg shadow-card p-5">
+            <h3 class="text-sm font-semibold text-navy-900">Trouble signing in?</h3>
+            <p class="text-sm text-slate-600 mt-1.5 leading-relaxed">Call your home facility's customer service desk. We can reset your password and walk you through the portal.</p>
+            <a href="tel:1300783745" class="mt-3 inline-flex items-center gap-2 text-sm font-medium text-navy-900 hover:underline">
+              <Icon name="phone" :size="16"/> 1300 STERILE (1300 783 745)
+            </a>
+            <div class="text-xs text-slate-500 mt-1">Mon–Fri 7am–6pm AEST</div>
+          </div>
+        </aside>
+      </div>
     </main>
+
+    <footer class="bg-white border-t border-slate-200 mt-auto">
+      <div class="max-w-6xl mx-auto px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-xs text-slate-500">
+        <div>© Steritech Pty Ltd · Customer Portal v2.0</div>
+        <div class="flex items-center gap-5">
+          <a class="hover:text-slate-700 cursor-pointer">Terms of use</a>
+          <a class="hover:text-slate-700 cursor-pointer">Privacy</a>
+          <a class="hover:text-slate-700 cursor-pointer">Service notices</a>
+        </div>
+      </div>
+    </footer>
   </div>`
 };
 
