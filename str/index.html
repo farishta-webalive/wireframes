@@ -2004,102 +2004,73 @@ const DashboardPage = {
     state(){ return state; },
     fac(){ return currentFacility(); },
     treatmentLabels(){ return TREATMENT_LABELS; },
-    attentionItems(){
-      return state.orders.filter(o =>
-        o.status !== 'Completed' &&
-        (o.bcSync === 'failed' || o.bcSync === 'dead' || o.status === 'Awaiting collection')
-      ).slice(0, 4);
-    },
-    inFlight(){
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    activeOrders(){
       const active = ['Submitted','In progress','In treatment','Awaiting collection'];
-      return state.orders.filter(o => active.includes(o.status)).slice(0, 8);
+      return state.orders.filter(o => active.includes(o.status));
     },
-    shipped(){
-      return state.orders.filter(o => o.status === 'Completed').slice(0, 3);
+    completedOrders(){
+      return state.orders.filter(o => o.status === 'Completed');
     },
-    frequentForms(){
-      return FORM_CATALOG.filter(f => f.facility === state.profile.currentFacility).slice(0, 3);
+    recentOrders(){
+      return [...state.orders].slice(0, 8);
+    },
+    availableForms(){
+      return FORM_CATALOG.filter(f => f.facility === state.profile.currentFacility);
     },
     lastUpdated(){
       const d = new Date();
       return d.toLocaleTimeString('en-AU', { hour:'numeric', minute:'2-digit' });
-    }
-  },
-  methods:{
-    fmtDate,
-    attentionReason(o){
-      if (o.bcSync === 'failed') return 'Order paused while we double-check the consignment details.';
-      if (o.bcSync === 'dead')   return 'Stuck for a while - we are looking into it.';
-      if (o.status === 'Awaiting collection') return 'Ready for collection from ' + this.fac.name + '.';
-      return '';
     },
-    attentionAction(o){
-      if (o.status === 'Awaiting collection') return 'Confirm collection';
-      return 'Review';
+    stats(){
+      return [
+        { label:'Total orders',     value: state.orders.length,           sub:'lifetime' },
+        { label:'Active right now', value: this.activeOrders.length,      sub:'in progress or awaiting collection' },
+        { label:'Completed',        value: this.completedOrders.length,   sub:'lifetime' },
+      ];
     }
   },
+  methods:{ fmtDate },
   template:`
   <div class="p-6 sm:p-8 max-w-6xl mx-auto space-y-7 text-base text-slate-800">
 
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
       <div>
         <h1 class="text-xl font-semibold text-navy-900 leading-tight">Orders at {{ fac.name }}</h1>
-        <p class="text-sm text-slate-500 mt-0.5">Last updated {{ lastUpdated }} &middot; {{ inFlight.length }} active</p>
+        <p class="text-sm text-slate-500 mt-0.5">Last updated {{ lastUpdated }}</p>
       </div>
       <Btn icon="file-plus-2" size="lg" as="router-link" :to="{ path:'/start' }">New treatment request</Btn>
     </div>
 
-    <section class="bg-white border border-slate-200 rounded-md">
-      <div class="flex items-center justify-between px-5 sm:px-6 py-3.5 border-b border-slate-100">
-        <h2 class="text-base font-semibold text-navy-900 inline-flex items-center gap-2">
-          <Icon name="bell" :size="18" cls="text-slate-500"/>
-          Needs your attention
-        </h2>
-        <span v-if="!loading && attentionItems.length" class="text-xs text-slate-500">{{ attentionItems.length }} item{{ attentionItems.length === 1 ? '' : 's' }}</span>
-      </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <template v-if="loading">
-        <div class="px-5 sm:px-6 py-6 space-y-3">
-          <Skel w="60%" h="14px"/>
-          <Skel w="80%" h="14px"/>
+        <div v-for="n in 3" :key="n" class="bg-white border border-slate-200 rounded-md p-5 space-y-3">
+          <Skel w="120px" h="12px"/>
+          <Skel w="60px" h="32px"/>
+          <Skel w="100px" h="11px"/>
         </div>
       </template>
-      <template v-else-if="attentionItems.length === 0">
-        <div class="px-5 sm:px-6 py-8 text-center">
-          <Icon name="check-circle-2" :size="28" cls="mx-auto mb-2 text-emerald-500"/>
-          <div class="text-sm font-medium text-navy-900">Nothing waiting on you.</div>
-          <div class="text-sm text-slate-500 mt-0.5">We will let you know when something needs a look.</div>
-        </div>
-      </template>
-      <ul v-else class="divide-y divide-slate-100">
-        <li v-for="o in attentionItems" :key="o.id" class="px-5 sm:px-6 py-3.5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-2 flex-wrap">
-              <router-link :to="'/orders/'+o.id" class="font-mono text-sm text-navy-900 hover:underline">{{ o.id }}</router-link>
-              <span class="text-sm text-slate-500">{{ o.formName }}</span>
-            </div>
-            <div class="text-sm text-slate-600 mt-0.5">{{ attentionReason(o) }}</div>
-          </div>
-          <router-link :to="'/orders/'+o.id" class="text-sm font-medium text-teal-600 hover:underline whitespace-nowrap shrink-0 py-2 -my-2">
-            {{ attentionAction(o) }} &rarr;
-          </router-link>
-        </li>
-      </ul>
-    </section>
+      <div v-else v-for="s in stats" :key="s.label" class="bg-white border border-slate-200 rounded-md p-5">
+        <div class="text-sm font-medium text-slate-600">{{ s.label }}</div>
+        <div class="mt-2 text-3xl font-semibold text-navy-900 tabular-nums leading-none">{{ s.value }}</div>
+        <div class="mt-1.5 text-xs text-slate-500">{{ s.sub }}</div>
+      </div>
+    </div>
 
     <section class="bg-white border border-slate-200 rounded-md">
       <div class="flex items-center justify-between px-5 sm:px-6 py-3.5 border-b border-slate-100">
-        <h2 class="text-lg font-semibold text-navy-900">In flight</h2>
+        <h2 class="text-lg font-semibold text-navy-900">Recent orders</h2>
         <router-link to="/orders" class="text-sm text-teal-600 hover:underline py-2 -my-2">View all orders &rarr;</router-link>
       </div>
       <div class="overflow-x-auto">
         <table class="w-full text-base">
-          <caption class="sr-only">Active treatment requests currently in progress</caption>
+          <caption class="sr-only">Your most recent treatment requests</caption>
           <thead class="bg-slate-50 text-left text-xs text-slate-500 uppercase tracking-wider">
             <tr>
               <th scope="col" class="px-5 sm:px-6 py-3 font-medium">Reference</th>
               <th scope="col" class="px-3 py-3 font-medium">Treatment</th>
               <th scope="col" class="px-3 py-3 font-medium">Submitted</th>
-              <th scope="col" class="px-3 py-3 font-medium">Stage</th>
+              <th scope="col" class="px-3 py-3 font-medium">Status</th>
               <th scope="col" class="px-3 py-3 font-medium whitespace-nowrap">Expected back</th>
               <th scope="col" class="px-3 py-3"><span class="sr-only">Open</span></th>
             </tr>
@@ -2115,14 +2086,14 @@ const DashboardPage = {
                 <td class="px-3 py-3"></td>
               </tr>
             </template>
-            <tr v-else-if="inFlight.length === 0">
+            <tr v-else-if="recentOrders.length === 0">
               <td colspan="6" class="px-5 sm:px-6 py-10 text-center text-slate-500">
                 <Icon name="package" :size="28" cls="mx-auto mb-2 text-slate-300"/>
-                <div class="text-sm">No active requests right now.</div>
+                <div class="text-sm">No orders yet.</div>
                 <div class="text-sm mt-0.5">Start one above.</div>
               </td>
             </tr>
-            <tr v-else v-for="o in inFlight" :key="o.id"
+            <tr v-else v-for="o in recentOrders" :key="o.id"
                 class="hover:bg-slate-50 cursor-pointer focus:bg-slate-50 focus:outline-none"
                 tabindex="0"
                 @click="$router.push('/orders/'+o.id)"
@@ -2145,48 +2116,35 @@ const DashboardPage = {
       </div>
     </section>
 
-    <div class="grid md:grid-cols-2 gap-6 pt-2">
-      <section class="bg-white border border-slate-200 rounded-md">
-        <div class="px-5 py-3.5 border-b border-slate-100">
-          <h2 class="text-base font-semibold text-navy-900">Start another request</h2>
-        </div>
-        <ul class="divide-y divide-slate-100">
-          <li v-for="f in frequentForms" :key="f.facility+f.key">
-            <router-link :to="'/forms/'+f.facility+'/'+f.key" class="px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 group">
-              <div class="min-w-0">
-                <div class="text-sm font-medium text-navy-900 truncate">{{ f.name }}</div>
-                <div class="text-xs text-slate-500 mt-0.5 font-mono">{{ f.code }}</div>
+    <section class="bg-white border border-slate-200 rounded-md">
+      <div class="px-5 sm:px-6 py-3.5 border-b border-slate-100">
+        <h2 class="text-lg font-semibold text-navy-900">Start another request</h2>
+        <p class="text-sm text-slate-500 mt-0.5">Forms available at {{ fac.name }}. Click one to start filling it out.</p>
+      </div>
+      <ul class="divide-y divide-slate-100">
+        <li v-if="!availableForms.length" class="px-5 sm:px-6 py-6 text-sm text-slate-500 text-center">No forms configured for this facility.</li>
+        <li v-for="f in availableForms" :key="f.facility+f.key">
+          <router-link :to="'/forms/'+f.facility+'/'+f.key" class="px-5 sm:px-6 py-4 flex items-center gap-4 hover:bg-slate-50 group">
+            <div class="min-w-0 flex-1">
+              <div class="text-base font-medium text-navy-900 leading-snug">{{ f.name }}</div>
+              <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-600">
+                <span class="inline-flex items-center gap-1.5">
+                  <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[f.treatment].dot]" aria-hidden="true"></span>
+                  {{ treatmentLabels[f.treatment] || f.treatment }}
+                </span>
+                <span class="text-slate-400">&middot;</span>
+                <span class="font-mono text-xs text-slate-500">{{ f.code }}</span>
               </div>
-              <Icon name="arrow-right" :size="16" cls="text-slate-300 group-hover:text-navy-900 shrink-0"/>
-            </router-link>
-          </li>
-        </ul>
-        <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 rounded-b-md">
-          <router-link to="/forms" class="text-sm text-teal-600 hover:underline">See all forms &rarr;</router-link>
-        </div>
-      </section>
-
-      <section class="bg-white border border-slate-200 rounded-md">
-        <div class="px-5 py-3.5 border-b border-slate-100">
-          <h2 class="text-base font-semibold text-navy-900">Recently shipped</h2>
-        </div>
-        <ul class="divide-y divide-slate-100">
-          <li v-if="!shipped.length" class="px-5 py-6 text-sm text-slate-500 text-center">No completed orders yet.</li>
-          <li v-for="o in shipped" :key="o.id">
-            <router-link :to="'/orders/'+o.id" class="px-5 py-3 flex items-center justify-between gap-3 hover:bg-slate-50 group">
-              <div class="min-w-0">
-                <div class="font-mono text-sm text-navy-900">{{ o.id }}</div>
-                <div class="text-xs text-slate-500 mt-0.5">Shipped {{ fmtDate(o.collection) }}</div>
-              </div>
-              <Icon name="arrow-right" :size="16" cls="text-slate-300 group-hover:text-navy-900 shrink-0"/>
-            </router-link>
-          </li>
-        </ul>
-        <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 rounded-b-md">
-          <router-link to="/orders" class="text-sm text-teal-600 hover:underline">View order history &rarr;</router-link>
-        </div>
-      </section>
-    </div>
+            </div>
+            <Icon name="arrow-right" :size="18" cls="text-slate-300 group-hover:text-navy-900 shrink-0"/>
+          </router-link>
+        </li>
+      </ul>
+      <div class="px-5 sm:px-6 py-3 bg-slate-50 border-t border-slate-100 rounded-b-md flex items-center justify-between">
+        <span class="text-xs text-slate-500">Showing {{ availableForms.length }} form{{ availableForms.length === 1 ? '' : 's' }} for this facility</span>
+        <router-link to="/forms" class="text-sm text-teal-600 hover:underline">See forms at all facilities &rarr;</router-link>
+      </div>
+    </section>
   </div>`,
 };
 
