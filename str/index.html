@@ -316,34 +316,34 @@ const seedConsignees = [
 const seedOrders = [
   { id:'STR-25-018342', facility:'MER', formCode:'ICA-55',   formName:'Fresh Produce Irradiation — Domestic', treatment:'Gamma',
     submitted:'2026-04-18', po:'PO-88421', consignor:'Sunraysia Orchards', consignee:'Yum Foods Distribution',
-    goods:'Dried mango, 12 pallets', doseKGy:6, status:'In treatment',  bcSync:'synced',  exsitedId:'EXS-402918', bcId:'SO-2026-41882', collection:'2026-04-24' },
+    goods:'Dried mango, 12 pallets', spaces:12, cheps:12, doseKGy:6, status:'In treatment',  bcSync:'synced',  exsitedId:'EXS-402918', bcId:'SO-2026-41882', collection:'2026-04-24' },
   { id:'STR-25-018339', facility:'MER', formCode:'FRM-0121', formName:'Bee Equipment Irradiation',            treatment:'Gamma',
     submitted:'2026-04-17', po:'PO-88420', consignor:'Top End Apiaries',   consignee:'Golden Hive Co-op',
-    goods:'Hive boxes + frames, 4 pallets', doseKGy:15, status:'Awaiting collection', bcSync:'syncing', exsitedId:'EXS-402917', bcId:'—', collection:'2026-04-23' },
+    goods:'Hive boxes + frames, 4 pallets', spaces:4, cheps:4, doseKGy:15, status:'Awaiting collection', bcSync:'syncing', exsitedId:'EXS-402917', bcId:'—', collection:'2026-04-23' },
   { id:'STR-25-018336', facility:'DAN', formCode:'FRM-0092', formName:'Ethylene Oxide Treatment',             treatment:'ETO',
     submitted:'2026-04-16', po:'PO-41199', consignor:'Bellarine Botanics', consignee:'Auspharm Wholesalers',
-    goods:'Herbal tea sachets, 800 cartons', doseKGy:null, status:'In progress',      bcSync:'pending', exsitedId:'EXS-402913', bcId:'—', collection:'2026-04-22' },
+    goods:'Herbal tea sachets, 800 cartons', spaces:18, cheps:18, doseKGy:null, status:'In progress',      bcSync:'pending', exsitedId:'EXS-402913', bcId:'—', collection:'2026-04-22' },
   { id:'STR-25-018330', facility:'NAR', formCode:'FRM-0241', formName:'Blood Serum',                          treatment:'Gamma',
     submitted:'2026-04-15', po:'PO-00553', consignor:'Queensland Biolab',   consignee:'BioSeq Pty Ltd',
-    goods:'Bovine serum, 36 IBC totes', doseKGy:25, status:'Submitted',     bcSync:'failed',  exsitedId:'EXS-402908', bcId:'—', collection:'2026-04-21' },
+    goods:'Bovine serum, 36 IBC totes', spaces:36, cheps:0, doseKGy:25, status:'Submitted',     bcSync:'failed',  exsitedId:'EXS-402908', bcId:'—', collection:'2026-04-21' },
   { id:'STR-25-018327', facility:'WPK', formCode:'FRM-0217', formName:'Treatment',                            treatment:'Gamma+ETO',
     submitted:'2026-04-13', po:'PO-77410', consignor:'Kingsgrove Medical',  consignee:'NSW Health Logistics',
-    goods:'Surgical packs, 18 pallets',  doseKGy:25, status:'Completed',     bcSync:'synced',  exsitedId:'EXS-402891', bcId:'SO-2026-41812', collection:'2026-04-20' },
+    goods:'Surgical packs, 18 pallets', spaces:18, cheps:18, doseKGy:25, status:'Completed',     bcSync:'synced',  exsitedId:'EXS-402891', bcId:'SO-2026-41812', collection:'2026-04-20' },
   { id:'STR-25-018321', facility:'MER', formCode:'FRM-0118', formName:'Fresh Produce Irradiation — Export',   treatment:'Gamma',
     submitted:'2026-04-10', po:'PO-88418', consignor:'Sunraysia Orchards',  consignee:'Pacific Produce USA',
-    goods:'Table grapes, 22 pallets',    doseKGy:0.4, status:'Completed',   bcSync:'synced',  exsitedId:'EXS-402877', bcId:'SO-2026-41788', collection:'2026-04-16' },
+    goods:'Table grapes, 22 pallets', spaces:22, cheps:22, doseKGy:0.4, status:'Completed',   bcSync:'synced',  exsitedId:'EXS-402877', bcId:'SO-2026-41788', collection:'2026-04-16' },
   { id:'STR-25-018314', facility:'NAR', formCode:'FRM-0240', formName:'Bee Equipment',                        treatment:'Gamma',
     submitted:'2026-04-08', po:'PO-00549', consignor:'Sunshine Coast Apiary',consignee:'Golden Hive Co-op',
-    goods:'Wooden supers, 6 pallets',    doseKGy:15, status:'Completed',    bcSync:'synced',  exsitedId:'EXS-402869', bcId:'SO-2026-41770', collection:'2026-04-14' },
+    goods:'Wooden supers, 6 pallets', spaces:6, cheps:6, doseKGy:15, status:'Completed',    bcSync:'synced',  exsitedId:'EXS-402869', bcId:'SO-2026-41770', collection:'2026-04-14' },
   { id:'STR-25-018308', facility:'DAN', formCode:'FRM-0091', formName:'Irradiation Treatment',                treatment:'Gamma',
     submitted:'2026-04-05', po:'PO-41196', consignor:'Bellarine Botanics', consignee:'Chemist Warehouse DC',
-    goods:'Cosmetic raw powders, 40 drums', doseKGy:10, status:'Completed', bcSync:'dead',   exsitedId:'EXS-402855', bcId:'—', collection:'2026-04-11' },
+    goods:'Cosmetic raw powders, 40 drums', spaces:8, cheps:8, doseKGy:10, status:'Completed', bcSync:'dead',   exsitedId:'EXS-402855', bcId:'—', collection:'2026-04-11' },
   { id:'STR-25-018301', facility:'MER', formCode:'FRM-0359', formName:'Packing and Labelling — Herbal Medicine', treatment:'GMP',
     submitted:'2026-04-03', po:'PO-88414', consignor:'Bellarine Botanics', consignee:'Auspharm Wholesalers',
-    goods:'Capsule bottles + labels, 14 pallets', doseKGy:null, status:'Completed', bcSync:'synced', exsitedId:'EXS-402841', bcId:'SO-2026-41748', collection:'2026-04-09' },
+    goods:'Capsule bottles + labels, 14 pallets', spaces:14, cheps:14, doseKGy:null, status:'Completed', bcSync:'synced', exsitedId:'EXS-402841', bcId:'SO-2026-41748', collection:'2026-04-09' },
   { id:'STR-25-018297', facility:'NAR', formCode:'FRM-0203', formName:'Treatment',                            treatment:'Gamma',
     submitted:'2026-04-02', po:'PO-00544', consignor:'Toowoomba Pet Co.',   consignee:'Petbarn DC Brisbane',
-    goods:'Rawhide chews, 30 pallets',   doseKGy:25, status:'Completed',    bcSync:'synced',  exsitedId:'EXS-402833', bcId:'SO-2026-41741', collection:'2026-04-08' },
+    goods:'Rawhide chews, 30 pallets', spaces:30, cheps:30, doseKGy:25, status:'Completed',    bcSync:'synced',  exsitedId:'EXS-402833', bcId:'SO-2026-41741', collection:'2026-04-08' },
 ];
 
 /* ---------- Order messages seed (customer ↔ admin thread per order) -------- */
@@ -2067,27 +2067,29 @@ const DashboardPage = {
           <caption class="sr-only">Your most recent treatment requests</caption>
           <thead class="bg-slate-50 text-left text-xs text-slate-500 uppercase tracking-wider">
             <tr>
-              <th scope="col" class="px-5 sm:px-6 py-3 font-medium">Reference</th>
+              <th scope="col" class="px-5 sm:px-6 py-3 font-medium whitespace-nowrap">Order ID</th>
+              <th scope="col" class="px-3 py-3 font-medium whitespace-nowrap">PO Number</th>
               <th scope="col" class="px-3 py-3 font-medium">Treatment</th>
-              <th scope="col" class="px-3 py-3 font-medium">Submitted</th>
+              <th scope="col" class="px-3 py-3 font-medium text-right">Spaces</th>
+              <th scope="col" class="px-3 py-3 font-medium text-right">Cheps</th>
               <th scope="col" class="px-3 py-3 font-medium">Status</th>
-              <th scope="col" class="px-3 py-3 font-medium whitespace-nowrap">Expected back</th>
-              <th scope="col" class="px-3 py-3"><span class="sr-only">Open</span></th>
+              <th scope="col" class="px-3 sm:px-6 py-3 font-medium text-right">Action</th>
             </tr>
           </thead>
           <tbody class="divide-y divide-slate-100">
             <template v-if="loading">
               <tr v-for="n in 5" :key="n">
                 <td class="px-5 sm:px-6 py-3"><Skel w="120px"/></td>
+                <td class="px-3 py-3"><Skel w="80px"/></td>
                 <td class="px-3 py-3"><Skel w="160px"/></td>
-                <td class="px-3 py-3"><Skel w="80px"/></td>
+                <td class="px-3 py-3"><Skel w="40px"/></td>
+                <td class="px-3 py-3"><Skel w="40px"/></td>
                 <td class="px-3 py-3"><Skel w="90px" h="20px"/></td>
-                <td class="px-3 py-3"><Skel w="80px"/></td>
-                <td class="px-3 py-3"></td>
+                <td class="px-3 sm:px-6 py-3"><Skel w="50px"/></td>
               </tr>
             </template>
             <tr v-else-if="recentOrders.length === 0">
-              <td colspan="6" class="px-5 sm:px-6 py-10 text-center text-slate-500">
+              <td colspan="7" class="px-5 sm:px-6 py-10 text-center text-slate-500">
                 <Icon name="package" :size="28" cls="mx-auto mb-2 text-slate-300"/>
                 <div class="text-sm">No orders yet.</div>
                 <div class="text-sm mt-0.5">Start one above.</div>
@@ -2100,16 +2102,19 @@ const DashboardPage = {
                 @keydown.enter="$router.push('/orders/'+o.id)"
                 :aria-label="'Open order ' + o.id">
               <td class="px-5 sm:px-6 py-4 font-mono text-sm text-navy-900 whitespace-nowrap">{{ o.id }}</td>
+              <td class="px-3 py-4 font-mono text-sm text-slate-700 whitespace-nowrap">{{ o.po }}</td>
               <td class="px-3 py-4">
-                <div class="flex items-center gap-2 min-w-0">
-                  <TreatmentChip :treatment="o.treatment" :small="true"/>
-                  <span class="text-sm text-slate-700 truncate">{{ treatmentLabels[o.treatment] || o.treatment }}</span>
+                <div class="inline-flex items-center gap-2 min-w-0">
+                  <span :class="['inline-block h-2.5 w-2.5 rounded-full shrink-0', treatmentStyles[o.treatment].dot]" aria-hidden="true"></span>
+                  <span class="text-sm text-slate-700 whitespace-nowrap">{{ treatmentLabels[o.treatment] || o.treatment }}</span>
                 </div>
               </td>
-              <td class="px-3 py-4 text-sm text-slate-600 whitespace-nowrap">{{ fmtDate(o.submitted) }}</td>
+              <td class="px-3 py-4 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ o.spaces }}</td>
+              <td class="px-3 py-4 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ o.cheps }}</td>
               <td class="px-3 py-4 whitespace-nowrap"><StatusBadge :status="o.status"/></td>
-              <td class="px-3 py-4 text-sm text-slate-600 whitespace-nowrap">{{ fmtDate(o.collection) }}</td>
-              <td class="px-3 py-4 text-right"><Icon name="chevron-right" :size="16" cls="text-slate-400" aria-hidden="true"/></td>
+              <td class="px-3 sm:px-6 py-4 text-right">
+                <span class="inline-flex items-center gap-1 text-sm font-medium text-teal-600 group-hover:underline whitespace-nowrap">Open <Icon name="arrow-right" :size="14" aria-hidden="true"/></span>
+              </td>
             </tr>
           </tbody>
         </table>
