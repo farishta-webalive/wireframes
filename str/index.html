@@ -1213,63 +1213,81 @@ const Skel = {
 /* ---------- Layout: Top nav + Sidebar + Facility switcher ------------------- */
 
 const FacilityChip = {
-  template:`
-    <button v-if="fac" @click="open" :class="['flex items-center gap-2 px-3 py-1.5 rounded-full text-white text-xs font-medium focus-ring',
-      multi ? 'bg-navy-800 hover:bg-navy-700 cursor-pointer' : 'bg-navy-800/70 cursor-default']">
-      <Icon name="map-pin" :size="14" />
-      <span>{{ fac.name }}, {{ fac.state }}</span>
-      <span class="text-navy-50/70 text-[10px] font-semibold tracking-wider">{{ fac.code }}</span>
-      <Icon v-if="multi" name="chevrons-up-down" :size="14" cls="opacity-70" />
-    </button>`,
   components:{ Icon },
-  computed:{
-    fac(){ return currentFacility(); },
-    multi(){ return (state.profile.facilities || []).length > 1; }
+  data(){ return { open: false }; },
+  mounted(){
+    this._closeOnDoc = (e) => { if (!this.$el || !this.$el.contains(e.target)) this.open = false; };
+    document.addEventListener('click', this._closeOnDoc);
   },
-  methods:{ open(){ if (this.multi) state.facilitySwitcherOpen = true; } }
-};
-
-const FacilitySwitcher = {
-  template:`
-    <transition name="fade">
-      <div v-if="state.facilitySwitcherOpen" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="close">
-        <div class="bg-white rounded-xl shadow-md w-full max-w-lg overflow-hidden">
-          <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
-            <div>
-              <h3 class="font-semibold text-navy-900">Switch facility</h3>
-              <p class="text-xs text-slate-500">You have access to {{ state.profile.facilities.length }} facilities.</p>
-            </div>
-            <button @click="close" class="p-1 rounded hover:bg-slate-100 focus-ring"><Icon name="x" :size="18"/></button>
-          </div>
-          <div class="p-3">
-            <button v-for="f in facilities" :key="f.code"
-                    @click="pick(f.code)"
-                    :class="['w-full flex items-center gap-4 p-4 rounded-lg text-left transition-colors',
-                             f.code===state.profile.currentFacility ? 'bg-teal-50 ring-1 ring-teal-500' : 'hover:bg-slate-50']">
-              <div :class="['w-10 h-10 rounded-lg flex items-center justify-center font-semibold text-sm',
-                            f.code===state.profile.currentFacility ? 'bg-teal-500 text-white':'bg-slate-200 text-slate-700']">
-                {{ f.code }}
-              </div>
-              <div class="flex-1 min-w-0">
-                <div class="font-medium text-navy-900">{{ f.name }}, {{ f.state }}</div>
-                <div class="text-xs text-slate-500 truncate">{{ f.address }}</div>
-              </div>
-              <Icon v-if="f.code===state.profile.currentFacility" name="check" :size="18" cls="text-teal-600"/>
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>`,
-  components:{ Icon },
+  beforeUnmount(){ document.removeEventListener('click', this._closeOnDoc); },
   computed:{
     state(){ return state; },
+    fac(){ return currentFacility(); },
+    multi(){ return (state.profile.facilities || []).length > 1; },
     facilities(){ return FACILITIES.filter(f => state.profile.facilities.includes(f.code)); }
   },
   methods:{
-    close(){ state.facilitySwitcherOpen = false; },
-    pick(code){ state.profile.currentFacility = code; this.close(); }
-  }
+    toggle(){ this.open = !this.open; },
+    pick(code){
+      const before = state.profile.currentFacility;
+      state.profile.currentFacility = code;
+      this.open = false;
+      if (before !== code) {
+        const f = FACILITIES.find(x => x.code === code);
+        if (f) showToast('Now viewing ' + f.name + ', ' + f.state, 'success');
+      }
+    }
+  },
+  template:`
+    <div v-if="fac" class="relative inline-block" @keydown.escape="open = false">
+      <!-- Single-facility: plain text, nothing to click, nothing to fear -->
+      <div v-if="!multi" class="inline-flex items-center gap-2 text-sm text-white/85 px-2 py-1.5">
+        <Icon name="building-2" :size="16" cls="text-white/60"/>
+        <span class="text-white/60 text-xs uppercase tracking-wide hidden md:inline">Viewing</span>
+        <span class="font-medium text-white">{{ fac.name }}, {{ fac.state }}</span>
+      </div>
+      <!-- Multi-facility: ledger-flat trigger button + dropdown -->
+      <template v-else>
+        <button type="button"
+                @click.stop="toggle"
+                :aria-expanded="open"
+                aria-haspopup="menu"
+                aria-label="Switch site"
+                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 focus-ring whitespace-nowrap">
+          <Icon name="building-2" :size="16" cls="text-slate-500"/>
+          <span class="text-slate-500 text-xs uppercase tracking-wide hidden md:inline">Viewing</span>
+          <span class="font-medium text-slate-900">{{ fac.name }}, {{ fac.state }}</span>
+          <Icon name="chevron-down" :size="16" cls="text-slate-500"/>
+        </button>
+        <div v-if="open"
+             role="menu"
+             @click.stop
+             class="absolute left-1/2 -translate-x-1/2 mt-2 w-80 bg-white border border-slate-200 rounded-md shadow-lg z-40 overflow-hidden text-left">
+          <div class="px-4 py-3 border-b border-slate-100">
+            <div class="text-sm font-medium text-slate-900">Switch site</div>
+            <div class="text-xs text-slate-500">{{ facilities.length }} sites you have access to</div>
+          </div>
+          <ul class="py-1 max-h-80 overflow-y-auto">
+            <li v-for="f in facilities" :key="f.code">
+              <button type="button"
+                      role="menuitem"
+                      @click="pick(f.code)"
+                      :class="['w-full text-left flex flex-col px-4 py-2.5 hover:bg-slate-50 focus-ring',
+                               f.code === state.profile.currentFacility ? 'border-l-2 border-blue-600 bg-slate-50 pl-[14px]' : '']">
+                <div class="text-sm font-medium text-slate-900">{{ f.name }}, {{ f.state }}</div>
+                <div class="text-xs text-slate-500 truncate">{{ f.address }}</div>
+                <div v-if="f.code === state.profile.currentFacility" class="text-[11px] text-blue-700 font-medium mt-0.5">Currently viewing</div>
+              </button>
+            </li>
+          </ul>
+        </div>
+      </template>
+    </div>`
 };
+
+// Legacy FacilitySwitcher modal retired in favour of inline dropdown on FacilityChip.
+// Kept as no-op stub so the Shell component reference does not break.
+const FacilitySwitcher = { template: '' };
 
 const Sidebar = {
   props:['asDrawer'],
