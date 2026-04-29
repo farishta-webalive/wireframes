@@ -2002,8 +2002,13 @@ const SignupPage = {
 
 const DashboardPage = {
   components:{ Icon, Btn, TreatmentChip, StatusBadge, Skel, EmptyState, RouterLink },
-  data(){ return { loading: true }; },
-  mounted(){ setTimeout(() => { this.loading = false; }, 300); },
+  data(){ return { loading: true, openMenuId: null }; },
+  mounted(){
+    setTimeout(() => { this.loading = false; }, 300);
+    this._closeMenu = () => { this.openMenuId = null; };
+    document.addEventListener('click', this._closeMenu);
+  },
+  beforeUnmount(){ document.removeEventListener('click', this._closeMenu); },
   computed:{
     state(){ return state; },
     fac(){ return currentFacility(); },
@@ -2035,7 +2040,10 @@ const DashboardPage = {
       ];
     }
   },
-  methods:{ fmtDate },
+  methods:{
+    fmtDate,
+    toggleMenu(id){ this.openMenuId = this.openMenuId === id ? null : id; }
+  },
   template:`
   <div class="p-6 sm:p-8 max-w-6xl mx-auto space-y-7 text-base text-slate-800">
 
@@ -2119,16 +2127,34 @@ const DashboardPage = {
               <td class="px-3 py-4 whitespace-nowrap"><StatusBadge :status="o.status"/></td>
               <td class="px-3 sm:px-6 py-4 text-right whitespace-nowrap">
                 <span v-if="o.status === 'Cancelled'" class="text-sm text-slate-400" aria-label="No actions available for cancelled order">&mdash;</span>
-                <template v-else-if="o.status === 'Completed'">
-                  <a href="#" @click.stop class="text-sm font-medium text-teal-600 hover:underline">View as PDF</a>
-                </template>
-                <span v-else class="inline-flex items-center gap-2 text-sm">
-                  <a href="#" @click.stop class="font-medium text-teal-600 hover:underline">View as PDF</a>
-                  <span class="text-slate-300" aria-hidden="true">&middot;</span>
-                  <a href="#" @click.stop class="font-medium text-teal-600 hover:underline">Edit</a>
-                  <span class="text-slate-300" aria-hidden="true">&middot;</span>
-                  <a href="#" @click.stop class="font-medium text-red-600 hover:underline">Cancel Order</a>
-                </span>
+                <div v-else class="relative inline-block">
+                  <button type="button"
+                          @click.stop="toggleMenu(o.id)"
+                          @keydown.escape="openMenuId = null"
+                          :aria-expanded="openMenuId === o.id"
+                          aria-haspopup="menu"
+                          aria-label="Order actions"
+                          class="p-1.5 rounded-md text-slate-500 hover:text-navy-900 hover:bg-slate-100 focus-ring">
+                    <Icon name="more-vertical" :size="18" aria-hidden="true"/>
+                  </button>
+                  <div v-if="openMenuId === o.id"
+                       role="menu"
+                       @click.stop
+                       class="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20 text-left">
+                    <a href="#" role="menuitem" @click.stop.prevent="openMenuId = null" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="file-text" :size="14" cls="text-slate-500"/> View as PDF
+                    </a>
+                    <template v-if="o.status !== 'Completed'">
+                      <a href="#" role="menuitem" @click.stop.prevent="openMenuId = null" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                        <Icon name="pencil" :size="14" cls="text-slate-500"/> Edit
+                      </a>
+                      <div class="border-t border-slate-100 my-1" role="separator"></div>
+                      <a href="#" role="menuitem" @click.stop.prevent="openMenuId = null" class="flex items-center gap-2 px-4 py-2 text-sm text-red-600 hover:bg-red-50">
+                        <Icon name="x-circle" :size="14"/> Cancel Order
+                      </a>
+                    </template>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>
