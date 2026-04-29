@@ -1236,6 +1236,15 @@ const FacilityChip = {
         const f = FACILITIES.find(x => x.code === code);
         if (f) showToast('Now viewing ' + f.name + ', ' + f.state, 'success');
       }
+    },
+    initial(name){ return (name || '?').charAt(0).toUpperCase(); },
+    avatarColor(code){
+      return ({
+        'MER': 'bg-navy-800',
+        'DAN': 'bg-teal-600',
+        'WPK': 'bg-slate-600',
+        'NAR': 'bg-emerald-700',
+      })[code] || 'bg-slate-600';
     }
   },
   template:`
@@ -1262,7 +1271,7 @@ const FacilityChip = {
         <div v-if="open"
              role="menu"
              @click.stop
-             class="absolute left-1/2 -translate-x-1/2 mt-2 w-80 bg-white border border-slate-200 rounded-md shadow-lg z-40 overflow-hidden text-left">
+             class="absolute left-1/2 -translate-x-1/2 mt-2 w-96 bg-white border border-slate-200 rounded-md shadow-lg z-40 overflow-hidden text-left">
           <div class="px-4 py-3 border-b border-slate-100">
             <div class="text-sm font-medium text-slate-900">Switch site</div>
             <div class="text-xs text-slate-500">{{ facilities.length }} sites you have access to</div>
@@ -1272,14 +1281,20 @@ const FacilityChip = {
               <button type="button"
                       role="menuitem"
                       @click="pick(f.code)"
-                      :class="['w-full text-left flex flex-col px-4 py-2.5 hover:bg-slate-50 focus-ring',
-                               f.code === state.profile.currentFacility ? 'border-l-2 border-blue-600 bg-slate-50 pl-[14px]' : '']">
-                <div class="text-sm font-medium text-slate-900">{{ f.name }}, {{ f.state }}</div>
-                <div class="text-xs text-slate-500 truncate">{{ f.address }}</div>
-                <div v-if="f.code === state.profile.currentFacility" class="text-[11px] text-blue-700 font-medium mt-0.5">Currently viewing</div>
+                      class="w-full text-left flex items-center gap-3 px-4 py-2.5 hover:bg-slate-50 focus-ring">
+                <span :class="['shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-full text-white text-sm font-semibold', avatarColor(f.code)]"
+                      aria-hidden="true">{{ initial(f.name) }}</span>
+                <span class="min-w-0 flex-1">
+                  <span :class="['block text-sm text-slate-900 truncate', f.code === state.profile.currentFacility ? 'font-semibold' : 'font-medium']">{{ f.name }}, {{ f.state }}</span>
+                  <span class="block text-xs text-slate-500 truncate">{{ f.address }}</span>
+                </span>
+                <Icon v-if="f.code === state.profile.currentFacility" name="check" :size="16" cls="text-teal-600 shrink-0"/>
               </button>
             </li>
           </ul>
+          <div class="border-t border-slate-100 px-4 py-2.5">
+            <a href="#" class="text-sm text-teal-600 hover:underline">Manage your sites &rarr;</a>
+          </div>
         </div>
       </template>
     </div>`
