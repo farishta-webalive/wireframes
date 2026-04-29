@@ -1813,7 +1813,7 @@ const SignupPage = {
             <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
               <div class="flex items-center gap-2 text-navy-900">
                 <Icon name="map-pin" :size="18" cls="text-slate-500"/>
-                <h2 class="text-lg font-semibold">{{ invited ? 'Your assigned facility' : 'Choose your home facility' }}</h2>
+                <h2 class="text-lg font-semibold">{{ invited ? 'Your assigned facility' : 'Choose facility' }}</h2>
               </div>
               <p class="text-sm text-slate-600 mt-1">{{ invited ? 'Your account manager assigned this facility. You can request a change later.' : 'You will see the forms and services available at this facility after signing in.' }}</p>
             </div>
@@ -1821,16 +1821,15 @@ const SignupPage = {
             <div v-if="invited" class="px-5 sm:px-7 py-6">
               <div class="rounded-md border border-slate-200 bg-slate-50 p-5">
                 <div class="flex flex-wrap items-center gap-2 mb-1">
-                  <span class="text-xs font-semibold text-slate-500 uppercase tracking-wide">{{ assignedFacility.code }}</span>
-                  <span class="inline-flex items-center gap-1 text-[11px] font-medium text-sky-800 bg-sky-100 border border-sky-200 rounded-full px-2 py-0.5">
+                  <span class="inline-flex items-center gap-1 text-[11px] font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5">
                     <Icon name="lock" :size="10"/> Set by admin
                   </span>
                 </div>
                 <div class="text-base font-semibold text-navy-900">{{ assignedFacility.name }}, {{ assignedFacility.state }}</div>
                 <div class="mt-3">
-                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium mb-1.5">Services available here</div>
-                  <div class="flex flex-wrap gap-1.5">
-                    <TreatmentChip v-for="s in services[assignedFacility.code]" :key="s" :treatment="s" :small="true"/>
+                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium mb-1">Services available</div>
+                  <div class="text-sm font-medium text-slate-700 uppercase tracking-wider">
+                    {{ services[assignedFacility.code].join(' · ') }}
                   </div>
                 </div>
                 <div class="mt-4 pt-3 border-t border-slate-200 text-xs text-slate-500">
@@ -1865,8 +1864,7 @@ const SignupPage = {
                     <div class="flex flex-wrap items-baseline gap-x-2">
                       <span class="text-base font-semibold text-navy-900">{{ fac.name }}</span>
                       <span class="text-sm text-slate-500">{{ fac.state }}</span>
-                      <span class="text-xs font-mono text-slate-400">{{ fac.code }}</span>
-                      <span v-if="!manualPick && autoFromAddress === fac.code" class="ml-auto inline-flex items-center gap-1 text-[11px] font-medium text-teal-800 bg-teal-100 border border-teal-200 rounded-full px-2 py-0.5">
+                      <span v-if="!manualPick && autoFromAddress === fac.code" class="ml-auto inline-flex items-center gap-1 text-[11px] font-medium text-slate-700 bg-slate-100 border border-slate-200 rounded-full px-2 py-0.5">
                         Suggested
                       </span>
                     </div>
@@ -1875,8 +1873,8 @@ const SignupPage = {
                       <template v-if="addressHasSignal">~{{ distance[fac.code] }} km from your address</template>
                       <template v-else>{{ fac.address.split(',').slice(-2,-1)[0]?.trim() || fac.state }}</template>
                     </div>
-                    <div class="mt-2 flex flex-wrap gap-1.5">
-                      <TreatmentChip v-for="s in services[fac.code]" :key="s" :treatment="s" :small="true"/>
+                    <div class="mt-1.5 text-xs font-medium text-slate-500 uppercase tracking-wider">
+                      {{ services[fac.code].join(' · ') }}
                     </div>
                   </div>
                 </label>
