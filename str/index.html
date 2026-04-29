@@ -982,39 +982,30 @@ const BcSyncChip = {
 
 const StatusBadge = {
   props:{ status:String, small:Boolean },
-  components:{ Icon },
   computed:{
     cfg(){
-      // Each status: { fill, text, ring, dot, icon, pulse }
-      // pulse:true → animated dot for in-flight statuses
-      // icon (lucide name) replaces the dot when set
+      // Mature dot + plain text indicator. Each status: { dot, pulse }.
+      // No pill chrome. Dot colour signals state at a glance; text reads
+      // as a list item, calmer for older B2B ops audiences.
       return ({
-        'Draft':                    { fill:'bg-slate-100',    text:'text-slate-700',    ring:'ring-slate-200/80',    dot:'bg-slate-400',    icon:'pencil',         pulse:false },
-        'Created':                  { fill:'bg-slate-50',     text:'text-slate-700',    ring:'ring-slate-200',       dot:'bg-slate-500',    icon:null,             pulse:false },
-        'Cancelled':                { fill:'bg-red-50',       text:'text-red-800',      ring:'ring-red-200',         dot:'bg-red-500',      icon:'x-circle',       pulse:false },
-        'Accepted':                 { fill:'bg-sky-50',       text:'text-sky-800',      ring:'ring-sky-200',         dot:'bg-sky-500',      icon:null,             pulse:false },
-        'On Hold':                  { fill:'bg-amber-50',     text:'text-amber-800',    ring:'ring-amber-200',       dot:'bg-amber-500',    icon:'pause-circle',   pulse:false },
-        'Late Arrival':             { fill:'bg-orange-50',    text:'text-orange-800',   ring:'ring-orange-200',      dot:'bg-orange-500',   icon:'alert-triangle', pulse:false },
-        'Scheduled for Processing': { fill:'bg-indigo-50',    text:'text-indigo-800',   ring:'ring-indigo-200',      dot:'bg-indigo-500',   icon:null,             pulse:false },
-        'In Process':               { fill:'bg-violet-50',    text:'text-violet-800',   ring:'ring-violet-200',      dot:'bg-violet-500',   icon:null,             pulse:true  },
-        'Ready for Invoicing':      { fill:'bg-teal-50',      text:'text-teal-800',     ring:'ring-teal-200',        dot:'bg-teal-500',     icon:null,             pulse:false },
-        'Completed':                { fill:'bg-emerald-50',   text:'text-emerald-800',  ring:'ring-emerald-200',     dot:'bg-emerald-600',  icon:'check',          pulse:false },
-      })[this.status] || { fill:'bg-slate-50', text:'text-slate-700', ring:'ring-slate-200', dot:'bg-slate-400', icon:null, pulse:false };
+        'Draft':                    { dot:'bg-slate-400',    pulse:false },
+        'Created':                  { dot:'bg-slate-500',    pulse:false },
+        'Cancelled':                { dot:'bg-red-500',      pulse:false },
+        'Accepted':                 { dot:'bg-sky-500',      pulse:false },
+        'On Hold':                  { dot:'bg-amber-500',    pulse:false },
+        'Late Arrival':             { dot:'bg-orange-500',   pulse:false },
+        'Scheduled for Processing': { dot:'bg-indigo-500',   pulse:false },
+        'In Process':               { dot:'bg-violet-500',   pulse:true  },
+        'Ready for Invoicing':      { dot:'bg-teal-500',     pulse:false },
+        'Completed':                { dot:'bg-emerald-600',  pulse:false },
+      })[this.status] || { dot:'bg-slate-400', pulse:false };
     },
-    sizeCls(){
-      return this.small
-        ? 'text-[10px] px-1.5 py-0.5 gap-1'
-        : 'text-[11px] px-2 py-0.5 gap-1.5';
-    },
+    dotSize(){ return this.small ? 'w-1.5 h-1.5' : 'w-2 h-2'; },
+    textSize(){ return this.small ? 'text-xs' : 'text-sm'; },
   },
   template:`
-    <span :class="['inline-flex items-center font-medium rounded-full ring-1 ring-inset whitespace-nowrap', sizeCls, cfg.fill, cfg.text, cfg.ring]">
-      <span v-if="cfg.icon"
-            :class="['inline-flex items-center justify-center', small ? 'w-3 h-3' : 'w-3.5 h-3.5', cfg.text]">
-        <Icon :name="cfg.icon" :size="small ? 10 : 11"/>
-      </span>
-      <span v-else
-            :class="['relative inline-flex shrink-0 rounded-full', small ? 'w-1.5 h-1.5' : 'w-2 h-2', cfg.dot]">
+    <span :class="['inline-flex items-center gap-2 whitespace-nowrap text-slate-700', textSize]">
+      <span :class="['relative inline-flex shrink-0 rounded-full', dotSize, cfg.dot]">
         <span v-if="cfg.pulse"
               :class="['absolute inset-0 rounded-full opacity-75 animate-ping', cfg.dot]"></span>
       </span>
