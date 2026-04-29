@@ -2259,30 +2259,6 @@ const StartRequestPage = {
       rows.sort((a,b) => a.name.localeCompare(b.name));
       return rows;
     },
-    visibleSteps(){
-      const out = [{ id:1, key:'facility', label:'Site' }];
-      const facCount = this.myFacilities.length;
-      if (facCount <= 1 && this.myFacilities[0]) {
-        const services = this.myFacilities[0].services;
-        const hasCombined = services.includes('Gamma') && services.includes('ETO');
-        const treatCount = services.length + (hasCombined ? 1 : 0);
-        if (treatCount > 1) out.push({ id:2, key:'treatment', label:'Treatment' });
-        out.push({ id:3, key:'form', label:'Form' });
-      } else {
-        out.push({ id:2, key:'treatment', label:'Treatment' });
-        out.push({ id:3, key:'form', label:'Form' });
-      }
-      return out.map((s,i) => ({ ...s, num: i+1 }));
-    },
-    currentStepLabel(){
-      const s = this.visibleSteps.find(x => x.id === this.step);
-      return s ? s.label : '';
-    },
-    currentStepNumber(){
-      const s = this.visibleSteps.find(x => x.id === this.step);
-      return s ? s.num : 1;
-    },
-    totalSteps(){ return this.visibleSteps.length; }
   },
   watch:{
     facility(code){
@@ -2318,14 +2294,16 @@ const StartRequestPage = {
     go(row){
       this.$router.push({ path: `/forms/${row.facility}/${row.key}` });
     },
-    back(){
-      if (this.step === 3) {
-        if (this.treatmentOptions.length > 1) { this.treatment = null; this.step = 2; }
-        else { this.facility = null; this.step = 1; }
-      } else if (this.step === 2) {
-        this.facility = null;
-        this.step = 1;
-      }
+    editFacility(){
+      // Reset everything back to the site question.
+      this.treatment = null;
+      this.facility = null;
+      this.step = 1;
+    },
+    editTreatment(){
+      // Keep the picked facility, drop the treatment, return to the treatment question.
+      this.treatment = null;
+      this.step = 2;
     },
     treatmentBlurb(t){
       switch(t){
@@ -2363,26 +2341,38 @@ const StartRequestPage = {
     }
   },
   template:`
-  <div class="p-6 sm:p-8 max-w-4xl mx-auto text-base text-slate-800">
+  <div class="max-w-2xl mx-auto px-6 py-10 space-y-6 text-base text-slate-800">
 
-    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3 mb-6">
-      <div>
-        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Start a request</h1>
-        <p class="text-sm text-slate-600 mt-0.5">Answer a couple of quick questions and we will load the right form for you.</p>
+    <h1 class="text-xl font-semibold text-navy-900 leading-tight">Start a request</h1>
+
+    <!-- Summary row: site (shown when site has been picked) -->
+    <div v-if="step >= 2 && activeFacility"
+         class="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+      <div class="min-w-0">
+        <span class="text-slate-500">Site</span>
+        <span class="ml-2 text-slate-900 font-medium">{{ activeFacility.name }}, {{ activeFacility.state }}</span>
       </div>
-      <Btn v-if="step > 1" @click="back" kind="ghost" size="sm" icon="arrow-left">Back</Btn>
+      <button type="button" @click="editFacility"
+              class="text-sm text-teal-600 hover:underline focus-ring py-1 -my-1">Edit</button>
     </div>
 
-    <div class="text-sm text-slate-600 flex items-baseline gap-2 mb-6">
-      <span class="font-medium text-navy-900">Step {{ currentStepNumber }} of {{ totalSteps }}</span>
-      <span aria-hidden="true">&middot;</span>
-      <span>{{ currentStepLabel }}</span>
+    <!-- Summary row: treatment (shown when treatment has been picked) -->
+    <div v-if="step >= 3 && treatment"
+         class="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm">
+      <div class="min-w-0 inline-flex items-center gap-2">
+        <span class="text-slate-500">Treatment</span>
+        <span :class="['inline-block h-2 w-2 rounded-full ml-2', treatmentStyles[treatment].dot]" aria-hidden="true"></span>
+        <span class="text-slate-900 font-medium">{{ treatmentLabels[treatment] || treatment }}</span>
+      </div>
+      <button type="button" @click="editTreatment"
+              class="text-sm text-teal-600 hover:underline focus-ring py-1 -my-1">Edit</button>
     </div>
 
-    <section v-if="step === 1" class="space-y-4">
+    <!-- Active question: site -->
+    <section v-if="step === 1" class="rounded-md border border-slate-200 bg-white p-6 space-y-4">
       <div>
         <h2 class="text-lg font-semibold text-navy-900">Which site is this request for?</h2>
-        <p class="text-sm text-slate-600 mt-0.5">You have access to {{ myFacilities.length }} {{ myFacilities.length === 1 ? 'site' : 'sites' }}.</p>
+        <p class="text-sm text-slate-500 mt-0.5">You have access to {{ myFacilities.length }} {{ myFacilities.length === 1 ? 'site' : 'sites' }}.</p>
       </div>
       <ul class="space-y-2.5">
         <li v-for="f in myFacilities" :key="f.code">
@@ -2407,10 +2397,11 @@ const StartRequestPage = {
       </ul>
     </section>
 
-    <section v-if="step === 2" class="space-y-4">
+    <!-- Active question: treatment -->
+    <section v-if="step === 2" class="rounded-md border border-slate-200 bg-white p-6 space-y-4">
       <div>
         <h2 class="text-lg font-semibold text-navy-900">What kind of treatment do you need?</h2>
-        <p class="text-sm text-slate-600 mt-0.5">Available services at <span class="font-medium text-navy-900">{{ activeFacility && activeFacility.name }}, {{ activeFacility && activeFacility.state }}</span>.</p>
+        <p class="text-sm text-slate-500 mt-0.5">Available services at {{ activeFacility && activeFacility.name }}.</p>
       </div>
       <ul class="space-y-2.5">
         <li v-for="t in treatmentOptions" :key="t">
@@ -2433,17 +2424,11 @@ const StartRequestPage = {
       </ul>
     </section>
 
-    <section v-if="step === 3" class="space-y-4">
+    <!-- Active question: form -->
+    <section v-if="step === 3" class="rounded-md border border-slate-200 bg-white p-6 space-y-4">
       <div>
         <h2 class="text-lg font-semibold text-navy-900">Which form do you want to fill in?</h2>
-        <p class="text-sm text-slate-600 mt-0.5 inline-flex flex-wrap items-center gap-x-2 gap-y-1">
-          <span class="inline-flex items-center gap-1.5">
-            <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[treatment].dot]" aria-hidden="true"></span>
-            {{ treatmentLabels[treatment] || treatment }}
-          </span>
-          <span aria-hidden="true">&middot;</span>
-          <span>at <span class="font-medium text-navy-900">{{ activeFacility && activeFacility.name }}, {{ activeFacility && activeFacility.state }}</span></span>
-        </p>
+        <p class="text-sm text-slate-500 mt-0.5">Forms available for this combination.</p>
       </div>
       <ul v-if="matchingForms.length" class="space-y-2.5">
         <li v-for="r in matchingForms" :key="r.code+'-'+r.facility">
@@ -2471,15 +2456,15 @@ const StartRequestPage = {
           </button>
         </li>
       </ul>
-      <div v-else class="bg-white border border-slate-200 rounded-md p-8 text-center">
+      <div v-else class="rounded-md border border-slate-200 bg-slate-50 p-8 text-center">
         <Icon name="search-x" :size="28" cls="text-slate-300 mx-auto mb-2"/>
         <div class="text-sm text-slate-600">No forms configured for this combination.</div>
       </div>
     </section>
 
-    <div class="mt-10 pt-6 border-t border-slate-200 text-sm text-slate-500">
+    <p class="pt-2 text-sm text-slate-500">
       Want to browse the full catalogue? <router-link to="/forms" class="text-teal-600 hover:underline font-medium">See all forms &rarr;</router-link>
-    </div>
+    </p>
   </div>`,
 };
 
