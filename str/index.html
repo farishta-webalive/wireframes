@@ -3825,7 +3825,7 @@ const SubmittedPage = {
 
 const OrdersPage = {
   components:{ Icon, Btn, StatusBadge, Skel, EmptyState },
-  data(){ return { loading:true, q:'', facility:'ALL', treatment:'ALL', dateRange:'all', dateFrom:'', dateTo:'', sort:{ by:'submitted', dir:'desc' }, menuFor:null }; },
+  data(){ return { loading:true, q:'', treatment:'ALL', dateRange:'all', dateFrom:'', dateTo:'', sort:{ by:'submitted', dir:'desc' }, menuFor:null }; },
   mounted(){
     setTimeout(() => { this.loading = false; }, 300);
     document.addEventListener('click', this.closeMenu);
@@ -3853,16 +3853,16 @@ const OrdersPage = {
   },
   computed:{
     state(){ return state; },
-    myFacilities(){ return FACILITIES.filter(f => state.profile.facilities.includes(f.code)); },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
-    facilityLabel(){
-      const f = FACILITIES.find(x => x.code === this.facility);
-      return f ? `${f.name}, ${f.state}` : '';
+    currentFacility(){
+      return FACILITIES.find(f => f.code === state.profile.currentFacility);
+    },
+    scopedOrders(){
+      return state.orders.filter(o => o.facility === state.profile.currentFacility);
     },
     filtered(){
-      let list = state.orders.slice();
-      if (this.facility!=='ALL')  list = list.filter(o => o.facility === this.facility);
+      let list = this.scopedOrders.slice();
       if (this.treatment!=='ALL') list = list.filter(o => o.treatment === this.treatment);
       if (this.dateFrom)          list = list.filter(o => o.submitted >= this.dateFrom);
       if (this.dateTo)            list = list.filter(o => o.submitted <= this.dateTo);
@@ -3904,12 +3904,15 @@ const OrdersPage = {
 
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
       <div>
-        <h1 class="text-xl font-semibold text-navy-900 leading-tight">My orders</h1>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">
+          Orders at {{ currentFacility ? currentFacility.name + ', ' + currentFacility.state : 'your site' }}
+        </h1>
+        <p class="text-sm text-slate-500 mt-0.5">Switch site from the top bar to view another facility&rsquo;s orders.</p>
       </div>
       <Btn as="router-link" :to="{ path:'/start' }" icon="file-plus-2" size="lg">New treatment request</Btn>
     </div>
 
-    <!-- Filters: stacked labels, all controls visible, date presets -->
+    <!-- Filters: stacked labels, all controls visible, date presets. Site scoping handled by FacilityChip. -->
     <div class="bg-white border border-slate-200 rounded-md p-4">
       <div class="grid grid-cols-12 gap-4">
         <div class="col-span-12">
@@ -3922,14 +3925,7 @@ const OrdersPage = {
           </div>
           <p class="mt-1 text-xs text-slate-500">Searches across reference, PO number, consignor, consignee, and goods.</p>
         </div>
-        <div class="col-span-12 sm:col-span-4">
-          <label for="orders-site" class="block text-sm font-medium text-slate-800 mb-1.5">Site</label>
-          <select id="orders-site" v-model="facility" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
-            <option value="ALL">All sites</option>
-            <option v-for="f in myFacilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
-          </select>
-        </div>
-        <div class="col-span-12 sm:col-span-4">
+        <div class="col-span-12 sm:col-span-6">
           <label for="orders-treatment" class="block text-sm font-medium text-slate-800 mb-1.5">Treatment</label>
           <select id="orders-treatment" v-model="treatment" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
             <option value="ALL">All treatments</option>
@@ -3939,7 +3935,7 @@ const OrdersPage = {
             <option value="Gamma+ETO">Gamma + Ethylene Oxide</option>
           </select>
         </div>
-        <div class="col-span-12 sm:col-span-4">
+        <div class="col-span-12 sm:col-span-6">
           <label for="orders-date" class="block text-sm font-medium text-slate-800 mb-1.5">Submitted</label>
           <select id="orders-date" v-model="dateRange" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
             <option value="all">Any time</option>
@@ -3960,7 +3956,7 @@ const OrdersPage = {
       </div>
     </div>
 
-    <p class="text-sm text-slate-600">Showing {{ filtered.length }} of {{ state.orders.length }} orders.</p>
+    <p class="text-sm text-slate-600">Showing {{ filtered.length }} of {{ scopedOrders.length }} orders at this site.</p>
 
     <!-- Table -->
     <section class="bg-white border-t border-b border-slate-200">
