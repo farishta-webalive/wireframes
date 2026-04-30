@@ -4184,10 +4184,19 @@ const OrdersPage = {
 /* ---------- Page: Order Detail ---------------------------------------------- */
 
 const OrderDetailPage = {
-  components:{ Icon, Btn, TreatmentChip, BcSyncChip, StatusBadge, MessagesPanel },
+  components:{ Icon, Btn, StatusBadge, MessagesPanel },
   computed:{
     state(){ return state; },
     order(){ return state.orders.find(o => o.id === this.$route.params.id); },
+    orderFacility(){
+      return this.order ? FACILITIES.find(f => f.code === this.order.facility) : null;
+    },
+    inScope(){
+      return !!this.order && this.order.facility === state.profile.currentFacility;
+    },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    canEdit(){ return this.order && !['Completed','Cancelled'].includes(this.order.status); },
     timeline(){
       if (!this.order) return [];
       const e = [
@@ -4219,128 +4228,136 @@ const OrderDetailPage = {
       return e;
     }
   },
-  methods:{ fmtDate, fmtMoney }
-  ,template:`
+  methods:{
+    fmtDate, fmtMoney,
+    dotClass(e){
+      if (e.fail) return 'bg-red-500';
+      if (e.pulse) return 'bg-amber-500 animate-syncpulse';
+      if (e.done) return 'bg-emerald-500';
+      return 'bg-slate-300';
+    }
+  },
+  template:`
   <div v-if="!order" class="p-12 text-slate-500">Order not found.</div>
-  <div v-else class="p-8 max-w-[1400px]">
+  <div v-else class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+
     <!-- Breadcrumb -->
-    <div class="flex items-center gap-2 text-xs text-slate-500 mb-4">
-      <router-link to="/orders" class="hover:text-teal-600">Orders</router-link>
+    <div class="flex items-center gap-2 text-sm text-slate-500">
+      <router-link to="/orders" class="hover:text-teal-600 focus-ring rounded">Orders</router-link>
       <Icon name="chevron-right" :size="12"/>
       <span class="font-mono text-navy-900">{{ order.id }}</span>
     </div>
 
-    <div class="flex items-start justify-between gap-4 flex-wrap mb-6">
-      <div>
-        <div class="flex items-center gap-2 mb-2">
-          <TreatmentChip :treatment="order.treatment"/>
-          <StatusBadge :status="order.status"/>
-          <BcSyncChip :status="order.bcSync"/>
+    <!-- Cross-facility scope gate: keep FacilityChip as single source of truth -->
+    <div v-if="!inScope" class="bg-white border border-slate-200 rounded-md p-6">
+      <h1 class="text-lg font-medium text-navy-900">This order is at {{ orderFacility ? orderFacility.name + ', ' + orderFacility.state : 'another site' }}.</h1>
+      <p class="text-sm text-slate-600 mt-1">Switch site from the top bar to view it.</p>
+      <router-link to="/orders" class="inline-flex items-center gap-1 mt-4 text-sm text-teal-600 hover:underline focus-ring rounded">
+        <Icon name="arrow-left" :size="14"/> Back to orders
+      </router-link>
+    </div>
+
+    <template v-else>
+      <!-- Header strip: form name + status inline, action row right -->
+      <div class="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+        <div class="min-w-0">
+          <div class="flex items-center gap-3 flex-wrap">
+            <h1 class="text-xl font-semibold text-navy-900 leading-tight">{{ order.formName }}</h1>
+            <StatusBadge :status="order.status"/>
+          </div>
+          <p class="text-sm text-slate-500 mt-1">
+            {{ orderFacility ? orderFacility.name + ', ' + orderFacility.state : order.facility }} &middot; Submitted {{ fmtDate(order.submitted) }}
+          </p>
         </div>
-        <h1 class="text-2xl font-semibold text-navy-900">{{ order.formName }}</h1>
-        <div class="text-sm text-slate-500 mt-1">{{ order.formCode }} · {{ order.facility }} · Submitted {{ fmtDate(order.submitted) }}</div>
-      </div>
-      <div class="flex gap-2">
-        <Btn kind="ghost" icon="download">PDF</Btn>
-        <Btn kind="secondary" icon="pencil" action="edit">Edit</Btn>
-        <Btn kind="navy" icon="copy" action="create">Duplicate</Btn>
-      </div>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Left: summary -->
-      <div class="lg:col-span-2 space-y-4">
-        <section class="bg-white border border-slate-200 rounded-lg shadow-card">
-          <header class="px-6 py-3 border-b border-slate-100 font-semibold text-sm text-navy-900">Customer</header>
-          <div class="p-6 grid grid-cols-2 gap-4 text-sm">
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">Company</div><div class="mt-0.5 text-navy-900">{{ state.profile.company }}</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">ABN</div><div class="mt-0.5 text-navy-900">{{ state.profile.abn }}</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">Contact</div><div class="mt-0.5 text-navy-900">{{ state.profile.contact }}</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">BC Customer</div><div class="mt-0.5 font-mono text-navy-900">{{ state.profile.bcCustomerNumber }}</div></div>
-          </div>
-        </section>
-        <section class="bg-white border border-slate-200 rounded-lg shadow-card">
-          <header class="px-6 py-3 border-b border-slate-100 font-semibold text-sm text-navy-900">Consignment</header>
-          <div class="p-6 grid grid-cols-2 gap-4 text-sm">
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">Purchase order</div><div class="mt-0.5 font-mono text-navy-900">{{ order.po }}</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">Expected delivery</div><div class="mt-0.5 text-navy-900">{{ fmtDate(order.collection) }}</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">Consignor</div><div class="mt-0.5 text-navy-900">{{ order.consignor }}</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">Consignee</div><div class="mt-0.5 text-navy-900">{{ order.consignee }}</div></div>
-            <div class="col-span-2"><div class="text-[11px] uppercase tracking-wider text-slate-500">Description of goods</div><div class="mt-0.5 text-navy-900">{{ order.goods }}</div></div>
-          </div>
-        </section>
-        <section v-if="order.doseKGy" class="bg-white border border-slate-200 rounded-lg shadow-card">
-          <header class="px-6 py-3 border-b border-slate-100 font-semibold text-sm text-navy-900">Treatment parameters</header>
-          <div class="p-6 grid grid-cols-2 gap-4 text-sm">
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">Target dose</div><div class="mt-0.5 text-navy-900 font-medium">{{ order.doseKGy }} kGy</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">Treatment type</div><div class="mt-0.5 text-navy-900">Routine</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">RPI</div><div class="mt-0.5 text-navy-900 font-mono">RPI-{{ order.id.slice(-4) }}</div></div>
-            <div><div class="text-[11px] uppercase tracking-wider text-slate-500">ISO 11137 compliance</div><div class="mt-0.5 text-navy-900">Dose mapping · Bioburden</div></div>
-          </div>
-        </section>
-        <section class="bg-white border border-slate-200 rounded-lg shadow-card">
-          <header class="px-6 py-3 border-b border-slate-100 font-semibold text-sm text-navy-900 flex items-center justify-between">
-            <span>Attachments</span>
-            <span class="text-xs text-slate-500 font-normal">2 files</span>
-          </header>
-          <div class="divide-y divide-slate-100">
-            <div class="px-6 py-3 flex items-center gap-3 text-sm">
-              <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center"><Icon name="file-text" :size="14" cls="text-teal-600"/></div>
-              <div class="flex-1"><div class="font-medium text-navy-900">msds-{{ order.formCode.toLowerCase() }}.pdf</div><div class="text-xs text-slate-500">184 KB · uploaded at submission</div></div>
-              <button class="text-teal-600 text-xs hover:underline">Download</button>
-            </div>
-            <div class="px-6 py-3 flex items-center gap-3 text-sm">
-              <div class="w-8 h-8 rounded bg-slate-100 flex items-center justify-center"><Icon name="file-text" :size="14" cls="text-teal-600"/></div>
-              <div class="flex-1"><div class="font-medium text-navy-900">coa-{{ order.id.toLowerCase() }}.pdf</div><div class="text-xs text-slate-500">92 KB · uploaded at submission</div></div>
-              <button class="text-teal-600 text-xs hover:underline">Download</button>
-            </div>
-          </div>
-        </section>
-        <MessagesPanel :order-id="order.id" :as-admin="false"/>
+        <div class="flex items-center gap-2 shrink-0">
+          <Btn kind="ghost" icon="download">PDF</Btn>
+          <Btn v-if="canEdit" kind="secondary" icon="pencil">Edit</Btn>
+        </div>
       </div>
 
-      <!-- Right: metadata / timeline -->
-      <div class="space-y-4">
-        <section class="bg-white border border-slate-200 rounded-lg shadow-card">
-          <header class="px-5 py-3 border-b border-slate-100 font-semibold text-sm text-navy-900">Integrations</header>
-          <div class="p-5 space-y-3 text-sm">
-            <div class="flex items-center justify-between">
-              <div class="text-slate-500 text-xs uppercase tracking-wider">Exsited</div>
-              <span class="text-emerald-600 text-xs inline-flex items-center gap-1"><Icon name="check-circle-2" :size="12"/>Created</span>
-            </div>
-            <div class="font-mono text-navy-900">{{ order.exsitedId }}</div>
-            <hr class="border-slate-100"/>
-            <div class="flex items-center justify-between">
-              <div class="text-slate-500 text-xs uppercase tracking-wider">Business Central</div>
-              <BcSyncChip :status="order.bcSync" small/>
-            </div>
-            <div class="font-mono text-navy-900">{{ order.bcId }}</div>
-            <div v-if="order.bcSync==='failed' || order.bcSync==='dead'" class="mt-2 bg-red-50 border border-red-200 text-red-800 rounded p-3 text-xs">
-              Last error: <span class="font-mono">BC-422: customer credit hold</span>. Retry scheduled.
-              <button class="mt-2 text-red-700 underline">Retry now</button>
-            </div>
-          </div>
-        </section>
+      <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Main column -->
+        <div class="lg:col-span-2 space-y-6">
+          <section class="bg-white border border-slate-200 rounded-md">
+            <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Customer</header>
+            <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+              <div><dt class="text-slate-500">Company</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.company }}</dd></div>
+              <div><dt class="text-slate-500">ABN</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.abn }}</dd></div>
+              <div><dt class="text-slate-500">Contact</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.contact }}</dd></div>
+            </dl>
+          </section>
 
-        <section class="bg-white border border-slate-200 rounded-lg shadow-card">
-          <header class="px-5 py-3 border-b border-slate-100 font-semibold text-sm text-navy-900">Status timeline</header>
-          <ol class="p-5 space-y-4">
-            <li v-for="(e,i) in timeline" :key="i" class="flex gap-3">
-              <div :class="['w-8 h-8 rounded-full shrink-0 flex items-center justify-center',
-                            e.fail ? 'bg-red-100 text-red-700' :
-                            e.done ? 'bg-emerald-100 text-emerald-700' :
-                            'bg-slate-100 text-slate-600', e.pulse && 'animate-syncpulse']">
-                <Icon :name="e.icon" :size="14"/>
+          <section class="bg-white border border-slate-200 rounded-md">
+            <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Consignment</header>
+            <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+              <div><dt class="text-slate-500">Purchase order</dt><dd class="mt-0.5 font-mono text-base text-navy-900">{{ order.po }}</dd></div>
+              <div><dt class="text-slate-500">Expected delivery</dt><dd class="mt-0.5 text-base text-navy-900">{{ fmtDate(order.collection) }}</dd></div>
+              <div><dt class="text-slate-500">Consignor</dt><dd class="mt-0.5 text-base text-navy-900">{{ order.consignor }}</dd></div>
+              <div><dt class="text-slate-500">Consignee</dt><dd class="mt-0.5 text-base text-navy-900">{{ order.consignee }}</dd></div>
+              <div>
+                <dt class="text-slate-500">Treatment</dt>
+                <dd class="mt-0.5 inline-flex items-center gap-2 text-base text-navy-900">
+                  <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[order.treatment] && treatmentStyles[order.treatment].dot]" aria-hidden="true"></span>
+                  <span>{{ treatmentLabels[order.treatment] || order.treatment }}</span>
+                </dd>
               </div>
-              <div class="flex-1 text-sm pb-1">
-                <div class="text-navy-900">{{ e.label }}</div>
-                <div class="text-[11px] text-slate-500 mt-0.5">{{ e.ts.replace('T',' · ') }}</div>
-              </div>
-            </li>
-          </ol>
-        </section>
+              <div class="sm:col-span-2"><dt class="text-slate-500">Description of goods</dt><dd class="mt-0.5 text-base text-navy-900">{{ order.goods }}</dd></div>
+            </dl>
+          </section>
+
+          <section v-if="order.doseKGy" class="bg-white border border-slate-200 rounded-md">
+            <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Treatment parameters</header>
+            <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+              <div><dt class="text-slate-500">Target dose</dt><dd class="mt-0.5 text-base text-navy-900 font-medium">{{ order.doseKGy }} kGy</dd></div>
+              <div><dt class="text-slate-500">Treatment type</dt><dd class="mt-0.5 text-base text-navy-900">Routine</dd></div>
+              <div class="sm:col-span-2"><dt class="text-slate-500">Compliance</dt><dd class="mt-0.5 text-base text-navy-900">Treated to ISO 11137.</dd></div>
+            </dl>
+          </section>
+
+          <section class="bg-white border border-slate-200 rounded-md">
+            <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center justify-between">
+              <span>Attachments</span>
+              <span class="text-xs text-slate-500 font-normal">2 files</span>
+            </header>
+            <ul class="p-5 space-y-3">
+              <li class="flex items-center gap-3 text-sm">
+                <Icon name="file-text" :size="16" cls="text-slate-500 shrink-0"/>
+                <div class="flex-1 min-w-0">
+                  <div class="text-base text-navy-900 truncate">msds-{{ order.formCode.toLowerCase() }}.pdf</div>
+                  <div class="text-xs text-slate-500">184 KB &middot; uploaded at submission</div>
+                </div>
+                <a href="#" class="text-sm text-teal-600 hover:underline focus-ring rounded">Download</a>
+              </li>
+              <li class="flex items-center gap-3 text-sm">
+                <Icon name="file-text" :size="16" cls="text-slate-500 shrink-0"/>
+                <div class="flex-1 min-w-0">
+                  <div class="text-base text-navy-900 truncate">coa-{{ order.id.toLowerCase() }}.pdf</div>
+                  <div class="text-xs text-slate-500">92 KB &middot; uploaded at submission</div>
+                </div>
+                <a href="#" class="text-sm text-teal-600 hover:underline focus-ring rounded">Download</a>
+              </li>
+            </ul>
+          </section>
+
+          <MessagesPanel :order-id="order.id" :as-admin="false"/>
+        </div>
+
+        <!-- Right rail: Status timeline (primary, sticky) -->
+        <aside class="lg:sticky lg:top-16 self-start">
+          <section class="bg-white border border-slate-200 rounded-md">
+            <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Status timeline</header>
+            <ol class="p-5">
+              <li v-for="(e, i) in timeline" :key="i" class="relative pl-7" :class="i < timeline.length - 1 ? 'pb-5' : ''">
+                <span v-if="i < timeline.length - 1" class="absolute left-[7px] top-3 bottom-0 w-px bg-slate-200" aria-hidden="true"></span>
+                <span :class="['absolute left-1 top-1.5 h-3 w-3 rounded-full ring-4 ring-white', dotClass(e)]" aria-hidden="true"></span>
+                <div class="text-sm text-navy-900">{{ e.label }}</div>
+                <div class="text-xs text-slate-500 mt-0.5">{{ e.ts.replace('T', ' &middot; ') }}</div>
+              </li>
+            </ol>
+          </section>
+        </aside>
       </div>
-    </div>
+    </template>
   </div>`
 };
 
