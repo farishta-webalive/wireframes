@@ -82,6 +82,17 @@
   .focus-ring { outline: none; }
   .focus-ring:focus-visible { box-shadow: 0 0 0 2px #fff, 0 0 0 4px #14B8A6; }
   input, textarea, select, option, button { font-family: inherit; font-variant-ligatures: inherit; font-feature-settings: inherit; }
+  /* Replace native browser select chevron with consistent custom chevron — native arrows ignore padding-right and overlap content on short selects (e.g. "25"). */
+  select:not([multiple]) {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23475569' stroke-width='2'><path stroke-linecap='round' stroke-linejoin='round' d='M19 9l-7 7-7-7'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0.75rem center;
+    background-size: 1rem 1rem;
+    padding-right: 2.25rem;
+  }
   /* subtle pulse override to be gentle */
   @keyframes syncpulse { 0%,100% { opacity: 1 } 50% { opacity: .55 } }
   .animate-syncpulse { animation: syncpulse 1.6s ease-in-out infinite; }
@@ -4139,7 +4150,7 @@ const OrdersPage = {
         <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
           Rows per page
           <select v-model.number="pageSize"
-                  class="h-11 pl-3 pr-8 rounded-md border border-slate-300 text-base focus-ring bg-white">
+                  class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
             <option :value="25">25</option>
             <option :value="50">50</option>
             <option :value="100">100</option>
