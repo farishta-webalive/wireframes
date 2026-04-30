@@ -5846,18 +5846,18 @@ const AdminConsolePage = {
   components:{ Icon, Btn, RouterLink },
   computed:{
     state(){ return state; },
-    customerCount(){ return state.customers.length; },
     activeCount(){ return state.customers.filter(c => c.status === 'Active').length; },
     pendingCount(){ return state.customers.filter(c => c.status === 'Pending').length; },
     disabledCount(){ return state.customers.filter(c => c.status === 'Disabled').length; },
+    pendingOnboards(){
+      return state.customers
+        .filter(c => c.status === 'Pending')
+        .sort((a,b) => new Date(b.created) - new Date(a.created));
+    },
     recentlyOnboarded(){
-      // Sort by created date desc, take 5 most recent
       return [...state.customers]
         .sort((a,b) => new Date(b.created) - new Date(a.created))
         .slice(0, 5);
-    },
-    pendingCustomers(){
-      return state.customers.filter(c => c.status === 'Pending');
     },
   },
   methods:{
@@ -5865,153 +5865,124 @@ const AdminConsolePage = {
       const dt = new Date(d);
       return dt.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
     },
+    statusDot(status){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[status] || 'bg-slate-400';
+    },
+    turnOffBanner(){
+      state.maintenanceBanner.enabled = false;
+      showToast('Maintenance banner hidden.', 'success');
+    }
   },
   template:`
-  <div class="px-6 sm:px-10 py-8 max-w-[1600px] mx-auto space-y-8">
-    <!-- Header -->
+  <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
     <div>
-      <div class="flex items-center gap-2 mb-2">
-        <span class="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded bg-amber-50 text-amber-700 border border-amber-200">
-          <Icon name="shield-check" :size="11"/> Admin Console
-        </span>
-      </div>
-      <h1 class="text-2xl font-semibold text-navy-900 leading-tight tracking-tight">Steritech management</h1>
+      <h1 class="text-xl font-semibold text-navy-900 leading-tight">Steritech management</h1>
       <p class="text-sm text-slate-500 mt-1">Customer onboarding, feature matrix, and form-schema administration.</p>
     </div>
 
-    <!-- Exsited middleware callout -->
-    <div class="bg-gradient-to-r from-sky-50 to-white border border-sky-200 rounded-xl p-4 sm:p-5 flex flex-col sm:flex-row gap-4 sm:items-center sm:justify-between">
-      <div class="flex gap-3 items-start sm:items-center">
-        <div class="shrink-0 w-10 h-10 rounded-lg bg-sky-100 text-sky-700 flex items-center justify-center">
-          <Icon name="database" :size="18"/>
+    <!-- Triage row: Needs attention (left) + Quick actions (right) -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <!-- Needs attention: Pending onboards as actual rows -->
+      <section class="lg:col-span-2 bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
+          <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
+            <Icon name="clipboard-check" :size="14" cls="text-slate-500"/> Needs attention
+            <span v-if="pendingOnboards.length" class="text-xs text-slate-500 font-normal">({{ pendingOnboards.length }})</span>
+          </span>
+          <router-link v-if="pendingOnboards.length" to="/admin/customers?status=Pending"
+                       class="text-sm text-teal-600 hover:underline focus-ring rounded">View all pending &rarr;</router-link>
+        </header>
+        <div v-if="pendingOnboards.length === 0" class="px-5 py-10 text-center">
+          <Icon name="check-circle-2" :size="28" cls="text-emerald-500 inline-block mb-2"/>
+          <p class="text-sm text-slate-700 font-medium">No pending onboards.</p>
+          <p class="text-xs text-slate-500 mt-1">All accounts are active or disabled.</p>
         </div>
-        <div class="min-w-0">
-          <div class="text-sm font-semibold text-navy-900">Operational data lives in Exsited</div>
-          <p class="text-xs text-slate-600 mt-0.5">Orders, treatments, billing and recent activity are managed in the Exsited middleware. This console is for management only.</p>
-        </div>
-      </div>
-      <a href="https://app.exsited.com" target="_blank" rel="noopener"
-         class="shrink-0 inline-flex items-center gap-1.5 px-3 py-2 rounded-lg bg-white border border-sky-300 text-sky-700 text-sm font-medium hover:bg-sky-50 focus-ring">
-        Open Exsited
-        <Icon name="external-link" :size="14"/>
-      </a>
-    </div>
-
-    <!-- Stat tiles -->
-    <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
-      <router-link to="/admin/customers"
-                   class="block bg-white border border-slate-200 rounded-xl p-5 hover:border-amber-300 hover:shadow-card transition-all focus-ring">
-        <div class="flex items-start justify-between mb-3">
-          <div class="w-9 h-9 rounded-lg bg-emerald-50 text-emerald-700 flex items-center justify-center">
-            <Icon name="users" :size="16"/>
-          </div>
-        </div>
-        <div class="text-2xl font-semibold text-navy-900">{{ activeCount }}</div>
-        <div class="text-xs text-slate-500 mt-0.5">Active customers</div>
-      </router-link>
-
-      <router-link to="/admin/customers?status=Pending"
-                   class="block bg-white border border-slate-200 rounded-xl p-5 hover:border-amber-300 hover:shadow-card transition-all focus-ring">
-        <div class="flex items-start justify-between mb-3">
-          <div class="w-9 h-9 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center">
-            <Icon name="clock" :size="16"/>
-          </div>
-          <span v-if="pendingCount > 0" class="text-[10px] font-semibold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">Action</span>
-        </div>
-        <div class="text-2xl font-semibold text-navy-900">{{ pendingCount }}</div>
-        <div class="text-xs text-slate-500 mt-0.5">Pending onboards</div>
-      </router-link>
-
-      <div class="bg-white border border-slate-200 rounded-xl p-5">
-        <div class="flex items-start justify-between mb-3">
-          <div class="w-9 h-9 rounded-lg bg-slate-100 text-slate-600 flex items-center justify-center">
-            <Icon name="user-x" :size="16"/>
-          </div>
-        </div>
-        <div class="text-2xl font-semibold text-navy-900">{{ disabledCount }}</div>
-        <div class="text-xs text-slate-500 mt-0.5">Disabled accounts</div>
-      </div>
-    </div>
-
-    <!-- Two-column: quick actions + pending onboards -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-      <!-- Quick actions -->
-      <div class="lg:col-span-1 bg-white border border-slate-200 rounded-xl p-5">
-        <div class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Management tools</div>
-        <div class="space-y-1">
-          <router-link to="/admin/onboard-customer"
-                       class="flex items-center gap-3 -mx-2 px-3 py-2.5 rounded-lg hover:bg-amber-50 group transition-colors focus-ring">
-            <div class="w-8 h-8 rounded-lg bg-amber-50 group-hover:bg-amber-100 text-amber-700 flex items-center justify-center transition-colors">
-              <Icon name="user-plus" :size="15"/>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-sm font-medium text-navy-900">Onboard customer</div>
-              <div class="text-[11px] text-slate-500">Create a new account &amp; provision facilities</div>
-            </div>
-            <Icon name="chevron-right" :size="14" cls="text-slate-400 group-hover:text-amber-600"/>
-          </router-link>
-          <router-link to="/admin/customers"
-                       class="flex items-center gap-3 -mx-2 px-3 py-2.5 rounded-lg hover:bg-amber-50 group transition-colors focus-ring">
-            <div class="w-8 h-8 rounded-lg bg-emerald-50 group-hover:bg-emerald-100 text-emerald-700 flex items-center justify-center transition-colors">
-              <Icon name="users" :size="15"/>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-sm font-medium text-navy-900">Customers</div>
-              <div class="text-[11px] text-slate-500">Browse, edit feature matrix</div>
-            </div>
-            <Icon name="chevron-right" :size="14" cls="text-slate-400 group-hover:text-amber-600"/>
-          </router-link>
-          <router-link :to="{ path:'/settings', query:{ tab:'site' } }"
-                       class="flex items-center gap-3 -mx-2 px-3 py-2.5 rounded-lg hover:bg-amber-50 group transition-colors focus-ring">
-            <div class="w-8 h-8 rounded-lg bg-sky-50 group-hover:bg-sky-100 text-sky-700 flex items-center justify-center transition-colors">
-              <Icon name="sliders-horizontal" :size="15"/>
-            </div>
-            <div class="min-w-0 flex-1">
-              <div class="text-sm font-medium text-navy-900 flex items-center gap-2">
-                Site settings
-                <span v-if="state.maintenanceBanner.enabled" class="inline-flex items-center gap-1 text-[10px] font-semibold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800 border border-amber-200">
-                  <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-                  Banner live
-                </span>
+        <ul v-else>
+          <li v-for="c in pendingOnboards" :key="c.id" class="border-b border-slate-100 last:border-b-0">
+            <div class="px-5 py-3.5 flex items-center gap-4 flex-wrap">
+              <div class="min-w-0 flex-1">
+                <router-link :to="'/admin/customers/'+c.id" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.company }}</router-link>
+                <div class="text-sm text-slate-500 mt-0.5">{{ c.contact }} &middot; Requested {{ fmtDate(c.created) }}</div>
               </div>
-              <div class="text-[11px] text-slate-500">Maintenance banner &amp; site-wide notices</div>
+              <router-link :to="'/admin/customers/'+c.id"
+                           class="text-sm text-slate-700 hover:text-teal-600 focus-ring rounded inline-flex items-center gap-1">Open <Icon name="arrow-right" :size="14"/></router-link>
             </div>
-            <Icon name="chevron-right" :size="14" cls="text-slate-400 group-hover:text-amber-600"/>
-          </router-link>
-        </div>
-      </div>
+          </li>
+        </ul>
+      </section>
 
-      <!-- Recently onboarded -->
-      <div class="lg:col-span-2 xl:col-span-3 bg-white border border-slate-200 rounded-xl">
-        <div class="flex items-center justify-between px-5 py-3.5 border-b border-slate-100">
-          <div>
-            <div class="text-sm font-semibold text-navy-900">Recently onboarded</div>
-            <div class="text-[11px] text-slate-500">Latest 5 customer accounts created</div>
-          </div>
-          <router-link to="/admin/customers" class="text-xs text-amber-700 hover:text-amber-800 font-medium">View all →</router-link>
-        </div>
-        <div class="divide-y divide-slate-100">
-          <router-link v-for="c in recentlyOnboarded" :key="c.id"
-                       :to="'/admin/customers/'+c.id"
-                       class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 transition-colors focus-ring">
-            <div class="w-8 h-8 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-semibold shrink-0">
+      <!-- Quick actions: text-row list, no colored icon containers -->
+      <section class="lg:col-span-1 bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Quick actions</header>
+        <ul class="py-1">
+          <li>
+            <router-link to="/admin/onboard-customer"
+                         class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
+              <Icon name="user-plus" :size="16" cls="text-slate-500 shrink-0"/>
+              <span class="flex-1 text-base text-navy-900">Onboard customer</span>
+              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+            </router-link>
+          </li>
+          <li class="border-t border-slate-100">
+            <router-link to="/admin/customers"
+                         class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
+              <Icon name="users" :size="16" cls="text-slate-500 shrink-0"/>
+              <span class="flex-1 min-w-0">
+                <span class="block text-base text-navy-900">Customers</span>
+                <span class="block text-xs text-slate-500">{{ activeCount }} active &middot; {{ disabledCount }} disabled</span>
+              </span>
+              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+            </router-link>
+          </li>
+          <li class="border-t border-slate-100">
+            <router-link :to="{ path:'/settings', query:{ tab:'site' } }"
+                         class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
+              <Icon name="sliders-horizontal" :size="16" cls="text-slate-500 shrink-0"/>
+              <span class="flex-1 min-w-0">
+                <span class="block text-base text-navy-900">Site settings</span>
+                <span v-if="state.maintenanceBanner.enabled" class="block text-xs text-slate-500">
+                  Maintenance banner is on &middot; <button type="button" @click.stop.prevent="turnOffBanner" class="text-teal-600 hover:underline focus-ring rounded">Turn off</button>
+                </span>
+                <span v-else class="block text-xs text-slate-500">Maintenance banner and site-wide notices</span>
+              </span>
+              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+            </router-link>
+          </li>
+        </ul>
+      </section>
+    </div>
+
+    <!-- Recently onboarded (secondary, full width) -->
+    <section class="bg-white border border-slate-200 rounded-md">
+      <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
+        <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
+          <Icon name="history" :size="14" cls="text-slate-500"/> Recently onboarded
+        </span>
+        <router-link to="/admin/customers" class="text-sm text-teal-600 hover:underline focus-ring rounded">View all customers &rarr;</router-link>
+      </header>
+      <ul>
+        <li v-for="c in recentlyOnboarded" :key="c.id" class="border-b border-slate-100 last:border-b-0">
+          <div class="px-5 py-3.5 flex items-center gap-4 flex-wrap">
+            <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-semibold shrink-0">
               {{ c.contact.split(' ').map(s=>s[0]).slice(0,2).join('') }}
             </div>
             <div class="min-w-0 flex-1">
-              <div class="text-sm font-medium text-navy-900 truncate">{{ c.company }}</div>
-              <div class="text-[11px] text-slate-500 truncate">{{ c.contact }} · {{ c.facilities.length }} facilit{{ c.facilities.length === 1 ? 'y' : 'ies' }}</div>
+              <router-link :to="'/admin/customers/'+c.id" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.company }}</router-link>
+              <div class="text-sm text-slate-500 mt-0.5 truncate">{{ c.contact }} &middot; {{ c.facilities.length }} {{ c.facilities.length === 1 ? 'site' : 'sites' }} &middot; Created {{ fmtDate(c.created) }}</div>
             </div>
-            <span :class="['hidden sm:inline-flex text-[10px] font-medium px-2 py-0.5 rounded-full ring-1 ring-inset',
-                            c.status === 'Active'   ? 'bg-emerald-50 text-emerald-700 ring-emerald-200' :
-                            c.status === 'Pending'  ? 'bg-amber-50 text-amber-700 ring-amber-200' :
-                                                      'bg-slate-100 text-slate-600 ring-slate-200']">
-              {{ c.status }}
+            <span class="inline-flex items-center gap-2 text-sm text-slate-700 whitespace-nowrap">
+              <span :class="['inline-block h-2 w-2 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
+              <span>{{ c.status }}</span>
             </span>
-            <span class="text-[11px] text-slate-400 hidden md:inline">{{ fmtDate(c.created) }}</span>
-          </router-link>
-        </div>
-      </div>
-    </div>
+          </div>
+        </li>
+      </ul>
+    </section>
+
+    <p class="text-sm text-slate-500">
+      Billing and contracts live in Exsited.
+      <a href="https://app.exsited.com" target="_blank" rel="noopener" class="text-teal-600 hover:underline focus-ring rounded inline-flex items-center gap-1">Open Exsited <Icon name="external-link" :size="12"/></a>
+    </p>
   </div>`
 };
 
