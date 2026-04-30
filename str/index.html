@@ -5999,7 +5999,6 @@ const OnboardCustomerPage = {
       access[f.code] = row;
     });
     return {
-      step: 1,
       f: {
         company:'',
         contact:'',
@@ -6012,7 +6011,8 @@ const OnboardCustomerPage = {
         addrPostcode:'',
       },
       access,
-      previewOpen: false,
+      previewOpen: true,
+      submitAttempted: false,
     };
   },
   computed:{
@@ -6073,184 +6073,129 @@ const OnboardCustomerPage = {
       const order = ['Gamma','ETO','GMP','Gamma+ETO'];
       return order.filter(t => groups[t]).map(t => ({ treatment:t, rows: groups[t] }));
     },
-    step1Valid(){
+    detailsValid(){
       const f = this.f;
-      return f.company.trim() && f.contact.trim() && f.abn.trim() && f.phone.trim() && f.email.trim()
-          && f.addrStreet.trim() && f.addrSuburb.trim() && f.addrState && f.addrPostcode.trim();
+      return f.company.trim() && f.contact.trim() && f.abn.trim() && f.phone.trim() && f.email.trim();
     },
-    step2Valid(){
+    addressValid(){
+      const f = this.f;
+      return f.addrStreet.trim() && f.addrSuburb.trim() && f.addrState && f.addrPostcode.trim();
+    },
+    accessValid(){
       return this.grantedFacilities.length > 0;
+    },
+    formValid(){
+      return this.detailsValid && this.addressValid && this.accessValid;
+    },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    issueCount(){
+      let n = 0;
+      if (!this.detailsValid) n++;
+      if (!this.addressValid) n++;
+      if (!this.accessValid) n++;
+      return n;
     },
   },
   methods:{
-    treatmentColor(t){
-      // Pull from the shared TREATMENT_STYLES map so admin and customer views
-      // never drift apart. Add `border` for the table-header pill outline.
-      const s = TREATMENT_STYLES[t] || TREATMENT_STYLES['Gamma'];
-      return `${s.bg} ${s.text} ${s.border}`;
-    },
     facName(code){ const f = FACILITIES.find(x => x.code===code); return f ? f.name : code; },
     facState(code){ const f = FACILITIES.find(x => x.code===code); return f ? f.state : ''; },
-    next(){ if (this.step1Valid) this.step = 2; },
-    back(){ this.step = 1; },
-    cancel(){ this.$router.push('/dashboard'); },
+    cancel(){ this.$router.push('/admin'); },
     sendInvite(){
+      this.submitAttempted = true;
+      if (!this.formValid) {
+        showToast('Fix the issues highlighted before sending the invitation.', 'error');
+        return;
+      }
       const email = this.f.email || 'customer@example.com';
-      showToast(`Invitation sent to ${email}. Customer will receive credentials once Exsited customer creation succeeds.`);
-      // Reset
-      this.step = 1;
-      this.previewOpen = false;
+      showToast(`Invitation sent to ${email}. Customer record will be created in Exsited.`, 'success');
+      this.$router.push('/admin/customers');
     },
   },
   template:`
-    <div class="px-6 sm:px-10 py-8 max-w-[1600px] mx-auto">
-      <!-- Vertical-stack header -->
-      <div class="mb-6">
-        <button @click="cancel" class="text-xs text-slate-500 hover:text-navy-900 inline-flex items-center gap-1 mb-3 focus-ring rounded">
-          <Icon name="arrow-left" :size="14"/> All admin tools
-        </button>
-        <div class="flex items-center gap-2 mb-2">
-          <span class="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded bg-amber-50 text-amber-700 border border-amber-200">
-            <Icon name="user-plus" :size="11"/> Admin · Onboarding
-          </span>
-        </div>
-        <h1 class="text-2xl font-semibold text-navy-900 leading-tight tracking-tight">Onboard a new customer</h1>
-        <p class="text-sm text-slate-500 mt-1">
-          <span v-if="step===1">Step 1 of 2 — Customer details</span>
-          <span v-else>Step 2 of 2 — Assign facilities and services</span>
-        </p>
+    <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <button type="button" @click="cancel" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-navy-900 focus-ring rounded">
+        <Icon name="arrow-left" :size="14"/> Back to admin
+      </button>
+
+      <div>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Onboard a new customer</h1>
+        <p class="text-sm text-slate-500 mt-1">Create a customer record and grant facility access. The invitation sends after submit.</p>
       </div>
 
-      <!-- Step indicator (numbered, NOT a stepper sidebar) -->
-      <div class="flex items-center gap-3 mb-8">
-        <div class="flex items-center gap-2">
-          <div :class="['w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border transition-colors',
-                         step>=1 ? 'bg-amber-500 border-amber-500 text-white' : 'bg-white border-slate-300 text-slate-500']">1</div>
-          <span :class="['text-xs font-medium', step===1 ? 'text-navy-900' : 'text-slate-500']">Customer details</span>
-        </div>
-        <div :class="['flex-1 h-px max-w-[80px]', step>=2 ? 'bg-amber-500' : 'bg-slate-200']"></div>
-        <div class="flex items-center gap-2">
-          <div :class="['w-7 h-7 rounded-full flex items-center justify-center text-xs font-semibold border transition-colors',
-                         step>=2 ? 'bg-amber-500 border-amber-500 text-white' : 'bg-white border-slate-300 text-slate-500']">2</div>
-          <span :class="['text-xs font-medium', step===2 ? 'text-navy-900' : 'text-slate-500']">Access</span>
-        </div>
-      </div>
-
-      <!-- ====================== STEP 1 ====================== -->
-      <div v-if="step===1" class="grid grid-cols-1 xl:grid-cols-12 gap-6">
-        <div class="xl:col-span-8 bg-white border border-slate-200 rounded-xl">
-        <div class="px-6 sm:px-8 py-5 border-b border-slate-100">
-          <h2 class="font-semibold text-navy-900">Customer details</h2>
-          <p class="text-xs text-slate-500 mt-0.5">Primary contact and billing address. ABN is verified against the ABR before invitation send.</p>
-        </div>
-
-        <div class="px-6 sm:px-8 py-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-          <div>
-            <label class="text-xs font-medium text-navy-900">Company name <span class="text-rose-600">*</span></label>
-            <input v-model="f.company" type="text" placeholder="e.g. Acme Foods Pty Ltd"
-                   class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring"/>
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="building-2" :size="14" cls="text-slate-500"/> Customer details
+        </header>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div class="md:col-span-2">
+            <label for="oc-company" class="block text-sm font-medium text-slate-700 mb-1.5">Company name <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="oc-company" v-model="f.company" type="text" placeholder="e.g. Acme Foods Pty Ltd" autocomplete="organization"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
           </div>
           <div>
-            <label class="text-xs font-medium text-navy-900">Contact name <span class="text-rose-600">*</span></label>
-            <input v-model="f.contact" type="text" placeholder="Full name"
-                   class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring"/>
+            <label for="oc-contact" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="oc-contact" v-model="f.contact" type="text" placeholder="Full name" autocomplete="name"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
           </div>
           <div>
-            <label class="text-xs font-medium text-navy-900">ABN <span class="text-rose-600">*</span></label>
-            <input v-model="f.abn" type="text" placeholder="11 digits"
-                   class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring"/>
+            <label for="oc-abn" class="block text-sm font-medium text-slate-700 mb-1.5">ABN <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="oc-abn" v-model="f.abn" type="text" placeholder="11 digits" inputmode="numeric"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <p class="mt-1 text-xs text-slate-500">Verified against the Australian Business Register on submit.</p>
           </div>
           <div>
-            <label class="text-xs font-medium text-navy-900">Business phone <span class="text-rose-600">*</span></label>
-            <input v-model="f.phone" type="tel" placeholder="+61 ..."
-                   class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring"/>
+            <label for="oc-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Business phone <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="oc-phone" v-model="f.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
           </div>
           <div class="md:col-span-2">
-            <label class="text-xs font-medium text-navy-900">Email <span class="text-rose-600">*</span></label>
-            <input v-model="f.email" type="email" placeholder="customer@company.com.au"
-                   class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring"/>
-            <div class="mt-1 text-[11px] text-slate-500">The invitation will be sent to this address.</div>
+            <label for="oc-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="oc-email" v-model="f.email" type="email" placeholder="customer@company.com.au" autocomplete="email"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <p class="mt-1 text-xs text-slate-500">Becomes the primary login. The invitation goes to this address.</p>
           </div>
+        </div>
+      </section>
 
-          <div class="md:col-span-2 mt-2 pt-5 border-t border-slate-100">
-            <div class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-3">Billing address</div>
-          </div>
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="map-pin" :size="14" cls="text-slate-500"/> Billing address
+        </header>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <div class="md:col-span-2">
-            <label class="text-xs font-medium text-navy-900">Street <span class="text-rose-600">*</span></label>
-            <input v-model="f.addrStreet" type="text" placeholder="e.g. 14 Williamson Rd"
-                   class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring"/>
+            <label for="oc-street" class="block text-sm font-medium text-slate-700 mb-1.5">Street <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="oc-street" v-model="f.addrStreet" type="text" placeholder="e.g. 14 Williamson Rd" autocomplete="street-address"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
           </div>
           <div>
-            <label class="text-xs font-medium text-navy-900">Suburb <span class="text-rose-600">*</span></label>
-            <input v-model="f.addrSuburb" type="text" placeholder="Suburb"
-                   class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring"/>
+            <label for="oc-suburb" class="block text-sm font-medium text-slate-700 mb-1.5">Suburb <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="oc-suburb" v-model="f.addrSuburb" type="text" placeholder="Suburb" autocomplete="address-level2"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
           </div>
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="text-xs font-medium text-navy-900">State <span class="text-rose-600">*</span></label>
-              <select v-model="f.addrState"
-                      class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring bg-white">
+              <label for="oc-state" class="block text-sm font-medium text-slate-700 mb-1.5">State <span class="text-red-500" aria-hidden="true">*</span></label>
+              <select id="oc-state" v-model="f.addrState"
+                      class="w-full h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
                 <option value="VIC">VIC</option>
                 <option value="NSW">NSW</option>
                 <option value="QLD">QLD</option>
+                <option value="WA">WA</option>
+                <option value="SA">SA</option>
+                <option value="TAS">TAS</option>
+                <option value="ACT">ACT</option>
+                <option value="NT">NT</option>
               </select>
             </div>
             <div>
-              <label class="text-xs font-medium text-navy-900">Postcode <span class="text-rose-600">*</span></label>
-              <input v-model="f.addrPostcode" type="text" placeholder="3000"
-                     class="mt-1 w-full px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring"/>
+              <label for="oc-postcode" class="block text-sm font-medium text-slate-700 mb-1.5">Postcode <span class="text-red-500" aria-hidden="true">*</span></label>
+              <input id="oc-postcode" v-model="f.addrPostcode" type="text" placeholder="3000" inputmode="numeric" autocomplete="postal-code"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
             </div>
           </div>
         </div>
-
-        <div class="px-6 sm:px-8 py-4 border-t border-slate-100 bg-slate-50 flex items-center gap-3 rounded-b-xl">
-          <Btn kind="ghost" icon="x" @click="cancel">Cancel</Btn>
-          <div class="flex-1"></div>
-          <Btn kind="primary" iconRight="arrow-right" :disabled="!step1Valid" @click="next">Next: Access</Btn>
-        </div>
-        </div>
-
-        <!-- Helper sidebar for Step 1 -->
-        <aside class="xl:col-span-4 space-y-4">
-          <div class="bg-white border border-slate-200 rounded-xl p-5">
-            <div class="flex items-center gap-2 mb-3">
-              <div class="w-8 h-8 rounded-lg bg-amber-50 text-amber-700 flex items-center justify-center"><Icon name="info" :size="14"/></div>
-              <h3 class="text-sm font-semibold text-navy-900">What happens next</h3>
-            </div>
-            <ol class="space-y-3 text-xs text-slate-600">
-              <li class="flex gap-3">
-                <div class="w-5 h-5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">1</div>
-                <div>
-                  <div class="font-medium text-navy-900">ABN verified against ABR</div>
-                  <div class="mt-0.5 text-slate-500">Australian Business Register lookup happens before the invitation goes out.</div>
-                </div>
-              </li>
-              <li class="flex gap-3">
-                <div class="w-5 h-5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">2</div>
-                <div>
-                  <div class="font-medium text-navy-900">Assign facilities &amp; services</div>
-                  <div class="mt-0.5 text-slate-500">You\u2019ll pick which Steritech facilities the customer can request treatments from \u2014 Gamma, ETO, GMP.</div>
-                </div>
-              </li>
-              <li class="flex gap-3">
-                <div class="w-5 h-5 rounded-full bg-slate-100 text-slate-700 text-[10px] font-bold flex items-center justify-center shrink-0 mt-0.5">3</div>
-                <div>
-                  <div class="font-medium text-navy-900">Customer record created in Exsited</div>
-                  <div class="mt-0.5 text-slate-500">An invitation email with portal credentials is sent to the address you provide.</div>
-                </div>
-              </li>
-            </ol>
-          </div>
-
-          <div class="bg-sky-50/60 border border-sky-200 rounded-xl p-4 flex gap-3">
-            <Icon name="lightbulb" :size="16" cls="text-sky-700 shrink-0 mt-0.5"/>
-            <div class="text-xs text-sky-900">
-              <div class="font-semibold mb-0.5">Tip</div>
-              The contact email becomes the primary login. Customer admins can add more team members from their own settings later.
-            </div>
-          </div>
-        </aside>
-      </div>
+      </section>
 
       <!-- ====================== STEP 2 ====================== -->
       <div v-else class="space-y-6">
