@@ -6775,6 +6775,8 @@ const CustomerDetailPage = {
   computed:{
     state(){ return state; },
     customer(){ return state.customers.find(c => c.id === this.$route.params.id); },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
     facObjs(){ return (this.customer?.facilities || []).map(code => FACILITIES.find(f => f.code === code)).filter(Boolean); },
     recentOrders(){
       // Reuse seed orders, take first 5 as a mock
@@ -6804,11 +6806,8 @@ const CustomerDetailPage = {
   },
   methods:{
     fmtDate, fmtMoney,
-    statusCls(s){
-      if (s === 'Active')   return 'bg-emerald-100 text-emerald-800 ring-emerald-200';
-      if (s === 'Pending')  return 'bg-amber-100   text-amber-800   ring-amber-200';
-      if (s === 'Disabled') return 'bg-slate-100   text-slate-600   ring-slate-200';
-      return 'bg-slate-100 text-slate-700 ring-slate-200';
+    statusDot(s){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
     },
     fmtTs(ts){
       if (!ts) return '';
@@ -6827,106 +6826,120 @@ const CustomerDetailPage = {
     },
   },
   template:`
-    <div v-if="!customer" class="px-6 py-12 max-w-[1600px] mx-auto text-sm text-slate-500">Customer not found. <router-link to="/admin/customers" class="text-teal-600 hover:underline">← All customers</router-link></div>
-    <div v-else class="px-6 sm:px-10 py-8 max-w-[1600px] mx-auto">
-      <!-- Vertical-stack header -->
-      <div class="mb-6">
-        <router-link to="/admin/customers" class="text-xs text-slate-500 hover:text-navy-900 inline-flex items-center gap-1 mb-3 focus-ring rounded">
-          <Icon name="arrow-left" :size="14"/> All customers
-        </router-link>
-        <div class="flex items-center gap-2 mb-2">
-          <span class="inline-flex items-center gap-1 text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded bg-amber-50 text-amber-700 border border-amber-200">
-            <Icon name="user" :size="11"/> Admin · Customer
+    <div v-if="!customer" class="p-12 text-sm text-slate-500">Customer not found. <router-link to="/admin/customers" class="text-teal-600 hover:underline">&larr; All customers</router-link></div>
+    <div v-else class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <router-link to="/admin/customers" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-navy-900 focus-ring rounded">
+        <Icon name="arrow-left" :size="14"/> All customers
+      </router-link>
+
+      <div>
+        <h1 :class="['text-xl font-semibold leading-tight', customer.status === 'Disabled' ? 'text-slate-400' : 'text-navy-900']">{{ customer.company }}</h1>
+        <p class="text-sm text-slate-500 mt-1 inline-flex items-center gap-2 flex-wrap">
+          <span>{{ customer.contact }}</span>
+          <span aria-hidden="true">&middot;</span>
+          <span>Joined {{ fmtDate(customer.created) }}</span>
+          <span aria-hidden="true">&middot;</span>
+          <span class="font-mono text-xs text-slate-400">{{ customer.id }}</span>
+          <span aria-hidden="true">&middot;</span>
+          <span class="inline-flex items-center gap-1.5 text-slate-700">
+            <span :class="['inline-block h-2 w-2 rounded-full', statusDot(customer.status)]" aria-hidden="true"></span>
+            <span>{{ customer.status }}</span>
           </span>
-          <span class="text-xs text-slate-400">{{ customer.id }}</span>
-          <span :class="['inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full ring-1', statusCls(customer.status)]">{{ customer.status }}</span>
-        </div>
-        <h1 class="text-2xl font-semibold text-navy-900 leading-tight tracking-tight">{{ customer.contact }}</h1>
-        <p class="text-sm text-slate-500 mt-1">{{ customer.company }} · joined {{ fmtDate(customer.created) }}</p>
+        </p>
       </div>
 
-      <!-- Tabs -->
-      <div class="border-b border-slate-200 mb-6">
-        <nav class="flex items-center gap-1 -mb-px" role="tablist">
-          <button type="button" role="tab" :aria-selected="tab==='profile'"
+      <div role="tablist" aria-label="Customer detail sections" class="border-b border-slate-200">
+        <div class="flex flex-wrap gap-1">
+          <button type="button" role="tab"
+                  :id="'cd-tab-profile'"
+                  :aria-selected="tab === 'profile'"
+                  :aria-controls="'cd-panel-profile'"
+                  :tabindex="tab === 'profile' ? 0 : -1"
                   @click="tab='profile'"
-                  :class="['inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px focus-ring rounded-t',
-                           tab==='profile' ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-500 hover:text-navy-900']">
-            <Icon name="user" :size="14"/> Profile
+                  :class="['inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px focus-ring transition-colors',
+                           tab === 'profile' ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+            Profile
           </button>
-          <button type="button" role="tab" :aria-selected="tab==='messages'"
+          <button type="button" role="tab"
+                  :id="'cd-tab-messages'"
+                  :aria-selected="tab === 'messages'"
+                  :aria-controls="'cd-panel-messages'"
+                  :tabindex="tab === 'messages' ? 0 : -1"
                   @click="tab='messages'"
-                  :class="['inline-flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px focus-ring rounded-t',
-                           tab==='messages' ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-500 hover:text-navy-900']">
-            <Icon name="message-square" :size="14"/> Messages
-            <span v-if="totalMessageCount" class="ml-1 text-[10px] font-semibold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800">{{ totalMessageCount }}</span>
+                  :class="['inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px focus-ring transition-colors',
+                           tab === 'messages' ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+            Messages<span v-if="totalMessageCount" class="text-slate-500"> ({{ totalMessageCount }})</span>
           </button>
-        </nav>
+        </div>
       </div>
 
-      <!-- PROFILE TAB -->
-      <div v-if="tab === 'profile'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <!-- Left: Customer details -->
-        <div class="space-y-4">
-          <div class="bg-white border border-slate-200 rounded-xl p-5">
-            <h2 class="text-sm font-semibold text-navy-900 mb-3">Contact</h2>
-            <dl class="text-sm divide-y divide-slate-100">
-              <div class="py-2 grid grid-cols-3 gap-2"><dt class="text-slate-500">Contact</dt><dd class="col-span-2 text-navy-900">{{ customer.contact }}</dd></div>
-              <div class="py-2 grid grid-cols-3 gap-2"><dt class="text-slate-500">Company</dt><dd class="col-span-2 text-navy-900">{{ customer.company }}</dd></div>
-              <div class="py-2 grid grid-cols-3 gap-2"><dt class="text-slate-500">Email</dt><dd class="col-span-2 text-navy-900 break-all">{{ customer.email }}</dd></div>
-              <div class="py-2 grid grid-cols-3 gap-2"><dt class="text-slate-500">Phone</dt><dd class="col-span-2 text-navy-900">{{ customer.phone }}</dd></div>
-              <div class="py-2 grid grid-cols-3 gap-2"><dt class="text-slate-500">Customer ID</dt><dd class="col-span-2 text-slate-700 font-mono text-xs">{{ customer.id }}</dd></div>
-            </dl>
-          </div>
+      <div v-if="tab === 'profile'" role="tabpanel" id="cd-panel-profile" aria-labelledby="cd-tab-profile" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="bg-white border border-slate-200 rounded-md">
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+            <Icon name="building-2" :size="14" cls="text-slate-500"/> Contact
+          </header>
+          <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+            <div><dt class="text-slate-500">Company</dt><dd class="mt-0.5 text-base text-navy-900">{{ customer.company }}</dd></div>
+            <div><dt class="text-slate-500">Contact name</dt><dd class="mt-0.5 text-base text-navy-900">{{ customer.contact }}</dd></div>
+            <div class="sm:col-span-2"><dt class="text-slate-500">Email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ customer.email }}</dd></div>
+            <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ customer.phone }}</dd></div>
+            <div><dt class="text-slate-500">Joined</dt><dd class="mt-0.5 text-base text-navy-900">{{ fmtDate(customer.created) }}</dd></div>
+          </dl>
+        </section>
 
-          <div class="bg-white border border-slate-200 rounded-xl p-5">
-            <h2 class="text-sm font-semibold text-navy-900 mb-1">Notes</h2>
-            <p class="text-xs text-slate-500 mb-3">Internal notes are not visible to the customer.</p>
-            <div class="text-sm text-slate-400 italic">No notes yet.</div>
-          </div>
-        </div>
-
-        <!-- Right: Entitlements + Orders -->
-        <div class="space-y-4">
-          <div class="bg-white border border-slate-200 rounded-xl p-5">
-            <h2 class="text-sm font-semibold text-navy-900 mb-3">Facility entitlements</h2>
-            <div class="space-y-3">
-              <div v-for="f in facObjs" :key="f.code" class="flex items-start justify-between gap-3 pb-3 border-b border-slate-100 last:border-0 last:pb-0">
-                <div>
-                  <div class="text-sm font-medium text-navy-900">{{ f.code }} · {{ f.name }}</div>
-                  <div class="text-xs text-slate-500">{{ f.address }}</div>
-                </div>
-                <div class="flex flex-wrap gap-1 shrink-0">
-                  <TreatmentChip v-for="s in customer.services.filter(svc => f.services.includes(svc))" :key="s" :treatment="s"/>
-                </div>
+        <section class="bg-white border border-slate-200 rounded-md">
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+            <Icon name="map-pin" :size="14" cls="text-slate-500"/> Facility access
+          </header>
+          <ul class="p-5 space-y-4">
+            <li v-for="f in facObjs" :key="f.code" class="flex items-start justify-between gap-4 pb-4 border-b border-slate-100 last:border-b-0 last:pb-0">
+              <div class="min-w-0">
+                <div class="text-base text-navy-900">{{ f.name }}, {{ f.state }}</div>
+                <div class="text-xs text-slate-500 mt-0.5">{{ f.address }}</div>
               </div>
-            </div>
-          </div>
+              <div class="text-sm text-slate-700 inline-flex items-center gap-1.5 flex-wrap shrink-0 max-w-[55%] justify-end">
+                <template v-for="(s, idx) in customer.services.filter(svc => f.services.includes(svc))" :key="s">
+                  <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                  <span>{{ treatmentLabels[s] || s }}</span>
+                  <span v-if="idx < customer.services.filter(svc => f.services.includes(svc)).length - 1" aria-hidden="true" class="text-slate-300">&middot;</span>
+                </template>
+              </div>
+            </li>
+          </ul>
+        </section>
 
-          <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
-              <h2 class="text-sm font-semibold text-navy-900">Recent orders</h2>
-              <span class="text-xs text-slate-500">{{ customer.orders }} total</span>
-            </div>
-            <div v-if="customer.status === 'Pending'" class="px-5 py-8 text-center text-sm text-slate-500">No orders yet — customer just signed up.</div>
-            <table v-else class="w-full text-sm">
-              <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500">
+        <section class="bg-white border border-slate-200 rounded-md lg:col-span-2">
+          <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
+            <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
+              <Icon name="package" :size="14" cls="text-slate-500"/> Recent orders
+            </span>
+            <span class="text-sm text-slate-500">{{ customer.orders }} total</span>
+          </header>
+          <div v-if="customer.status === 'Pending'" class="px-5 py-10 text-center text-sm text-slate-500">No orders yet &mdash; customer just signed up.</div>
+          <div v-else class="overflow-x-auto">
+            <table class="w-full text-base">
+              <caption class="sr-only">Recent orders</caption>
+              <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
                 <tr>
-                  <th class="text-left font-semibold px-4 py-2">Order</th>
-                  <th class="text-left font-semibold px-4 py-2">Status</th>
-                  <th class="text-right font-semibold px-4 py-2">Total</th>
+                  <th scope="col" class="px-4 py-3 font-medium">Order</th>
+                  <th scope="col" class="px-4 py-3 font-medium">Status</th>
+                  <th scope="col" class="px-4 py-3 font-medium">Submitted</th>
+                  <th scope="col" class="px-4 py-3 font-medium text-right">Total</th>
                 </tr>
               </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr v-for="o in recentOrders" :key="o.id">
-                  <td class="px-4 py-2 font-mono text-xs text-navy-900">{{ o.id }}</td>
-                  <td class="px-4 py-2"><StatusBadge :status="o.status"/></td>
-                  <td class="px-4 py-2 text-right text-navy-900">{{ fmtMoney(o.total) }}</td>
+              <tbody>
+                <tr v-for="o in recentOrders" :key="o.id" class="even:bg-slate-50/60">
+                  <td class="px-4 py-3.5">
+                    <router-link :to="'/orders/'+o.id" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ o.id }}</router-link>
+                  </td>
+                  <td class="px-4 py-3.5 whitespace-nowrap"><StatusBadge :status="o.status"/></td>
+                  <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(o.submitted) }}</td>
+                  <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ fmtMoney(o.total) }}</td>
                 </tr>
               </tbody>
             </table>
           </div>
-        </div>
+        </section>
       </div>
 
       <!-- MESSAGES TAB -->
