@@ -440,11 +440,6 @@ const seedMessages = {
     { id:'m3', from:'admin',    author:'Steritech Narangba', ts:'2026-04-17T08:14', body:'Update \u2014 credit hold cleared, order is now scheduled. Treatment will begin tomorrow morning.' },
     { id:'m4', from:'customer', author:'Emily Walker',    ts:'2026-04-17T08:32', body:'Appreciate the quick turnaround. Thanks team.' },
   ],
-  'STR-25-018342_extra_continuation': [
-    { id:'m4', from:'admin',    author:'Steritech Mernda', ts:'2026-04-19T09:08', body:'Quick heads-up \u2014 the COA for lot B references a different sterilisation date. Can you confirm which date should print on the certificate?' },
-    { id:'m5', from:'customer', author:'Alex Nguyen',      ts:'2026-04-19T09:40', body:'Use the 18 Apr date for both. Lot B was packed on the same day, just labelled differently in our WMS.' },
-    { id:'m6', from:'admin',    author:'Steritech Mernda', ts:'2026-04-19T10:02', body:'Got it. COA will print with 18 Apr. We\u2019re scheduled to begin treatment Monday 22 Apr. We\u2019ll send the dose-mapping report once treatment completes.' },
-  ],
   'STR-25-018336': [
     { id:'m1', from:'customer', author:'Sarah Lewis',         ts:'2026-04-17T13:55', body:'Just confirming the validated dose for the herbal tea sachets \u2014 is 8 kGy still the agreed minimum, or has that changed since last quarter?' },
     { id:'m2', from:'admin',    author:'Steritech Dandenong', ts:'2026-04-17T14:30', body:'Still 8 kGy minimum, validated under your standing agreement. Target is 10 kGy, max 14 kGy. Same as Q1.' },
@@ -474,6 +469,75 @@ const seedMessages = {
   ],
 };
 
+/* ---------- Generated mock thread per order (so every order has demo
+   messages without hand-curating 60 dictionary entries). Curated
+   seedMessages above override generated when both are present. ---- */
+function generateMockThread(order, customerName){
+  const facName = (FACILITIES.find(f => f.code === order.facility) || {}).name || 'Facility';
+  const admin = 'Steritech ' + facName;
+  const customer = customerName || 'Alex Nguyen';
+  const sub = order.submitted;
+  const col = order.collection || sub;
+  const ts = (date, h, m) => `${date}T${String(h).padStart(2,'0')}:${String(m).padStart(2,'0')}`;
+  const tpl = ({
+    'Created':[
+      { from:'customer', author:customer, ts:ts(sub,9,15), body:`Submitted this morning. Anything you need from us before you start?` },
+      { from:'admin',    author:admin,    ts:ts(sub,10,2), body:`All received, thanks. We'll process within standard turnaround and reach out if anything looks off.` },
+    ],
+    'Accepted':[
+      { from:'customer', author:customer, ts:ts(sub,11,30), body:`Truck on the way with the consignment. Driver name is Tim Patel, rego XJ-92-LR.` },
+      { from:'admin',    author:admin,    ts:ts(sub,12,5),  body:`Got it — dock is clear, send him through to bay 3 on arrival.` },
+    ],
+    'On Hold':[
+      { from:'admin',    author:admin,    ts:ts(sub,13,20), body:`We've placed this order on hold pending paperwork clarification. Could you confirm the lot number on the inner label matches the COA?` },
+      { from:'customer', author:customer, ts:ts(sub,14,8),  body:`Checking with our QA team now. Will revert by COB.` },
+    ],
+    'Late Arrival':[
+      { from:'admin',    author:admin,    ts:ts(sub,14,0),  body:`Truck flagged as late arrival. ETA pushed to 17:30. We'll keep the chamber pre-heated.` },
+      { from:'customer', author:customer, ts:ts(sub,14,22), body:`Apologies — driver hit roadworks. Will keep you posted on progress.` },
+    ],
+    'Scheduled for Processing':[
+      { from:'admin',    author:admin,    ts:ts(sub,15,10), body:`Scheduled for processing on ${col}. Target dose locked in per your standing agreement.` },
+      { from:'customer', author:customer, ts:ts(sub,15,45), body:`Thanks. Could you confirm pickup window on the day?` },
+      { from:'admin',    author:admin,    ts:ts(sub,16,8),  body:`Pickup window is 14:00-16:00 from bay 2.` },
+    ],
+    'In Process':[
+      { from:'admin',    author:admin,    ts:ts(col,7,0),   body:`Treatment started this morning. First dose-map readings are within spec. Will update mid-cycle.` },
+      { from:'admin',    author:admin,    ts:ts(col,11,30), body:`Mid-cycle check complete — all dosimeters reading within target band.` },
+    ],
+    'Ready for Invoicing':[
+      { from:'admin',    author:admin,    ts:ts(col,15,30), body:`Treatment complete. COA and dose-mapping report uploaded to this order. Invoice will follow within 24 hours.` },
+      { from:'customer', author:customer, ts:ts(col,16,12), body:`Brilliant, thanks team.` },
+    ],
+    'Completed':[
+      { from:'admin',    author:admin,    ts:ts(col,16,0),  body:`Order completed and released to consignee. All paperwork attached.` },
+      { from:'customer', author:customer, ts:ts(col,17,5),  body:`Received and signed off our end. Thanks team.` },
+    ],
+    'Cancelled':[
+      { from:'customer', author:customer, ts:ts(sub,10,30), body:`Need to cancel this one — consignor changed shipping schedule. Apologies for the late notice.` },
+      { from:'admin',    author:admin,    ts:ts(sub,11,0),  body:`No problem, cancellation logged. No charges. Let us know when you're ready to re-submit.` },
+    ],
+  })[order.status] || [
+    { from:'customer', author:customer, ts:ts(sub,9,15), body:`Submitted via portal — let me know if anything is missing on our end.` },
+    { from:'admin',    author:admin,    ts:ts(sub,10,2), body:`Received, thanks. We'll be in touch with next steps.` },
+  ];
+  return tpl.map((m, i) => ({ ...m, id: `m-${order.id}-${i+1}` }));
+}
+
+function buildInitialMessages(orders, customerName){
+  const msgs = {};
+  for (const o of orders) {
+    msgs[o.id] = generateMockThread(o, customerName);
+  }
+  // Curated threads override generated where defined.
+  for (const k of Object.keys(seedMessages)) {
+    msgs[k] = JSON.parse(JSON.stringify(seedMessages[k]));
+  }
+  return msgs;
+}
+
+const _initialOrders = [...seedOrders, ...generateMockOrders(50)];
+
 /* ---------- Global app state ------------------------------------------------ */
 
 const state = reactive({
@@ -483,10 +547,10 @@ const state = reactive({
   commodities: [...seedCommodities],
   consignors:  [...seedConsignors],
   consignees:  [...seedConsignees],
-  orders:      [...seedOrders, ...generateMockOrders(50)],
+  orders:      _initialOrders,
   drafts:      [], // in-progress form drafts
   // Order-level messages: { [orderId]: [{id, from:'customer'|'admin', author, ts, body}] }
-  messages:    JSON.parse(JSON.stringify(seedMessages)),
+  messages:    buildInitialMessages(_initialOrders, seedProfile.contact),
   facilitySwitcherOpen: false,
   mobileDrawerOpen: false,
   lastSubmissionId: null,
@@ -1610,8 +1674,9 @@ const DemoPanel = {
       this.open = false;
     },
     resetData(){
-      state.orders.splice(0, state.orders.length, ...seedOrders, ...generateMockOrders(50));
-      state.messages = JSON.parse(JSON.stringify(seedMessages));
+      const newOrders = [...seedOrders, ...generateMockOrders(50)];
+      state.orders.splice(0, state.orders.length, ...newOrders);
+      state.messages = buildInitialMessages(newOrders, seedProfile.contact);
       state.maintenanceBanner = { enabled:false, message:'Scheduled maintenance is in progress. Some features may be temporarily unavailable.', severity:'info' };
       showToast('Demo data reset to defaults.', 'success');
     },
