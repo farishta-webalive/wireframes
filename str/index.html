@@ -4281,7 +4281,31 @@ const OrderDetailPage = {
       return this.attSort.by === by ? (this.attSort.dir === 'asc' ? 'chevron-up' : 'chevron-down') : 'chevrons-up-down';
     },
     attPrevPage(){ if (this.attEffectivePage > 1) this.attPage = this.attEffectivePage - 1; },
-    attNextPage(){ if (this.attEffectivePage < this.attTotalPages) this.attPage = this.attEffectivePage + 1; }
+    attNextPage(){ if (this.attEffectivePage < this.attTotalPages) this.attPage = this.attEffectivePage + 1; },
+    typeBadgeClass(type){
+      return ({
+        'PDF':  'bg-red-50 text-red-700 border-red-200',
+        'CSV':  'bg-emerald-50 text-emerald-700 border-emerald-200',
+        'DOCX': 'bg-blue-50 text-blue-700 border-blue-200',
+        'XLSX': 'bg-green-50 text-green-700 border-green-200',
+        'PNG':  'bg-violet-50 text-violet-700 border-violet-200',
+        'JPG':  'bg-violet-50 text-violet-700 border-violet-200',
+        'ZIP':  'bg-amber-50 text-amber-700 border-amber-200',
+      })[type] || 'bg-slate-50 text-slate-700 border-slate-200';
+    },
+    typeIconName(type){
+      return ({
+        'PDF':'file-text', 'CSV':'file-spreadsheet', 'XLSX':'file-spreadsheet',
+        'DOCX':'file-text', 'PNG':'image', 'JPG':'image', 'ZIP':'archive'
+      })[type] || 'file';
+    },
+    typeIconClass(type){
+      return ({
+        'PDF':'text-red-500', 'CSV':'text-emerald-500', 'XLSX':'text-green-500',
+        'DOCX':'text-blue-500', 'PNG':'text-violet-500', 'JPG':'text-violet-500',
+        'ZIP':'text-amber-500'
+      })[type] || 'text-slate-500';
+    }
   },
   template:`
   <div v-if="!order" class="p-12 text-slate-500">Order not found.</div>
@@ -4432,12 +4456,14 @@ const OrderDetailPage = {
                 </tr>
                 <tr v-else v-for="f in pagedAttachments" :key="f.name" class="even:bg-slate-50/60">
                   <td class="px-4 py-3.5">
-                    <a href="#" @click.prevent class="inline-flex items-center gap-2 text-blue-700 hover:underline focus-ring rounded">
-                      <Icon name="file-text" :size="16" cls="text-slate-500 shrink-0"/>
+                    <a href="#" @click.prevent class="inline-flex items-center gap-2.5 text-blue-700 hover:underline focus-ring rounded">
+                      <Icon :name="typeIconName(f.type)" :size="18" :cls="typeIconClass(f.type) + ' shrink-0'"/>
                       <span>{{ f.name }}</span>
                     </a>
                   </td>
-                  <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ f.type }}</td>
+                  <td class="px-4 py-3.5 whitespace-nowrap">
+                    <span :class="['inline-flex items-center px-2 py-0.5 text-[11px] font-semibold tracking-wide rounded-sm border', typeBadgeClass(f.type)]">{{ f.type }}</span>
+                  </td>
                   <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ f.size }}</td>
                   <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(f.uploaded) }}</td>
                   <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ f.uploadedBy }}</td>
