@@ -4265,22 +4265,21 @@ const OrdersPage = {
       <Btn as="router-link" :to="{ path:'/start' }" icon="file-plus-2" size="lg">New treatment request</Btn>
     </div>
 
-    <!-- Filters: stacked labels, all controls visible, date presets. Site scoping handled by FacilityChip. -->
+    <!-- Filters: 1 row 3 columns on md+, smaller h-10 inputs (designer feedback) -->
     <div class="bg-white border border-slate-200 rounded-md p-4">
-      <div class="grid grid-cols-12 gap-4">
-        <div class="col-span-12">
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div>
           <label for="orders-search" class="block text-sm font-medium text-slate-800 mb-1.5">Search orders</label>
           <div class="relative">
-            <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+            <Icon name="search" :size="14" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
             <input id="orders-search" v-model="q"
-                   placeholder="Type a reference number, PO, or company name&hellip;"
-                   class="pl-9 pr-3 h-11 w-full rounded-md border border-slate-300 text-base focus-ring"/>
+                   placeholder="Reference, PO, or company&hellip;"
+                   class="pl-9 pr-3 h-10 w-full rounded-md border border-slate-300 text-sm focus-ring"/>
           </div>
-          <p class="mt-1 text-xs text-slate-500">Searches across reference, PO number, consignor, consignee, and goods.</p>
         </div>
-        <div class="col-span-12 sm:col-span-6">
+        <div>
           <label for="orders-treatment" class="block text-sm font-medium text-slate-800 mb-1.5">Treatment</label>
-          <select id="orders-treatment" v-model="treatment" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
+          <select id="orders-treatment" v-model="treatment" class="h-10 pl-3 w-full rounded-md border border-slate-300 text-sm focus-ring bg-white">
             <option value="ALL">All treatments</option>
             <option value="Gamma">Gamma irradiation</option>
             <option value="ETO">Ethylene Oxide</option>
@@ -4288,9 +4287,9 @@ const OrdersPage = {
             <option value="Gamma+ETO">Gamma + Ethylene Oxide</option>
           </select>
         </div>
-        <div class="col-span-12 sm:col-span-6">
+        <div>
           <label for="orders-date" class="block text-sm font-medium text-slate-800 mb-1.5">Submitted</label>
-          <select id="orders-date" v-model="dateRange" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
+          <select id="orders-date" v-model="dateRange" class="h-10 pl-3 w-full rounded-md border border-slate-300 text-sm focus-ring bg-white">
             <option value="all">Any time</option>
             <option value="last7">Last 7 days</option>
             <option value="last30">Last 30 days</option>
@@ -4300,10 +4299,10 @@ const OrdersPage = {
           </select>
           <div v-if="dateRange === 'custom'" class="mt-2 flex items-center gap-2">
             <input type="date" v-model="dateFrom" aria-label="From date"
-                   class="h-11 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white"/>
+                   class="h-10 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white"/>
             <span class="text-slate-400" aria-hidden="true">&rarr;</span>
             <input type="date" v-model="dateTo" aria-label="To date"
-                   class="h-11 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white"/>
+                   class="h-10 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white"/>
           </div>
         </div>
       </div>
