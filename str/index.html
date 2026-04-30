@@ -4105,58 +4105,54 @@ const FormRenderer = {
 /* ---------- Page: Submission Confirmation ----------------------------------- */
 
 const SubmittedPage = {
-  components:{ Icon, Btn, TreatmentChip, BcSyncChip, StatusBadge },
+  components:{ Icon, Btn },
   computed:{
-    order(){ return state.orders.find(o => o.id === this.$route.params.id); }
+    order(){ return state.orders.find(o => o.id === this.$route.params.id); },
+    orderFacility(){ return this.order ? FACILITIES.find(f => f.code === this.order.facility) : null; },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; }
   },
   template:`
-  <div v-if="!order" class="p-12"><div class="text-slate-500">Submission not found.</div></div>
-  <div v-else class="p-8 max-w-3xl mx-auto">
-    <div class="bg-white border border-slate-200 rounded-xl shadow-card overflow-hidden">
-      <div class="p-10 text-center border-b border-slate-100 bg-gradient-to-b from-emerald-50/50 to-white">
-        <div class="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center mx-auto mb-4">
-          <Icon name="check" :size="32" cls="text-emerald-600"/>
+  <div v-if="!order" class="p-12 text-slate-500">Submission not found.</div>
+  <div v-else class="p-6 sm:p-8 max-w-3xl mx-auto space-y-6 text-base text-slate-800">
+    <div class="bg-white border border-slate-200 rounded-md">
+      <!-- Hero: plain check icon + heading + helper + inline reference -->
+      <div class="px-6 sm:px-8 py-8 text-center">
+        <div class="flex justify-center mb-4">
+          <Icon name="check-circle-2" :size="48" cls="text-emerald-600"/>
         </div>
-        <h1 class="text-2xl font-semibold text-navy-900">Request submitted</h1>
-        <p class="text-sm text-slate-500 mt-1">Your treatment request has been received and routed to billing.</p>
-        <div class="mt-6 inline-flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-lg px-4 py-2">
-          <div class="text-[11px] text-slate-500 uppercase tracking-wider">Reference</div>
-          <div class="font-mono font-semibold text-navy-900">{{ order.id }}</div>
-        </div>
+        <h1 class="text-xl font-semibold text-navy-900">Treatment request received</h1>
+        <p class="mt-2 text-sm text-slate-600 max-w-md mx-auto leading-relaxed">We&rsquo;ve received your request. You&rsquo;ll get a confirmation once it&rsquo;s been accepted.</p>
+        <p class="mt-4 text-sm text-slate-600">Reference <span class="font-mono font-medium text-slate-900">{{ order.id }}</span></p>
       </div>
-      <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-6">
+
+      <!-- Form + Expected delivery -->
+      <dl class="px-6 sm:px-8 py-6 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 text-sm">
         <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-500">Form</div>
-          <div class="mt-1 flex items-center gap-2"><TreatmentChip :treatment="order.treatment"/><span class="font-medium text-navy-900">{{ order.formName }}</span></div>
-          <div class="text-xs text-slate-500 mt-1 font-mono">{{ order.formCode }} · {{ order.facility }}</div>
-        </div>
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-500">Expected delivery</div>
-          <div class="mt-1 font-medium text-navy-900">{{ fmtDate(order.collection) }}</div>
-          <div class="text-xs text-slate-500 mt-1">PO {{ order.po }}</div>
-        </div>
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-500">Exsited order ID</div>
-          <div class="mt-1 font-mono text-navy-900">{{ order.exsitedId }}</div>
-          <div class="text-xs text-emerald-600 mt-1 inline-flex items-center gap-1"><Icon name="check-circle-2" :size="12"/> Created in Exsited</div>
-        </div>
-        <div>
-          <div class="text-[11px] uppercase tracking-wider text-slate-500">Business Central</div>
-          <div class="mt-1 group relative inline-block">
-            <BcSyncChip :status="order.bcSync"/>
-            <div class="absolute z-10 left-0 top-full mt-1 hidden group-hover:block bg-navy-900 text-white text-[11px] rounded px-2 py-1 w-56 shadow-md">
-              Your order will appear in Business Central within 60 seconds.
-            </div>
+          <dt class="text-slate-500">Form</dt>
+          <dd class="mt-1 text-base text-navy-900">{{ order.formName }}</dd>
+          <div class="mt-1 inline-flex items-center gap-2 text-sm text-slate-600">
+            <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[order.treatment] && treatmentStyles[order.treatment].dot]" aria-hidden="true"></span>
+            <span>{{ treatmentLabels[order.treatment] || order.treatment }}</span>
+            <span class="text-slate-400" aria-hidden="true">&middot;</span>
+            <span>{{ orderFacility ? orderFacility.name + ', ' + orderFacility.state : order.facility }}</span>
           </div>
-          <div class="text-xs text-slate-500 mt-1">Async push in progress — typically &lt; 5 min.</div>
         </div>
-      </div>
-      <div class="px-8 py-5 border-t border-slate-100 bg-slate-50 flex flex-wrap items-center gap-3">
+        <div>
+          <dt class="text-slate-500">Expected delivery</dt>
+          <dd class="mt-1 text-base text-navy-900">{{ fmtDate(order.collection) }}</dd>
+          <div class="mt-1 text-sm text-slate-600">PO <span class="font-mono">{{ order.po }}</span></div>
+        </div>
+      </dl>
+
+      <!-- Action row -->
+      <div class="px-6 sm:px-8 py-4 border-t border-slate-200 flex items-center gap-5 flex-wrap">
         <Btn as="router-link" :to="{ path:'/orders/'+order.id }" icon="file-text">View order</Btn>
-        <Btn as="router-link" :to="{ path:'/forms' }" kind="secondary" icon="file-plus-2">Submit another</Btn>
-        <Btn kind="ghost" icon="download">Download PDF</Btn>
+        <a href="#" @click.prevent class="inline-flex items-center gap-1.5 text-sm text-slate-700 hover:text-teal-600 focus-ring rounded">
+          <Icon name="download" :size="14" aria-hidden="true"/> Print as PDF
+        </a>
         <div class="flex-1"></div>
-        <router-link to="/dashboard" class="text-sm text-slate-500 hover:text-teal-600">Back to dashboard</router-link>
+        <router-link to="/dashboard" class="text-sm text-slate-700 hover:text-teal-600 focus-ring rounded">Back to dashboard</router-link>
       </div>
     </div>
   </div>`,
