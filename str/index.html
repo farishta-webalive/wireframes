@@ -3912,7 +3912,7 @@ const OrdersPage = {
     editOrder(o, e){ e.stopPropagation(); this.menuFor = null; this.$router.push('/orders/'+o.id+'?edit=1'); }
   },
   template:`
-  <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6 text-base text-slate-800">
+  <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
 
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
       <div>
@@ -3967,8 +3967,8 @@ const OrdersPage = {
             <col style="width:200px"/>
             <col/>
             <col style="width:280px"/>
-            <col style="width:120px"/>
-            <col style="width:140px"/>
+            <col style="width:130px"/>
+            <col style="width:220px"/>
             <col style="width:56px"/>
           </colgroup>
           <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
