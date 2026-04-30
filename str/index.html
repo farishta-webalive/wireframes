@@ -6197,120 +6197,96 @@ const OnboardCustomerPage = {
         </div>
       </section>
 
-      <!-- ====================== STEP 2 ====================== -->
-      <div v-else class="space-y-6">
-
-        <div class="bg-white border border-slate-200 rounded-xl">
-          <div class="px-6 sm:px-8 py-5 border-b border-slate-100">
-            <h2 class="font-semibold text-navy-900">Access matrix</h2>
-            <p class="text-xs text-slate-500 mt-0.5">Tick the services this customer can submit at each facility. A facility is granted access automatically when at least one of its services is ticked.</p>
-          </div>
-
-          <div class="px-2 sm:px-4 py-4 overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead>
-                <tr class="text-left">
-                  <th class="px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider">Facility</th>
-                  <th v-for="s in services" :key="s" class="px-4 py-3 text-[11px] font-semibold text-slate-500 uppercase tracking-wider text-center w-32">
-                    <span :class="['inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border', treatmentColor(s)]">{{ s }}</span>
-                  </th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-slate-100">
-                <tr v-for="fac in facilities" :key="fac.code" class="hover:bg-slate-50/60">
-                  <td class="px-4 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="w-9 h-9 rounded-lg bg-navy-50 text-navy-700 flex items-center justify-center text-[11px] font-bold">{{ fac.code }}</div>
-                      <div>
-                        <div class="font-semibold text-navy-900">{{ fac.name }}</div>
-                        <div class="text-[11px] text-slate-500">{{ fac.state }}</div>
-                      </div>
-                    </div>
-                  </td>
-                  <td v-for="s in services" :key="s" class="px-4 py-4 text-center">
-                    <label v-if="canCheck[fac.code][s]" class="inline-flex items-center justify-center cursor-pointer">
-                      <input type="checkbox" v-model="access[fac.code][s]"
-                             class="w-4 h-4 rounded border-slate-300 text-amber-600 focus:ring-amber-500 cursor-pointer"/>
-                    </label>
-                    <span v-else class="inline-flex items-center justify-center w-4 h-4 text-slate-300" title="Service not offered at this facility">
-                      <Icon name="minus" :size="14"/>
-                    </span>
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
-
-          <div class="px-6 sm:px-8 py-3 border-t border-slate-100 bg-slate-50 text-[11px] text-slate-500 rounded-b-xl">
-            <span v-if="grantedFacilities.length === 0">No facilities selected yet.</span>
-            <span v-else>
-              <strong class="text-navy-900">{{ grantedFacilities.length }}</strong>
-              {{ grantedFacilities.length === 1 ? 'facility' : 'facilities' }} will be granted:
-              <span class="text-navy-900">{{ grantedFacilities.map(f => f.code).join(' · ') }}</span>
-            </span>
-          </div>
+      <!-- Access matrix card (locked Customer list Edit modal pattern) -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility and service access
+          <span class="ml-auto text-sm text-slate-500 font-normal">
+            <span v-if="grantedFacilities.length === 0">No facilities selected.</span>
+            <span v-else>{{ grantedFacilities.length }} {{ grantedFacilities.length === 1 ? 'facility' : 'facilities' }} granted</span>
+          </span>
+        </header>
+        <p class="px-5 pt-4 text-sm text-slate-500">Tick the services this customer can submit at each facility. A facility is granted access automatically when at least one of its services is ticked.</p>
+        <div class="px-5 pt-3 pb-5 overflow-x-auto">
+          <table class="w-full text-base">
+            <caption class="sr-only">Facility and service access matrix</caption>
+            <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-y border-slate-300">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-medium">Facility</th>
+                <th v-for="s in services" :key="s" scope="col" class="px-4 py-3 font-medium text-center w-32">
+                  <span class="inline-flex items-center gap-1.5">
+                    <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                    <span>{{ treatmentLabels[s] || s }}</span>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="fac in facilities" :key="fac.code" class="even:bg-slate-50/60">
+                <td class="px-4 py-3.5">
+                  <div class="text-base text-navy-900">{{ fac.name }}, {{ fac.state }}</div>
+                  <div class="text-xs text-slate-500">{{ fac.code }}</div>
+                </td>
+                <td v-for="s in services" :key="s" class="px-4 py-3.5 text-center">
+                  <input v-if="canCheck[fac.code][s]" type="checkbox"
+                         v-model="access[fac.code][s]"
+                         :aria-label="`${s} at ${fac.name}`"
+                         class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                  <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </section>
 
-        <!-- Forms preview (collapsible) -->
-        <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-          <button @click="previewOpen = !previewOpen" type="button"
-                  class="w-full px-6 sm:px-8 py-4 flex items-center gap-3 hover:bg-slate-50 focus-ring text-left">
-            <Icon :name="previewOpen ? 'chevron-down' : 'chevron-right'" :size="16" cls="text-slate-500"/>
-            <div class="flex-1">
-              <div class="font-semibold text-navy-900 text-sm">Forms preview</div>
-              <div class="text-xs text-slate-500 mt-0.5">
-                <span v-if="grantedFacilities.length === 0">Select services above to preview which forms the customer will see.</span>
-                <span v-else>
-                  Customer will see
-                  <strong class="text-navy-900">
-                    {{ previewRows.reduce((n,g) => n + g.rows.length, 0) }}
-                  </strong>
-                  {{ previewRows.reduce((n,g) => n + g.rows.length, 0) === 1 ? 'form' : 'forms' }}
-                  on Submit Request.
-                </span>
-              </div>
-            </div>
+      <!-- Forms preview card (kept per architect; chrome quieted to grouped lists, not 3-col card grid) -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
+          <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
+            <Icon name="file-text" :size="14" cls="text-slate-500"/> Forms preview
+          </span>
+          <button type="button" @click="previewOpen = !previewOpen"
+                  class="text-sm text-teal-600 hover:underline focus-ring rounded inline-flex items-center gap-1">
+            {{ previewOpen ? 'Hide' : 'Show' }}
+            <Icon :name="previewOpen ? 'chevron-up' : 'chevron-down'" :size="14"/>
           </button>
-
-          <div v-if="previewOpen" class="px-6 sm:px-8 pb-6 pt-2 border-t border-slate-100">
-            <div v-if="previewRows.length === 0" class="text-sm text-slate-500 py-6 text-center">
-              No forms available — tick at least one service above.
-            </div>
-            <div v-else class="space-y-6">
-              <div v-for="g in previewRows" :key="g.treatment">
-                <div class="flex items-center gap-2 mb-3">
-                  <span :class="['inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border', treatmentColor(g.treatment)]">{{ g.treatment }}</span>
-                  <span class="text-[11px] text-slate-500">{{ g.rows.length }} {{ g.rows.length===1 ? 'form' : 'forms' }}</span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                  <div v-for="r in g.rows" :key="r.key"
-                       class="border border-slate-200 rounded-lg p-3 bg-slate-50/30">
-                    <div class="flex items-start justify-between gap-2">
-                      <div class="text-[11px] font-mono text-slate-500">{{ r.code }}</div>
-                      <div class="flex flex-wrap gap-1 justify-end">
-                        <span v-for="b in r.badges" :key="b"
-                              class="inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold bg-navy-50 text-navy-700 border border-navy-100">
-                          {{ b }}
-                        </span>
-                      </div>
-                    </div>
-                    <div class="font-semibold text-navy-900 text-sm leading-snug mt-1">{{ r.name }}</div>
-                    <div v-if="r.isShared && r.badges.length > 1" class="mt-1 text-[10px] text-slate-500">
-                      Shared form — same definition across {{ r.badges.length }} facilities
-                    </div>
-                  </div>
-                </div>
+        </header>
+        <p class="px-5 pt-4 text-sm text-slate-500">
+          <span v-if="grantedFacilities.length === 0">Tick services above to preview which forms the customer will see.</span>
+          <span v-else>Customer will see <span class="font-medium text-navy-900">{{ previewRows.reduce((n,g) => n + g.rows.length, 0) }}</span> {{ previewRows.reduce((n,g) => n + g.rows.length, 0) === 1 ? 'form' : 'forms' }} on Submit Request.</span>
+        </p>
+        <div v-if="previewOpen" class="px-5 pb-5 pt-3">
+          <div v-if="previewRows.length === 0" class="text-sm text-slate-500 py-6 text-center">Tick at least one service above to see the form list.</div>
+          <div v-else class="space-y-5">
+            <div v-for="g in previewRows" :key="g.treatment">
+              <div class="text-sm text-slate-700 inline-flex items-center gap-1.5 mb-2">
+                <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[g.treatment] && treatmentStyles[g.treatment].dot]" aria-hidden="true"></span>
+                <span class="font-medium text-navy-900">{{ treatmentLabels[g.treatment] || g.treatment }}</span>
+                <span class="text-slate-400">&middot; {{ g.rows.length }} {{ g.rows.length === 1 ? 'form' : 'forms' }}</span>
               </div>
+              <ul class="border-t border-slate-200">
+                <li v-for="r in g.rows" :key="r.key" class="py-2 border-b border-slate-100 last:border-b-0 text-sm text-slate-700">
+                  <span class="text-base text-navy-900">{{ r.name }}</span>
+                  <span class="text-slate-400 ml-2">({{ r.code }})</span>
+                  <span class="text-slate-500 ml-2">&middot; {{ r.badges.join(', ') }}</span>
+                  <span v-if="r.isShared && r.badges.length > 1" class="text-xs text-slate-400 ml-2">&middot; shared form</span>
+                </li>
+              </ul>
             </div>
           </div>
         </div>
+      </section>
 
-        <!-- Footer -->
-        <div class="bg-white border border-slate-200 rounded-xl px-6 sm:px-8 py-4 flex items-center gap-3">
-          <Btn kind="ghost" icon="arrow-left" @click="back">Back</Btn>
-          <div class="flex-1"></div>
-          <Btn kind="primary" iconRight="send" :disabled="!step2Valid" @click="sendInvite">Send invitation</Btn>
-        </div>
+      <!-- Validation summary + action row (architect: single-page forms need a submit-failure summary) -->
+      <div class="border-t border-slate-200 pt-4 flex items-center gap-4 flex-wrap">
+        <p v-if="submitAttempted && !formValid" role="alert" class="text-sm text-red-600 inline-flex items-center gap-2">
+          <Icon name="alert-circle" :size="16" aria-hidden="true"/>
+          Fix {{ issueCount }} {{ issueCount === 1 ? 'issue' : 'issues' }} above before sending the invitation.
+        </p>
+        <div class="flex-1"></div>
+        <button type="button" @click="cancel" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+        <Btn icon="send" @click="sendInvite">Send invitation</Btn>
       </div>
     </div>
   `
