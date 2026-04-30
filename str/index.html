@@ -1466,6 +1466,80 @@ const FacilityChip = {
 // Kept as no-op stub so the Shell component reference does not break.
 const FacilitySwitcher = { template: '' };
 
+/* UserChip — clickable avatar in top bar. Dropdown shows logged-in user
+   profile (name, role, email, company, site count) + View profile link
+   + Sign out. Mirrors the FacilityChip dropdown mechanics. */
+const UserChip = {
+  components:{ Icon },
+  data(){ return { open: false }; },
+  mounted(){
+    this._closeOnDoc = (e) => { if (this.open && this.$el && !this.$el.contains(e.target)) this.open = false; };
+    this._onKey = (e) => { if (e.key === 'Escape') this.open = false; };
+    document.addEventListener('click', this._closeOnDoc);
+    document.addEventListener('keydown', this._onKey);
+  },
+  beforeUnmount(){
+    document.removeEventListener('click', this._closeOnDoc);
+    document.removeEventListener('keydown', this._onKey);
+  },
+  computed:{
+    state(){ return state; },
+    initials(){ return (state.profile.contact || '').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase(); },
+    facilityCount(){ return (state.profile.facilities || []).length; }
+  },
+  methods:{
+    toggle(e){ if (e) e.stopPropagation(); this.open = !this.open; },
+    goSettings(){ this.open = false; this.$router.push('/settings'); },
+    logout(){ this.open = false; state.authed = false; this.$router.push('/login'); }
+  },
+  template:`
+  <div class="relative inline-block">
+    <button type="button"
+            @click.stop="toggle"
+            :aria-expanded="open"
+            aria-haspopup="menu"
+            aria-label="Open user menu"
+            class="inline-flex items-center justify-center w-9 h-9 rounded-full bg-teal-500 text-white text-xs font-semibold hover:bg-teal-400 focus-ring">
+      {{ initials }}
+    </button>
+    <div v-if="open"
+         role="menu"
+         @click.stop
+         class="absolute right-0 mt-2 w-72 bg-white border border-slate-200 rounded-md shadow-lg z-40 overflow-hidden text-left">
+      <div class="px-4 py-3 border-b border-slate-100 flex items-start gap-3">
+        <span class="w-10 h-10 shrink-0 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">{{ initials }}</span>
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2">
+            <span class="text-sm font-semibold text-navy-900 truncate">{{ state.profile.contact }}</span>
+            <span :class="['shrink-0 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded-sm', state.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700']">{{ state.role === 'admin' ? 'Admin' : 'Customer' }}</span>
+          </div>
+          <div class="text-xs text-slate-500 truncate mt-0.5">{{ state.profile.email }}</div>
+        </div>
+      </div>
+      <div class="px-4 py-3 border-b border-slate-100 space-y-1.5 text-sm">
+        <div class="flex items-start gap-2 text-slate-700">
+          <Icon name="building-2" :size="14" cls="text-slate-400 shrink-0 mt-0.5"/>
+          <span class="truncate">{{ state.profile.company }}</span>
+        </div>
+        <div class="flex items-start gap-2 text-slate-700">
+          <Icon name="map-pin" :size="14" cls="text-slate-400 shrink-0 mt-0.5"/>
+          <span>{{ facilityCount }} {{ facilityCount === 1 ? 'site' : 'sites' }}</span>
+        </div>
+      </div>
+      <div class="py-1">
+        <button type="button" role="menuitem" @click="goSettings"
+                class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50 focus-ring">
+          <Icon name="user" :size="14" cls="text-slate-500"/> View profile
+        </button>
+        <button type="button" role="menuitem" @click="logout"
+                class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50 focus-ring">
+          <Icon name="log-out" :size="14" cls="text-slate-500"/> Sign out
+        </button>
+      </div>
+    </div>
+  </div>`
+};
+
 const Sidebar = {
   props:['asDrawer'],
   template:`
@@ -1554,16 +1628,10 @@ const TopNav = {
       </div>
       <div class="flex-1"></div>
       <FacilityChip />
-      <div class="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center text-xs font-semibold">{{ initials }}</div>
-      <button @click="logout" class="p-2 rounded hover:bg-navy-800 focus-ring" title="Sign out" aria-label="Sign out"><Icon name="log-out" :size="16" /></button>
+      <UserChip />
     </header>`,
-  components:{ Icon, FacilityChip },
-  computed:{
-    state(){ return state; },
-    initials(){ return (state.profile.contact||'').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase(); }
-  },
+  components:{ Icon, FacilityChip, UserChip },
   methods:{
-    logout(){ state.authed=false; this.$router.push('/login'); },
     toggleDrawer(){ state.mobileDrawerOpen = !state.mobileDrawerOpen; }
   }
 };
@@ -7024,6 +7092,7 @@ app.component('StatusBadge', StatusBadge);
 app.component('TopNav', TopNav);
 app.component('Sidebar', Sidebar);
 app.component('FacilityChip', FacilityChip);
+app.component('UserChip', UserChip);
 app.component('DemoPanel', DemoPanel);
 app.component('FacilitySwitcher', FacilitySwitcher);
 app.component('Shell', Shell);
