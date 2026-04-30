@@ -1432,18 +1432,6 @@ const TopNav = {
         <img src="assets/steritech-logo-white.png" alt="Steritech" class="h-6 w-auto shrink-0" draggable="false"/>
       </div>
       <div class="flex-1"></div>
-      <!-- Demo toggles: only shown when ?dev=1 in URL. Hidden by default to keep customer-facing bar calm. -->
-      <template v-if="$route.query.dev">
-        <div class="hidden md:flex items-center gap-1 bg-navy-800 rounded-full p-0.5 text-[11px]" title="Mock user.role">
-          <button @click="setRole('customer')" :class="['px-2.5 py-1 rounded-full transition', state.role==='customer' ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Customer</button>
-          <button @click="setRole('admin')"    :class="['px-2.5 py-1 rounded-full transition', state.role==='admin'    ? 'bg-amber-500 text-white' : 'text-navy-100/80 hover:text-white']">Admin</button>
-        </div>
-        <div class="hidden md:flex items-center gap-1 bg-navy-800 rounded-full p-0.5 text-[11px]" title="Mock user.facility_ids">
-          <button @click="setMode('single')" :class="['px-2.5 py-1 rounded-full transition', mode==='single' ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Single</button>
-          <button @click="setMode('multi')"  :class="['px-2.5 py-1 rounded-full transition', mode==='multi'  ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Multi</button>
-          <button @click="setMode('zero')"   :class="['px-2.5 py-1 rounded-full transition', mode==='zero'   ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Zero</button>
-        </div>
-      </template>
       <FacilityChip />
       <div class="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center text-xs font-semibold">{{ initials }}</div>
       <button @click="logout" class="p-2 rounded hover:bg-navy-800 focus-ring" title="Sign out" aria-label="Sign out"><Icon name="log-out" :size="16" /></button>
@@ -1451,34 +1439,11 @@ const TopNav = {
   components:{ Icon, FacilityChip },
   computed:{
     state(){ return state; },
-    initials(){ return (state.profile.contact||'').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase(); },
-    mode(){
-      const ids = state.profile.facilities || [];
-      if (ids.length === 0) return 'zero';
-      if (ids.length === 1) return 'single';
-      return 'multi';
-    }
+    initials(){ return (state.profile.contact||'').split(' ').map(s=>s[0]).slice(0,2).join('').toUpperCase(); }
   },
   methods:{
     logout(){ state.authed=false; this.$router.push('/login'); },
-    toggleDrawer(){ state.mobileDrawerOpen = !state.mobileDrawerOpen; },
-    setRole(r){
-      state.role = r;
-      // Route to the appropriate landing page for the new role
-      if (r === 'admin' && !this.$route.path.startsWith('/admin') && this.$route.path !== '/settings') {
-        this.$router.push('/admin');
-      } else if (r === 'customer' && this.$route.path.startsWith('/admin')) {
-        this.$router.push('/dashboard');
-      }
-    },
-    setMode(m){
-      if (m==='single'){ state.profile.facilities.splice(0, state.profile.facilities.length, 'DAN'); state.profile.currentFacility = 'DAN'; }
-      else if (m==='multi'){ state.profile.facilities.splice(0, state.profile.facilities.length, 'DAN','MER'); if (!['DAN','MER'].includes(state.profile.currentFacility)) state.profile.currentFacility = 'DAN'; }
-      else { state.profile.facilities.splice(0, state.profile.facilities.length); }
-      // Route correctly for new mode
-      if (m==='zero') this.$router.push('/onboarding/incomplete');
-      else if (this.$route.path === '/onboarding/incomplete') this.$router.push('/dashboard');
-    }
+    toggleDrawer(){ state.mobileDrawerOpen = !state.mobileDrawerOpen; }
   }
 };
 
@@ -1526,8 +1491,98 @@ const MaintenanceBanner = {
     </transition>`
 };
 
+/* DemoPanel — floating bottom-right card exposing role + facility-loadout
+   toggles for stakeholder demos. Wireframe-only chrome (amber accent so
+   it never reads as a production feature). Mounted by Shell so it's
+   visible across every authed route. */
+const DemoPanel = {
+  components:{ Icon },
+  data(){ return { open: false }; },
+  mounted(){
+    this._closeOnDoc = (e) => { if (this.open && this.$el && !this.$el.contains(e.target)) this.open = false; };
+    this._onKey = (e) => { if (e.key === 'Escape') this.open = false; };
+    document.addEventListener('click', this._closeOnDoc);
+    document.addEventListener('keydown', this._onKey);
+  },
+  beforeUnmount(){
+    document.removeEventListener('click', this._closeOnDoc);
+    document.removeEventListener('keydown', this._onKey);
+  },
+  computed:{
+    state(){ return state; },
+    mode(){
+      const ids = state.profile.facilities || [];
+      if (ids.length === 0) return 'zero';
+      if (ids.length === 1) return 'single';
+      return 'multi';
+    }
+  },
+  methods:{
+    toggle(e){ if (e) e.stopPropagation(); this.open = !this.open; },
+    setRole(r){
+      state.role = r;
+      if (r === 'admin' && !this.$route.path.startsWith('/admin') && this.$route.path !== '/settings') {
+        this.$router.push('/admin');
+      } else if (r === 'customer' && this.$route.path.startsWith('/admin')) {
+        this.$router.push('/dashboard');
+      }
+    },
+    setMode(m){
+      if (m === 'single') {
+        state.profile.facilities.splice(0, state.profile.facilities.length, 'DAN');
+        state.profile.currentFacility = 'DAN';
+      } else if (m === 'multi') {
+        state.profile.facilities.splice(0, state.profile.facilities.length, 'DAN', 'MER');
+        if (!['DAN','MER'].includes(state.profile.currentFacility)) state.profile.currentFacility = 'DAN';
+      } else {
+        state.profile.facilities.splice(0, state.profile.facilities.length);
+      }
+      if (m === 'zero') this.$router.push('/onboarding/incomplete');
+      else if (this.$route.path === '/onboarding/incomplete') this.$router.push('/dashboard');
+    }
+  },
+  template:`
+  <div v-if="state.authed" class="fixed bottom-4 right-4 z-[60]">
+    <button v-if="!open" type="button" @click="toggle"
+            aria-label="Open demo controls" :aria-expanded="open"
+            class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-full bg-amber-500 text-white text-xs font-semibold shadow-lg hover:bg-amber-600 focus-ring">
+      <Icon name="settings-2" :size="14" aria-hidden="true"/> Demo
+    </button>
+    <div v-else role="dialog" aria-label="Demo controls"
+         class="w-72 bg-white border border-amber-300 rounded-md shadow-xl overflow-hidden">
+      <div class="px-4 py-2.5 bg-amber-500 text-white flex items-center justify-between">
+        <div class="inline-flex items-center gap-2 text-sm font-semibold">
+          <Icon name="settings-2" :size="14" aria-hidden="true"/> Demo controls
+        </div>
+        <button type="button" @click="toggle" aria-label="Close demo controls"
+                class="p-1 rounded hover:bg-amber-600 focus-ring">
+          <Icon name="x" :size="14"/>
+        </button>
+      </div>
+      <div class="p-4 space-y-4">
+        <p class="text-xs text-slate-500">Wireframe-only. Switch role or facility load-out to demo other states.</p>
+        <div>
+          <div class="text-xs font-medium text-slate-700 mb-1.5">Role</div>
+          <div class="inline-flex w-full bg-slate-100 rounded-full p-0.5 text-xs">
+            <button @click="setRole('customer')" :class="['flex-1 px-3 py-1.5 rounded-full transition', state.role==='customer' ? 'bg-teal-600 text-white' : 'text-slate-700 hover:text-navy-900']">Customer</button>
+            <button @click="setRole('admin')" :class="['flex-1 px-3 py-1.5 rounded-full transition', state.role==='admin' ? 'bg-amber-600 text-white' : 'text-slate-700 hover:text-navy-900']">Admin</button>
+          </div>
+        </div>
+        <div>
+          <div class="text-xs font-medium text-slate-700 mb-1.5">Facility load-out</div>
+          <div class="inline-flex w-full bg-slate-100 rounded-full p-0.5 text-xs">
+            <button @click="setMode('single')" :class="['flex-1 px-3 py-1.5 rounded-full transition', mode==='single' ? 'bg-teal-600 text-white' : 'text-slate-700 hover:text-navy-900']">Single</button>
+            <button @click="setMode('multi')" :class="['flex-1 px-3 py-1.5 rounded-full transition', mode==='multi' ? 'bg-teal-600 text-white' : 'text-slate-700 hover:text-navy-900']">Multi</button>
+            <button @click="setMode('zero')" :class="['flex-1 px-3 py-1.5 rounded-full transition', mode==='zero' ? 'bg-teal-600 text-white' : 'text-slate-700 hover:text-navy-900']">Zero</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`
+};
+
 const Shell = {
-  components:{ TopNav, Sidebar, FacilitySwitcher, RouterView, Icon, Toast, MaintenanceBanner },
+  components:{ TopNav, Sidebar, FacilitySwitcher, RouterView, Icon, Toast, MaintenanceBanner, DemoPanel },
   computed:{ state(){ return state; } },
   methods:{
     closeDrawer(){ state.mobileDrawerOpen = false; },
@@ -1543,6 +1598,7 @@ const Shell = {
         </main>
       </div>
       <Toast/>
+      <DemoPanel/>
       <!-- Mobile drawer -->
       <transition name="fade">
         <div v-if="state.mobileDrawerOpen" class="md:hidden fixed inset-0 z-40 bg-slate-900/40" @click="closeDrawer"></div>
@@ -6771,6 +6827,7 @@ app.component('StatusBadge', StatusBadge);
 app.component('TopNav', TopNav);
 app.component('Sidebar', Sidebar);
 app.component('FacilityChip', FacilityChip);
+app.component('DemoPanel', DemoPanel);
 app.component('FacilitySwitcher', FacilitySwitcher);
 app.component('Shell', Shell);
 app.component('EmptyState', EmptyState);
