@@ -4283,7 +4283,7 @@ const OrdersPage = {
 const OrderDetailPage = {
   components:{ Icon, StatusBadge, MessagesPanel },
   data(){ return {
-    tabs: ['overview','conversation'],
+    tabs: ['overview','messages','timeline'],
     attSearch: '',
     attSort: { by:'uploaded', dir:'desc' },
     attPage: 1,
@@ -4307,8 +4307,9 @@ const OrderDetailPage = {
     canEdit(){ return this.order && !['Completed','Cancelled'].includes(this.order.status); },
     currentTab(){
       let t = this.$route.query.tab;
-      // Backward-compat: old ?tab=messages and ?tab=activity → Conversation; ?tab=attachments → Overview (attachments now folded into Overview).
-      if (t === 'messages' || t === 'activity') t = 'conversation';
+      // Backward-compat: ?tab=conversation → messages; ?tab=activity → timeline; ?tab=attachments → overview.
+      if (t === 'conversation') t = 'messages';
+      if (t === 'activity') t = 'timeline';
       if (t === 'attachments') t = 'overview';
       return this.tabs.includes(t) ? t : 'overview';
     },
@@ -4399,7 +4400,7 @@ const OrderDetailPage = {
       this.$router.replace({ query: q });
     },
     tabLabel(t){
-      return ({ overview:'Overview', conversation:'Conversation' })[t] || t;
+      return ({ overview:'Overview', messages:'Messages', timeline:'Timeline' })[t] || t;
     },
     setAttSort(by){
       if (this.attSort.by === by) this.attSort.dir = this.attSort.dir === 'asc' ? 'desc' : 'asc';
@@ -4492,7 +4493,7 @@ const OrderDetailPage = {
                   :class="['inline-flex items-center px-4 py-2.5 text-sm font-medium border-b-2 -mb-px focus-ring transition-colors',
                            currentTab === t ? 'border-teal-600 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
             {{ tabLabel(t) }}
-            <span v-if="t === 'conversation' && messageCount" class="ml-1.5 inline-flex items-center justify-center min-w-[1.5rem] px-1.5 h-5 text-xs font-medium rounded-full bg-slate-100 text-slate-700">{{ messageCount }}</span>
+            <span v-if="t === 'messages' && messageCount" class="ml-1.5 inline-flex items-center justify-center min-w-[1.5rem] px-1.5 h-5 text-xs font-medium rounded-full bg-slate-100 text-slate-700">{{ messageCount }}</span>
           </button>
         </div>
       </div>
@@ -4637,49 +4638,28 @@ const OrderDetailPage = {
 
       </div>
 
-      <!-- Conversation pane: messages primary + activity rail (architect B-prime, 60/40 on lg+) -->
-      <div role="tabpanel" id="panel-conversation" aria-labelledby="tab-conversation" v-show="currentTab === 'conversation'">
-        <!-- Below lg: activity timeline as <details> collapsed above thread -->
-        <details class="lg:hidden mb-4 bg-white border border-slate-200 rounded-md group">
-          <summary class="px-5 py-3 text-sm font-medium text-navy-900 cursor-pointer flex items-center justify-between focus-ring list-none">
-            <span class="inline-flex items-center gap-2">
-              <Icon name="clock" :size="14" cls="text-slate-500"/>
-              Activity timeline ({{ timeline.length }} events)
-            </span>
-            <Icon name="chevron-down" :size="14" cls="text-slate-400 group-open:rotate-180 transition-transform"/>
-          </summary>
-          <div class="px-5 pb-5 pt-2 border-t border-slate-200">
-            <ol>
-              <li v-for="(e, i) in timeline" :key="i" class="relative pl-7" :class="i < timeline.length - 1 ? 'pb-4' : ''">
-                <span v-if="i < timeline.length - 1" class="absolute left-[7px] top-3 bottom-0 w-px bg-slate-200" aria-hidden="true"></span>
-                <span :class="['absolute left-1 top-1.5 h-3 w-3 rounded-full ring-4 ring-white', dotClass(e)]" aria-hidden="true"></span>
-                <div class="text-sm text-navy-900">{{ e.label }}</div>
-                <div class="text-xs text-slate-500 mt-0.5">{{ e.ts.replace('T', ' &middot; ') }}</div>
-              </li>
-            </ol>
-          </div>
-        </details>
+      <!-- Messages pane -->
+      <div role="tabpanel" id="panel-messages" aria-labelledby="tab-messages" v-show="currentTab === 'messages'">
+        <section class="bg-white border border-slate-200 rounded-md overflow-hidden">
+          <MessagesPanel :order-id="order.id" :as-admin="false"/>
+        </section>
+      </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <section class="lg:col-span-3 bg-white border border-slate-200 rounded-md overflow-hidden">
-            <MessagesPanel :order-id="order.id" :as-admin="false"/>
-          </section>
-          <aside class="hidden lg:block lg:col-span-2">
-            <section class="bg-white border border-slate-200 rounded-md">
-              <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-                <Icon name="clock" :size="14" cls="text-slate-500"/> Activity timeline
-              </header>
-              <ol class="p-5">
-                <li v-for="(e, i) in timeline" :key="i" class="relative pl-7" :class="i < timeline.length - 1 ? 'pb-5' : ''">
-                  <span v-if="i < timeline.length - 1" class="absolute left-[7px] top-3 bottom-0 w-px bg-slate-200" aria-hidden="true"></span>
-                  <span :class="['absolute left-1 top-1.5 h-3 w-3 rounded-full ring-4 ring-white', dotClass(e)]" aria-hidden="true"></span>
-                  <div class="text-sm text-navy-900">{{ e.label }}</div>
-                  <div class="text-xs text-slate-500 mt-0.5">{{ e.ts.replace('T', ' &middot; ') }}</div>
-                </li>
-              </ol>
-            </section>
-          </aside>
-        </div>
+      <!-- Timeline pane (status events with vertical-spine dots) -->
+      <div role="tabpanel" id="panel-timeline" aria-labelledby="tab-timeline" v-show="currentTab === 'timeline'">
+        <section class="bg-white border border-slate-200 rounded-md">
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+            <Icon name="clock" :size="14" cls="text-slate-500"/> Status timeline
+          </header>
+          <ol class="p-5">
+            <li v-for="(e, i) in timeline" :key="i" class="relative pl-7" :class="i < timeline.length - 1 ? 'pb-5' : ''">
+              <span v-if="i < timeline.length - 1" class="absolute left-[7px] top-3 bottom-0 w-px bg-slate-200" aria-hidden="true"></span>
+              <span :class="['absolute left-1 top-1.5 h-3 w-3 rounded-full ring-4 ring-white', dotClass(e)]" aria-hidden="true"></span>
+              <div class="text-sm text-navy-900">{{ e.label }}</div>
+              <div class="text-xs text-slate-500 mt-0.5">{{ e.ts.replace('T', ' &middot; ') }}</div>
+            </li>
+          </ol>
+        </section>
       </div>
 
     </template>
