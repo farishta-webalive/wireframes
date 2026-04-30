@@ -1867,8 +1867,8 @@ const LoginPage = {
   },
   template:`
   <div class="min-h-screen bg-white text-slate-800 text-base flex flex-col lg:grid lg:grid-cols-2">
-    <!-- Form column (left on lg+, full-width on mobile) -->
-    <main class="flex-1 flex flex-col px-6 sm:px-10 py-8 lg:py-12">
+    <!-- Form column (right on lg+ via order-2, full-width on mobile, kept first in DOM for keyboard tab order) -->
+    <main class="flex-1 flex flex-col px-6 sm:px-10 py-8 lg:py-12 lg:order-2">
       <h1 class="sr-only">Steritech Customer Portal sign-in</h1>
 
       <div class="lg:hidden flex items-center gap-3 mb-8">
@@ -1932,8 +1932,8 @@ const LoginPage = {
       </div>
     </main>
 
-    <!-- Brand panel (lg+ only) -->
-    <aside class="hidden lg:flex flex-col justify-center px-12 xl:px-20 py-12 bg-slate-50 border-l border-slate-200">
+    <!-- Brand panel (lg+ only, left side via order-1 — DOM order kept after form for tab-flow) -->
+    <aside class="hidden lg:flex flex-col justify-center px-12 xl:px-20 py-12 bg-slate-50 border-r border-slate-200 lg:order-1">
       <div class="max-w-md">
         <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-16 w-auto mb-8" draggable="false"/>
         <h2 class="text-2xl font-semibold text-navy-900 leading-tight">Customer Portal</h2>
