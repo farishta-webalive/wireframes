@@ -1280,21 +1280,21 @@ const MessagesPanel = {
         <p class="text-base text-slate-700 font-medium">No messages yet</p>
         <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">{{ asAdmin ? 'Reply below to start the thread with the customer.' : 'Use the box below to ask Steritech anything about this order — pickup timing, dose questions, paperwork, anything.' }}</p>
       </div>
-      <ul v-else>
+      <ul v-else class="px-5 py-3 space-y-3">
         <template v-for="(m, i) in thread" :key="m.id">
-          <li v-if="showDateDivider(m, i)" class="px-5 py-2 bg-white border-b border-slate-100">
-            <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">{{ formatDateDivider(m.ts) }}</div>
+          <li v-if="showDateDivider(m, i)" class="text-center text-xs uppercase tracking-wide text-slate-500 font-medium pt-2">
+            {{ formatDateDivider(m.ts) }}
           </li>
-          <li :class="['group px-5 py-4 border-b border-slate-100 last:border-b-0 transition-colors',
-                       m.from === 'admin' ? 'bg-slate-50/70' : 'bg-white hover:bg-slate-50/40']">
-            <div class="flex items-baseline justify-between gap-3 flex-wrap">
-              <div class="flex items-baseline gap-2 min-w-0">
-                <span class="text-base font-medium text-navy-900">{{ m.author }}</span>
-                <span :class="['text-[11px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded-sm', m.from === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700']">{{ m.from === 'admin' ? 'Steritech' : 'You' }}</span>
+          <li :class="['flex', m.from === 'admin' ? 'justify-start' : 'justify-end']">
+            <div class="max-w-[80%] min-w-0">
+              <div :class="['flex items-baseline gap-2 text-xs text-slate-500 mb-1', m.from === 'admin' ? '' : 'justify-end']">
+                <span class="text-sm font-medium text-navy-900">{{ m.author }}</span>
+                <span :class="['text-[11px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded-sm', m.from === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-teal-100 text-teal-800']">{{ m.from === 'admin' ? 'Steritech' : 'You' }}</span>
+                <span>{{ fmtTs(m.ts) }}</span>
               </div>
-              <span class="text-xs text-slate-500 shrink-0">{{ fmtTs(m.ts) }}</span>
+              <div :class="['rounded-md border px-4 py-3 text-base text-slate-800 whitespace-pre-wrap leading-relaxed',
+                            m.from === 'admin' ? 'bg-slate-50 border-slate-200' : 'bg-teal-50 border-teal-200']">{{ m.body }}</div>
             </div>
-            <div class="mt-2 text-base text-slate-800 whitespace-pre-wrap leading-relaxed">{{ m.body }}</div>
           </li>
         </template>
       </ul>
