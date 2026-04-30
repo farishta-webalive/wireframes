@@ -3839,9 +3839,16 @@ const SubmittedPage = {
 
 const OrdersPage = {
   components:{ Icon, Btn, StatusBadge, Skel, EmptyState },
-  data(){ return { loading:true, q:'', facility:'ALL', treatment:'ALL', dateFrom:'', dateTo:'', sort:{ by:'submitted', dir:'desc' }, menuFor:null }; },
-  mounted(){ setTimeout(() => { this.loading = false; }, 300); document.addEventListener('click', this.closeMenu); },
+  data(){ return { loading:true, q:'', facility:'ALL', treatment:'ALL', dateFrom:'', dateTo:'', sort:{ by:'submitted', dir:'desc' }, menuFor:null, showMoreFilters:false }; },
+  mounted(){
+    setTimeout(() => { this.loading = false; }, 300);
+    document.addEventListener('click', this.closeMenu);
+    if (this.hasActiveFilters) this.showMoreFilters = true;
+  },
   beforeUnmount(){ document.removeEventListener('click', this.closeMenu); },
+  watch:{
+    hasActiveFilters(v){ if (v) this.showMoreFilters = true; }
+  },
   computed:{
     state(){ return state; },
     myFacilities(){ return FACILITIES.filter(f => state.profile.facilities.includes(f.code)); },
@@ -3872,6 +3879,19 @@ const OrdersPage = {
         const f = FACILITIES.find(x => x.code === code);
         return f ? `${f.name}, ${f.state}` : code;
       };
+    },
+    summaryLine(){
+      const parts = [];
+      const active = state.orders.filter(o => !['Cancelled','Completed'].includes(o.status)).length;
+      const awaiting = state.orders.filter(o => o.status === 'Awaiting collection').length;
+      const ready = state.orders.filter(o => o.status === 'Ready for Invoicing').length;
+      if (active)   parts.push(`${active} active`);
+      if (awaiting) parts.push(`${awaiting} awaiting collection`);
+      if (ready)    parts.push(`${ready} ready for invoicing`);
+      return parts.length ? parts.join('. ') + '.' : 'No orders yet.';
+    },
+    hasActiveFilters(){
+      return this.facility !== 'ALL' || this.treatment !== 'ALL' || !!this.dateFrom || !!this.dateTo;
     }
   },
   methods:{
@@ -3886,6 +3906,7 @@ const OrdersPage = {
       return f ? `${f.name}, ${f.state}` : code;
     },
     toggleMenu(id, e){ e.stopPropagation(); this.menuFor = this.menuFor === id ? null : id; },
+    toggleMoreFilters(){ this.showMoreFilters = !this.showMoreFilters; },
     closeMenu(){ this.menuFor = null; },
     viewPdf(o, e){ e.stopPropagation(); this.menuFor = null; window.open('about:blank','_blank'); },
     editOrder(o, e){ e.stopPropagation(); this.menuFor = null; this.$router.push('/orders/'+o.id+'?edit=1'); }
@@ -3896,34 +3917,45 @@ const OrdersPage = {
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
       <div>
         <h1 class="text-xl font-semibold text-navy-900 leading-tight">My orders</h1>
-        <p class="text-sm text-slate-500 mt-0.5">{{ filtered.length }} of {{ state.orders.length }} orders</p>
+        <p class="text-sm text-slate-700 mt-1">{{ summaryLine }}</p>
       </div>
       <Btn as="router-link" :to="{ path:'/start' }" icon="file-plus-2" size="lg">New treatment request</Btn>
     </div>
 
-    <!-- Filters -->
-    <div class="bg-white border border-slate-200 rounded-md p-4 flex items-center gap-3 flex-wrap">
-      <div class="relative flex-1 min-w-[260px]">
-        <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-        <input v-model="q" placeholder="Search reference, PO, consignor, consignee, goods..."
-               aria-label="Search orders"
-               class="pl-9 pr-3 h-11 w-full rounded-md border border-slate-300 text-base focus-ring"/>
+    <!-- Filters: search-only by default; More filters toggle reveals the rest -->
+    <div class="bg-white border border-slate-200 rounded-md p-4">
+      <div class="flex items-center gap-3 flex-wrap">
+        <div class="relative flex-1 min-w-[260px]">
+          <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+          <input v-model="q" placeholder="Search reference, PO, consignor, consignee, goods..."
+                 aria-label="Search orders"
+                 class="pl-9 pr-3 h-11 w-full rounded-md border border-slate-300 text-base focus-ring"/>
+        </div>
+        <button type="button" @click="toggleMoreFilters"
+                :aria-expanded="showMoreFilters" aria-controls="orders-more-filters"
+                class="text-sm text-slate-600 hover:text-slate-900 underline underline-offset-2 inline-flex items-center gap-1.5 px-2 py-1 focus-ring rounded">
+          {{ showMoreFilters ? 'Hide filters' : 'More filters' }}
+          <span v-if="hasActiveFilters && !showMoreFilters" class="text-xs text-teal-700 font-medium">(active)</span>
+        </button>
+        <span class="ml-auto text-sm text-slate-500">{{ filtered.length }} of {{ state.orders.length }}</span>
       </div>
-      <select v-model="facility" aria-label="Filter by site" class="h-11 px-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
-        <option value="ALL">All sites</option>
-        <option v-for="f in myFacilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
-      </select>
-      <select v-model="treatment" aria-label="Filter by treatment" class="h-11 px-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
-        <option value="ALL">All treatments</option>
-        <option value="Gamma">Gamma irradiation</option>
-        <option value="ETO">Ethylene Oxide</option>
-        <option value="GMP">GMP-certified packing</option>
-        <option value="Gamma+ETO">Gamma + Ethylene Oxide</option>
-      </select>
-      <div class="flex items-center gap-2">
-        <input type="date" v-model="dateFrom" class="h-11 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white" aria-label="From date"/>
-        <span class="text-slate-400" aria-hidden="true">&rarr;</span>
-        <input type="date" v-model="dateTo"   class="h-11 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white" aria-label="To date"/>
+      <div v-if="showMoreFilters" id="orders-more-filters" class="mt-3 pt-3 border-t border-slate-200 flex items-center gap-3 flex-wrap">
+        <select v-model="facility" aria-label="Filter by site" class="h-11 px-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+          <option value="ALL">All sites</option>
+          <option v-for="f in myFacilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
+        </select>
+        <select v-model="treatment" aria-label="Filter by treatment" class="h-11 px-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+          <option value="ALL">All treatments</option>
+          <option value="Gamma">Gamma irradiation</option>
+          <option value="ETO">Ethylene Oxide</option>
+          <option value="GMP">GMP-certified packing</option>
+          <option value="Gamma+ETO">Gamma + Ethylene Oxide</option>
+        </select>
+        <div class="flex items-center gap-2">
+          <input type="date" v-model="dateFrom" class="h-11 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white" aria-label="From date"/>
+          <span class="text-slate-400" aria-hidden="true">&rarr;</span>
+          <input type="date" v-model="dateTo"   class="h-11 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white" aria-label="To date"/>
+        </div>
       </div>
     </div>
 
