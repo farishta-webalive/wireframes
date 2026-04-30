@@ -4002,7 +4002,12 @@ const OrdersPage = {
               <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ o.cheps }}</td>
               <td class="px-4 py-3.5 whitespace-nowrap"><StatusBadge :status="o.status"/></td>
               <td class="px-4 py-3.5 text-right whitespace-nowrap" @click.stop>
-                <span v-if="o.status === 'Cancelled'" class="text-sm text-slate-400" aria-label="No actions available for cancelled order">&mdash;</span>
+                <span v-if="o.status === 'Cancelled'"
+                      class="inline-flex items-center justify-center p-1.5 rounded-md text-slate-300 cursor-not-allowed"
+                      role="img"
+                      aria-label="No actions available for cancelled order">
+                  <Icon name="more-vertical" :size="18" aria-hidden="true"/>
+                </span>
                 <div v-else class="relative inline-block">
                   <button type="button"
                           @click="toggleMenu(o.id, $event)"
