@@ -4157,7 +4157,17 @@ const OrdersPage = {
 
 const OrderDetailPage = {
   components:{ Icon, StatusBadge, MessagesPanel },
-  data(){ return { tabs: ['overview','messages','attachments','activity'] }; },
+  data(){ return {
+    tabs: ['overview','messages','attachments','activity'],
+    attSearch: '',
+    attSort: { by:'uploaded', dir:'desc' },
+    attPage: 1,
+    attPageSize: 25,
+  }; },
+  watch:{
+    attSearch(){ this.attPage = 1; },
+    attPageSize(){ this.attPage = 1; },
+  },
   computed:{
     state(){ return state; },
     order(){ return state.orders.find(o => o.id === this.$route.params.id); },
@@ -4177,12 +4187,44 @@ const OrderDetailPage = {
     messageCount(){ return this.order ? (state.messages[this.order.id] || []).length : 0; },
     attachments(){
       if (!this.order) return [];
+      const facName = this.orderFacility ? `Steritech ${this.orderFacility.name}` : 'Steritech';
+      const customer = state.profile.contact || 'Customer';
+      const sub = this.order.submitted;
+      const col = this.order.collection;
       return [
-        { name: `msds-${this.order.formCode.toLowerCase()}.pdf`, label: 'Material Safety Data Sheet', size: '184 KB' },
-        { name: `coa-${this.order.id.toLowerCase()}.pdf`, label: 'Certificate of Analysis', size: '92 KB' },
+        { name: `msds-${this.order.formCode.toLowerCase()}.pdf`,         type:'PDF', size:'184 KB', uploaded: sub, uploadedBy: customer },
+        { name: `coa-${this.order.id.toLowerCase()}.pdf`,                type:'PDF', size:'92 KB',  uploaded: sub, uploadedBy: customer },
+        { name: `dose-map-${this.order.id.toLowerCase()}.pdf`,           type:'PDF', size:'412 KB', uploaded: col, uploadedBy: facName  },
+        { name: `treatment-cert-${this.order.id.toLowerCase()}.pdf`,     type:'PDF', size:'128 KB', uploaded: col, uploadedBy: facName  },
+        { name: `iso-11137-evidence-${this.order.id.toLowerCase()}.pdf`, type:'PDF', size:'276 KB', uploaded: col, uploadedBy: facName  },
+        { name: `batch-log-${this.order.id.toLowerCase()}.csv`,          type:'CSV', size:'18 KB',  uploaded: col, uploadedBy: facName  },
       ];
     },
     attachmentCount(){ return this.attachments.length; },
+    filteredAttachments(){
+      if (!this.attSearch.trim()) return this.attachments;
+      const q = this.attSearch.toLowerCase();
+      return this.attachments.filter(f =>
+        f.name.toLowerCase().includes(q) ||
+        f.type.toLowerCase().includes(q) ||
+        f.uploadedBy.toLowerCase().includes(q));
+    },
+    sortedAttachments(){
+      const list = this.filteredAttachments.slice();
+      const k = this.attSort.by;
+      const m = this.attSort.dir === 'asc' ? 1 : -1;
+      list.sort((a,b) => (a[k] > b[k] ? m : a[k] < b[k] ? -m : 0));
+      return list;
+    },
+    attTotalPages(){ return Math.max(1, Math.ceil(this.sortedAttachments.length / this.attPageSize)); },
+    attEffectivePage(){ return Math.min(this.attPage, this.attTotalPages); },
+    pagedAttachments(){
+      if (this.sortedAttachments.length <= this.attPageSize) return this.sortedAttachments;
+      const start = (this.attEffectivePage - 1) * this.attPageSize;
+      return this.sortedAttachments.slice(start, start + this.attPageSize);
+    },
+    attRangeStart(){ return this.sortedAttachments.length === 0 ? 0 : (this.attEffectivePage - 1) * this.attPageSize + 1; },
+    attRangeEnd(){ return Math.min(this.attEffectivePage * this.attPageSize, this.sortedAttachments.length); },
     timeline(){
       if (!this.order) return [];
       const e = [
@@ -4230,7 +4272,16 @@ const OrderDetailPage = {
     },
     tabLabel(t){
       return ({ overview:'Overview', messages:'Messages', attachments:'Attachments', activity:'Activity' })[t] || t;
-    }
+    },
+    setAttSort(by){
+      if (this.attSort.by === by) this.attSort.dir = this.attSort.dir === 'asc' ? 'desc' : 'asc';
+      else { this.attSort.by = by; this.attSort.dir = 'asc'; }
+    },
+    attSortIcon(by){
+      return this.attSort.by === by ? (this.attSort.dir === 'asc' ? 'chevron-up' : 'chevron-down') : 'chevrons-up-down';
+    },
+    attPrevPage(){ if (this.attEffectivePage > 1) this.attPage = this.attEffectivePage - 1; },
+    attNextPage(){ if (this.attEffectivePage < this.attTotalPages) this.attPage = this.attEffectivePage + 1; }
   },
   template:`
   <div v-if="!order" class="p-12 text-slate-500">Order not found.</div>
@@ -4344,29 +4395,82 @@ const OrderDetailPage = {
 
       <!-- Attachments pane -->
       <div role="tabpanel" id="panel-attachments" aria-labelledby="tab-attachments" v-show="currentTab === 'attachments'" class="space-y-4">
-        <p class="text-sm text-slate-600">Files uploaded with this order. Tap a file to view it inline, or download a copy for your records.</p>
-        <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <li v-for="f in attachments" :key="f.name"
-              class="bg-white border border-slate-200 rounded-md p-4 flex items-start gap-4 hover:border-slate-300 transition-colors">
-            <div class="shrink-0 w-12 h-14 rounded-sm bg-red-50 border border-red-200 text-red-700 flex flex-col items-center justify-center" aria-hidden="true">
-              <Icon name="file-text" :size="20"/>
-              <span class="text-[10px] font-semibold tracking-wide mt-0.5">PDF</span>
+        <!-- Search appears once thread length crosses 5 (architect: progressive control disclosure, not structure) -->
+        <div v-if="attachments.length >= 6" class="flex justify-end">
+          <div class="relative w-full sm:w-72">
+            <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+            <input v-model="attSearch" placeholder="Search files&hellip;" aria-label="Search attachments"
+                   class="pl-9 pr-3 h-11 w-full rounded-md border border-slate-300 text-base focus-ring"/>
+          </div>
+        </div>
+
+        <section class="bg-white border-t border-b border-slate-200">
+          <div class="overflow-x-auto">
+            <table class="w-full text-base min-w-[820px]">
+              <caption class="sr-only">Order attachments</caption>
+              <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
+                <tr>
+                  <th scope="col" class="px-4 py-3 font-medium">
+                    <button @click="setAttSort('name')" class="inline-flex items-center gap-1 font-medium">File <Icon :name="attSortIcon('name')" :size="12" cls="text-slate-400"/></button>
+                  </th>
+                  <th scope="col" class="px-4 py-3 font-medium">
+                    <button @click="setAttSort('type')" class="inline-flex items-center gap-1 font-medium">Type <Icon :name="attSortIcon('type')" :size="12" cls="text-slate-400"/></button>
+                  </th>
+                  <th scope="col" class="px-4 py-3 font-medium text-right">
+                    <button @click="setAttSort('size')" class="inline-flex items-center gap-1 font-medium">Size <Icon :name="attSortIcon('size')" :size="12" cls="text-slate-400"/></button>
+                  </th>
+                  <th scope="col" class="px-4 py-3 font-medium">
+                    <button @click="setAttSort('uploaded')" class="inline-flex items-center gap-1 font-medium">Uploaded <Icon :name="attSortIcon('uploaded')" :size="12" cls="text-slate-400"/></button>
+                  </th>
+                  <th scope="col" class="px-4 py-3 font-medium">Uploaded by</th>
+                  <th scope="col" class="px-4 py-3 font-medium text-right">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="pagedAttachments.length === 0">
+                  <td colspan="6" class="px-4 py-12 text-center text-sm text-slate-500">No files match your search.</td>
+                </tr>
+                <tr v-else v-for="f in pagedAttachments" :key="f.name" class="even:bg-slate-50/60">
+                  <td class="px-4 py-3.5">
+                    <a href="#" @click.prevent class="inline-flex items-center gap-2 text-blue-700 hover:underline focus-ring rounded">
+                      <Icon name="file-text" :size="16" cls="text-slate-500 shrink-0"/>
+                      <span>{{ f.name }}</span>
+                    </a>
+                  </td>
+                  <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ f.type }}</td>
+                  <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ f.size }}</td>
+                  <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(f.uploaded) }}</td>
+                  <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ f.uploadedBy }}</td>
+                  <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                    <a href="#" @click.prevent class="inline-flex items-center gap-1.5 text-sm text-slate-700 hover:text-teal-600 focus-ring rounded">
+                      <Icon name="download" :size="14" aria-hidden="true"/> Download
+                    </a>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Pagination strip — only when attachments exceed page size (architect: appears at 26+) -->
+        <nav v-if="sortedAttachments.length > attPageSize" aria-label="Attachments pagination" class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
+          <div class="text-slate-600">Showing {{ attRangeStart }}&ndash;{{ attRangeEnd }} of {{ sortedAttachments.length }}</div>
+          <div class="flex items-center gap-3 flex-wrap">
+            <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
+              Rows per page
+              <select v-model.number="attPageSize" class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+                <option :value="100">100</option>
+              </select>
+            </label>
+            <div class="flex items-center gap-2">
+              <button type="button" @click="attPrevPage" :disabled="attEffectivePage <= 1" :aria-disabled="attEffectivePage <= 1" aria-label="Previous page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Prev</button>
+              <span class="text-slate-700 px-2 tabular-nums">Page {{ attEffectivePage }} of {{ attTotalPages }}</span>
+              <button type="button" @click="attNextPage" :disabled="attEffectivePage >= attTotalPages" :aria-disabled="attEffectivePage >= attTotalPages" aria-label="Next page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Next</button>
             </div>
-            <div class="flex-1 min-w-0">
-              <div class="text-base text-navy-900 font-medium truncate" :title="f.name">{{ f.name }}</div>
-              <div class="text-xs text-slate-500 mt-0.5">{{ f.label }}</div>
-              <div class="text-xs text-slate-500 mt-1">{{ f.size }} &middot; Uploaded {{ fmtDate(order.submitted) }} by {{ state.profile.contact }}</div>
-              <div class="mt-3 flex items-center gap-4 text-sm">
-                <a href="#" @click.prevent class="inline-flex items-center gap-1.5 text-teal-600 hover:text-teal-700 hover:underline focus-ring rounded">
-                  <Icon name="eye" :size="14" aria-hidden="true"/> View
-                </a>
-                <a href="#" @click.prevent class="inline-flex items-center gap-1.5 text-slate-700 hover:text-teal-600 focus-ring rounded">
-                  <Icon name="download" :size="14" aria-hidden="true"/> Download
-                </a>
-              </div>
-            </div>
-          </li>
-        </ul>
+          </div>
+        </nav>
       </div>
 
       <!-- Activity pane (Status timeline) -->
