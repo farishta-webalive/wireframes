@@ -3838,13 +3838,19 @@ const SubmittedPage = {
 /* ---------- Page: Orders List ----------------------------------------------- */
 
 const OrdersPage = {
-  components:{ Icon, Btn, TreatmentChip, BcSyncChip, StatusBadge, Skel, EmptyState },
+  components:{ Icon, Btn, StatusBadge, Skel, EmptyState },
   data(){ return { loading:true, q:'', facility:'ALL', treatment:'ALL', dateFrom:'', dateTo:'', sort:{ by:'submitted', dir:'desc' }, menuFor:null }; },
   mounted(){ setTimeout(() => { this.loading = false; }, 300); document.addEventListener('click', this.closeMenu); },
   beforeUnmount(){ document.removeEventListener('click', this.closeMenu); },
   computed:{
     state(){ return state; },
     myFacilities(){ return FACILITIES.filter(f => state.profile.facilities.includes(f.code)); },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    facilityLabel(){
+      const f = FACILITIES.find(x => x.code === this.facility);
+      return f ? `${f.name}, ${f.state}` : '';
+    },
     filtered(){
       let list = state.orders.slice();
       if (this.facility!=='ALL')  list = list.filter(o => o.facility === this.facility);
@@ -3860,6 +3866,12 @@ const OrdersPage = {
         return av>bv?m:av<bv?-m:0;
       });
       return list;
+    },
+    facilityName(){
+      return (code) => {
+        const f = FACILITIES.find(x => x.code === code);
+        return f ? `${f.name}, ${f.state}` : code;
+      };
     }
   },
   methods:{
@@ -3869,106 +3881,137 @@ const OrdersPage = {
       else { this.sort.by = by; this.sort.dir = 'desc'; }
     },
     sortIcon(by){ return this.sort.by===by ? (this.sort.dir==='asc'?'chevron-up':'chevron-down') : 'chevrons-up-down'; },
-    facilityColor(code){ return ({ MER:'#0EA5E9', DAN:'#8B5CF6', NAR:'#F59E0B', WPK:'#10B981', BRI:'#EF4444', PER:'#EC4899' })[code] || '#64748B'; },
+    siteName(code){
+      const f = FACILITIES.find(x => x.code === code);
+      return f ? `${f.name}, ${f.state}` : code;
+    },
     toggleMenu(id, e){ e.stopPropagation(); this.menuFor = this.menuFor === id ? null : id; },
     closeMenu(){ this.menuFor = null; },
     viewPdf(o, e){ e.stopPropagation(); this.menuFor = null; window.open('about:blank','_blank'); },
     editOrder(o, e){ e.stopPropagation(); this.menuFor = null; this.$router.push('/orders/'+o.id+'?edit=1'); }
   },
   template:`
-  <div class="p-8 space-y-5 max-w-[1600px]">
-    <div class="flex items-start justify-between flex-wrap gap-4">
+  <div class="p-6 sm:p-8 max-w-7xl mx-auto space-y-6 text-base text-slate-800">
+
+    <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
       <div>
-        <div class="text-xs font-semibold text-teal-600 uppercase tracking-wider mb-1">My Orders</div>
-        <h1 class="text-2xl font-semibold text-navy-900">All treatment requests</h1>
-        <p class="text-sm text-slate-500 mt-1">{{ state.orders.length }} orders across {{ state.profile.facilities.length }} facilities. Click any row for details.</p>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">My orders</h1>
+        <p class="text-sm text-slate-500 mt-0.5">{{ filtered.length }} of {{ state.orders.length }} orders</p>
       </div>
-      <div class="flex gap-2">
-        <Btn as="router-link" :to="{ path:'/start' }" icon="file-plus-2">New request</Btn>
-      </div>
+      <Btn as="router-link" :to="{ path:'/start' }" icon="file-plus-2" size="lg">New treatment request</Btn>
     </div>
 
     <!-- Filters -->
-    <div class="bg-white border border-slate-200 rounded-lg shadow-card p-4 flex items-center gap-3 flex-wrap">
+    <div class="bg-white border border-slate-200 rounded-md p-4 flex items-center gap-3 flex-wrap">
       <div class="relative flex-1 min-w-[260px]">
         <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-        <input v-model="q" placeholder="Search reference, PO, consignor, consignee, goods…" class="pl-9 pr-3 py-2 w-full rounded-lg border border-slate-300 text-sm focus-ring"/>
+        <input v-model="q" placeholder="Search reference, PO, consignor, consignee, goods..."
+               aria-label="Search orders"
+               class="pl-9 pr-3 h-11 w-full rounded-md border border-slate-300 text-base focus-ring"/>
       </div>
-      <select v-model="facility" class="px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring bg-white">
-        <option value="ALL">All facilities</option>
-        <option v-for="f in myFacilities" :key="f.code" :value="f.code">{{ f.name }} ({{ f.code }})</option>
+      <select v-model="facility" aria-label="Filter by site" class="h-11 px-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+        <option value="ALL">All sites</option>
+        <option v-for="f in myFacilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
       </select>
-      <select v-model="treatment" class="px-3 py-2 rounded-lg border border-slate-300 text-sm focus-ring bg-white">
+      <select v-model="treatment" aria-label="Filter by treatment" class="h-11 px-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
         <option value="ALL">All treatments</option>
-        <option>Gamma</option><option>ETO</option><option>GMP</option><option>Gamma+ETO</option>
+        <option value="Gamma">Gamma irradiation</option>
+        <option value="ETO">Ethylene Oxide</option>
+        <option value="GMP">GMP-certified packing</option>
+        <option value="Gamma+ETO">Gamma + Ethylene Oxide</option>
       </select>
-      <div class="flex items-center gap-1 text-xs">
-        <input type="date" v-model="dateFrom" class="px-2 py-2 rounded-lg border border-slate-300 text-sm focus-ring bg-white" aria-label="From date"/>
-        <span class="text-slate-400">→</span>
-        <input type="date" v-model="dateTo"   class="px-2 py-2 rounded-lg border border-slate-300 text-sm focus-ring bg-white" aria-label="To date"/>
+      <div class="flex items-center gap-2">
+        <input type="date" v-model="dateFrom" class="h-11 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white" aria-label="From date"/>
+        <span class="text-slate-400" aria-hidden="true">&rarr;</span>
+        <input type="date" v-model="dateTo"   class="h-11 px-3 rounded-md border border-slate-300 text-sm focus-ring bg-white" aria-label="To date"/>
       </div>
     </div>
 
     <!-- Table -->
-    <div class="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden">
+    <section class="bg-white border-t border-b border-slate-200">
       <div class="overflow-x-auto">
-      <table class="w-full text-sm min-w-[1100px]">
-        <thead class="bg-slate-50 text-left text-xs text-slate-500 uppercase tracking-wider">
-          <tr>
-            <th class="px-5 py-3"><button @click="setSort('id')" class="inline-flex items-center gap-1">Reference <Icon :name="sortIcon('id')" :size="12"/></button></th>
-            <th class="px-5 py-3">Facility</th>
-            <th class="px-5 py-3">Form</th>
-            <th class="px-5 py-3">PO</th>
-            <th class="px-5 py-3">Consignor → Consignee</th>
-            <th class="px-5 py-3"><button @click="setSort('submitted')" class="inline-flex items-center gap-1">Submitted <Icon :name="sortIcon('submitted')" :size="12"/></button></th>
-            <th class="px-5 py-3">Status</th>
-            <th class="px-5 py-3 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-100">
-          <tr v-for="o in filtered" :key="o.id" @click="$router.push('/orders/'+o.id)" class="hover:bg-slate-50 cursor-pointer">
-            <td class="px-5 py-3 font-mono text-xs font-medium text-navy-900">{{ o.id }}</td>
-            <td class="px-5 py-3">
-              <div class="inline-flex items-center gap-2 pl-1.5 pr-2.5 py-1 rounded-full bg-slate-50 border border-slate-200">
-                <span class="w-1.5 h-1.5 rounded-full" :style="{background: facilityColor(o.facility)}"></span>
-                <span class="text-[11px] font-semibold tracking-wide text-slate-700">{{ o.facility }}</span>
-              </div>
-            </td>
-            <td class="px-5 py-3">
-              <div class="flex items-center gap-2">
-                <TreatmentChip :treatment="o.treatment" small/>
-                <div class="min-w-0">
-                  <div class="text-slate-900 truncate">{{ o.formName }}</div>
-                  <div class="text-[11px] text-slate-500 font-mono">{{ o.formCode }}</div>
+        <table class="w-full text-base min-w-[1100px]">
+          <caption class="sr-only">Treatment requests</caption>
+          <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
+            <tr>
+              <th scope="col" class="px-5 py-3 font-medium">
+                <button @click="setSort('id')" class="inline-flex items-center gap-1 font-medium">Order ID <Icon :name="sortIcon('id')" :size="12" cls="text-slate-400"/></button>
+              </th>
+              <th scope="col" class="px-3 py-3 font-medium">Site</th>
+              <th scope="col" class="px-3 py-3 font-medium">Form</th>
+              <th scope="col" class="px-3 py-3 font-medium">PO Number</th>
+              <th scope="col" class="px-3 py-3 font-medium">Consignor &rarr; Consignee</th>
+              <th scope="col" class="px-3 py-3 font-medium">
+                <button @click="setSort('submitted')" class="inline-flex items-center gap-1 font-medium">Submitted <Icon :name="sortIcon('submitted')" :size="12" cls="text-slate-400"/></button>
+              </th>
+              <th scope="col" class="px-3 py-3 font-medium">Status</th>
+              <th scope="col" class="px-3 py-3 text-right font-medium">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="8" class="px-5 sm:px-6 py-6 text-sm text-slate-500 text-center">Loading orders&hellip;</td>
+            </tr>
+            <tr v-else-if="filtered.length === 0">
+              <td colspan="8" class="px-5 py-12 text-center text-slate-500">
+                <Icon name="search-x" :size="28" cls="mx-auto mb-2 text-slate-300"/>
+                <div class="text-sm">No orders match the current filters.</div>
+                <div class="text-sm text-slate-400 mt-0.5">Try a different search or clear your filters.</div>
+              </td>
+            </tr>
+            <tr v-else v-for="o in filtered" :key="o.id" class="even:bg-slate-50/60">
+              <td class="px-5 py-4 text-sm whitespace-nowrap">
+                <router-link :to="'/orders/'+o.id" class="font-medium text-blue-700 hover:underline focus-ring">{{ o.id }}</router-link>
+              </td>
+              <td class="px-3 py-4 text-sm text-slate-700 whitespace-nowrap">{{ siteName(o.facility) }}</td>
+              <td class="px-3 py-4">
+                <div class="text-sm text-slate-900 leading-snug truncate max-w-[260px]">{{ o.formName }}</div>
+                <div class="mt-0.5 inline-flex items-center gap-1.5 text-xs text-slate-500">
+                  <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[o.treatment].dot]" aria-hidden="true"></span>
+                  <span>{{ treatmentLabels[o.treatment] || o.treatment }}</span>
+                  <span aria-hidden="true" class="mx-1 text-slate-300">&middot;</span>
+                  <span>{{ o.formCode }}</span>
                 </div>
-              </div>
-            </td>
-            <td class="px-5 py-3 font-mono text-xs text-slate-700">{{ o.po }}</td>
-            <td class="px-5 py-3">
-              <div class="text-xs text-slate-700 truncate max-w-[220px]">{{ o.consignor }}</div>
-              <div class="text-[11px] text-slate-500 truncate max-w-[220px]">→ {{ o.consignee }}</div>
-            </td>
-            <td class="px-5 py-3 text-slate-600 whitespace-nowrap">{{ fmtDate(o.submitted) }}</td>
-            <td class="px-5 py-3"><StatusBadge :status="o.status"/></td>
-            <td class="px-5 py-3 text-right relative" @click.stop>
-              <button @click="toggleMenu(o.id, $event)" class="w-8 h-8 inline-flex items-center justify-center rounded-md hover:bg-slate-100 text-slate-500 focus-ring" :aria-expanded="menuFor===o.id" aria-label="Order actions">
-                <Icon name="more-horizontal" :size="16"/>
-              </button>
-              <div v-if="menuFor===o.id" class="absolute right-3 top-11 z-20 w-44 bg-white border border-slate-200 rounded-lg shadow-lg py-1 text-left">
-                <button @click="viewPdf(o, $event)" class="w-full px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                  <Icon name="file-text" :size="14" cls="text-slate-500"/>View as PDF
-                </button>
-                <button @click="editOrder(o, $event)" class="w-full px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 inline-flex items-center gap-2">
-                  <Icon name="pencil" :size="14" cls="text-slate-500"/>Edit
-                </button>
-              </div>
-            </td>
-          </tr>
-          <tr v-if="filtered.length===0"><td colspan="8" class="px-5 py-12 text-center text-slate-500"><Icon name="search-x" :size="24" cls="mx-auto mb-2 text-slate-300"/>No orders match the current filters.</td></tr>
-        </tbody>
-      </table>
+              </td>
+              <td class="px-3 py-4 text-sm text-slate-700 whitespace-nowrap">{{ o.po }}</td>
+              <td class="px-3 py-4">
+                <div class="text-sm text-slate-700 truncate max-w-[240px]">{{ o.consignor }}</div>
+                <div class="text-xs text-slate-500 truncate max-w-[240px]">&rarr; {{ o.consignee }}</div>
+              </td>
+              <td class="px-3 py-4 text-sm text-slate-600 whitespace-nowrap">{{ fmtDate(o.submitted) }}</td>
+              <td class="px-3 py-4 whitespace-nowrap"><StatusBadge :status="o.status"/></td>
+              <td class="px-3 py-4 text-right whitespace-nowrap" @click.stop>
+                <span v-if="o.status === 'Cancelled'" class="text-sm text-slate-400" aria-label="No actions available for cancelled order">&mdash;</span>
+                <div v-else class="relative inline-block">
+                  <button type="button"
+                          @click="toggleMenu(o.id, $event)"
+                          @keydown.escape="menuFor = null"
+                          :aria-expanded="menuFor === o.id"
+                          aria-haspopup="menu"
+                          aria-label="Order actions"
+                          class="p-1.5 rounded-md text-slate-500 hover:text-navy-900 hover:bg-slate-100 focus-ring">
+                    <Icon name="more-vertical" :size="18" aria-hidden="true"/>
+                  </button>
+                  <div v-if="menuFor === o.id"
+                       role="menu"
+                       @click.stop
+                       class="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20 text-left">
+                    <a href="#" role="menuitem" @click.stop.prevent="viewPdf(o, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="file-text" :size="14" cls="text-slate-500"/> View as PDF
+                    </a>
+                    <template v-if="o.status !== 'Completed'">
+                      <a href="#" role="menuitem" @click.stop.prevent="editOrder(o, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                        <Icon name="pencil" :size="14" cls="text-slate-500"/> Edit
+                      </a>
+                    </template>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
       </div>
-    </div>
+    </section>
   </div>`
 };
 
