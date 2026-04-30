@@ -437,6 +437,40 @@ const seedMessages = {
   'STR-25-018330': [
     { id:'m1', from:'customer', author:'Emily Walker',    ts:'2026-04-16T09:40', body:'Got an email about a sync issue \u2014 do I need to do anything on my side?' },
     { id:'m2', from:'admin',    author:'Steritech Narangba', ts:'2026-04-16T09:55', body:'Nothing required from you. Our finance team is releasing the credit hold and the order will retry automatically.' },
+    { id:'m3', from:'admin',    author:'Steritech Narangba', ts:'2026-04-17T08:14', body:'Update \u2014 credit hold cleared, order is now scheduled. Treatment will begin tomorrow morning.' },
+    { id:'m4', from:'customer', author:'Emily Walker',    ts:'2026-04-17T08:32', body:'Appreciate the quick turnaround. Thanks team.' },
+  ],
+  'STR-25-018342_extra_continuation': [
+    { id:'m4', from:'admin',    author:'Steritech Mernda', ts:'2026-04-19T09:08', body:'Quick heads-up \u2014 the COA for lot B references a different sterilisation date. Can you confirm which date should print on the certificate?' },
+    { id:'m5', from:'customer', author:'Alex Nguyen',      ts:'2026-04-19T09:40', body:'Use the 18 Apr date for both. Lot B was packed on the same day, just labelled differently in our WMS.' },
+    { id:'m6', from:'admin',    author:'Steritech Mernda', ts:'2026-04-19T10:02', body:'Got it. COA will print with 18 Apr. We\u2019re scheduled to begin treatment Monday 22 Apr. We\u2019ll send the dose-mapping report once treatment completes.' },
+  ],
+  'STR-25-018336': [
+    { id:'m1', from:'customer', author:'Sarah Lewis',         ts:'2026-04-17T13:55', body:'Just confirming the validated dose for the herbal tea sachets \u2014 is 8 kGy still the agreed minimum, or has that changed since last quarter?' },
+    { id:'m2', from:'admin',    author:'Steritech Dandenong', ts:'2026-04-17T14:30', body:'Still 8 kGy minimum, validated under your standing agreement. Target is 10 kGy, max 14 kGy. Same as Q1.' },
+    { id:'m3', from:'customer', author:'Sarah Lewis',         ts:'2026-04-17T14:48', body:'Thanks. Could we get the validation report emailed across? Auditor is asking for a copy.' },
+    { id:'m4', from:'admin',    author:'Steritech Dandenong', ts:'2026-04-17T15:12', body:'Sent through to sarah.lewis@bellarinebotanics.com.au this afternoon. Let us know if it doesn\u2019t arrive.' },
+  ],
+  'STR-25-018327': [
+    { id:'m1', from:'admin',    author:'Steritech Wagga',  ts:'2026-04-13T16:08', body:'Heads up \u2014 the truck flagged late arrival, ETA now 17:30. We\u2019ll keep the chamber pre-heated and start as soon as it lands.' },
+    { id:'m2', from:'customer', author:'Mark Thompson',    ts:'2026-04-13T16:24', body:'Apologies for the late notice. Driver hit roadworks on the M31. Anything we need to do at this end?' },
+    { id:'m3', from:'admin',    author:'Steritech Wagga',  ts:'2026-04-13T16:30', body:'No action needed. We\u2019ll absorb the schedule slip and still hit your collection date.' },
+  ],
+  'STR-25-018321': [
+    { id:'m1', from:'admin',    author:'Steritech Mernda', ts:'2026-04-15T07:00', body:'Treatment started this morning at 06:45. First dose-map readings are within spec. Will update mid-cycle.' },
+    { id:'m2', from:'admin',    author:'Steritech Mernda', ts:'2026-04-15T11:42', body:'Mid-cycle check complete. All dosimeters reading 0.38\u20130.42 kGy, well within your 0.4 kGy target band.' },
+    { id:'m3', from:'customer', author:'Priya Singh',      ts:'2026-04-15T12:08', body:'Brilliant, thanks for the update. Will the cooling-down period push the collection back at all?' },
+    { id:'m4', from:'admin',    author:'Steritech Mernda', ts:'2026-04-15T12:31', body:'No \u2014 collection still on for 16 Apr morning. Cooling completes overnight.' },
+  ],
+  'STR-25-018314': [
+    { id:'m1', from:'admin',    author:'Steritech Narangba', ts:'2026-04-12T15:20', body:'Treatment complete and ready for invoicing. The COA and dose-mapping report have been uploaded to this order.' },
+    { id:'m2', from:'customer', author:'David Cho',          ts:'2026-04-12T16:05', body:'Brilliant. Could you also email a copy across to accounts@goldenhive.com.au for our records?' },
+    { id:'m3', from:'admin',    author:'Steritech Narangba', ts:'2026-04-13T08:14', body:'Sent across this morning. Invoice will follow from our Exsited system within 24 hours.' },
+  ],
+  'STR-25-018308': [
+    { id:'m1', from:'customer', author:'Jess O\u2019Brien',  ts:'2026-04-10T14:22', body:'Hi \u2014 the dose mapping report mentions a min of 9.2 kGy at one point. Is that still inside our validated range?' },
+    { id:'m2', from:'admin',    author:'Steritech Dandenong', ts:'2026-04-10T15:01', body:'Yes \u2014 your validated range is 8\u201316 kGy. The 9.2 kGy reading was at the lowest point in the load and is still well above the 8 kGy minimum. The COA reflects this and confirms compliance.' },
+    { id:'m3', from:'customer', author:'Jess O\u2019Brien',  ts:'2026-04-10T15:18', body:'Perfect, thanks for confirming. Closing this off our end.' },
   ],
 };
 
@@ -1168,29 +1202,40 @@ const MessagesPanel = {
   },
   template:`
   <div class="flex flex-col">
-    <div ref="scroll"
-         :class="['overflow-y-auto', compact ? 'max-h-72' : 'max-h-[520px]']">
-      <div v-if="thread.length === 0" class="text-center text-sm text-slate-500 py-8 px-5">
-        No messages yet. {{ asAdmin ? 'Reply below to start the thread.' : 'Send a message to ask Steritech a question about this order.' }}
+    <!-- Thread header strip — message count + last reply timestamp; hides on empty thread -->
+    <div v-if="thread.length" class="px-5 py-2.5 border-b border-slate-200 bg-white flex items-center justify-between gap-3 text-xs text-slate-500">
+      <span>{{ thread.length }} {{ thread.length === 1 ? 'message' : 'messages' }}</span>
+      <span>Last reply {{ fmtTs(thread[thread.length - 1].ts) }}</span>
+    </div>
+
+    <div ref="scroll" :class="['overflow-y-auto', compact ? 'max-h-72' : 'max-h-[520px]']">
+      <div v-if="thread.length === 0" class="text-center py-12 px-5">
+        <div class="w-12 h-12 rounded-full bg-slate-100 text-slate-400 flex items-center justify-center mx-auto mb-3">
+          <Icon name="message-square" :size="22" aria-hidden="true"/>
+        </div>
+        <p class="text-base text-slate-700 font-medium">No messages yet</p>
+        <p class="text-sm text-slate-500 mt-1 max-w-sm mx-auto">{{ asAdmin ? 'Reply below to start the thread with the customer.' : 'Use the box below to ask Steritech anything about this order — pickup timing, dose questions, paperwork, anything.' }}</p>
       </div>
       <ul v-else>
         <template v-for="(m, i) in thread" :key="m.id">
           <li v-if="showDateDivider(m, i)" class="px-5 py-2 bg-white border-b border-slate-100">
             <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">{{ formatDateDivider(m.ts) }}</div>
           </li>
-          <li :class="['px-5 py-4 border-b border-slate-100 last:border-b-0', m.from === 'admin' ? 'bg-slate-50' : 'bg-white']">
-            <div class="flex items-baseline gap-2 text-xs text-slate-500 flex-wrap">
-              <span class="font-medium text-navy-900 text-sm">{{ m.author }}</span>
-              <span aria-hidden="true">&middot;</span>
-              <span>{{ m.from === 'admin' ? 'Steritech' : 'Customer' }}</span>
-              <span aria-hidden="true">&middot;</span>
-              <span>{{ fmtTs(m.ts) }}</span>
+          <li :class="['group px-5 py-4 border-b border-slate-100 last:border-b-0 transition-colors',
+                       m.from === 'admin' ? 'bg-slate-50/70' : 'bg-white hover:bg-slate-50/40']">
+            <div class="flex items-baseline justify-between gap-3 flex-wrap">
+              <div class="flex items-baseline gap-2 min-w-0">
+                <span class="text-base font-medium text-navy-900">{{ m.author }}</span>
+                <span :class="['text-[11px] font-medium uppercase tracking-wide px-1.5 py-0.5 rounded-sm', m.from === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700']">{{ m.from === 'admin' ? 'Steritech' : 'You' }}</span>
+              </div>
+              <span class="text-xs text-slate-500 shrink-0">{{ fmtTs(m.ts) }}</span>
             </div>
-            <div class="mt-1.5 text-base text-slate-800 whitespace-pre-wrap leading-relaxed">{{ m.body }}</div>
+            <div class="mt-2 text-base text-slate-800 whitespace-pre-wrap leading-relaxed">{{ m.body }}</div>
           </li>
         </template>
       </ul>
     </div>
+
     <div class="px-5 py-4 border-t border-slate-200 bg-white">
       <label :for="composerId" class="block text-sm font-medium text-slate-800 mb-1.5">
         {{ asAdmin ? 'Reply to customer' : 'Send a message to Steritech' }}
@@ -1199,19 +1244,13 @@ const MessagesPanel = {
         <textarea v-model="draft" rows="2" @keydown="onKey" :id="composerId"
                   :placeholder="asAdmin ? 'Type your reply&hellip;' : 'Type your message&hellip;'"
                   class="flex-1 resize-none rounded-md border border-slate-300 p-3 text-base text-slate-900 placeholder:text-slate-400 focus-ring"></textarea>
-        <div class="flex items-center gap-2">
-          <button type="button" aria-label="Attach a file"
-                  class="inline-flex items-center justify-center h-11 w-11 rounded-md border border-slate-300 text-slate-600 hover:bg-slate-50 focus-ring">
-            <Icon name="paperclip" :size="16" aria-hidden="true"/>
-          </button>
-          <button type="button" @click="send" :disabled="!canSend"
-                  class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed focus-ring">
-            <Icon name="send" :size="16" aria-hidden="true"/> Send
-          </button>
-        </div>
+        <button type="button" @click="send" :disabled="!canSend"
+                class="inline-flex items-center justify-center gap-2 h-11 px-5 rounded-md bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed focus-ring">
+          <Icon name="send" :size="16" aria-hidden="true"/> Send
+        </button>
       </div>
       <p class="text-xs text-slate-500 mt-1.5">
-        Cmd/Ctrl + Enter to send.
+        Plain text only. Cmd/Ctrl + Enter to send.
         <span v-if="!asAdmin">Replies come back on this thread, usually within 1 business day.</span>
       </p>
     </div>
