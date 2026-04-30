@@ -6230,7 +6230,7 @@ const OnboardCustomerPage = {
                 <td v-for="s in services" :key="s" class="px-4 py-3.5 text-center">
                   <input v-if="canCheck[fac.code][s]" type="checkbox"
                          v-model="access[fac.code][s]"
-                         :aria-label="`${s} at ${fac.name}`"
+                         :aria-label="s + ' at ' + fac.name"
                          class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
                   <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
                 </td>
