@@ -3880,16 +3880,6 @@ const OrdersPage = {
         return f ? `${f.name}, ${f.state}` : code;
       };
     },
-    summaryLine(){
-      const parts = [];
-      const active = state.orders.filter(o => !['Cancelled','Completed'].includes(o.status)).length;
-      const awaiting = state.orders.filter(o => o.status === 'Awaiting collection').length;
-      const ready = state.orders.filter(o => o.status === 'Ready for Invoicing').length;
-      if (active)   parts.push(`${active} active`);
-      if (awaiting) parts.push(`${awaiting} awaiting collection`);
-      if (ready)    parts.push(`${ready} ready for invoicing`);
-      return parts.length ? parts.join('. ') + '.' : 'No orders yet.';
-    },
     hasActiveFilters(){
       return this.facility !== 'ALL' || this.treatment !== 'ALL' || !!this.dateFrom || !!this.dateTo;
     }
@@ -3917,7 +3907,6 @@ const OrdersPage = {
     <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
       <div>
         <h1 class="text-xl font-semibold text-navy-900 leading-tight">My orders</h1>
-        <p class="text-sm text-slate-700 mt-1">{{ summaryLine }}</p>
       </div>
       <Btn as="router-link" :to="{ path:'/start' }" icon="file-plus-2" size="lg">New treatment request</Btn>
     </div>
