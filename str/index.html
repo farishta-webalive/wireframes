@@ -3929,58 +3929,63 @@ const OrdersPage = {
 
     <!-- Table -->
     <section class="bg-white border-t border-b border-slate-200">
-      <div class="overflow-x-auto">
-        <table class="w-full text-base min-w-[1100px]">
+        <table class="w-full table-fixed text-base">
           <caption class="sr-only">Treatment requests</caption>
+          <colgroup>
+            <col style="width:200px"/>
+            <col/>
+            <col style="width:280px"/>
+            <col style="width:120px"/>
+            <col style="width:140px"/>
+            <col style="width:56px"/>
+          </colgroup>
           <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
             <tr>
               <th scope="col" class="px-5 py-3 font-medium">
-                <button @click="setSort('id')" class="inline-flex items-center gap-1 font-medium">Order ID <Icon :name="sortIcon('id')" :size="12" cls="text-slate-400"/></button>
+                <button @click="setSort('id')" class="inline-flex items-center gap-1 font-medium">Order <Icon :name="sortIcon('id')" :size="12" cls="text-slate-400"/></button>
               </th>
-              <th scope="col" class="px-3 py-3 font-medium">Site</th>
               <th scope="col" class="px-3 py-3 font-medium">Form</th>
-              <th scope="col" class="px-3 py-3 font-medium">PO Number</th>
               <th scope="col" class="px-3 py-3 font-medium">Consignor &rarr; Consignee</th>
               <th scope="col" class="px-3 py-3 font-medium">
                 <button @click="setSort('submitted')" class="inline-flex items-center gap-1 font-medium">Submitted <Icon :name="sortIcon('submitted')" :size="12" cls="text-slate-400"/></button>
               </th>
               <th scope="col" class="px-3 py-3 font-medium">Status</th>
-              <th scope="col" class="px-3 py-3 text-right font-medium">Action</th>
+              <th scope="col" class="px-3 py-3 text-right font-medium"><span class="sr-only">Action</span></th>
             </tr>
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="8" class="px-5 sm:px-6 py-6 text-sm text-slate-500 text-center">Loading orders&hellip;</td>
+              <td colspan="6" class="px-5 sm:px-6 py-6 text-sm text-slate-500 text-center">Loading orders&hellip;</td>
             </tr>
             <tr v-else-if="filtered.length === 0">
-              <td colspan="8" class="px-5 py-12 text-center text-slate-500">
+              <td colspan="6" class="px-5 py-12 text-center text-slate-500">
                 <Icon name="search-x" :size="28" cls="mx-auto mb-2 text-slate-300"/>
                 <div class="text-sm">No orders match the current filters.</div>
                 <div class="text-sm text-slate-400 mt-0.5">Try a different search or clear your filters.</div>
               </td>
             </tr>
             <tr v-else v-for="o in filtered" :key="o.id" class="even:bg-slate-50/60">
-              <td class="px-5 py-4 text-sm whitespace-nowrap">
-                <router-link :to="'/orders/'+o.id" class="font-medium text-blue-700 hover:underline focus-ring">{{ o.id }}</router-link>
+              <td class="px-5 py-4 align-top">
+                <router-link :to="'/orders/'+o.id" class="text-sm font-medium text-blue-700 hover:underline focus-ring whitespace-nowrap">{{ o.id }}</router-link>
+                <div class="text-xs text-slate-500 mt-0.5 truncate" :title="'PO ' + o.po + ' · ' + siteName(o.facility)">PO {{ o.po }} &middot; {{ siteName(o.facility) }}</div>
               </td>
-              <td class="px-3 py-4 text-sm text-slate-700 whitespace-nowrap">{{ siteName(o.facility) }}</td>
-              <td class="px-3 py-4">
-                <div class="text-sm text-slate-900 leading-snug truncate max-w-[260px]">{{ o.formName }}</div>
+              <td class="px-3 py-4 align-top">
+                <div class="text-sm text-slate-900 leading-snug truncate" :title="o.formName">{{ o.formName }}</div>
                 <div class="mt-0.5 inline-flex items-center gap-1.5 text-xs text-slate-500">
-                  <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[o.treatment].dot]" aria-hidden="true"></span>
-                  <span>{{ treatmentLabels[o.treatment] || o.treatment }}</span>
+                  <span :class="['inline-block h-1.5 w-1.5 rounded-full shrink-0', treatmentStyles[o.treatment].dot]" aria-hidden="true"></span>
+                  <span class="truncate">{{ treatmentLabels[o.treatment] || o.treatment }}</span>
                   <span aria-hidden="true" class="mx-1 text-slate-300">&middot;</span>
                   <span>{{ o.formCode }}</span>
                 </div>
               </td>
-              <td class="px-3 py-4 text-sm text-slate-700 whitespace-nowrap">{{ o.po }}</td>
-              <td class="px-3 py-4">
-                <div class="text-sm text-slate-700 truncate max-w-[240px]">{{ o.consignor }}</div>
-                <div class="text-xs text-slate-500 truncate max-w-[240px]">&rarr; {{ o.consignee }}</div>
+              <td class="px-3 py-4 align-top">
+                <div class="text-sm text-slate-700 truncate" :title="o.consignor + ' → ' + o.consignee">
+                  {{ o.consignor }} <span aria-hidden="true" class="text-slate-400">&rarr;</span> {{ o.consignee }}
+                </div>
               </td>
-              <td class="px-3 py-4 text-sm text-slate-600 whitespace-nowrap">{{ fmtDate(o.submitted) }}</td>
-              <td class="px-3 py-4 whitespace-nowrap"><StatusBadge :status="o.status"/></td>
-              <td class="px-3 py-4 text-right whitespace-nowrap" @click.stop>
+              <td class="px-3 py-4 text-sm text-slate-600 whitespace-nowrap align-top">{{ fmtDate(o.submitted) }}</td>
+              <td class="px-3 py-4 whitespace-nowrap align-top"><StatusBadge :status="o.status"/></td>
+              <td class="px-3 py-4 text-right whitespace-nowrap align-top" @click.stop>
                 <span v-if="o.status === 'Cancelled'" class="text-sm text-slate-400" aria-label="No actions available for cancelled order">&mdash;</span>
                 <div v-else class="relative inline-block">
                   <button type="button"
@@ -4010,7 +4015,6 @@ const OrdersPage = {
             </tr>
           </tbody>
         </table>
-      </div>
     </section>
   </div>`
 };
