@@ -4993,20 +4993,72 @@ const SiteSettingsPage = {
 
 /* ---------- Page: Settings (tabs) ------------------------------------------- */
 
+const SETTINGS_DRAWER_FIELDS = {
+  commodity: [
+    { key:'name',           label:'Name',                type:'text',     required:true },
+    { key:'tariffCode',     label:'Tariff code',         type:'text',     help:'e.g. 0804.50.20' },
+    { key:'treatment',      label:'Treatment',           type:'select',   options:['Gamma','ETO','GMP','Gamma+ETO'] },
+    { key:'defaultDoseKGy', label:'Default dose (kGy)',  type:'number',   step:0.5 },
+    { key:'notes',          label:'Notes',               type:'textarea' },
+  ],
+  consignor: [
+    { key:'name',    label:'Company name', type:'text',     required:true },
+    { key:'contact', label:'Contact name', type:'text' },
+    { key:'phone',   label:'Phone',        type:'tel' },
+    { key:'address', label:'Address',      type:'textarea' },
+  ],
+  consignee: [
+    { key:'name',    label:'Company name', type:'text',     required:true },
+    { key:'contact', label:'Contact name', type:'text' },
+    { key:'phone',   label:'Phone',        type:'tel' },
+    { key:'address', label:'Address',      type:'textarea' },
+  ],
+};
+
 const SettingsPage = {
-  components:{ Icon, Btn, TreatmentChip, SiteSettingsPage },
+  components:{ Icon, Btn, SiteSettingsPage },
   data(){
     const isAdmin = state.role === 'admin';
     const defaultTab = isAdmin ? 'site' : 'profile';
     return {
       tab: this.$route.query.tab || defaultTab,
       pwd: { current:'', next:'', confirm:'' },
-      editCommodity: null, editConsignor: null, editConsignee: null,
+      commoditySearch: '',
+      consignorSearch: '',
+      consigneeSearch: '',
+      drawer: { open:false, kind:'commodity', mode:'add', original:null, working:{} },
+      del:    { open:false, kind:'commodity', row:null },
     };
   },
   computed:{
     state(){ return state; },
     isAdmin(){ return state.role === 'admin'; },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    drawerFields(){ return SETTINGS_DRAWER_FIELDS[this.drawer.kind] || []; },
+    drawerTitle(){
+      const noun = ({ commodity:'commodity', consignor:'consignor', consignee:'consignee' })[this.drawer.kind] || 'item';
+      return (this.drawer.mode === 'add' ? 'Add ' : 'Edit ') + noun;
+    },
+    filteredCommodities(){
+      if (!this.commoditySearch.trim()) return state.commodities;
+      const q = this.commoditySearch.toLowerCase();
+      return state.commodities.filter(c =>
+        (c.name||'').toLowerCase().includes(q) ||
+        (c.tariffCode||'').toLowerCase().includes(q) ||
+        (c.treatment||'').toLowerCase().includes(q) ||
+        (c.notes||'').toLowerCase().includes(q));
+    },
+    filteredConsignors(){
+      if (!this.consignorSearch.trim()) return state.consignors;
+      const q = this.consignorSearch.toLowerCase();
+      return state.consignors.filter(r => [r.name,r.contact,r.phone,r.address].some(v => String(v||'').toLowerCase().includes(q)));
+    },
+    filteredConsignees(){
+      if (!this.consigneeSearch.trim()) return state.consignees;
+      const q = this.consigneeSearch.toLowerCase();
+      return state.consignees.filter(r => [r.name,r.contact,r.phone,r.address].some(v => String(v||'').toLowerCase().includes(q)));
+    },
     tabs(){
       const customerTabs = [
         { id:'profile',     label:'Profile',     icon:'user' },
@@ -5026,21 +5078,49 @@ const SettingsPage = {
     tab(v){ this.$router.replace({ query:{ tab:v } }); }
   },
   created(){
-    // If the URL points to a tab not allowed for this role (e.g. ?tab=profile for admin), clamp to default.
     const valid = this.tabs.some(t => t.id === this.tab);
     if (!valid) this.tab = this.tabs[0].id;
   },
   methods:{
+    openAdd(kind){
+      const blank = Object.fromEntries(SETTINGS_DRAWER_FIELDS[kind].map(f => [f.key, f.type === 'number' ? 0 : (f.type === 'select' ? f.options[0] : '')]));
+      this.drawer = { open:true, kind, mode:'add', original:null, working: blank };
+    },
+    openEdit(kind, row){
+      this.drawer = { open:true, kind, mode:'edit', original: row, working: JSON.parse(JSON.stringify(row)) };
+    },
+    cancelDrawer(){ this.drawer.open = false; },
+    saveDrawer(){
+      const kind = this.drawer.kind;
+      const list = ({ commodity:state.commodities, consignor:state.consignors, consignee:state.consignees })[kind];
+      if (this.drawer.mode === 'add') {
+        const idPrefix = ({ commodity:'C', consignor:'SR', consignee:'SE' })[kind];
+        list.unshift({ ...this.drawer.working, id: `${idPrefix}-${Date.now()}` });
+        showToast(`${this.drawerTitle.replace('Add ','')} added.`, 'success');
+      } else {
+        Object.assign(this.drawer.original, this.drawer.working);
+        showToast('Changes saved.', 'success');
+      }
+      this.drawer.open = false;
+    },
+    confirmDelete(kind, row){
+      this.del = { open:true, kind, row };
+    },
+    cancelDelete(){ this.del.open = false; },
+    executeDelete(){
+      const list = ({ commodity:state.commodities, consignor:state.consignors, consignee:state.consignees })[this.del.kind];
+      const idx = list.indexOf(this.del.row);
+      if (idx >= 0) list.splice(idx, 1);
+      this.del.open = false;
+      showToast('Removed. Past orders are unchanged.', 'success');
+    },
+    // Backward-compat shims so Consignors/Consignees template (still using addRow/removeRow inline-edit) keeps working until Commit C refactor lands.
     addRow(kind){
-      const seed = { id: 'NEW-' + Date.now(), name:'', contact:'', phone:'', address:'' };
-      if (kind==='commodities') state.commodities.unshift({ id: 'C-NEW', name:'', tariffCode:'', treatment:'Gamma', defaultDoseKGy:0, notes:'' });
-      if (kind==='consignors')  state.consignors.unshift(seed);
-      if (kind==='consignees')  state.consignees.unshift(seed);
+      this.openAdd(({ commodities:'commodity', consignors:'consignor', consignees:'consignee' })[kind]);
     },
     removeRow(kind, i){
-      if (kind==='commodities') state.commodities.splice(i,1);
-      if (kind==='consignors')  state.consignors.splice(i,1);
-      if (kind==='consignees')  state.consignees.splice(i,1);
+      const list = ({ commodities:state.commodities, consignors:state.consignors, consignees:state.consignees })[kind];
+      if (list) list.splice(i, 1);
     }
   },
   template:`
@@ -5127,33 +5207,68 @@ const SettingsPage = {
     </div>
 
     <!-- Commodities -->
-    <div v-if="tab==='commodities'" class="space-y-3">
-      <div class="flex items-center justify-between">
-        <div class="text-sm text-slate-500"><strong class="text-navy-900">{{ state.commodities.length }}</strong> commodities · shared across all facilities</div>
-        <Btn icon="plus" @click="addRow('commodities')">Add commodity</Btn>
+    <div v-if="tab==='commodities'" role="tabpanel" id="settings-panel-commodities" aria-labelledby="settings-tab-commodities" class="space-y-4">
+      <div class="flex items-center justify-between gap-3 flex-wrap">
+        <div>
+          <h2 class="text-lg font-medium text-navy-900">Commodities</h2>
+          <p class="text-sm text-slate-500">{{ filteredCommodities.length }} of {{ state.commodities.length }} &middot; shared across all your sites</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <div class="relative w-full sm:w-64">
+            <Icon name="search" :size="14" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+            <input v-model="commoditySearch" placeholder="Search commodities&hellip;" aria-label="Search commodities"
+                   class="pl-9 pr-3 h-11 w-full rounded-md border border-slate-300 text-base focus-ring"/>
+          </div>
+          <Btn icon="plus" @click="openAdd('commodity')">Add commodity</Btn>
+        </div>
       </div>
-      <div class="bg-white border border-slate-200 rounded-lg shadow-card overflow-hidden">
-        <table class="w-full text-sm">
-          <thead class="bg-slate-50 text-left text-xs text-slate-500 uppercase tracking-wider">
-            <tr><th class="px-5 py-3">Name</th><th class="px-5 py-3">Tariff code</th><th class="px-5 py-3">Treatment</th><th class="px-5 py-3">Default dose (kGy)</th><th class="px-5 py-3">Notes</th><th></th></tr>
-          </thead>
-          <tbody class="divide-y divide-slate-100">
-            <tr v-for="(c,i) in state.commodities" :key="c.id">
-              <td class="px-5 py-2"><input v-model="c.name" class="w-full rounded border border-transparent hover:border-slate-200 focus:border-teal-500 px-2 py-1 text-sm focus-ring"/></td>
-              <td class="px-5 py-2 font-mono text-xs"><input v-model="c.tariffCode" class="w-full rounded border border-transparent hover:border-slate-200 focus:border-teal-500 px-2 py-1 font-mono text-xs focus-ring"/></td>
-              <td class="px-5 py-2">
-                <select v-model="c.treatment" class="rounded border border-transparent hover:border-slate-200 focus:border-teal-500 px-2 py-1 text-sm focus-ring bg-transparent">
-                  <option>Gamma</option><option>ETO</option><option>GMP</option><option>Gamma+ETO</option>
-                </select>
-                <TreatmentChip :treatment="c.treatment" class="ml-1"/>
-              </td>
-              <td class="px-5 py-2"><input type="number" v-model.number="c.defaultDoseKGy" step="0.5" class="w-24 rounded border border-transparent hover:border-slate-200 focus:border-teal-500 px-2 py-1 text-sm focus-ring"/></td>
-              <td class="px-5 py-2 text-slate-600"><input v-model="c.notes" class="w-full rounded border border-transparent hover:border-slate-200 focus:border-teal-500 px-2 py-1 text-sm focus-ring"/></td>
-              <td class="px-5 py-2"><button @click="removeRow('commodities', i)" class="p-1 rounded hover:bg-red-50 text-slate-400 hover:text-red-600"><Icon name="trash-2" :size="14"/></button></td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
+      <section class="bg-white border-t border-b border-slate-200">
+        <div class="overflow-x-auto">
+          <table class="w-full text-base min-w-[860px]">
+            <caption class="sr-only">Commodities</caption>
+            <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-medium">Name</th>
+                <th scope="col" class="px-4 py-3 font-medium">Tariff code</th>
+                <th scope="col" class="px-4 py-3 font-medium">Treatment</th>
+                <th scope="col" class="px-4 py-3 font-medium text-right">Default dose</th>
+                <th scope="col" class="px-4 py-3 font-medium">Notes</th>
+                <th scope="col" class="px-4 py-3 text-right font-medium"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="filteredCommodities.length === 0">
+                <td colspan="6" class="px-4 py-12 text-center text-sm text-slate-500">
+                  {{ commoditySearch ? 'No commodities match your search.' : 'No commodities yet. Add your first to start booking shipments.' }}
+                </td>
+              </tr>
+              <tr v-else v-for="c in filteredCommodities" :key="c.id" class="even:bg-slate-50/60">
+                <td class="px-4 py-3.5 text-base text-navy-900">{{ c.name || '—' }}</td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ c.tariffCode || '—' }}</td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-2">
+                    <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[c.treatment] && treatmentStyles[c.treatment].dot]" aria-hidden="true"></span>
+                    <span>{{ treatmentLabels[c.treatment] || c.treatment }}</span>
+                  </span>
+                </td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ c.defaultDoseKGy }} kGy</td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 truncate max-w-[18rem]" :title="c.notes">{{ c.notes || '—' }}</td>
+                <td class="px-4 py-3.5 text-right whitespace-nowrap">
+                  <button type="button" @click="openEdit('commodity', c)" aria-label="Edit commodity"
+                          class="p-1.5 rounded-md text-slate-500 hover:text-navy-900 hover:bg-slate-100 focus-ring">
+                    <Icon name="pencil" :size="16"/>
+                  </button>
+                  <button type="button" @click="confirmDelete('commodity', c)" aria-label="Delete commodity"
+                          class="ml-1 p-1.5 rounded-md text-slate-500 hover:text-red-600 hover:bg-red-50 focus-ring">
+                    <Icon name="trash-2" :size="16"/>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
     </div>
 
     <!-- Consignors / Consignees (shared renderer) -->
@@ -5184,6 +5299,70 @@ const SettingsPage = {
 
     <!-- Site (admin-only): site-wide settings, e.g. maintenance banner -->
     <SiteSettingsPage v-if="tab==='site' && isAdmin"/>
+
+    <!-- Right-side edit drawer (shared across Commodities / Consignors / Consignees) -->
+    <transition name="fade">
+      <div v-if="drawer.open" class="fixed inset-0 z-50" role="dialog" aria-modal="true" :aria-label="drawerTitle">
+        <div class="absolute inset-0 bg-slate-900/40" @click="cancelDrawer"></div>
+        <div class="absolute right-0 top-0 bottom-0 w-full max-w-md bg-white shadow-xl flex flex-col" @keydown.escape="cancelDrawer">
+          <header class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+            <h2 class="text-lg font-semibold text-navy-900">{{ drawerTitle }}</h2>
+            <button type="button" @click="cancelDrawer" aria-label="Close" class="p-1.5 rounded hover:bg-slate-100 text-slate-500 focus-ring">
+              <Icon name="x" :size="18"/>
+            </button>
+          </header>
+          <div class="flex-1 overflow-y-auto p-6 space-y-5">
+            <div v-for="f in drawerFields" :key="f.key">
+              <label :for="'drw-'+f.key" class="block text-sm font-medium text-slate-700 mb-1.5">
+                {{ f.label }} <span v-if="f.required" class="text-red-500" aria-hidden="true">*</span>
+              </label>
+              <input v-if="f.type === 'text' || f.type === 'tel' || f.type === 'email'"
+                     :id="'drw-'+f.key" :type="f.type" v-model="drawer.working[f.key]"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <input v-else-if="f.type === 'number'"
+                     :id="'drw-'+f.key" type="number" v-model.number="drawer.working[f.key]" :step="f.step"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <select v-else-if="f.type === 'select'"
+                      :id="'drw-'+f.key" v-model="drawer.working[f.key]"
+                      class="w-full h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+                <option v-for="o in f.options" :key="o" :value="o">{{ o }}</option>
+              </select>
+              <textarea v-else-if="f.type === 'textarea'"
+                        :id="'drw-'+f.key" v-model="drawer.working[f.key]" rows="3"
+                        class="w-full p-3 rounded-md border border-slate-300 text-base focus-ring"></textarea>
+              <p v-if="f.help" class="text-xs text-slate-500 mt-1">{{ f.help }}</p>
+            </div>
+          </div>
+          <footer class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+            <button type="button" @click="cancelDrawer" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+            <Btn icon="save" @click="saveDrawer">{{ drawer.mode === 'add' ? 'Add' : 'Save changes' }}</Btn>
+          </footer>
+        </div>
+      </div>
+    </transition>
+
+    <!-- Delete confirmation -->
+    <transition name="fade">
+      <div v-if="del.open" class="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true" aria-label="Confirm removal">
+        <div class="absolute inset-0 bg-slate-900/40" @click="cancelDelete"></div>
+        <div class="relative bg-white border border-slate-200 rounded-md shadow-xl w-full max-w-md" @keydown.escape="cancelDelete">
+          <header class="px-6 py-4 border-b border-slate-200">
+            <h2 class="text-base font-semibold text-navy-900">Remove {{ del.kind }}?</h2>
+          </header>
+          <div class="px-6 py-5 text-sm text-slate-700 space-y-2">
+            <p><span class="font-medium text-navy-900">{{ del.row && del.row.name }}</span> will be removed from your shared list.</p>
+            <p class="text-slate-500">Past orders that reference this entry are unchanged.</p>
+          </div>
+          <footer class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3">
+            <button type="button" @click="cancelDelete" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+            <button type="button" @click="executeDelete"
+                    class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md bg-red-600 text-white text-sm font-medium hover:bg-red-700 focus-ring">
+              <Icon name="trash-2" :size="16" aria-hidden="true"/> Remove
+            </button>
+          </footer>
+        </div>
+      </div>
+    </transition>
   </div>`
 };
 
