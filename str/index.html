@@ -4283,7 +4283,7 @@ const OrdersPage = {
 const OrderDetailPage = {
   components:{ Icon, StatusBadge, MessagesPanel },
   data(){ return {
-    tabs: ['overview','conversation','attachments'],
+    tabs: ['overview','conversation'],
     attSearch: '',
     attSort: { by:'uploaded', dir:'desc' },
     attPage: 1,
@@ -4307,8 +4307,9 @@ const OrderDetailPage = {
     canEdit(){ return this.order && !['Completed','Cancelled'].includes(this.order.status); },
     currentTab(){
       let t = this.$route.query.tab;
-      // Backward-compat: old deep-links to ?tab=messages or ?tab=activity now land on the merged Conversation tab.
+      // Backward-compat: old ?tab=messages and ?tab=activity → Conversation; ?tab=attachments → Overview (attachments now folded into Overview).
       if (t === 'messages' || t === 'activity') t = 'conversation';
+      if (t === 'attachments') t = 'overview';
       return this.tabs.includes(t) ? t : 'overview';
     },
     messageCount(){ return this.order ? (state.messages[this.order.id] || []).length : 0; },
@@ -4398,7 +4399,7 @@ const OrderDetailPage = {
       this.$router.replace({ query: q });
     },
     tabLabel(t){
-      return ({ overview:'Overview', conversation:'Conversation', attachments:'Attachments' })[t] || t;
+      return ({ overview:'Overview', conversation:'Conversation' })[t] || t;
     },
     setAttSort(by){
       if (this.attSort.by === by) this.attSort.dir = this.attSort.dir === 'asc' ? 'desc' : 'asc';
@@ -4492,7 +4493,6 @@ const OrderDetailPage = {
                            currentTab === t ? 'border-teal-600 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
             {{ tabLabel(t) }}
             <span v-if="t === 'conversation' && messageCount" class="ml-1.5 inline-flex items-center justify-center min-w-[1.5rem] px-1.5 h-5 text-xs font-medium rounded-full bg-slate-100 text-slate-700">{{ messageCount }}</span>
-            <span v-if="t === 'attachments' && attachmentCount" class="ml-1.5 inline-flex items-center justify-center min-w-[1.5rem] px-1.5 h-5 text-xs font-medium rounded-full bg-slate-100 text-slate-700">{{ attachmentCount }}</span>
           </button>
         </div>
       </div>
@@ -4555,65 +4555,19 @@ const OrderDetailPage = {
           </dl>
         </section>
 
-      </div>
-
-      <!-- Conversation pane: messages primary + activity rail (architect B-prime, 60/40 on lg+) -->
-      <div role="tabpanel" id="panel-conversation" aria-labelledby="tab-conversation" v-show="currentTab === 'conversation'">
-        <!-- Below lg: activity timeline as <details> collapsed above thread -->
-        <details class="lg:hidden mb-4 bg-white border border-slate-200 rounded-md group">
-          <summary class="px-5 py-3 text-sm font-medium text-navy-900 cursor-pointer flex items-center justify-between focus-ring list-none">
-            <span class="inline-flex items-center gap-2">
-              <Icon name="clock" :size="14" cls="text-slate-500"/>
-              Activity timeline ({{ timeline.length }} events)
+        <!-- Attachments — folded into Overview as a full-width section. Sortable table + progressive search/pagination preserved. -->
+        <section class="bg-white border border-slate-200 rounded-md">
+          <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3 flex-wrap">
+            <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
+              <Icon name="paperclip" :size="14" cls="text-slate-500"/> Attachments
+              <span class="text-xs text-slate-500 font-normal">({{ attachments.length }})</span>
             </span>
-            <Icon name="chevron-down" :size="14" cls="text-slate-400 group-open:rotate-180 transition-transform"/>
-          </summary>
-          <div class="px-5 pb-5 pt-2 border-t border-slate-200">
-            <ol>
-              <li v-for="(e, i) in timeline" :key="i" class="relative pl-7" :class="i < timeline.length - 1 ? 'pb-4' : ''">
-                <span v-if="i < timeline.length - 1" class="absolute left-[7px] top-3 bottom-0 w-px bg-slate-200" aria-hidden="true"></span>
-                <span :class="['absolute left-1 top-1.5 h-3 w-3 rounded-full ring-4 ring-white', dotClass(e)]" aria-hidden="true"></span>
-                <div class="text-sm text-navy-900">{{ e.label }}</div>
-                <div class="text-xs text-slate-500 mt-0.5">{{ e.ts.replace('T', ' &middot; ') }}</div>
-              </li>
-            </ol>
-          </div>
-        </details>
-
-        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          <section class="lg:col-span-3 bg-white border border-slate-200 rounded-md overflow-hidden">
-            <MessagesPanel :order-id="order.id" :as-admin="false"/>
-          </section>
-          <aside class="hidden lg:block lg:col-span-2">
-            <section class="bg-white border border-slate-200 rounded-md">
-              <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-                <Icon name="clock" :size="14" cls="text-slate-500"/> Activity timeline
-              </header>
-              <ol class="p-5">
-                <li v-for="(e, i) in timeline" :key="i" class="relative pl-7" :class="i < timeline.length - 1 ? 'pb-5' : ''">
-                  <span v-if="i < timeline.length - 1" class="absolute left-[7px] top-3 bottom-0 w-px bg-slate-200" aria-hidden="true"></span>
-                  <span :class="['absolute left-1 top-1.5 h-3 w-3 rounded-full ring-4 ring-white', dotClass(e)]" aria-hidden="true"></span>
-                  <div class="text-sm text-navy-900">{{ e.label }}</div>
-                  <div class="text-xs text-slate-500 mt-0.5">{{ e.ts.replace('T', ' &middot; ') }}</div>
-                </li>
-              </ol>
-            </section>
-          </aside>
-        </div>
-      </div>
-
-      <!-- Attachments pane -->
-      <div role="tabpanel" id="panel-attachments" aria-labelledby="tab-attachments" v-show="currentTab === 'attachments'" class="space-y-4">
-        <!-- Search appears once thread length crosses 5 (architect: progressive control disclosure, not structure) -->
-        <div v-if="attachments.length >= 6" class="flex justify-end">
-          <div class="relative w-full sm:w-72">
-            <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
-            <input v-model="attSearch" placeholder="Search files&hellip;" aria-label="Search attachments"
-                   class="pl-9 pr-3 h-11 w-full rounded-md border border-slate-300 text-base focus-ring"/>
-          </div>
-        </div>
-
-        <section class="bg-white border-t border-b border-slate-200">
+            <div v-if="attachments.length >= 6" class="relative w-full sm:w-64">
+              <Icon name="search" :size="14" cls="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"/>
+              <input v-model="attSearch" placeholder="Search files&hellip;" aria-label="Search attachments"
+                     class="pl-8 pr-3 h-9 w-full rounded-md border border-slate-300 text-sm focus-ring"/>
+            </div>
+          </header>
           <div class="overflow-x-auto">
             <table class="w-full text-base min-w-[820px]">
               <caption class="sr-only">Order attachments</caption>
@@ -4661,30 +4615,73 @@ const OrderDetailPage = {
               </tbody>
             </table>
           </div>
+          <nav v-if="sortedAttachments.length > attPageSize" aria-label="Attachments pagination" class="px-5 py-3 border-t border-slate-200 flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
+            <div class="text-slate-600">Showing {{ attRangeStart }}&ndash;{{ attRangeEnd }} of {{ sortedAttachments.length }}</div>
+            <div class="flex items-center gap-3 flex-wrap">
+              <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
+                Rows per page
+                <select v-model.number="attPageSize" class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+                  <option :value="25">25</option>
+                  <option :value="50">50</option>
+                  <option :value="100">100</option>
+                </select>
+              </label>
+              <div class="flex items-center gap-2">
+                <button type="button" @click="attPrevPage" :disabled="attEffectivePage <= 1" :aria-disabled="attEffectivePage <= 1" aria-label="Previous page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Prev</button>
+                <span class="text-slate-700 px-2 tabular-nums">Page {{ attEffectivePage }} of {{ attTotalPages }}</span>
+                <button type="button" @click="attNextPage" :disabled="attEffectivePage >= attTotalPages" :aria-disabled="attEffectivePage >= attTotalPages" aria-label="Next page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Next</button>
+              </div>
+            </div>
+          </nav>
         </section>
 
-        <!-- Pagination strip — only when attachments exceed page size (architect: appears at 26+) -->
-        <nav v-if="sortedAttachments.length > attPageSize" aria-label="Attachments pagination" class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
-          <div class="text-slate-600">Showing {{ attRangeStart }}&ndash;{{ attRangeEnd }} of {{ sortedAttachments.length }}</div>
-          <div class="flex items-center gap-3 flex-wrap">
-            <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
-              Rows per page
-              <select v-model.number="attPageSize" class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
-                <option :value="25">25</option>
-                <option :value="50">50</option>
-                <option :value="100">100</option>
-              </select>
-            </label>
-            <div class="flex items-center gap-2">
-              <button type="button" @click="attPrevPage" :disabled="attEffectivePage <= 1" :aria-disabled="attEffectivePage <= 1" aria-label="Previous page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Prev</button>
-              <span class="text-slate-700 px-2 tabular-nums">Page {{ attEffectivePage }} of {{ attTotalPages }}</span>
-              <button type="button" @click="attNextPage" :disabled="attEffectivePage >= attTotalPages" :aria-disabled="attEffectivePage >= attTotalPages" aria-label="Next page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Next</button>
-            </div>
-          </div>
-        </nav>
       </div>
 
-      <!-- Activity pane (Status timeline) -->
+      <!-- Conversation pane: messages primary + activity rail (architect B-prime, 60/40 on lg+) -->
+      <div role="tabpanel" id="panel-conversation" aria-labelledby="tab-conversation" v-show="currentTab === 'conversation'">
+        <!-- Below lg: activity timeline as <details> collapsed above thread -->
+        <details class="lg:hidden mb-4 bg-white border border-slate-200 rounded-md group">
+          <summary class="px-5 py-3 text-sm font-medium text-navy-900 cursor-pointer flex items-center justify-between focus-ring list-none">
+            <span class="inline-flex items-center gap-2">
+              <Icon name="clock" :size="14" cls="text-slate-500"/>
+              Activity timeline ({{ timeline.length }} events)
+            </span>
+            <Icon name="chevron-down" :size="14" cls="text-slate-400 group-open:rotate-180 transition-transform"/>
+          </summary>
+          <div class="px-5 pb-5 pt-2 border-t border-slate-200">
+            <ol>
+              <li v-for="(e, i) in timeline" :key="i" class="relative pl-7" :class="i < timeline.length - 1 ? 'pb-4' : ''">
+                <span v-if="i < timeline.length - 1" class="absolute left-[7px] top-3 bottom-0 w-px bg-slate-200" aria-hidden="true"></span>
+                <span :class="['absolute left-1 top-1.5 h-3 w-3 rounded-full ring-4 ring-white', dotClass(e)]" aria-hidden="true"></span>
+                <div class="text-sm text-navy-900">{{ e.label }}</div>
+                <div class="text-xs text-slate-500 mt-0.5">{{ e.ts.replace('T', ' &middot; ') }}</div>
+              </li>
+            </ol>
+          </div>
+        </details>
+
+        <div class="grid grid-cols-1 lg:grid-cols-5 gap-6">
+          <section class="lg:col-span-3 bg-white border border-slate-200 rounded-md overflow-hidden">
+            <MessagesPanel :order-id="order.id" :as-admin="false"/>
+          </section>
+          <aside class="hidden lg:block lg:col-span-2">
+            <section class="bg-white border border-slate-200 rounded-md">
+              <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+                <Icon name="clock" :size="14" cls="text-slate-500"/> Activity timeline
+              </header>
+              <ol class="p-5">
+                <li v-for="(e, i) in timeline" :key="i" class="relative pl-7" :class="i < timeline.length - 1 ? 'pb-5' : ''">
+                  <span v-if="i < timeline.length - 1" class="absolute left-[7px] top-3 bottom-0 w-px bg-slate-200" aria-hidden="true"></span>
+                  <span :class="['absolute left-1 top-1.5 h-3 w-3 rounded-full ring-4 ring-white', dotClass(e)]" aria-hidden="true"></span>
+                  <div class="text-sm text-navy-900">{{ e.label }}</div>
+                  <div class="text-xs text-slate-500 mt-0.5">{{ e.ts.replace('T', ' &middot; ') }}</div>
+                </li>
+              </ol>
+            </section>
+          </aside>
+        </div>
+      </div>
+
     </template>
   </div>`
 };
