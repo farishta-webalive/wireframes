@@ -1250,23 +1250,19 @@ const FacilityChip = {
   template:`
     <div v-if="fac" class="relative inline-block" @keydown.escape="open = false">
       <!-- Single-facility: plain text, nothing to click, nothing to fear -->
-      <div v-if="!multi" class="inline-flex items-center gap-2 text-sm text-white/85 px-2 py-1.5">
-        <Icon name="building-2" :size="16" cls="text-white/60"/>
-        <span class="text-white/60 text-xs uppercase tracking-wide hidden md:inline">Viewing</span>
-        <span class="font-medium text-white">{{ fac.name }}, {{ fac.state }}</span>
+      <div v-if="!multi" class="inline-flex items-center gap-2 text-sm text-white px-2 py-1.5">
+        <span class="font-medium">{{ fac.name }}, {{ fac.state }}</span>
       </div>
-      <!-- Multi-facility: ledger-flat trigger button + dropdown -->
+      <!-- Multi-facility: quiet navy trigger blends into bar (Xero org-switcher pattern) -->
       <template v-else>
         <button type="button"
                 @click.stop="toggle"
                 :aria-expanded="open"
                 aria-haspopup="menu"
                 aria-label="Switch site"
-                class="inline-flex items-center gap-2 px-3 py-1.5 rounded-md text-sm text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 focus-ring whitespace-nowrap">
-          <Icon name="building-2" :size="16" cls="text-slate-500"/>
-          <span class="text-slate-500 text-xs uppercase tracking-wide hidden md:inline">Viewing</span>
-          <span class="font-medium text-slate-900">{{ fac.name }}, {{ fac.state }}</span>
-          <Icon name="chevron-down" :size="16" cls="text-slate-500"/>
+                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-md text-sm text-white hover:bg-navy-800 focus-ring whitespace-nowrap">
+          <span class="font-medium">{{ fac.name }}, {{ fac.state }}</span>
+          <Icon name="chevron-down" :size="14" cls="text-white/70"/>
         </button>
         <div v-if="open"
              role="menu"
@@ -1383,39 +1379,29 @@ const Sidebar = {
 
 const TopNav = {
   template:`
-    <header class="h-14 bg-navy-900 text-white flex items-center px-3 sm:px-4 gap-3 sm:gap-4 shrink-0">
+    <header class="h-12 bg-navy-900 text-white flex items-center px-3 sm:px-4 gap-2 sm:gap-3 shrink-0">
       <button @click="toggleDrawer" class="md:hidden p-2 rounded hover:bg-navy-800 focus-ring" aria-label="Open menu">
         <Icon name="menu" :size="20"/>
       </button>
-      <div class="flex items-center gap-2 min-w-0">
-        <img src="assets/steritech-logo-white.png" alt="Steritech" class="h-7 w-auto shrink-0" draggable="false"/>
+      <div class="flex items-center min-w-0">
+        <img src="assets/steritech-logo-white.png" alt="Steritech" class="h-6 w-auto shrink-0" draggable="false"/>
       </div>
       <div class="flex-1"></div>
-      <button class="hidden sm:inline-flex p-2 rounded hover:bg-navy-800 relative focus-ring">
-        <Icon name="bell" :size="18" />
-        <span class="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-teal-400"></span>
-      </button>
-      <button class="hidden sm:inline-flex p-2 rounded hover:bg-navy-800 focus-ring"><Icon name="circle-help" :size="18" /></button>
-      <!-- Demo Role toggle (Customer vs Admin) -->
-      <div class="hidden md:flex items-center gap-1 ml-1 bg-navy-800 rounded-full p-0.5 text-[11px]" title="Mock user.role">
-        <button @click="setRole('customer')" :class="['px-2.5 py-1 rounded-full transition', state.role==='customer' ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Customer</button>
-        <button @click="setRole('admin')"    :class="['px-2.5 py-1 rounded-full transition', state.role==='admin'    ? 'bg-amber-500 text-white' : 'text-navy-100/80 hover:text-white']">Admin</button>
-      </div>
-      <!-- Demo Role toggle (mock facility_ids) -->
-      <div class="hidden md:flex items-center gap-1 ml-1 mr-1 bg-navy-800 rounded-full p-0.5 text-[11px]" title="Mock user.facility_ids">
-        <button @click="setMode('single')" :class="['px-2.5 py-1 rounded-full transition', mode==='single' ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Single</button>
-        <button @click="setMode('multi')"  :class="['px-2.5 py-1 rounded-full transition', mode==='multi'  ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Multi</button>
-        <button @click="setMode('zero')"   :class="['px-2.5 py-1 rounded-full transition', mode==='zero'   ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Zero</button>
-      </div>
-      <FacilityChip />
-      <div class="hidden sm:block w-px h-6 bg-navy-700"></div>
-      <div class="flex items-center gap-2 pl-1">
-        <div class="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center text-xs font-semibold">{{ initials }}</div>
-        <div class="text-xs leading-tight hidden lg:block">
-          <div class="font-medium">{{ state.profile.contact }}</div>
+      <!-- Demo toggles: only shown when ?dev=1 in URL. Hidden by default to keep customer-facing bar calm. -->
+      <template v-if="$route.query.dev">
+        <div class="hidden md:flex items-center gap-1 bg-navy-800 rounded-full p-0.5 text-[11px]" title="Mock user.role">
+          <button @click="setRole('customer')" :class="['px-2.5 py-1 rounded-full transition', state.role==='customer' ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Customer</button>
+          <button @click="setRole('admin')"    :class="['px-2.5 py-1 rounded-full transition', state.role==='admin'    ? 'bg-amber-500 text-white' : 'text-navy-100/80 hover:text-white']">Admin</button>
         </div>
-        <button @click="logout" class="p-2 rounded hover:bg-navy-800 focus-ring" title="Sign out"><Icon name="log-out" :size="16" /></button>
-      </div>
+        <div class="hidden md:flex items-center gap-1 bg-navy-800 rounded-full p-0.5 text-[11px]" title="Mock user.facility_ids">
+          <button @click="setMode('single')" :class="['px-2.5 py-1 rounded-full transition', mode==='single' ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Single</button>
+          <button @click="setMode('multi')"  :class="['px-2.5 py-1 rounded-full transition', mode==='multi'  ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Multi</button>
+          <button @click="setMode('zero')"   :class="['px-2.5 py-1 rounded-full transition', mode==='zero'   ? 'bg-teal-500 text-white' : 'text-navy-100/80 hover:text-white']">Zero</button>
+        </div>
+      </template>
+      <FacilityChip />
+      <div class="w-8 h-8 rounded-full bg-teal-500 text-white flex items-center justify-center text-xs font-semibold">{{ initials }}</div>
+      <button @click="logout" class="p-2 rounded hover:bg-navy-800 focus-ring" title="Sign out" aria-label="Sign out"><Icon name="log-out" :size="16" /></button>
     </header>`,
   components:{ Icon, FacilityChip },
   computed:{
