@@ -1515,7 +1515,15 @@ const DemoPanel = {
       if (ids.length === 0) return 'zero';
       if (ids.length === 1) return 'single';
       return 'multi';
-    }
+    },
+    bannerSeverity:{
+      get(){ return state.maintenanceBanner.enabled ? state.maintenanceBanner.severity : 'off'; },
+      set(v){
+        if (v === 'off') state.maintenanceBanner.enabled = false;
+        else { state.maintenanceBanner.enabled = true; state.maintenanceBanner.severity = v; }
+      }
+    },
+    landingPath(){ return state.role === 'admin' ? '/admin' : '/dashboard'; }
   },
   methods:{
     toggle(e){ if (e) e.stopPropagation(); this.open = !this.open; },
@@ -1539,6 +1547,21 @@ const DemoPanel = {
       }
       if (m === 'zero') this.$router.push('/onboarding/incomplete');
       else if (this.$route.path === '/onboarding/incomplete') this.$router.push('/dashboard');
+    },
+    goLanding(){
+      this.$router.push(this.landingPath);
+      this.open = false;
+    },
+    resetData(){
+      state.orders.splice(0, state.orders.length, ...seedOrders, ...generateMockOrders(50));
+      state.messages = JSON.parse(JSON.stringify(seedMessages));
+      state.maintenanceBanner = { enabled:false, message:'Scheduled maintenance is in progress. Some features may be temporarily unavailable.', severity:'info' };
+      showToast('Demo data reset to defaults.', 'success');
+    },
+    signOut(){
+      state.authed = false;
+      this.open = false;
+      this.$router.push('/login');
     }
   },
   template:`
@@ -1549,8 +1572,8 @@ const DemoPanel = {
       <Icon name="settings-2" :size="14" aria-hidden="true"/> Demo
     </button>
     <div v-else role="dialog" aria-label="Demo controls"
-         class="w-72 bg-white border border-amber-300 rounded-md shadow-xl overflow-hidden">
-      <div class="px-4 py-2.5 bg-amber-500 text-white flex items-center justify-between">
+         class="w-80 max-h-[85vh] flex flex-col bg-white border border-amber-300 rounded-md shadow-xl overflow-hidden">
+      <div class="px-4 py-2.5 bg-amber-500 text-white flex items-center justify-between shrink-0">
         <div class="inline-flex items-center gap-2 text-sm font-semibold">
           <Icon name="settings-2" :size="14" aria-hidden="true"/> Demo controls
         </div>
@@ -1559,8 +1582,9 @@ const DemoPanel = {
           <Icon name="x" :size="14"/>
         </button>
       </div>
-      <div class="p-4 space-y-4">
-        <p class="text-xs text-slate-500">Wireframe-only. Switch role or facility load-out to demo other states.</p>
+      <div class="p-4 space-y-5 overflow-y-auto">
+        <p class="text-xs text-slate-500">Wireframe-only. Switch state to demo other scenarios.</p>
+
         <div>
           <div class="text-xs font-medium text-slate-700 mb-1.5">Role</div>
           <div class="inline-flex w-full bg-slate-100 rounded-full p-0.5 text-xs">
@@ -1568,6 +1592,7 @@ const DemoPanel = {
             <button @click="setRole('admin')" :class="['flex-1 px-3 py-1.5 rounded-full transition', state.role==='admin' ? 'bg-amber-600 text-white' : 'text-slate-700 hover:text-navy-900']">Admin</button>
           </div>
         </div>
+
         <div>
           <div class="text-xs font-medium text-slate-700 mb-1.5">Facility load-out</div>
           <div class="inline-flex w-full bg-slate-100 rounded-full p-0.5 text-xs">
@@ -1575,6 +1600,32 @@ const DemoPanel = {
             <button @click="setMode('multi')" :class="['flex-1 px-3 py-1.5 rounded-full transition', mode==='multi' ? 'bg-teal-600 text-white' : 'text-slate-700 hover:text-navy-900']">Multi</button>
             <button @click="setMode('zero')" :class="['flex-1 px-3 py-1.5 rounded-full transition', mode==='zero' ? 'bg-teal-600 text-white' : 'text-slate-700 hover:text-navy-900']">Zero</button>
           </div>
+        </div>
+
+        <div>
+          <label for="demo-banner" class="block text-xs font-medium text-slate-700 mb-1.5">Maintenance banner</label>
+          <select id="demo-banner" v-model="bannerSeverity"
+                  class="h-10 w-full pl-3 rounded-md border border-slate-300 text-sm focus-ring bg-white">
+            <option value="off">Off</option>
+            <option value="info">Info (blue)</option>
+            <option value="warning">Warning (amber)</option>
+            <option value="critical">Critical (red)</option>
+          </select>
+        </div>
+
+        <div class="border-t border-slate-200 pt-4 space-y-2">
+          <button type="button" @click="goLanding"
+                  class="w-full inline-flex items-center justify-center gap-2 h-10 rounded-md border border-slate-300 text-sm text-navy-900 hover:bg-slate-50 focus-ring">
+            <Icon name="layout-dashboard" :size="14" aria-hidden="true"/> Go to {{ state.role === 'admin' ? 'Admin Console' : 'Dashboard' }}
+          </button>
+          <button type="button" @click="resetData"
+                  class="w-full inline-flex items-center justify-center gap-2 h-10 rounded-md border border-slate-300 text-sm text-navy-900 hover:bg-slate-50 focus-ring">
+            <Icon name="refresh-ccw" :size="14" aria-hidden="true"/> Reset demo data
+          </button>
+          <button type="button" @click="signOut"
+                  class="w-full inline-flex items-center justify-center gap-2 h-10 rounded-md border border-red-300 text-sm text-red-700 hover:bg-red-50 focus-ring">
+            <Icon name="log-out" :size="14" aria-hidden="true"/> Sign out
+          </button>
         </div>
       </div>
     </div>
