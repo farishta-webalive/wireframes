@@ -6011,7 +6011,6 @@ const OnboardCustomerPage = {
         addrPostcode:'',
       },
       access,
-      previewOpen: true,
       submitAttempted: false,
     };
   },
@@ -6032,46 +6031,6 @@ const OnboardCustomerPage = {
     /* List of facilities the customer will have access to (any service ticked in their row) */
     grantedFacilities(){
       return FACILITIES.filter(f => TREATMENT_SERVICES.some(s => this.access[f.code][s]));
-    },
-    /* Forms preview rows — re-uses form-picker grouping. Shared forms collapse to one row with combined badges. */
-    previewRows(){
-      const granted = new Set(this.grantedFacilities.map(f => f.code));
-      const grantedTreatments = {};
-      this.grantedFacilities.forEach(f => {
-        grantedTreatments[f.code] = TREATMENT_SERVICES.filter(s => this.access[f.code][s]);
-      });
-      const rows = [];
-      const sharedSeen = new Set();
-      for (const fm of FORM_CATALOG) {
-        if (!granted.has(fm.facility)) continue;
-        // Treatment gating: form's treatment must be allowed for this facility
-        // Special-case 'Gamma+ETO' — needs either Gamma or ETO at the facility
-        const allowedTreats = grantedTreatments[fm.facility] || [];
-        const treats = fm.treatment === 'Gamma+ETO' ? ['Gamma','ETO'] : [fm.treatment];
-        const ok = treats.some(t => allowedTreats.includes(t));
-        if (!ok) continue;
-
-        const sharedWith = fm.shared_with || [];
-        if (sharedWith.length) {
-          // Dedup shared forms — collapse to one row with badges from intersection of shared_with & granted
-          const key = `${fm.code}::${fm.key}`;
-          if (sharedSeen.has(key)) continue;
-          sharedSeen.add(key);
-          const badges = sharedWith.filter(c => granted.has(c));
-          rows.push({ code: fm.code, name: fm.name, treatment: fm.treatment, badges, isShared:true, key });
-        } else {
-          rows.push({ code: fm.code, name: fm.name, treatment: fm.treatment, badges:[fm.facility], isShared:false, key:`${fm.facility}::${fm.code}` });
-        }
-      }
-      // Group by treatment for the picker layout
-      const groups = {};
-      rows.forEach(r => {
-        const t = r.treatment;
-        if (!groups[t]) groups[t] = [];
-        groups[t].push(r);
-      });
-      const order = ['Gamma','ETO','GMP','Gamma+ETO'];
-      return order.filter(t => groups[t]).map(t => ({ treatment:t, rows: groups[t] }));
     },
     detailsValid(){
       const f = this.f;
@@ -6237,44 +6196,6 @@ const OnboardCustomerPage = {
               </tr>
             </tbody>
           </table>
-        </div>
-      </section>
-
-      <!-- Forms preview card (kept per architect; chrome quieted to grouped lists, not 3-col card grid) -->
-      <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
-          <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
-            <Icon name="file-text" :size="14" cls="text-slate-500"/> Forms preview
-          </span>
-          <button type="button" @click="previewOpen = !previewOpen"
-                  class="text-sm text-teal-600 hover:underline focus-ring rounded inline-flex items-center gap-1">
-            {{ previewOpen ? 'Hide' : 'Show' }}
-            <Icon :name="previewOpen ? 'chevron-up' : 'chevron-down'" :size="14"/>
-          </button>
-        </header>
-        <p class="px-5 pt-4 text-sm text-slate-500">
-          <span v-if="grantedFacilities.length === 0">Tick services above to preview which forms the customer will see.</span>
-          <span v-else>Customer will see <span class="font-medium text-navy-900">{{ previewRows.reduce((n,g) => n + g.rows.length, 0) }}</span> {{ previewRows.reduce((n,g) => n + g.rows.length, 0) === 1 ? 'form' : 'forms' }} on Submit Request.</span>
-        </p>
-        <div v-if="previewOpen" class="px-5 pb-5 pt-3">
-          <div v-if="previewRows.length === 0" class="text-sm text-slate-500 py-6 text-center">Tick at least one service above to see the form list.</div>
-          <div v-else class="space-y-5">
-            <div v-for="g in previewRows" :key="g.treatment">
-              <div class="text-sm text-slate-700 inline-flex items-center gap-1.5 mb-2">
-                <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[g.treatment] && treatmentStyles[g.treatment].dot]" aria-hidden="true"></span>
-                <span class="font-medium text-navy-900">{{ treatmentLabels[g.treatment] || g.treatment }}</span>
-                <span class="text-slate-400">&middot; {{ g.rows.length }} {{ g.rows.length === 1 ? 'form' : 'forms' }}</span>
-              </div>
-              <ul class="border-t border-slate-200">
-                <li v-for="r in g.rows" :key="r.key" class="py-2 border-b border-slate-100 last:border-b-0 text-sm text-slate-700">
-                  <span class="text-base text-navy-900">{{ r.name }}</span>
-                  <span class="text-slate-400 ml-2">({{ r.code }})</span>
-                  <span class="text-slate-500 ml-2">&middot; {{ r.badges.join(', ') }}</span>
-                  <span v-if="r.isShared && r.badges.length > 1" class="text-xs text-slate-400 ml-2">&middot; shared form</span>
-                </li>
-              </ul>
-            </div>
-          </div>
         </div>
       </section>
 
