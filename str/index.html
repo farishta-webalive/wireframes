@@ -3951,13 +3951,14 @@ const OrdersPage = {
     <!-- Table -->
     <section class="bg-white border-t border-b border-slate-200">
       <div class="overflow-x-auto">
-        <table class="w-full table-fixed text-base min-w-[1280px]">
+        <table class="w-full table-fixed text-base min-w-[1500px]">
           <caption class="sr-only">Treatment requests</caption>
           <colgroup>
             <col style="width:140px"/>
             <col style="width:110px"/>
             <col style="width:240px"/>
             <col style="width:200px"/>
+            <col style="width:220px"/>
             <col/>
             <col style="width:90px"/>
             <col style="width:90px"/>
@@ -3973,7 +3974,8 @@ const OrdersPage = {
               <th scope="col" class="px-4 py-3 font-medium">PO Number</th>
               <th scope="col" class="px-4 py-3 font-medium">Form</th>
               <th scope="col" class="px-4 py-3 font-medium">Treatment</th>
-              <th scope="col" class="px-4 py-3 font-medium">Consignor &rarr; Consignee</th>
+              <th scope="col" class="px-4 py-3 font-medium">Consignor</th>
+              <th scope="col" class="px-4 py-3 font-medium">Consignee</th>
               <th scope="col" class="px-4 py-3 font-medium text-right">Spaces</th>
               <th scope="col" class="px-4 py-3 font-medium text-right">Cheps</th>
               <th scope="col" class="px-4 py-3 font-medium">
@@ -3985,10 +3987,10 @@ const OrdersPage = {
           </thead>
           <tbody>
             <tr v-if="loading">
-              <td colspan="10" class="px-4 py-6 text-sm text-slate-500 text-center">Loading orders&hellip;</td>
+              <td colspan="11" class="px-4 py-6 text-sm text-slate-500 text-center">Loading orders&hellip;</td>
             </tr>
             <tr v-else-if="filtered.length === 0">
-              <td colspan="10" class="px-4 py-12 text-center text-slate-500">
+              <td colspan="11" class="px-4 py-12 text-center text-slate-500">
                 <Icon name="search-x" :size="28" cls="mx-auto mb-2 text-slate-300"/>
                 <div class="text-sm">No orders match the current filters.</div>
                 <div class="text-sm text-slate-400 mt-0.5">Try a different search or clear your filters.</div>
@@ -4006,11 +4008,8 @@ const OrdersPage = {
                   <span>{{ treatmentLabels[o.treatment] || o.treatment }}</span>
                 </div>
               </td>
-              <td class="px-4 py-3.5">
-                <div class="text-sm text-slate-700 truncate" :title="o.consignor + ' → ' + o.consignee">
-                  {{ o.consignor }} <span aria-hidden="true" class="text-slate-400">&rarr;</span> {{ o.consignee }}
-                </div>
-              </td>
+              <td class="px-4 py-3.5 text-sm text-slate-700 truncate" :title="o.consignor">{{ o.consignor }}</td>
+              <td class="px-4 py-3.5 text-sm text-slate-700 truncate" :title="o.consignee">{{ o.consignee }}</td>
               <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ o.spaces }}</td>
               <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ o.cheps }}</td>
               <td class="px-4 py-3.5 text-sm text-slate-600 whitespace-nowrap">{{ fmtDate(o.submitted) }}</td>
