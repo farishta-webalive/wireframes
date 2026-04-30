@@ -1099,12 +1099,7 @@ const MessagesPanel = {
     compact: { type:Boolean, default:false },   // tighter padding for embedded admin view
   },
   components:{ Icon },
-  data(){ return { draft: '', open: true }; },
-  computed:{
-    state(){ return state; },
-    thread(){ return state.messages[this.orderId] || []; },
-    canSend(){ return this.draft.trim().length > 0; },
-  },
+  data(){ return { draft: '' }; },
   methods:{
     fmtTs(ts){
       if (!ts) return '';
@@ -1158,74 +1153,51 @@ const MessagesPanel = {
       if (el) el.scrollTop = el.scrollHeight;
     });
   },
+  computed:{
+    state(){ return state; },
+    thread(){ return state.messages[this.orderId] || []; },
+    canSend(){ return this.draft.trim().length > 0; },
+    composerId(){ return 'msg-composer-' + this.orderId; }
+  },
   template:`
-  <section class="bg-white border border-slate-200 rounded-lg shadow-card">
-    <header class="px-6 py-3 border-b border-slate-100 flex items-center justify-between cursor-pointer select-none"
-            @click="open = !open">
-      <div class="flex items-center gap-2">
-        <Icon name="message-square" :size="14" cls="text-teal-600"/>
-        <span class="font-semibold text-sm text-navy-900">Messages</span>
-        <span v-if="thread.length" class="text-[11px] px-1.5 py-0.5 rounded bg-slate-100 text-slate-600 font-medium">{{ thread.length }}</span>
+  <div class="flex flex-col">
+    <div ref="scroll"
+         :class="['overflow-y-auto', compact ? 'max-h-72 px-4 py-3' : 'max-h-[480px] px-5 py-4']">
+      <div v-if="thread.length === 0" class="text-center text-sm text-slate-500 py-8">
+        No messages yet. {{ asAdmin ? 'Reply below to start the thread.' : 'Send a message to ask Steritech a question about this order.' }}
       </div>
-      <div class="flex items-center gap-3">
-        <span class="hidden sm:inline text-[11px] text-slate-400">{{ asAdmin ? 'Replies sync to Exsited' : 'Direct line to Steritech for this order' }}</span>
-        <Icon :name="open ? 'chevron-up' : 'chevron-down'" :size="14" cls="text-slate-400"/>
-      </div>
-    </header>
-    <div v-show="open">
-      <div ref="scroll"
-           :class="['overflow-y-auto bg-slate-50/40', compact ? 'max-h-72 px-4 py-3' : 'max-h-[420px] px-6 py-4']">
-        <div v-if="thread.length === 0" class="text-center text-xs text-slate-400 py-8">
-          No messages yet. {{ asAdmin ? 'Reply below to start the thread.' : 'Send a message to ask Steritech a question about this order.' }}
-        </div>
-        <ul v-else class="space-y-3">
-          <li v-for="m in thread" :key="m.id" class="flex gap-2.5"
-              :class="(asAdmin ? m.from === 'admin' : m.from === 'customer') ? 'justify-end' : 'justify-start'">
-            <!-- Avatar (other party) -->
-            <div v-if="!((asAdmin ? m.from === 'admin' : m.from === 'customer'))"
-                 :class="['w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-semibold',
-                          m.from === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-200 text-slate-700']">
-              {{ m.from === 'admin' ? 'ST' : (m.author||'?').split(' ').map(s=>s[0]).slice(0,2).join('') }}
-            </div>
-            <!-- Bubble -->
-            <div class="max-w-[78%]">
-              <div :class="['rounded-lg px-3 py-2 text-sm whitespace-pre-wrap break-words',
-                            (asAdmin ? m.from === 'admin' : m.from === 'customer')
-                              ? 'bg-teal-600 text-white rounded-br-sm'
-                              : (m.from === 'admin'
-                                  ? 'bg-amber-50 text-navy-900 border border-amber-100 rounded-bl-sm'
-                                  : 'bg-white text-navy-900 border border-slate-200 rounded-bl-sm')]">{{ m.body }}</div>
-              <div :class="['text-[10px] mt-1 px-1',
-                            (asAdmin ? m.from === 'admin' : m.from === 'customer') ? 'text-right text-slate-400' : 'text-slate-500']">
-                <span class="font-medium">{{ m.author }}</span>
-                <span class="text-slate-400"> · {{ fmtTs(m.ts) }}</span>
-              </div>
-            </div>
-            <!-- Avatar (self) -->
-            <div v-if="(asAdmin ? m.from === 'admin' : m.from === 'customer')"
-                 class="w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-[10px] font-semibold bg-teal-600 text-white">
-              {{ (m.author||'?').split(' ').map(s=>s[0]).slice(0,2).join('') }}
-            </div>
-          </li>
-        </ul>
-      </div>
-      <div class="px-4 py-3 border-t border-slate-100 bg-white rounded-b-lg">
-        <div class="flex items-end gap-2">
-          <textarea v-model="draft" rows="2" @keydown="onKey"
-                    :placeholder="asAdmin ? 'Reply to customer…' : 'Message Steritech about this order…'"
-                    class="flex-1 resize-none rounded-lg border border-slate-300 px-3 py-2 text-sm focus-ring placeholder:text-slate-400"></textarea>
-          <button type="button" @click="send" :disabled="!canSend"
-                  class="inline-flex items-center gap-1.5 rounded-lg bg-teal-500 hover:bg-teal-600 disabled:opacity-40 disabled:cursor-not-allowed text-white text-sm font-medium px-3.5 py-2 shrink-0 focus-ring">
-            <Icon name="send" :size="14"/> Send
-          </button>
-        </div>
-        <div class="text-[10px] text-slate-400 mt-1.5 px-0.5">
-          Plain text only. <span class="hidden sm:inline">Press <kbd class="px-1 py-0.5 rounded border border-slate-200 bg-slate-50 font-mono text-[10px]">⌘ Enter</kbd> to send.</span>
-          <span v-if="!asAdmin"> Visible to Steritech admins on this order.</span>
-        </div>
-      </div>
+      <ul v-else class="divide-y divide-slate-100">
+        <li v-for="m in thread" :key="m.id" class="py-4 first:pt-0 last:pb-0">
+          <div class="flex items-baseline gap-2 text-xs text-slate-500 flex-wrap">
+            <span class="font-medium text-navy-900 text-sm">{{ m.author }}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span>{{ m.from === 'admin' ? 'Steritech' : 'Customer' }}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span>{{ fmtTs(m.ts) }}</span>
+          </div>
+          <div class="mt-1.5 text-base text-slate-800 whitespace-pre-wrap leading-relaxed">{{ m.body }}</div>
+        </li>
+      </ul>
     </div>
-  </section>`
+    <div class="px-5 py-4 border-t border-slate-200 bg-white">
+      <label :for="composerId" class="block text-sm font-medium text-slate-800 mb-1.5">
+        {{ asAdmin ? 'Reply to customer' : 'Send a message to Steritech' }}
+      </label>
+      <div class="flex flex-col sm:flex-row sm:items-end gap-2">
+        <textarea v-model="draft" rows="2" @keydown="onKey" :id="composerId"
+                  :placeholder="asAdmin ? 'Type your reply&hellip;' : 'Type your message&hellip;'"
+                  class="flex-1 resize-none rounded-md border border-slate-300 p-3 text-base text-slate-900 placeholder:text-slate-400 focus-ring"></textarea>
+        <button type="button" @click="send" :disabled="!canSend"
+                class="inline-flex items-center justify-center gap-2 h-11 px-4 rounded-md bg-teal-600 text-white text-sm font-medium hover:bg-teal-700 disabled:opacity-40 disabled:cursor-not-allowed focus-ring">
+          <Icon name="send" :size="16" aria-hidden="true"/> Send
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 mt-1.5">
+        Cmd/Ctrl + Enter to send.
+        <span v-if="!asAdmin">Replies come back on this thread, usually within 1 business day.</span>
+      </p>
+    </div>
+  </div>`
 };
 
 const Btn = {
