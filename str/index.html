@@ -1866,36 +1866,34 @@ const LoginPage = {
     }
   },
   template:`
-  <div class="min-h-screen flex flex-col bg-slate-100 text-slate-800 text-base">
-    <main class="flex-1 w-full max-w-xl mx-auto px-5 sm:px-6 pt-8 sm:pt-14 pb-10 space-y-5">
-        <h1 class="sr-only">Steritech Customer Portal sign-in</h1>
+  <div class="min-h-screen bg-white text-slate-800 text-base flex flex-col lg:grid lg:grid-cols-2">
+    <!-- Form column (left on lg+, full-width on mobile) -->
+    <main class="flex-1 flex flex-col px-6 sm:px-10 py-8 lg:py-12">
+      <h1 class="sr-only">Steritech Customer Portal sign-in</h1>
 
-        <div class="flex flex-col items-center text-center pb-2">
-          <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-14 w-auto mb-3" draggable="false"/>
-          <div class="text-[17px] font-semibold text-navy-900 tracking-tight">Steritech Customer Portal</div>
-          <div class="text-sm text-slate-500 mt-0.5">Sign in to manage treatment requests &amp; orders</div>
-        </div>
+      <div class="lg:hidden flex items-center gap-3 mb-8">
+        <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-10 w-auto" draggable="false"/>
+        <div class="text-base font-semibold text-navy-900">Customer Portal</div>
+      </div>
 
-        <section class="bg-white border border-slate-200 rounded-md">
-          <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
-            <div class="flex items-center gap-2 text-navy-900">
-              <Icon name="lock" :size="18" cls="text-slate-500"/>
-              <h2 class="text-lg font-semibold">Sign in to your account</h2>
-            </div>
+      <div class="flex-1 flex flex-col justify-center">
+        <div class="w-full max-w-md mx-auto lg:mx-0">
+          <div class="mb-6">
+            <h2 class="text-xl font-semibold text-navy-900">Sign in to your account</h2>
             <p class="text-sm text-slate-600 mt-1">Use the email address provided when your account was set up.</p>
           </div>
-          <form @submit.prevent="submit" class="px-5 sm:px-7 py-6 space-y-5">
+
+          <form @submit.prevent="submit" class="space-y-5">
             <div>
               <label for="login-email" class="block text-sm font-medium text-slate-800 mb-1.5">Email address <span class="text-red-600" aria-hidden="true">*</span></label>
               <input id="login-email" v-model="email" type="email" required aria-required="true" autocomplete="username"
                      placeholder="name@company.com.au"
                      class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 placeholder:text-slate-400 focus-ring" />
-              <p class="mt-1 text-sm text-slate-500">Same email you use for invoices and order updates.</p>
             </div>
             <div>
               <div class="flex items-center justify-between mb-1.5">
                 <label for="login-password" class="text-sm font-medium text-slate-800">Password <span class="text-red-600" aria-hidden="true">*</span></label>
-                <a href="#" class="text-sm text-teal-600 hover:underline py-2 -my-2">Forgot your password?</a>
+                <a href="#" class="text-sm text-teal-600 hover:underline py-2 -my-2 focus-ring rounded">Forgot your password?</a>
               </div>
               <input id="login-password" v-model="password" type="password" required aria-required="true" autocomplete="current-password"
                      class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 focus-ring" />
@@ -1904,52 +1902,54 @@ const LoginPage = {
               <input type="checkbox" class="h-4 w-4 rounded border-slate-300"/> Remember this computer
             </label>
             <div v-if="err" role="alert" aria-live="polite" class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{{ err }}</div>
-            <div class="pt-1">
-              <Btn size="lg" :block="true">Sign in</Btn>
-            </div>
+            <Btn size="lg" :block="true">Sign in</Btn>
           </form>
-          <div class="px-5 sm:px-7 py-4 bg-slate-50 border-t border-slate-100 rounded-b-md text-sm text-slate-700">
-            Don't have an account yet? <router-link to="/signup" class="text-teal-600 hover:underline font-medium">Request access</router-link> — your home facility will set you up.
-          </div>
-        </section>
 
-        <aside class="bg-white border border-slate-200 rounded-md">
-          <div class="px-5 pt-6 pb-4 border-b border-slate-100">
-            <h2 class="text-lg font-semibold text-navy-900">Trouble signing in?</h2>
-            <p class="text-sm text-slate-600 mt-1">Call your home facility's customer service desk. We'll reset your password and walk you through the portal.</p>
-          </div>
-          <div class="px-5 py-5 space-y-4">
-            <div>
-              <div class="text-xs uppercase tracking-wide text-slate-500 font-medium mb-1">Customer service</div>
-              <a href="tel:1300783745" class="inline-flex items-center gap-2 text-base font-semibold text-navy-900 hover:underline">
-                <Icon name="phone" :size="18"/> 1300 STERILE
-              </a>
-              <div class="text-xs text-slate-500 mt-0.5">1300 783 745 · Mon–Fri 7am–6pm AEST</div>
-            </div>
-            <div class="border-t border-slate-100 pt-4">
-              <div class="text-xs uppercase tracking-wide text-slate-500 font-medium mb-1">Email</div>
-              <a href="mailto:support@steritech.com.au" class="text-sm text-teal-600 hover:underline break-all">support@steritech.com.au</a>
-              <div class="text-xs text-slate-500 mt-0.5">Reply within one business day</div>
-            </div>
-          </div>
-          <div class="px-5 py-3 bg-slate-50 border-t border-slate-100 rounded-b-md text-xs text-slate-500">
-            Browse the <a href="#" class="text-teal-600 hover:underline">help &amp; FAQs</a> first &mdash; most questions are answered there.
-          </div>
-        </aside>
+          <p class="text-sm text-slate-700 mt-6">
+            Don&rsquo;t have an account yet? <router-link to="/signup" class="text-teal-600 hover:underline font-medium focus-ring rounded">Request access</router-link>.
+          </p>
 
-        <div class="pt-2 text-center text-xs text-slate-500 leading-relaxed">
-          <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-            <a href="#" class="hover:text-slate-700">Terms of use</a>
-            <span aria-hidden="true">·</span>
-            <a href="#" class="hover:text-slate-700">Privacy</a>
-            <span aria-hidden="true">·</span>
-            <a href="#" class="hover:text-slate-700">Service notices</a>
-            <span aria-hidden="true">·</span>
-            <a href="#" class="hover:text-slate-700">Help &amp; FAQs</a>
+          <div class="mt-8 pt-6 border-t border-slate-200 text-sm text-slate-600">
+            <p class="font-medium text-navy-900">Trouble signing in?</p>
+            <p class="mt-1 leading-relaxed">
+              Call <a href="tel:1300783745" class="text-teal-600 hover:underline font-medium focus-ring rounded">1300 STERILE</a> (Mon&ndash;Fri 7am&ndash;6pm AEST) or email <a href="mailto:support@steritech.com.au" class="text-teal-600 hover:underline focus-ring rounded">support@steritech.com.au</a>.
+            </p>
           </div>
-          <div class="mt-1.5 text-slate-400">© Steritech Pty Ltd · Customer Portal v2.0</div>
         </div>
+      </div>
+
+      <div class="mt-8 lg:mt-12 text-xs text-slate-500 leading-relaxed">
+        <div class="flex flex-wrap items-center gap-x-3 gap-y-1">
+          <a href="#" class="hover:text-slate-700 focus-ring rounded">Terms</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="#" class="hover:text-slate-700 focus-ring rounded">Privacy</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="#" class="hover:text-slate-700 focus-ring rounded">Service notices</a>
+          <span aria-hidden="true">&middot;</span>
+          <a href="#" class="hover:text-slate-700 focus-ring rounded">Help &amp; FAQs</a>
+        </div>
+        <div class="mt-1.5 text-slate-400">&copy; Steritech Pty Ltd &middot; Customer Portal v2.0</div>
+      </div>
     </main>
+
+    <!-- Brand panel (lg+ only) -->
+    <aside class="hidden lg:flex flex-col justify-center px-12 xl:px-20 py-12 bg-slate-50 border-l border-slate-200">
+      <div class="max-w-md">
+        <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-16 w-auto mb-8" draggable="false"/>
+        <h2 class="text-2xl font-semibold text-navy-900 leading-tight">Customer Portal</h2>
+        <p class="text-base text-slate-600 mt-3 leading-relaxed">Manage treatment requests, track orders, and stay across every consignment with Australia&rsquo;s trusted sterilisation partner.</p>
+        <ul class="mt-8 space-y-3">
+          <li class="flex items-start gap-3 text-sm text-slate-700">
+            <Icon name="shield-check" :size="18" cls="text-teal-600 shrink-0 mt-0.5" aria-hidden="true"/>
+            <span>ISO 11137 certified across Mernda, Dandenong, Wagga and Narangba.</span>
+          </li>
+          <li class="flex items-start gap-3 text-sm text-slate-700">
+            <Icon name="clock" :size="18" cls="text-teal-600 shrink-0 mt-0.5" aria-hidden="true"/>
+            <span>40+ years processing for Australia&rsquo;s medical, food and agricultural sectors.</span>
+          </li>
+        </ul>
+      </div>
+    </aside>
   </div>`
 };
 
