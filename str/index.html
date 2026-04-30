@@ -6378,8 +6378,11 @@ const CustomerListPage = {
   data(){ return {
     facilityFilter:'All', statusFilter:'All', q:'',
     menuFor:null,            // customer.id whose actions menu is open
-    editing:null,            // working draft for the Edit modal: { ...customer fields, accessMatrix }
-    confirmDeactivate:null,  // customer object pending deactivation confirmation
+    editing:null,            // working draft for the Edit modal
+    confirmDeactivate:null,
+    sort:{ by:'created', dir:'desc' },
+    page: 1,
+    pageSize: 25,
   }; },
   mounted(){ document.addEventListener('click', this.closeMenu); },
   beforeUnmount(){ document.removeEventListener('click', this.closeMenu); },
@@ -6402,25 +6405,45 @@ const CustomerListPage = {
     pendingCount(){ return state.customers.filter(c => c.status === 'Pending').length; },
     disabledCount(){ return state.customers.filter(c => c.status === 'Disabled').length; },
     totalCount(){ return state.customers.length; },
-    facilityUsage(){
-      // Count how many active customers are using each facility
-      const counts = {};
-      FACILITIES.forEach(f => counts[f.code] = 0);
-      state.customers.forEach(c => {
-        if (c.status !== 'Active') return;
-        c.facilities.forEach(code => { if (counts[code] !== undefined) counts[code]++; });
-      });
-      return FACILITIES.map(f => ({ code: f.code, name: f.name, count: counts[f.code] }));
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    sortedRows(){
+      const list = this.rows.slice();
+      const k = this.sort.by;
+      const m = this.sort.dir === 'asc' ? 1 : -1;
+      list.sort((a,b) => (a[k] > b[k] ? m : a[k] < b[k] ? -m : 0));
+      return list;
     },
+    totalPages(){ return Math.max(1, Math.ceil(this.sortedRows.length / this.pageSize)); },
+    effectivePage(){ return Math.min(this.page, this.totalPages); },
+    pagedRows(){
+      if (this.sortedRows.length <= this.pageSize) return this.sortedRows;
+      const start = (this.effectivePage - 1) * this.pageSize;
+      return this.sortedRows.slice(start, start + this.pageSize);
+    },
+    rangeStart(){ return this.sortedRows.length === 0 ? 0 : (this.effectivePage - 1) * this.pageSize + 1; },
+    rangeEnd(){ return Math.min(this.effectivePage * this.pageSize, this.sortedRows.length); },
+  },
+  watch:{
+    q(){ this.page = 1; },
+    facilityFilter(){ this.page = 1; },
+    statusFilter(){ this.page = 1; },
+    pageSize(){ this.page = 1; },
   },
   methods:{
     fmtDate,
-    statusCls(s){
-      if (s === 'Active')   return 'bg-emerald-100 text-emerald-800 ring-emerald-200';
-      if (s === 'Pending')  return 'bg-amber-100   text-amber-800   ring-amber-200';
-      if (s === 'Disabled') return 'bg-slate-100   text-slate-600   ring-slate-200';
-      return 'bg-slate-100 text-slate-700 ring-slate-200';
+    statusDot(s){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
     },
+    setSort(by){
+      if (this.sort.by === by) this.sort.dir = this.sort.dir === 'asc' ? 'desc' : 'asc';
+      else { this.sort.by = by; this.sort.dir = by === 'created' ? 'desc' : 'asc'; }
+    },
+    sortIcon(by){
+      return this.sort.by === by ? (this.sort.dir === 'asc' ? 'chevron-up' : 'chevron-down') : 'chevrons-up-down';
+    },
+    prevPage(){ if (this.effectivePage > 1) this.page = this.effectivePage - 1; },
+    nextPage(){ if (this.effectivePage < this.totalPages) this.page = this.effectivePage + 1; },
     closeMenu(){ this.menuFor = null; },
     toggleMenu(c, ev){
       ev.stopPropagation();
@@ -6548,91 +6571,106 @@ const CustomerListPage = {
         </div>
       </div>
 
-      <!-- Table -->
-      <div class="bg-white border border-slate-200 rounded-xl overflow-hidden">
-        <div class="px-4 py-3 border-b border-slate-100 flex items-center justify-between text-xs">
-          <span class="text-slate-500">{{ rows.length }} {{ rows.length === 1 ? 'customer' : 'customers' }}</span>
-          <Btn as="router-link" :to="{ path:'/admin/onboard-customer' }" kind="ghost" size="sm" icon="user-plus">Onboard new</Btn>
-        </div>
+      <!-- Table (Orders pattern: edge-to-edge, zebra, sentence-case headers, single blue link, dot+text status) -->
+      <section class="bg-white border-t border-b border-slate-200">
         <div class="overflow-x-auto">
-          <table class="w-full text-sm">
-            <thead class="bg-slate-50 text-[11px] uppercase tracking-wider text-slate-500">
+          <table class="w-full text-base min-w-[1100px]">
+            <caption class="sr-only">Customers</caption>
+            <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
               <tr>
-                <th class="text-left font-semibold px-4 py-3">Customer</th>
-                <th class="text-left font-semibold px-4 py-3">Email</th>
-                <th class="text-left font-semibold px-4 py-3">Facilities</th>
-                <th class="text-left font-semibold px-4 py-3">Services</th>
-                <th class="text-left font-semibold px-4 py-3">Created</th>
-                <th class="text-left font-semibold px-4 py-3">Status</th>
-                <th class="font-semibold px-4 py-3 w-12"><span class="sr-only">Actions</span></th>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  <button type="button" @click="setSort('company')" class="inline-flex items-center gap-1 font-medium">Customer <Icon :name="sortIcon('company')" :size="12" cls="text-slate-400"/></button>
+                </th>
+                <th scope="col" class="px-4 py-3 font-medium">Facilities</th>
+                <th scope="col" class="px-4 py-3 font-medium">Services</th>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  <button type="button" @click="setSort('created')" class="inline-flex items-center gap-1 font-medium">Created <Icon :name="sortIcon('created')" :size="12" cls="text-slate-400"/></button>
+                </th>
+                <th scope="col" class="px-4 py-3 font-medium">Status</th>
+                <th scope="col" class="px-4 py-3 text-right font-medium"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-slate-100">
-              <tr v-for="c in rows" :key="c.id"
-                  @click="$router.push('/admin/customers/'+c.id)"
-                  class="hover:bg-slate-50 cursor-pointer transition-colors">
-                <td class="px-4 py-3">
-                  <div class="font-medium text-navy-900">{{ c.contact }}</div>
-                  <div class="text-xs text-slate-500">{{ c.company }}</div>
-                </td>
-                <td class="px-4 py-3 text-slate-700">{{ c.email }}</td>
-                <td class="px-4 py-3">
-                  <div class="flex flex-wrap gap-1">
-                    <span v-for="fc in c.facilities" :key="fc"
-                          class="inline-flex items-center text-[10px] font-semibold px-1.5 py-0.5 rounded border border-slate-200 bg-slate-50 text-slate-700">{{ fc }}</span>
-                  </div>
-                </td>
-                <td class="px-4 py-3">
-                  <div class="flex flex-wrap gap-1">
-                    <TreatmentChip v-for="s in c.services" :key="s" :treatment="s"/>
-                  </div>
-                </td>
-                <td class="px-4 py-3 text-slate-600 whitespace-nowrap">{{ fmtDate(c.created) }}</td>
-                <td class="px-4 py-3">
-                  <span :class="['inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-full ring-1', statusCls(c.status)]">{{ c.status }}</span>
-                </td>
-                <!-- Actions -->
-                <td class="px-2 py-3 text-right relative" @click.stop>
-                  <button type="button" @click="toggleMenu(c, $event)"
-                          :aria-expanded="menuFor === c.id"
-                          :class="['p-1.5 rounded-md transition-colors',
-                                    menuFor === c.id ? 'bg-slate-200 text-slate-900' : 'text-slate-400 hover:text-slate-700 hover:bg-slate-100']"
-                          title="Actions">
-                    <Icon name="more-vertical" :size="16"/>
-                  </button>
-                  <transition name="fade">
-                    <div v-if="menuFor === c.id"
-                         class="absolute right-2 top-10 z-20 w-48 bg-white border border-slate-200 rounded-lg shadow-lg py-1 text-left">
-                      <button @click="openEdit(c, $event)"
-                              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                        <Icon name="pencil" :size="14" cls="text-slate-400"/> Edit details
-                      </button>
-                      <router-link :to="'/admin/customers/'+c.id"
-                                   class="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50">
-                        <Icon name="eye" :size="14" cls="text-slate-400"/> View profile
-                      </router-link>
-                      <div class="my-1 border-t border-slate-100"></div>
-                      <button v-if="c.status !== 'Disabled'"
-                              @click="askDeactivate(c, $event)"
-                              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-rose-700 hover:bg-rose-50">
-                        <Icon name="ban" :size="14"/> Deactivate account
-                      </button>
-                      <button v-else
-                              @click="reactivate(c, $event)"
-                              class="w-full flex items-center gap-2 px-3 py-2 text-sm text-emerald-700 hover:bg-emerald-50">
-                        <Icon name="check-circle-2" :size="14"/> Reactivate
-                      </button>
-                    </div>
-                  </transition>
+            <tbody>
+              <tr v-if="pagedRows.length === 0">
+                <td colspan="6" class="px-4 py-12 text-center text-sm text-slate-500">
+                  <Icon name="search-x" :size="28" cls="mx-auto mb-2 text-slate-300"/>
+                  <div>No customers match these filters.</div>
+                  <div class="text-slate-400 mt-0.5">Try a different search or clear your filters.</div>
                 </td>
               </tr>
-              <tr v-if="rows.length === 0">
-                <td colspan="7" class="px-4 py-12 text-center text-sm text-slate-500">No customers match these filters.</td>
+              <tr v-else v-for="c in pagedRows" :key="c.id" class="even:bg-slate-50/60">
+                <td class="px-4 py-3.5">
+                  <router-link :to="'/admin/customers/'+c.id"
+                               :class="['text-base font-medium hover:underline focus-ring rounded',
+                                        c.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ c.company }}</router-link>
+                  <div class="text-sm text-slate-500 mt-0.5">{{ c.contact }}</div>
+                </td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ c.facilities.join(', ') }}</td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-1.5 flex-wrap">
+                    <template v-for="(s, idx) in c.services" :key="s">
+                      <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                      <span>{{ treatmentLabels[s] || s }}</span>
+                      <span v-if="idx < c.services.length - 1" aria-hidden="true" class="text-slate-300">&middot;</span>
+                    </template>
+                  </span>
+                </td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(c.created) }}</td>
+                <td class="px-4 py-3.5 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <span :class="['inline-block h-2 w-2 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
+                    <span>{{ c.status }}</span>
+                  </span>
+                </td>
+                <td class="px-4 py-3.5 text-right whitespace-nowrap relative" @click.stop>
+                  <button type="button" @click="toggleMenu(c, $event)"
+                          :aria-expanded="menuFor === c.id"
+                          aria-haspopup="menu"
+                          aria-label="Customer actions"
+                          class="p-1.5 rounded-md text-slate-500 hover:text-navy-900 hover:bg-slate-100 focus-ring">
+                    <Icon name="more-vertical" :size="16"/>
+                  </button>
+                  <div v-if="menuFor === c.id" role="menu"
+                       class="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20 text-left">
+                    <a href="#" role="menuitem" @click.stop.prevent="openEdit(c, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="pencil" :size="14" cls="text-slate-500"/> Edit details
+                    </a>
+                    <router-link :to="'/admin/customers/'+c.id" role="menuitem" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="eye" :size="14" cls="text-slate-500"/> View profile
+                    </router-link>
+                    <button v-if="c.status !== 'Disabled'" type="button" role="menuitem" @click.stop="askDeactivate(c, $event)" class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-rose-700 hover:bg-rose-50">
+                      <Icon name="ban" :size="14"/> Deactivate
+                    </button>
+                    <button v-else type="button" role="menuitem" @click.stop="reactivate(c, $event)" class="w-full text-left flex items-center gap-2 px-4 py-2 text-sm text-emerald-700 hover:bg-emerald-50">
+                      <Icon name="check-circle-2" :size="14"/> Reactivate
+                    </button>
+                  </div>
+                </td>
               </tr>
             </tbody>
           </table>
         </div>
-      </div>
+      </section>
+
+      <!-- Pagination strip — wired dormant; appears at 26+ rows (matches Orders default 25/page) -->
+      <nav v-if="sortedRows.length > pageSize" aria-label="Customers pagination" class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
+        <div class="text-slate-600">Showing {{ rangeStart }}&ndash;{{ rangeEnd }} of {{ sortedRows.length }}</div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
+            Rows per page
+            <select v-model.number="pageSize" class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option :value="25">25</option>
+              <option :value="50">50</option>
+              <option :value="100">100</option>
+            </select>
+          </label>
+          <div class="flex items-center gap-2">
+            <button type="button" @click="prevPage" :disabled="effectivePage <= 1" :aria-disabled="effectivePage <= 1" aria-label="Previous page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Prev</button>
+            <span class="text-slate-700 px-2 tabular-nums">Page {{ effectivePage }} of {{ totalPages }}</span>
+            <button type="button" @click="nextPage" :disabled="effectivePage >= totalPages" :aria-disabled="effectivePage >= totalPages" aria-label="Next page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Next</button>
+          </div>
+        </div>
+      </nav>
 
       <!-- Edit details modal -->
       <transition name="fade">
