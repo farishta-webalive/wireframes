@@ -346,6 +346,68 @@ const seedOrders = [
     goods:'Rawhide chews, 30 pallets', spaces:30, cheps:30, doseKGy:25, status:'Completed',    bcSync:'synced',  exsitedId:'EXS-402833', bcId:'SO-2026-41741', collection:'2026-04-08' },
 ];
 
+/* ---------- Generated mock orders (for pagination demo realism) ------------ */
+const _consignorPool = [
+  'Sunraysia Orchards','Top End Apiaries','Bellarine Botanics','Queensland Biolab',
+  'Kingsgrove Medical','Sunshine Coast Apiary','Toowoomba Pet Co.','Mildura Citrus',
+  'Riverina Wines','Atherton Tablelands Co-op','Goulburn Valley Foods','Tasmanian Berry Farm',
+  'Hunter Valley Stockfeeds','Macleay Pharmaceuticals','Western Plains Honey'
+];
+const _consigneePool = [
+  'Yum Foods Distribution','Golden Hive Co-op','Auspharm Wholesalers','BioSeq Pty Ltd',
+  'NSW Health Logistics','Pacific Produce USA','Chemist Warehouse DC','Petbarn DC Brisbane',
+  'Coles Logistics','Woolworths DC Brisbane','IGA Wholesale','Sigma Pharmaceuticals',
+  'API Health','Bunnings DC Sydney','Aldi Regency Park'
+];
+const _goodsPool = [
+  'Spice mix, 6 pallets','Pet treats, 18 cartons','Hive frames, 8 pallets',
+  'Cosmetic powders, 22 drums','Surgical gauze, 14 pallets','Herbal tinctures, 30 cartons',
+  'Dried fruit, 16 pallets','Animal feed, 24 pallets','Probiotic capsules, 12 pallets',
+  'Veterinary supplies, 10 pallets','Lab consumables, 8 cartons','Tea sachets, 600 cartons',
+  'Honey jars, 20 pallets','Cosmetic creams, 18 cartons','Nutrient packs, 32 pallets'
+];
+const _statusPool = ['Created','Accepted','On Hold','Late Arrival','Scheduled for Processing','In Process','Ready for Invoicing','Completed','Cancelled'];
+const _treatmentPool = ['Gamma','ETO','GMP','Gamma+ETO'];
+const _facilityPool = ['MER','DAN','WPK','NAR'];
+const _formMetaByFac = {
+  'MER': { code:'FRM-0118', name:'Fresh Produce Irradiation' },
+  'DAN': { code:'FRM-0091', name:'Irradiation Treatment' },
+  'WPK': { code:'FRM-0217', name:'Treatment' },
+  'NAR': { code:'FRM-0241', name:'Blood Serum' },
+};
+function generateMockOrders(count){
+  const out = [];
+  const baseId = 18296;
+  const today = new Date('2026-04-30T00:00:00');
+  const isoDate = (d) => d.toISOString().slice(0,10);
+  for (let i = 0; i < count; i++) {
+    const fac = _facilityPool[i % _facilityPool.length];
+    const submittedDate = new Date(today); submittedDate.setDate(submittedDate.getDate() - (i * 3 + 5));
+    const collectionDate = new Date(submittedDate); collectionDate.setDate(collectionDate.getDate() + 6);
+    out.push({
+      id: `STR-25-0${baseId - (i + 1)}`,
+      facility: fac,
+      formCode: _formMetaByFac[fac].code,
+      formName: _formMetaByFac[fac].name,
+      treatment: _treatmentPool[i % _treatmentPool.length],
+      submitted: isoDate(submittedDate),
+      po: `PO-${88000 + ((i * 7) % 9999)}`,
+      consignor: _consignorPool[i % _consignorPool.length],
+      consignee: _consigneePool[(i * 3) % _consigneePool.length],
+      goods: _goodsPool[i % _goodsPool.length],
+      spaces: 6 + (i % 30),
+      cheps: 6 + (i % 30),
+      doseKGy: i % 3 === 0 ? null : (i % 5 === 0 ? 25 : 15),
+      status: _statusPool[i % _statusPool.length],
+      bcSync: ['synced','syncing','pending','failed','dead'][i % 5],
+      exsitedId: `EXS-${402800 - i}`,
+      bcId: i % 3 === 0 ? '—' : `SO-2026-${41700 + i}`,
+      collection: isoDate(collectionDate),
+    });
+  }
+  return out;
+}
+
 /* ---------- Order messages seed (customer ↔ admin thread per order) -------- */
 
 const seedMessages = {
@@ -376,7 +438,7 @@ const state = reactive({
   commodities: [...seedCommodities],
   consignors:  [...seedConsignors],
   consignees:  [...seedConsignees],
-  orders:      [...seedOrders],
+  orders:      [...seedOrders, ...generateMockOrders(50)],
   drafts:      [], // in-progress form drafts
   // Order-level messages: { [orderId]: [{id, from:'customer'|'admin', author, ts, body}] }
   messages:    JSON.parse(JSON.stringify(seedMessages)),
@@ -3825,13 +3887,21 @@ const SubmittedPage = {
 
 const OrdersPage = {
   components:{ Icon, Btn, StatusBadge, Skel, EmptyState },
-  data(){ return { loading:true, q:'', treatment:'ALL', dateRange:'all', dateFrom:'', dateTo:'', sort:{ by:'submitted', dir:'desc' }, menuFor:null }; },
+  data(){ return { loading:true, q:'', treatment:'ALL', dateRange:'all', dateFrom:'', dateTo:'', sort:{ by:'submitted', dir:'desc' }, menuFor:null, page:1, pageSize:25 }; },
   mounted(){
     setTimeout(() => { this.loading = false; }, 300);
     document.addEventListener('click', this.closeMenu);
+    // Reset to page 1 whenever the FacilityChip switches site.
+    this._unwatchFacility = this.$watch(() => state.profile.currentFacility, () => { this.page = 1; });
   },
-  beforeUnmount(){ document.removeEventListener('click', this.closeMenu); },
+  beforeUnmount(){
+    document.removeEventListener('click', this.closeMenu);
+    if (this._unwatchFacility) this._unwatchFacility();
+  },
   watch:{
+    q(){ this.page = 1; },
+    treatment(){ this.page = 1; },
+    pageSize(){ this.page = 1; },
     dateRange(v){
       const iso = (d) => d.toISOString().slice(0,10);
       const today = new Date();
@@ -3848,6 +3918,7 @@ const OrdersPage = {
         const d = new Date(today.getFullYear(), q * 3, 1);
         this.dateFrom = iso(d); this.dateTo = iso(today);
       }
+      this.page = 1;
       // 'custom' — keep current dateFrom/dateTo as-is, user edits inputs.
     }
   },
@@ -3876,6 +3947,14 @@ const OrdersPage = {
       });
       return list;
     },
+    totalPages(){ return Math.max(1, Math.ceil(this.filtered.length / this.pageSize)); },
+    effectivePage(){ return Math.min(this.page, this.totalPages); },
+    pagedOrders(){
+      const start = (this.effectivePage - 1) * this.pageSize;
+      return this.filtered.slice(start, start + this.pageSize);
+    },
+    rangeStart(){ return this.filtered.length === 0 ? 0 : (this.effectivePage - 1) * this.pageSize + 1; },
+    rangeEnd(){ return Math.min(this.effectivePage * this.pageSize, this.filtered.length); },
     facilityName(){
       return (code) => {
         const f = FACILITIES.find(x => x.code === code);
@@ -3897,7 +3976,9 @@ const OrdersPage = {
     toggleMenu(id, e){ e.stopPropagation(); this.menuFor = this.menuFor === id ? null : id; },
     closeMenu(){ this.menuFor = null; },
     viewPdf(o, e){ e.stopPropagation(); this.menuFor = null; window.open('about:blank','_blank'); },
-    editOrder(o, e){ e.stopPropagation(); this.menuFor = null; this.$router.push('/orders/'+o.id+'?edit=1'); }
+    editOrder(o, e){ e.stopPropagation(); this.menuFor = null; this.$router.push('/orders/'+o.id+'?edit=1'); },
+    prevPage(){ if (this.effectivePage > 1) this.page = this.effectivePage - 1; },
+    nextPage(){ if (this.effectivePage < this.totalPages) this.page = this.effectivePage + 1; }
   },
   template:`
   <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
@@ -3956,8 +4037,6 @@ const OrdersPage = {
       </div>
     </div>
 
-    <p class="text-sm text-slate-600">Showing {{ filtered.length }} of {{ scopedOrders.length }} orders at this site.</p>
-
     <!-- Table -->
     <section class="bg-white border-t border-b border-slate-200">
       <div class="overflow-x-auto">
@@ -4000,7 +4079,7 @@ const OrdersPage = {
                 <div class="text-sm text-slate-400 mt-0.5">Try a different search or clear your filters.</div>
               </td>
             </tr>
-            <tr v-else v-for="o in filtered" :key="o.id" class="even:bg-slate-50/60">
+            <tr v-else v-for="o in pagedOrders" :key="o.id" class="even:bg-slate-50/60">
               <td class="px-4 py-3.5">
                 <router-link :to="'/orders/'+o.id" class="text-sm font-medium text-blue-700 hover:underline focus-ring whitespace-nowrap">{{ o.id }}</router-link>
               </td>
@@ -4048,6 +4127,46 @@ const OrdersPage = {
         </table>
       </div>
     </section>
+
+    <!-- Pagination strip (Xero/MYOB legacy-ops pattern: Prev / Page X of Y / Next + size selector) -->
+    <nav v-if="!loading && filtered.length > 0"
+         aria-label="Orders pagination"
+         class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
+      <div class="text-slate-600">
+        Showing {{ rangeStart }}&ndash;{{ rangeEnd }} of {{ filtered.length }}
+      </div>
+      <div class="flex items-center gap-3 flex-wrap">
+        <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
+          Rows per page
+          <select v-model.number="pageSize"
+                  class="h-11 px-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+            <option :value="25">25</option>
+            <option :value="50">50</option>
+            <option :value="100">100</option>
+          </select>
+        </label>
+        <div class="flex items-center gap-2">
+          <button type="button"
+                  @click="prevPage"
+                  :disabled="effectivePage <= 1"
+                  :aria-disabled="effectivePage <= 1"
+                  aria-label="Previous page"
+                  class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+            Prev
+          </button>
+          <span class="text-slate-700 px-2 tabular-nums">Page {{ effectivePage }} of {{ totalPages }}</span>
+          <button type="button"
+                  @click="nextPage"
+                  :disabled="effectivePage >= totalPages"
+                  :aria-disabled="effectivePage >= totalPages"
+                  aria-label="Next page"
+                  class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">
+            Next
+          </button>
+        </div>
+      </div>
+      <span aria-live="polite" class="sr-only">Page {{ effectivePage }} of {{ totalPages }}, showing orders {{ rangeStart }} to {{ rangeEnd }}.</span>
+    </nav>
   </div>`
 };
 
