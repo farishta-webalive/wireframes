@@ -4479,39 +4479,59 @@ const OrderDetailPage = {
 
       <!-- Overview pane -->
       <div role="tabpanel" id="panel-overview" aria-labelledby="tab-overview" v-show="currentTab === 'overview'" class="space-y-6">
-        <section class="bg-white border border-slate-200 rounded-md">
-          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Customer</header>
-          <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-            <div><dt class="text-slate-500">Company</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.company }}</dd></div>
-            <div><dt class="text-slate-500">ABN</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.abn }}</dd></div>
-            <div><dt class="text-slate-500">Contact</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.contact }}</dd></div>
-          </dl>
-        </section>
+        <!-- Customer + Consignment side-by-side on lg+ (architect: document feel, not dashboard grid) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <section class="bg-white border border-slate-200 rounded-md">
+            <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+              <Icon name="building-2" :size="14" cls="text-slate-500"/> Customer
+            </header>
+            <dl class="p-5 space-y-4 text-sm">
+              <div><dt class="text-slate-500">Company</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.company }}</dd></div>
+              <div><dt class="text-slate-500">ABN</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.abn }}</dd></div>
+              <div><dt class="text-slate-500">Contact</dt><dd class="mt-0.5 text-base text-navy-900">{{ state.profile.contact }}</dd></div>
+            </dl>
+          </section>
 
-        <section class="bg-white border border-slate-200 rounded-md">
-          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Consignment</header>
-          <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-            <div><dt class="text-slate-500">Purchase order</dt><dd class="mt-0.5 font-mono text-base text-navy-900">{{ order.po }}</dd></div>
-            <div><dt class="text-slate-500">Expected delivery</dt><dd class="mt-0.5 text-base text-navy-900">{{ fmtDate(order.collection) }}</dd></div>
-            <div><dt class="text-slate-500">Consignor</dt><dd class="mt-0.5 text-base text-navy-900">{{ order.consignor }}</dd></div>
-            <div><dt class="text-slate-500">Consignee</dt><dd class="mt-0.5 text-base text-navy-900">{{ order.consignee }}</dd></div>
-            <div>
-              <dt class="text-slate-500">Treatment</dt>
-              <dd class="mt-0.5 inline-flex items-center gap-2 text-base text-navy-900">
-                <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[order.treatment] && treatmentStyles[order.treatment].dot]" aria-hidden="true"></span>
-                <span>{{ treatmentLabels[order.treatment] || order.treatment }}</span>
-              </dd>
+          <section class="bg-white border border-slate-200 rounded-md">
+            <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+              <Icon name="package" :size="14" cls="text-slate-500"/> Consignment
+            </header>
+            <div class="p-5 space-y-4">
+              <!-- Lede sentence: description of goods (architect: top row, no label, treats as card lede) -->
+              <p class="text-base text-navy-900 leading-snug">{{ order.goods }}</p>
+              <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                <div>
+                  <dt class="text-slate-500">Pallets</dt>
+                  <dd class="mt-0.5 text-2xl text-navy-900 font-semibold tabular-nums leading-none">{{ order.spaces }}</dd>
+                </div>
+                <div>
+                  <dt class="text-slate-500">Expected delivery</dt>
+                  <dd class="mt-0.5 text-2xl text-navy-900 font-semibold leading-none">{{ fmtDate(order.collection) }}</dd>
+                </div>
+                <div><dt class="text-slate-500">Purchase order</dt><dd class="mt-0.5 font-mono text-base text-navy-900">{{ order.po }}</dd></div>
+                <div>
+                  <dt class="text-slate-500">Treatment</dt>
+                  <dd class="mt-0.5 inline-flex items-center gap-2 text-base text-navy-900">
+                    <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[order.treatment] && treatmentStyles[order.treatment].dot]" aria-hidden="true"></span>
+                    <span>{{ treatmentLabels[order.treatment] || order.treatment }}</span>
+                  </dd>
+                </div>
+                <div><dt class="text-slate-500">Consignor</dt><dd class="mt-0.5 text-base text-navy-900">{{ order.consignor }}</dd></div>
+                <div><dt class="text-slate-500">Consignee</dt><dd class="mt-0.5 text-base text-navy-900">{{ order.consignee }}</dd></div>
+              </dl>
             </div>
-            <div class="sm:col-span-2"><dt class="text-slate-500">Description of goods</dt><dd class="mt-0.5 text-base text-navy-900">{{ order.goods }}</dd></div>
-          </dl>
-        </section>
+          </section>
+        </div>
 
+        <!-- Treatment parameters (full-width band below; architect: 2 cols + full-width band reads as document, not dashboard grid) -->
         <section v-if="order.doseKGy" class="bg-white border border-slate-200 rounded-md">
-          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Treatment parameters</header>
-          <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+            <Icon name="radiation" :size="14" cls="text-slate-500"/> Treatment parameters
+          </header>
+          <dl class="p-5 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-4 text-sm">
             <div><dt class="text-slate-500">Target dose</dt><dd class="mt-0.5 text-base text-navy-900 font-medium">{{ order.doseKGy }} kGy</dd></div>
             <div><dt class="text-slate-500">Treatment type</dt><dd class="mt-0.5 text-base text-navy-900">Routine</dd></div>
-            <div class="sm:col-span-2"><dt class="text-slate-500">Compliance</dt><dd class="mt-0.5 text-base text-navy-900">Treated to ISO 11137.</dd></div>
+            <div><dt class="text-slate-500">Compliance</dt><dd class="mt-0.5 text-base text-navy-900">Treated to ISO 11137.</dd></div>
           </dl>
         </section>
 
