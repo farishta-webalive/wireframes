@@ -1,0 +1,503 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>RenoLogic — Mobile Preview</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root {
+    --bg: #0f1115;
+    --surface: #1a1d24;
+    --surface-2: #242831;
+    --line: #2f343f;
+    --text: #e8eaf0;
+    --muted: #8b919e;
+    --accent: #ff7a45;
+    --accent-soft: rgba(255,122,69,0.14);
+    --radius: 10px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter", system-ui, sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+  body {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    min-height: 100vh;
+  }
+
+  /* ── Sidebar (screen picker) ─────────────────────────────────── */
+  .sidebar {
+    background: var(--surface);
+    border-right: 1px solid var(--line);
+    padding: 20px 16px 28px;
+    overflow-y: auto;
+    max-height: 100vh;
+    position: sticky;
+    top: 0;
+  }
+  .sidebar-brand {
+    display: flex; align-items: center; gap: 10px;
+    padding: 4px 6px 18px;
+    border-bottom: 1px solid var(--line);
+    margin-bottom: 16px;
+  }
+  .sidebar-brand-mark {
+    width: 30px; height: 30px;
+    border-radius: 7px;
+    background: var(--accent);
+    color: #fff;
+    display: grid; place-items: center;
+    font-weight: 700; font-size: 14px;
+    letter-spacing: -0.02em;
+  }
+  .sidebar-brand-text {
+    font-size: 14px; font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .sidebar-brand-text small {
+    display: block;
+    color: var(--muted);
+    font-size: 11px; font-weight: 500;
+    letter-spacing: 0.02em;
+    margin-top: 1px;
+  }
+  .sidebar h3 {
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 18px 8px 6px;
+  }
+  .sidebar-section { margin-bottom: 4px; }
+  .nav-btn {
+    display: flex; align-items: center; gap: 10px;
+    width: 100%;
+    padding: 8px 10px;
+    background: transparent;
+    border: 0;
+    border-radius: 7px;
+    color: var(--text);
+    font: inherit;
+    font-size: 13px;
+    text-align: left;
+    cursor: pointer;
+    transition: background 120ms ease;
+  }
+  .nav-btn:hover { background: var(--surface-2); }
+  .nav-btn.active {
+    background: var(--accent-soft);
+    color: var(--accent);
+    font-weight: 600;
+  }
+  .nav-btn .id-pill {
+    margin-left: auto;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 10px;
+    color: var(--muted);
+    background: var(--surface-2);
+    padding: 2px 6px;
+    border-radius: 4px;
+    letter-spacing: 0.02em;
+  }
+  .nav-btn.active .id-pill {
+    background: rgba(255,122,69,0.18);
+    color: var(--accent);
+  }
+
+  /* ── Stage ───────────────────────────────────────────────────── */
+  .stage {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 32px 24px 48px;
+    min-height: 100vh;
+    gap: 18px;
+  }
+  .stage-header {
+    text-align: center;
+    max-width: 420px;
+  }
+  .stage-header h1 {
+    margin: 0 0 4px;
+    font-size: 18px;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+  .stage-header p {
+    margin: 0;
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+  .stage-controls {
+    display: flex; gap: 8px;
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  .ctrl-btn {
+    appearance: none;
+    background: var(--surface);
+    border: 1px solid var(--line);
+    color: var(--text);
+    padding: 7px 12px;
+    border-radius: 7px;
+    font: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    display: inline-flex; align-items: center; gap: 6px;
+    transition: background 120ms ease, border-color 120ms ease;
+  }
+  .ctrl-btn:hover { background: var(--surface-2); border-color: #3c4250; }
+  .ctrl-btn svg { width: 14px; height: 14px; opacity: 0.85; }
+
+  /* ── iPhone frame ────────────────────────────────────────────── */
+  /* Real iPhone 14 Pro: 393×852 logical px (we render at this size) */
+  .device {
+    --w: 393px;
+    --h: 852px;
+    width: calc(var(--w) + 22px);
+    height: calc(var(--h) + 22px);
+    border-radius: 56px;
+    background: #0a0a0e;
+    padding: 11px;
+    box-shadow:
+      0 0 0 1.5px #2a2d36,
+      0 0 0 3px #15161b,
+      0 30px 80px -20px rgba(0,0,0,0.6),
+      0 10px 30px -10px rgba(0,0,0,0.4);
+    position: relative;
+    flex-shrink: 0;
+  }
+  /* Side buttons */
+  .device::before,
+  .device::after {
+    content: "";
+    position: absolute;
+    background: #1a1c22;
+    border-radius: 2px;
+  }
+  .device::before {
+    /* Volume + mute on left */
+    left: -2.5px;
+    top: 100px;
+    width: 3px;
+    height: 32px;
+    box-shadow:
+      0 50px 0 #1a1c22,
+      0 100px 0 #1a1c22;
+    height: 32px;
+  }
+  .device::after {
+    /* Power on right */
+    right: -2.5px;
+    top: 160px;
+    width: 3px;
+    height: 90px;
+  }
+  .device-screen {
+    width: var(--w);
+    height: var(--h);
+    border-radius: 46px;
+    overflow: hidden;
+    background: #fff;
+    position: relative;
+  }
+  .device-screen iframe {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    background: #fff;
+  }
+  /* Dynamic island */
+  .device-island {
+    position: absolute;
+    top: 11px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 122px;
+    height: 36px;
+    background: #000;
+    border-radius: 20px;
+    z-index: 10;
+    pointer-events: none;
+  }
+
+  /* Loading veil */
+  .veil {
+    position: absolute;
+    inset: 0;
+    background: #fff;
+    display: grid; place-items: center;
+    z-index: 5;
+    transition: opacity 200ms ease;
+  }
+  .veil.hidden { opacity: 0; pointer-events: none; }
+  .veil-spinner {
+    width: 22px; height: 22px;
+    border: 2px solid #e5e7eb;
+    border-top-color: #ff7a45;
+    border-radius: 50%;
+    animation: spin 800ms linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ── Responsive ──────────────────────────────────────────────── */
+  @media (max-width: 1100px) {
+    body { grid-template-columns: 240px 1fr; }
+  }
+  @media (max-width: 860px) {
+    body {
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
+    .sidebar {
+      position: static;
+      max-height: 220px;
+      border-right: 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .stage { padding: 18px 12px 32px; }
+    .device {
+      transform: scale(0.85);
+      transform-origin: top center;
+      margin-bottom: -120px;
+    }
+  }
+  @media (max-width: 480px) {
+    .device {
+      transform: scale(0.7);
+      margin-bottom: -240px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="sidebar-brand-mark">R</div>
+    <div class="sidebar-brand-text">
+      RenoLogic
+      <small>Mobile preview</small>
+    </div>
+  </div>
+
+  <div class="sidebar-section" id="nav-list"></div>
+</aside>
+
+<main class="stage">
+  <div class="stage-header">
+    <h1 id="screen-title">Loading…</h1>
+    <p id="screen-sub">Tap any screen on the left to jump. The frame mirrors a real iPhone (393 × 852).</p>
+  </div>
+
+  <div class="device" role="img" aria-label="iPhone preview">
+    <div class="device-screen">
+      <div class="device-island"></div>
+      <div class="veil" id="veil"><div class="veil-spinner"></div></div>
+      <iframe id="app" src="Renologic Homeowner Platform.html" title="RenoLogic mobile" allow="clipboard-write"></iframe>
+    </div>
+  </div>
+
+  <div class="stage-controls">
+    <button class="ctrl-btn" id="reload-btn" type="button" title="Reload the prototype">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg>
+      Reload
+    </button>
+    <button class="ctrl-btn" id="open-btn" type="button" title="Open the prototype in a new tab">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+      Open full
+    </button>
+  </div>
+</main>
+
+<script>
+/* ──────────────────────────────────────────────────────────────────────
+   Screen registry — mirrors the section ids inside the main HTML file
+   ────────────────────────────────────────────────────────────────────── */
+const SECTIONS = [
+  {
+    title: "Public",
+    items: [
+      ["s01", "Landing"],
+      ["s02", "Sign in / Register"],
+    ]
+  },
+  {
+    title: "Homeowner — Onboarding",
+    items: [
+      ["s03", "Step 1 of 7"],
+      ["s04", "Step 2 of 7"],
+      ["s05", "Step 3 of 7"],
+      ["s06", "Step 4 of 7"],
+      ["s07", "Step 5 of 7"],
+      ["s08", "Step 6 of 7"],
+      ["s09", "Step 7 of 7"],
+    ]
+  },
+  {
+    title: "Homeowner — App",
+    items: [
+      ["s10", "Dashboard"],
+      ["s11", "Post a job"],
+      ["s12", "My jobs"],
+      ["s13", "Job — pre-quote"],
+      ["s15", "Job — post-quote"],
+      ["s16", "Quote review"],
+      ["s17", "Milestones"],
+      ["s19", "Allocation display"],
+      ["s20", "Evidence viewer"],
+      ["s21", "Variations"],
+      ["s22", "Comments"],
+      ["s23", "Profile"],
+    ]
+  },
+  {
+    title: "Contractor — Onboarding",
+    items: [
+      ["cs03", "Step 1"],
+      ["cs05", "Step 2"],
+      ["cs06", "Step 3 — Plan"],
+      ["cs07", "Step 4"],
+      ["cs08", "Step 5"],
+      ["cs09", "Step 6"],
+      ["cs10", "Step 7"],
+      ["cs11", "Welcome"],
+    ]
+  },
+  {
+    title: "Contractor — App",
+    items: [
+      ["cs12", "Browse jobs"],
+      ["cs12b", "My projects"],
+      ["cs12c", "Create job"],
+      ["cs13", "Browse — list"],
+      ["pm01", "PM team"],
+    ]
+  },
+  {
+    title: "Employee",
+    items: [
+      ["es01", "My jobs"],
+    ]
+  }
+];
+
+/* ──────────────────────────────────────────────────────────────────────
+   Render sidebar
+   ────────────────────────────────────────────────────────────────────── */
+const navList = document.getElementById("nav-list");
+const allBtns = [];
+SECTIONS.forEach(sec => {
+  const h = document.createElement("h3");
+  h.textContent = sec.title;
+  navList.appendChild(h);
+  sec.items.forEach(([id, label]) => {
+    const btn = document.createElement("button");
+    btn.className = "nav-btn";
+    btn.dataset.screen = id;
+    btn.innerHTML = `<span class="nav-label"></span><span class="id-pill"></span>`;
+    btn.querySelector(".nav-label").textContent = label;
+    btn.querySelector(".id-pill").textContent = id.toUpperCase();
+    btn.addEventListener("click", () => goToScreen(id, label));
+    navList.appendChild(btn);
+    allBtns.push(btn);
+  });
+});
+
+/* ──────────────────────────────────────────────────────────────────────
+   Drive the iframe via its own goTo() function
+   ────────────────────────────────────────────────────────────────────── */
+const iframe = document.getElementById("app");
+const veil = document.getElementById("veil");
+const titleEl = document.getElementById("screen-title");
+const subEl = document.getElementById("screen-sub");
+
+let currentScreen = null;
+let pendingScreen = null;
+
+function setActiveBtn(id) {
+  allBtns.forEach(b => b.classList.toggle("active", b.dataset.screen === id));
+}
+
+function findLabel(id) {
+  for (const sec of SECTIONS) {
+    for (const [sid, label] of sec.items) {
+      if (sid === id) return { section: sec.title, label };
+    }
+  }
+  return null;
+}
+
+function goToScreen(id, knownLabel) {
+  currentScreen = id;
+  setActiveBtn(id);
+
+  const meta = findLabel(id);
+  const label = knownLabel || (meta && meta.label) || id;
+  const section = meta && meta.section ? meta.section : "";
+  titleEl.textContent = label;
+  subEl.textContent = section
+    ? `${section} · ${id}`
+    : `Screen ${id}`;
+
+  const win = iframe.contentWindow;
+  if (win && typeof win.goTo === "function") {
+    try {
+      win.goTo(id);
+      // Scroll iframe to top so the screen renders from the start
+      win.scrollTo(0, 0);
+    } catch (e) {
+      pendingScreen = id;
+    }
+  } else {
+    // iframe not ready yet — queue and apply on load
+    pendingScreen = id;
+  }
+}
+
+iframe.addEventListener("load", () => {
+  veil.classList.add("hidden");
+  // Hide any prototype nav that the main file shows on desktop —
+  // we want a clean mobile view. The prototype's own @media query
+  // handles most of this, but make doubly sure by setting a tight
+  // viewport via the iframe width.
+  const win = iframe.contentWindow;
+  if (pendingScreen && win && typeof win.goTo === "function") {
+    win.goTo(pendingScreen);
+    pendingScreen = null;
+  } else if (currentScreen && win && typeof win.goTo === "function") {
+    win.goTo(currentScreen);
+  } else {
+    // Default starting screen: Landing
+    goToScreen("s01");
+  }
+});
+
+/* ──────────────────────────────────────────────────────────────────────
+   Controls
+   ────────────────────────────────────────────────────────────────────── */
+document.getElementById("reload-btn").addEventListener("click", () => {
+  pendingScreen = currentScreen || "s01";
+  veil.classList.remove("hidden");
+  iframe.src = iframe.src;
+});
+document.getElementById("open-btn").addEventListener("click", () => {
+  window.open("Renologic Homeowner Platform.html", "_blank");
+});
+
+/* Default selection */
+goToScreen("s01", "Landing");
+</script>
+
+</body>
+</html>
