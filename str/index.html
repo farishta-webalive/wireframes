@@ -1,4 +1,5 @@
 <!doctype html>
+
 <!--
   ============================================================================
   Steritech Gen 2 Customer Portal — single-file wireframe
@@ -1012,7 +1013,6 @@ function buildSchemas() {
   reg('NAR','treatment','QLD Request for Treatment (FRM-0203)','Gamma', [
     // 1. Customer Details
     { id:'customer', title:'Customer Details', prefill:true,
-      subtitle:'All fields marked with an asterisk (*) are mandatory and required to be completed for all request submissions.',
       fields:[
         { key:'company_name',        label:'Company Name',                 type:'text',  required:true, prefill:'company' },
         { key:'contact_name',        label:'Contact Name',                 type:'text',  required:true, prefill:'contact' },
@@ -1057,8 +1057,6 @@ function buildSchemas() {
     },
     // 4. Quarantine Goods
     { id:'quarantine', title:'Quarantine Goods',
-      subtitle:'All fields marked with an asterisk (*) are mandatory and required to be completed for specialised goods request submissions.',
-      legal:'For all goods with an associated Treatment Direction or Biosecurity Permit, the below fields are required. Please verify the goods are directed to facility Q1279, and a copy of the Treatment Direction and/or permit is supplied. If no Treatment Direction is supplied, DAFF will not be notified of the completion of treatment.',
       fields:[
         { key:'quarantine_reference', label:'Quarantine Reference Number', type:'text', required:true },
         { key:'container_number',     label:'Container Number',            type:'text' },
@@ -1066,11 +1064,7 @@ function buildSchemas() {
         { key:'permit_number',        label:'Permit Number/Reference',     type:'text' },
       ]
     },
-    // 5. Steritech Requirements (informational)
-    { id:'steritech_requirements', title:'Steritech Requirements',
-      legal:'Pallet Dimensions and Weight — The maximum allowable dimensions of a pallet are 220cm × 120cm × 120cm (Height × Width × Length). The maximum allowable weight of a pallet is 1050kg. Please contact Steritech if you have unusual or large sized items.\n\nProduct Identification — Pallets must be clearly marked with identification that can connect them to the customer name listed on this form and at least one unique identifier such as, but not limited to: user purchase order reference, user batch/lot reference.\n\nPallet Security — Products that contain any liquid, need to be completely sealed to prevent leakage.\n\nTransport — Please inform all transport/courier drivers that goods will only be released if a valid Steritech lot number or invoice number can be provided on pickup.\n\nAdditional Charges — Additional charges may apply if any breaches/discrepancies to the above are identified.'
-    },
-    // 6. Authorisation
+    // 5. Authorisation
     { id:'authorisation', title:'Authorisation',
       legal:'I authorise this consignment to be irradiated and confirm the details are correct and true.',
       fields:[
