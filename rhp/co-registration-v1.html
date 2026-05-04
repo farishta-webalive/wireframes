@@ -1,0 +1,853 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RenoLogic — Contractor Owner Registration Journey</title>
+<style>
+:root{
+  --color-primary:#1E1E1E;
+  --color-accent:#FF7A1A;
+  --color-accent-dark:#E06510;
+  --color-bg:#F8F9FB;
+  --color-surface:#FFFFFF;
+  --color-success:#4CAF50;
+  --color-success-bg:#E8F5E9;
+  --color-warning:#FF8F00;
+  --color-warning-bg:#FFF8E1;
+  --color-error:#E53935;
+  --color-border:#E0E0E0;
+  --color-border-light:#F0F0F0;
+  --color-muted:#757575;
+  --color-muted-micro:#9E9E9E;
+  --color-muted-bg:#F8F8F8;
+  --shadow-card:0 1px 3px rgba(0,0,0,0.08),0 1px 2px rgba(0,0,0,0.04);
+  --r-sm:8px;--r-md:12px;--r-lg:16px;
+  --tr:150ms ease;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--color-bg);color:var(--color-primary);-webkit-font-smoothing:antialiased}
+h1{font-size:28px;font-weight:700;color:#1E1E1E;line-height:1.25;margin:0}
+h2{font-size:22px;font-weight:700;color:#1E1E1E;line-height:1.3;margin:0}
+h3{font-size:18px;font-weight:600;color:#1E1E1E;line-height:1.35;margin:0}
+h4{font-size:15px;font-weight:600;color:#1E1E1E;margin:0}
+p{font-size:14px;color:#1E1E1E;line-height:1.6;margin:0}
+.muted{color:var(--color-muted)}
+button{font-family:inherit}
+
+/* Buttons */
+.btn{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:0 20px;font-size:15px;font-weight:600;border-radius:var(--r-sm);border:1.5px solid transparent;cursor:pointer;transition:background var(--tr),border-color var(--tr),color var(--tr);white-space:nowrap;gap:8px;line-height:1}
+.btn:active{transform:scale(.97)}
+.btn-accent{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
+.btn-accent:hover{background:var(--color-accent-dark);border-color:var(--color-accent-dark)}
+.btn-outline{background:transparent;color:var(--color-accent);border-color:var(--color-accent)}
+.btn-outline:hover{background:#FFF5EF}
+.btn-ghost{background:transparent;color:var(--color-muted);border-color:transparent}
+.btn-ghost:hover{background:var(--color-muted-bg);color:var(--color-primary)}
+.btn-full{width:100%;display:flex}
+.btn-sm{min-height:36px;padding:0 14px;font-size:13.5px;font-weight:600}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.btn:disabled:active{transform:none}
+
+/* Inputs */
+input[type=text],input[type=email],input[type=password],input[type=number],input[type=tel],select{
+  width:100%;height:46px;padding:0 14px;font-family:inherit;font-size:14px;
+  border:1.5px solid var(--color-border);border-radius:var(--r-sm);background:#fff;color:#1E1E1E;
+  transition:border-color var(--tr),box-shadow var(--tr);outline:none;appearance:none
+}
+input::placeholder{color:#BDBDBD}
+input:focus,select:focus{border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(255,122,26,0.12)}
+label{display:block;font-size:13px;font-weight:500;color:#5F5E5A;margin-bottom:6px}
+.input-group{display:flex;flex-direction:column}
+.form-stack{display:flex;flex-direction:column;gap:14px}
+.form-row{display:flex;gap:12px;flex-wrap:wrap}
+.form-row > *{flex:1;min-width:140px}
+
+/* Cards & badges */
+.card{background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-card);padding:24px}
+.badge{display:inline-flex;align-items:center;padding:4px 10px;border-radius:6px;font-size:12px;font-weight:600;letter-spacing:.3px;white-space:nowrap}
+.badge-warning{background:#FFF8E1;color:#F57F17}
+.badge-success{background:#E8F5E9;color:#2E7D32}
+.badge-muted{background:#F5F5F5;color:#616161}
+.badge-accent{background:#FFF3E0;color:#E65100}
+
+/* ─── Screen frame ─── */
+.screen{display:none;min-height:100vh}
+.screen.active{display:block}
+
+/* ─── Auth shell (S1, S2, S3) ─── */
+.auth-shell{min-height:100vh;display:flex;flex-direction:column;background:#fff}
+.auth-topbar{display:flex;align-items:center;justify-content:space-between;padding:16px 28px;border-bottom:1px solid var(--color-border-light)}
+.auth-logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:17px;color:#1E1E1E}
+.auth-logo img{height:24px;display:block}
+.steps-bar{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--color-muted-micro)}
+.steps-bar .step{display:inline-flex;align-items:center;gap:6px}
+.steps-bar .step-num{width:20px;height:20px;border-radius:50%;background:#EEE;color:#9E9E9E;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.steps-bar .step.active .step-num{background:var(--color-accent);color:#fff}
+.steps-bar .step.active .step-label{color:#1E1E1E;font-weight:600}
+.steps-bar .step.done .step-num{background:#1E1E1E;color:#fff}
+.steps-bar .step.done .step-label{color:#1E1E1E}
+.steps-bar .step-sep{width:24px;height:1px;background:#E0E0E0}
+
+.auth-stage{flex:1;display:flex;align-items:flex-start;justify-content:center;padding:48px 24px 64px}
+.auth-card{width:100%;max-width:520px;background:#fff;border-radius:var(--r-lg);box-shadow:var(--shadow-card);padding:36px 36px 32px}
+.auth-card h1{margin-bottom:6px}
+.auth-card .lead{color:var(--color-muted);font-size:14px;margin-bottom:24px}
+
+/* Role selector */
+.role-pill{display:flex;align-items:center;gap:12px;padding:14px;border:1.5px solid var(--color-accent);background:#FFF5EF;border-radius:var(--r-sm);margin-bottom:20px}
+.role-pill .ico{width:36px;height:36px;border-radius:var(--r-sm);background:#fff;display:inline-flex;align-items:center;justify-content:center;color:var(--color-accent)}
+.role-pill-label{font-size:14px;font-weight:600;color:#1E1E1E}
+.role-pill-sub{font-size:12px;color:var(--color-muted);margin-top:2px}
+.role-pill-tick{margin-left:auto;width:22px;height:22px;border-radius:50%;background:var(--color-accent);color:#fff;display:inline-flex;align-items:center;justify-content:center}
+
+/* Documents grid (S3) */
+.doc-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:20px}
+@media (max-width:720px){.doc-grid{grid-template-columns:1fr}}
+.doc-card{background:#fff;border:1.5px solid var(--color-border);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:10px}
+.doc-card-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px}
+.doc-card-title{font-size:14px;font-weight:600;color:#1E1E1E}
+.doc-card-desc{font-size:12.5px;color:var(--color-muted);line-height:1.5}
+.doc-card-req{font-size:11px;font-weight:700;color:var(--color-muted-micro);letter-spacing:.04em;text-transform:uppercase}
+.doc-card-req.required{color:#C2410C}
+.doc-drop{border:1.5px dashed #D4D4D4;border-radius:var(--r-sm);padding:18px 14px;text-align:center;background:#FAFAFA;cursor:pointer;transition:border-color var(--tr),background var(--tr)}
+.doc-drop:hover{border-color:var(--color-accent);background:#FFF7F0}
+.doc-drop-ico{color:var(--color-muted-micro);margin-bottom:6px}
+.doc-drop-text{font-size:13px;color:var(--color-muted);font-weight:500}
+.doc-drop-hint{font-size:11.5px;color:var(--color-muted-micro);margin-top:2px}
+.doc-uploaded{display:flex;align-items:center;gap:10px;background:#F0FDF4;border:1.5px solid #BBF7D0;border-radius:var(--r-sm);padding:10px 12px}
+.doc-uploaded-ico{width:28px;height:28px;border-radius:6px;background:#22C55E;color:#fff;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.doc-uploaded-info{flex:1;min-width:0}
+.doc-uploaded-name{font-size:13px;font-weight:600;color:#1E1E1E;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.doc-uploaded-meta{font-size:11.5px;color:var(--color-muted)}
+.doc-remove{background:none;border:none;color:var(--color-muted);font-size:12px;cursor:pointer;font-weight:500;padding:4px 6px}
+.doc-remove:hover{color:var(--color-error)}
+.doc-na{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--color-muted);user-select:none;cursor:pointer;padding-top:4px}
+.doc-na input{accent-color:var(--color-accent);width:15px;height:15px}
+
+/* ─── Pending dashboard shell (S4 + S7) ─── */
+.app-layout{display:grid;grid-template-columns:240px 1fr;min-height:100vh}
+.sidebar{background:#fff;border-right:1px solid var(--color-border-light);display:flex;flex-direction:column;padding:0}
+.sidebar-logo{padding:20px 20px 16px;display:flex;align-items:center;justify-content:space-between;gap:8px;border-bottom:1px solid var(--color-border-light);margin-bottom:8px}
+.sidebar-logo img{height:24px}
+.sidebar-bell{background:none;border:none;cursor:pointer;color:var(--color-muted);padding:6px}
+.sidebar-bell:hover{color:#1E1E1E}
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:0 10px;flex:1}
+.sidebar-link{display:flex;align-items:center;gap:10px;padding:0 12px;height:40px;border-radius:var(--r-sm);font-size:13.5px;font-weight:500;color:#5F5E5A;cursor:pointer;background:none;border:none;text-align:left;width:100%;font-family:inherit;transition:background var(--tr),color var(--tr)}
+.sidebar-link:hover{background:#F9F9F9;color:#1E1E1E}
+.sidebar-link.active{background:#FFF5EF;color:var(--color-accent);font-weight:600}
+.sidebar-link-ico{width:18px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center}
+.sidebar-link.locked{opacity:.55;pointer-events:none;cursor:not-allowed}
+.sidebar-link .lock-ico{margin-left:auto;color:var(--color-muted-micro)}
+.sidebar-footer{margin-top:auto;border-top:1px solid var(--color-border-light);padding:14px 16px;display:flex;align-items:center;gap:10px}
+.sidebar-avatar{width:34px;height:34px;border-radius:50%;background:var(--color-accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.sidebar-user-name{font-size:13px;font-weight:600;color:#1E1E1E}
+.sidebar-user-role{font-size:11.5px;color:var(--color-muted)}
+.sidebar-sub-strip{margin:0 14px 12px;padding:10px 12px;border-radius:var(--r-sm);background:#F5F5F5;font-size:11.5px;color:var(--color-muted)}
+.sidebar-sub-strip.active{background:#E8F5E9;color:#2E7D32}
+.sidebar-sub-strip strong{display:block;font-size:12.5px;color:#1E1E1E;font-weight:600;margin-bottom:1px}
+.sidebar-sub-strip.active strong{color:#1B5E20}
+
+.app-content{padding:32px 36px;overflow-y:auto}
+.page-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;margin-bottom:24px;flex-wrap:wrap}
+.page-head h1{font-size:24px}
+.page-head .sub{font-size:13.5px;color:var(--color-muted);margin-top:4px}
+
+/* Banners */
+.banner{display:flex;align-items:flex-start;gap:14px;padding:18px 20px;border-radius:var(--r-md);margin-bottom:24px}
+.banner-warning{background:#FFF8E1;border:1px solid #FFE082;color:#7C4A00}
+.banner-success{background:#E8F5E9;border:1px solid #A5D6A7;color:#1B5E20;align-items:center}
+.banner-ico{flex-shrink:0;width:36px;height:36px;border-radius:var(--r-sm);background:#fff;display:inline-flex;align-items:center;justify-content:center}
+.banner-warning .banner-ico{color:#F57F17}
+.banner-success .banner-ico{color:#2E7D32}
+.banner-title{font-size:15px;font-weight:700;margin-bottom:2px}
+.banner-body{font-size:13.5px;line-height:1.55}
+.banner-close{margin-left:auto;background:none;border:none;color:inherit;cursor:pointer;opacity:.6;padding:4px}
+.banner-close:hover{opacity:1}
+
+/* Doc status list */
+.doc-status-list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.doc-status-row{display:flex;align-items:center;gap:14px;padding:14px 16px;background:#fff;border:1px solid var(--color-border-light);border-radius:var(--r-sm)}
+.doc-status-ico{width:34px;height:34px;border-radius:var(--r-sm);background:#FFF8E1;color:#F57F17;display:inline-flex;align-items:center;justify-content:center;flex-shrink:0}
+.doc-status-name{font-size:13.5px;font-weight:600;color:#1E1E1E}
+.doc-status-meta{font-size:12px;color:var(--color-muted);margin-top:1px}
+
+/* KPI grid (S7) */
+.kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:24px}
+@media (max-width:980px){.kpi-grid{grid-template-columns:repeat(2,1fr)}}
+.kpi{background:#fff;border-radius:var(--r-md);padding:18px 18px 16px;box-shadow:var(--shadow-card);position:relative}
+.kpi-label{font-size:11px;font-weight:700;letter-spacing:.06em;color:var(--color-muted-micro);text-transform:uppercase;margin-bottom:8px}
+.kpi-value{font-size:24px;font-weight:700;color:#1E1E1E;line-height:1}
+.kpi-sub{font-size:12px;color:var(--color-muted-micro);margin-top:8px}
+
+/* Awaiting action panel */
+.empty-panel{background:#fff;border-radius:var(--r-md);padding:28px;box-shadow:var(--shadow-card);text-align:center}
+.empty-panel-ico{width:48px;height:48px;border-radius:12px;background:#FFF5EF;color:var(--color-accent);display:inline-flex;align-items:center;justify-content:center;margin-bottom:14px}
+.empty-panel h3{margin-bottom:6px}
+.empty-panel p{color:var(--color-muted);margin-bottom:18px}
+
+/* ─── Email screen (S5) ─── */
+.email-stage{min-height:100vh;background:#F0F1F4;padding:48px 24px;display:flex;align-items:flex-start;justify-content:center}
+.email-card{width:100%;max-width:600px;background:#fff;border-radius:var(--r-md);box-shadow:0 4px 24px rgba(0,0,0,0.08);overflow:hidden}
+.email-toolbar{display:flex;align-items:center;gap:8px;padding:10px 14px;background:#FAFAFA;border-bottom:1px solid var(--color-border-light);font-size:12px;color:var(--color-muted)}
+.email-dot{width:10px;height:10px;border-radius:50%}
+.email-meta{padding:18px 28px 14px;border-bottom:1px solid var(--color-border-light);font-size:12.5px;color:var(--color-muted)}
+.email-meta div{margin-bottom:2px}
+.email-meta strong{color:#1E1E1E;font-weight:600}
+.email-body{padding:28px}
+.email-body img{height:28px;margin-bottom:24px}
+.email-subject{font-size:20px;font-weight:700;color:#1E1E1E;margin-bottom:18px;line-height:1.3}
+.email-body p{font-size:14px;line-height:1.6;color:#3F3F3F;margin-bottom:14px}
+.email-cta{margin:24px 0}
+.email-foot{font-size:11.5px;color:var(--color-muted-micro);line-height:1.55;border-top:1px solid var(--color-border-light);padding-top:18px;margin-top:18px}
+.preview-link{position:fixed;bottom:24px;right:24px;background:#1E1E1E;color:#fff;border-radius:999px;padding:10px 16px;font-size:13px;font-weight:600;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(0,0,0,0.18);z-index:50}
+.preview-link:hover{background:#2C2C2C}
+
+/* ─── Subscription (S6) ─── */
+.sub-stage{min-height:100vh;background:var(--color-bg);padding:48px 24px}
+.sub-wrap{max-width:760px;margin:0 auto}
+.plan-card{background:#fff;border:1.5px solid var(--color-accent);border-radius:var(--r-lg);padding:28px;box-shadow:var(--shadow-card);position:relative}
+.plan-card::before{content:'Recommended';position:absolute;top:-11px;left:24px;background:var(--color-accent);color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;padding:4px 10px;border-radius:999px;text-transform:uppercase}
+.plan-name{font-size:18px;font-weight:700;color:#1E1E1E}
+.plan-price{font-size:34px;font-weight:700;color:#1E1E1E;margin-top:6px}
+.plan-price small{font-size:14px;font-weight:500;color:var(--color-muted)}
+.plan-list{list-style:none;padding:0;margin:18px 0 22px;display:flex;flex-direction:column;gap:8px}
+.plan-list li{display:flex;align-items:flex-start;gap:10px;font-size:13.5px;color:#3F3F3F;line-height:1.5}
+.plan-list .check{flex-shrink:0;color:var(--color-success);margin-top:1px}
+.sub-note{font-size:12.5px;color:var(--color-muted);text-align:center;margin:14px 0 24px;line-height:1.55}
+.payment-card{background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-card);padding:24px;margin-top:18px}
+
+/* Quote builder Step 1 (S8) */
+.qb-stepper{display:flex;align-items:center;gap:12px;margin-bottom:24px}
+.qb-step{display:flex;align-items:center;gap:8px}
+.qb-step-num{width:26px;height:26px;border-radius:50%;background:#EEE;color:#9E9E9E;display:inline-flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700}
+.qb-step.active .qb-step-num{background:var(--color-accent);color:#fff}
+.qb-step-label{font-size:13.5px;color:var(--color-muted);font-weight:500}
+.qb-step.active .qb-step-label{color:#1E1E1E;font-weight:600}
+.qb-step-sep{flex:1;max-width:48px;height:1px;background:var(--color-border)}
+
+/* Helpers */
+.hide{display:none!important}
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SCREEN 1 — Registration
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="s1" class="screen active">
+  <div class="auth-shell">
+    <header class="auth-topbar">
+      <div class="auth-logo"><img src="co-journey-assets/renologic-logo.png" alt="RenoLogic"></div>
+      <div class="steps-bar">
+        <span class="step active"><span class="step-num">1</span><span class="step-label">Account</span></span>
+        <span class="step-sep"></span>
+        <span class="step"><span class="step-num">2</span><span class="step-label">Business Details</span></span>
+        <span class="step-sep"></span>
+        <span class="step"><span class="step-num">3</span><span class="step-label">Documents</span></span>
+      </div>
+    </header>
+    <div class="auth-stage">
+      <div class="auth-card">
+        <h1>Create your account</h1>
+        <p class="lead">Register as a Contractor Owner to manage your renovation projects on RenoLogic.</p>
+
+        <div class="role-pill">
+          <span class="ico">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"/></svg>
+          </span>
+          <div>
+            <div class="role-pill-label">Contractor Owner</div>
+            <div class="role-pill-sub">Run your firm — manage team, projects &amp; quotes</div>
+          </div>
+          <span class="role-pill-tick">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
+        </div>
+
+        <div class="form-stack">
+          <div class="input-group"><label for="r-name">Full name</label><input id="r-name" type="text" value="Mark Chen" placeholder="Mark Chen"></div>
+          <div class="input-group"><label for="r-email">Email address</label><input id="r-email" type="email" value="mark@pacificbuild.com.au" placeholder="you@example.com"></div>
+          <div class="form-row">
+            <div class="input-group"><label for="r-pwd">Password</label><input id="r-pwd" type="password" value="••••••••••"></div>
+            <div class="input-group"><label for="r-pwd2">Confirm password</label><input id="r-pwd2" type="password" value="••••••••••"></div>
+          </div>
+          <div class="input-group"><label for="r-phone">Phone number</label><input id="r-phone" type="tel" value="+61 412 345 678" placeholder="+61 4XX XXX XXX"></div>
+          <button class="btn btn-accent btn-full" onclick="goTo('s2')">Create Account</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SCREEN 2 — Business Details
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="s2" class="screen">
+  <div class="auth-shell">
+    <header class="auth-topbar">
+      <div class="auth-logo"><img src="co-journey-assets/renologic-logo.png" alt="RenoLogic"></div>
+      <div class="steps-bar">
+        <span class="step done"><span class="step-num"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="step-label">Account</span></span>
+        <span class="step-sep"></span>
+        <span class="step active"><span class="step-num">2</span><span class="step-label">Business Details</span></span>
+        <span class="step-sep"></span>
+        <span class="step"><span class="step-num">3</span><span class="step-label">Documents</span></span>
+      </div>
+    </header>
+    <div class="auth-stage">
+      <div class="auth-card">
+        <h1>Tell us about your business</h1>
+        <p class="lead">We use this to match you with suitable jobs and verify your firm.</p>
+
+        <div class="form-stack">
+          <div class="input-group"><label for="b-name">Business / firm name</label><input id="b-name" type="text" value="Pacific Build Co Pty Ltd" placeholder="Your registered business name"></div>
+          <div class="form-row">
+            <div class="input-group"><label for="b-abn">ABN (Australian Business Number)</label><input id="b-abn" type="text" value="48 123 456 789" placeholder="11 digits"></div>
+            <div class="input-group"><label for="b-years">Years in operation</label><input id="b-years" type="number" value="8" placeholder="e.g. 5"></div>
+          </div>
+          <div class="input-group">
+            <label for="b-trade">Trade category</label>
+            <select id="b-trade">
+              <option>General Building</option>
+              <option>Plumbing</option>
+              <option>Electrical</option>
+              <option>Carpentry</option>
+              <option>Tiling</option>
+              <option>Painting</option>
+            </select>
+          </div>
+          <div class="input-group"><label for="b-suburb">Primary suburb</label><input id="b-suburb" type="text" value="Surry Hills" placeholder="e.g. Surry Hills"></div>
+          <div class="form-row">
+            <div class="input-group">
+              <label for="b-state">State</label>
+              <select id="b-state">
+                <option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option>
+                <option>SA</option><option>TAS</option><option>ACT</option><option>NT</option>
+              </select>
+            </div>
+            <div class="input-group"><label for="b-postcode">Postcode</label><input id="b-postcode" type="text" value="2010" placeholder="e.g. 2010"></div>
+          </div>
+          <button class="btn btn-accent btn-full" onclick="goTo('s3')">Continue</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SCREEN 3 — Document Upload
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="s3" class="screen">
+  <div class="auth-shell">
+    <header class="auth-topbar">
+      <div class="auth-logo"><img src="co-journey-assets/renologic-logo.png" alt="RenoLogic"></div>
+      <div class="steps-bar">
+        <span class="step done"><span class="step-num"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="step-label">Account</span></span>
+        <span class="step-sep"></span>
+        <span class="step done"><span class="step-num"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span><span class="step-label">Business Details</span></span>
+        <span class="step-sep"></span>
+        <span class="step active"><span class="step-num">3</span><span class="step-label">Documents</span></span>
+      </div>
+    </header>
+    <div class="auth-stage" style="padding-top:36px">
+      <div class="auth-card" style="max-width:760px">
+        <h1>Upload your documents</h1>
+        <p class="lead">We need to verify your credentials before your account can be activated. Your documents are reviewed by the RenoLogic team within 1 business day.</p>
+
+        <div class="doc-grid">
+          <!-- Builder's Licence -->
+          <div class="doc-card" data-doc="lic" data-required="1">
+            <div class="doc-card-head">
+              <div>
+                <div class="doc-card-title">Builder's Licence</div>
+                <div class="doc-card-desc">Your current state-issued builder's or contractor's licence.</div>
+              </div>
+              <span class="doc-card-req required">Required</span>
+            </div>
+            <div class="doc-drop" onclick="pickFile('lic')">
+              <div class="doc-drop-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+              <div class="doc-drop-text">Click to upload PDF or image</div>
+              <div class="doc-drop-hint">Up to 10 MB</div>
+            </div>
+          </div>
+
+          <!-- Public Liability Insurance -->
+          <div class="doc-card" data-doc="pli" data-required="1">
+            <div class="doc-card-head">
+              <div>
+                <div class="doc-card-title">Public Liability Insurance</div>
+                <div class="doc-card-desc">Certificate of currency showing active coverage.</div>
+              </div>
+              <span class="doc-card-req required">Required</span>
+            </div>
+            <div class="doc-drop" onclick="pickFile('pli')">
+              <div class="doc-drop-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+              <div class="doc-drop-text">Click to upload PDF or image</div>
+              <div class="doc-drop-hint">Up to 10 MB</div>
+            </div>
+          </div>
+
+          <!-- ABN Registration -->
+          <div class="doc-card" data-doc="abn" data-required="1">
+            <div class="doc-card-head">
+              <div>
+                <div class="doc-card-title">ABN Registration</div>
+                <div class="doc-card-desc">Confirmation of your ABN registration from the ATO.</div>
+              </div>
+              <span class="doc-card-req required">Required</span>
+            </div>
+            <div class="doc-drop" onclick="pickFile('abn')">
+              <div class="doc-drop-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+              <div class="doc-drop-text">Click to upload PDF or image</div>
+              <div class="doc-drop-hint">Up to 10 MB</div>
+            </div>
+          </div>
+
+          <!-- Workers Compensation Insurance -->
+          <div class="doc-card" data-doc="wci" data-required="1">
+            <div class="doc-card-head">
+              <div>
+                <div class="doc-card-title">Workers Compensation Insurance</div>
+                <div class="doc-card-desc">Required if your firm has employees.</div>
+              </div>
+              <span class="doc-card-req required">Required</span>
+            </div>
+            <div class="doc-drop" onclick="pickFile('wci')">
+              <div class="doc-drop-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>
+              <div class="doc-drop-text">Click to upload PDF or image</div>
+              <div class="doc-drop-hint">Up to 10 MB</div>
+            </div>
+            <label class="doc-na"><input type="checkbox" id="wci-na" onchange="toggleWciNA(this.checked)"> Not applicable — no employees</label>
+          </div>
+        </div>
+
+        <button class="btn btn-accent btn-full" id="submit-docs" disabled style="margin-top:24px" onclick="goTo('s4')">Submit for Review</button>
+        <p class="muted" style="font-size:12.5px;margin-top:14px;text-align:center">Your account will remain in review until our team has assessed your documents. You will receive an email once a decision has been made.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SCREEN 4 — Pending state (locked dashboard)
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="s4" class="screen">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="co-journey-assets/renologic-logo.png" alt="RenoLogic">
+        <button class="sidebar-bell" aria-label="Notifications"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="sidebar-link locked" disabled>
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          Dashboard
+          <span class="lock-ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </button>
+        <button class="sidebar-link locked" disabled>
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          Browse Jobs
+          <span class="lock-ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </button>
+        <button class="sidebar-link locked" disabled>
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></span>
+          My Projects
+          <span class="lock-ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </button>
+        <button class="sidebar-link locked" disabled>
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          Team
+          <span class="lock-ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </button>
+        <button class="sidebar-link locked" disabled>
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+          Certs &amp; Insurance
+          <span class="lock-ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </button>
+        <button class="sidebar-link locked" disabled>
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+          Subscription
+          <span class="lock-ico"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg></span>
+        </button>
+        <button class="sidebar-link active">
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          Profile
+        </button>
+      </nav>
+      <div class="sidebar-sub-strip"><strong>Subscription locked</strong>Available after approval</div>
+      <div class="sidebar-footer">
+        <span class="sidebar-avatar">MC</span>
+        <div>
+          <div class="sidebar-user-name">Mark Chen</div>
+          <div class="sidebar-user-role">Contractor Owner</div>
+        </div>
+      </div>
+    </aside>
+    <main class="app-content">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <div class="sub">Pacific Build Co Pty Ltd · Account in review</div>
+        </div>
+      </div>
+
+      <div class="banner banner-warning">
+        <span class="banner-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></span>
+        <div>
+          <div class="banner-title">Your account is under review</div>
+          <div class="banner-body">We're reviewing your submitted documents. This usually takes 1 business day. You'll receive an email once your account has been approved.</div>
+        </div>
+      </div>
+
+      <div class="card" style="padding:22px 24px">
+        <h3 style="margin-bottom:14px">Submitted documents</h3>
+        <div class="doc-status-list">
+          <div class="doc-status-row">
+            <span class="doc-status-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+            <div style="flex:1"><div class="doc-status-name">Builder's Licence</div><div class="doc-status-meta">builders-licence-2026.pdf · uploaded today</div></div>
+            <span class="badge badge-warning">Under Review</span>
+          </div>
+          <div class="doc-status-row">
+            <span class="doc-status-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+            <div style="flex:1"><div class="doc-status-name">Public Liability Insurance</div><div class="doc-status-meta">pli-cert-2026.pdf · uploaded today</div></div>
+            <span class="badge badge-warning">Under Review</span>
+          </div>
+          <div class="doc-status-row">
+            <span class="doc-status-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+            <div style="flex:1"><div class="doc-status-name">ABN Registration</div><div class="doc-status-meta">abn-registration.pdf · uploaded today</div></div>
+            <span class="badge badge-warning">Under Review</span>
+          </div>
+          <div class="doc-status-row">
+            <span class="doc-status-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+            <div style="flex:1"><div class="doc-status-name">Workers Compensation Insurance</div><div class="doc-status-meta">workers-comp-2026.pdf · uploaded today</div></div>
+            <span class="badge badge-warning">Under Review</span>
+          </div>
+        </div>
+      </div>
+
+      <p class="muted" style="text-align:center;font-size:13px;margin-top:36px">Once approved, you'll be able to subscribe and start using RenoLogic.</p>
+
+      <button class="preview-link" onclick="goTo('s5')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        Preview approval email
+      </button>
+    </main>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SCREEN 5 — Approval Email
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="s5" class="screen">
+  <div class="email-stage">
+    <div class="email-card">
+      <div class="email-toolbar">
+        <span class="email-dot" style="background:#FF5F57"></span>
+        <span class="email-dot" style="background:#FEBC2E"></span>
+        <span class="email-dot" style="background:#28C840"></span>
+        <span style="margin-left:10px">Inbox · RenoLogic</span>
+      </div>
+      <div class="email-meta">
+        <div><strong>From:</strong> RenoLogic Team &lt;noreply@renologic.com.au&gt;</div>
+        <div><strong>To:</strong> mark@pacificbuild.com.au</div>
+        <div><strong>Date:</strong> Tomorrow at 9:14 AM</div>
+      </div>
+      <div class="email-body">
+        <img src="co-journey-assets/renologic-logo.png" alt="RenoLogic">
+        <div class="email-subject">Your RenoLogic account has been approved</div>
+        <p>Hi Mark,</p>
+        <p>Great news — your contractor account has been reviewed and approved. You can now subscribe and start using RenoLogic to manage your renovation projects.</p>
+        <p>Click the button below to complete your subscription and get started.</p>
+        <div class="email-cta">
+          <button class="btn btn-accent" onclick="goTo('s6')">Complete Subscription</button>
+        </div>
+        <div class="email-foot">This invitation is tied to your registered email address. If you did not create a RenoLogic account, please ignore this email.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SCREEN 6 — Subscription Payment
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="s6" class="screen">
+  <div class="sub-stage">
+    <div class="sub-wrap">
+      <div style="text-align:center;margin-bottom:32px">
+        <img src="co-journey-assets/renologic-logo.png" alt="RenoLogic" style="height:28px;margin-bottom:18px">
+        <h1>Choose your plan</h1>
+        <p class="muted" style="margin-top:8px">Activate your account to start managing projects and your team.</p>
+      </div>
+
+      <div class="plan-card">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:16px;flex-wrap:wrap">
+          <div>
+            <div class="plan-name">Contractor Standard</div>
+            <div class="plan-price">$50<small> / month</small></div>
+          </div>
+          <span class="badge badge-accent">All features included</span>
+        </div>
+        <ul class="plan-list">
+          <li><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Browse and signal interest in jobs</li>
+          <li><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Create draft quotes and invite homeowners</li>
+          <li><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Manage your team (PM, Estimator, Admin, Site Manager)</li>
+          <li><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Upload evidence and manage milestones</li>
+          <li><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Full audit trail and record keeping</li>
+          <li><span class="check"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>Certificate and insurance document management</li>
+        </ul>
+        <button class="btn btn-accent btn-full" onclick="document.getElementById('payment-card').scrollIntoView({behavior:'smooth',block:'start'})">Subscribe Now</button>
+      </div>
+
+      <p class="sub-note">Your subscription begins today. You will be billed monthly. You can cancel at any time — your project history is always retained.</p>
+
+      <div class="payment-card" id="payment-card">
+        <h3 style="margin-bottom:18px">Payment details</h3>
+        <div class="form-stack">
+          <div class="input-group"><label for="p-card">Card number</label><input id="p-card" type="text" value="4242 4242 4242 4242"></div>
+          <div class="form-row">
+            <div class="input-group"><label for="p-exp">Expiry</label><input id="p-exp" type="text" value="08 / 28" placeholder="MM / YY"></div>
+            <div class="input-group"><label for="p-cvc">CVC</label><input id="p-cvc" type="text" value="123" placeholder="CVC"></div>
+          </div>
+          <div class="input-group"><label for="p-name">Name on card</label><input id="p-name" type="text" value="Mark Chen"></div>
+          <button class="btn btn-accent btn-full" onclick="goTo('s7')">Confirm Payment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SCREEN 7 — Activated dashboard
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="s7" class="screen">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="co-journey-assets/renologic-logo.png" alt="RenoLogic">
+        <button class="sidebar-bell"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></button>
+      </div>
+      <nav class="sidebar-nav">
+        <button class="sidebar-link active">
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>
+          Dashboard
+        </button>
+        <button class="sidebar-link">
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>
+          Browse Jobs
+        </button>
+        <button class="sidebar-link">
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></span>
+          My Projects
+        </button>
+        <button class="sidebar-link">
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+          Team
+        </button>
+        <button class="sidebar-link">
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>
+          Certs &amp; Insurance
+        </button>
+        <button class="sidebar-link">
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>
+          Subscription
+        </button>
+        <button class="sidebar-link">
+          <span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>
+          Profile
+        </button>
+      </nav>
+      <div class="sidebar-sub-strip active"><strong>Contractor Standard — Active</strong>Renews 28 May 2026</div>
+      <div class="sidebar-footer">
+        <span class="sidebar-avatar">MC</span>
+        <div>
+          <div class="sidebar-user-name">Mark Chen</div>
+          <div class="sidebar-user-role">Contractor Owner</div>
+        </div>
+      </div>
+    </aside>
+    <main class="app-content">
+      <div class="page-head">
+        <div>
+          <h1>Dashboard</h1>
+          <div class="sub">Pacific Build Co Pty Ltd · Welcome back</div>
+        </div>
+      </div>
+
+      <div class="banner banner-success" id="welcome-banner">
+        <span class="banner-ico"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>
+        <div>
+          <div class="banner-title">Your account is active</div>
+          <div class="banner-body">Welcome to RenoLogic.</div>
+        </div>
+        <button class="banner-close" onclick="document.getElementById('welcome-banner').style.display='none'" aria-label="Dismiss">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="kpi-grid">
+        <div class="kpi"><div class="kpi-label">Total Recorded Revenue</div><div class="kpi-value">$0</div><div class="kpi-sub">Lifetime on RenoLogic</div></div>
+        <div class="kpi"><div class="kpi-label">Active Projects</div><div class="kpi-value">0</div><div class="kpi-sub">In progress right now</div></div>
+        <div class="kpi"><div class="kpi-label">Quotes Pending</div><div class="kpi-value">0</div><div class="kpi-sub">Awaiting homeowner</div></div>
+        <div class="kpi"><div class="kpi-label">Outstanding</div><div class="kpi-value">$0</div><div class="kpi-sub">Approved but not paid</div></div>
+      </div>
+
+      <div class="empty-panel">
+        <div class="empty-panel-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><line x1="9" y1="15" x2="15" y2="15"/></svg></div>
+        <h3>Awaiting your first quote</h3>
+        <p>Start by creating a draft quote — invite the homeowner once it's ready.</p>
+        <button class="btn btn-accent" onclick="goTo('s8')">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Create Draft Quote
+        </button>
+      </div>
+    </main>
+  </div>
+</section>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     SCREEN 8 — Create Draft Quote (Step 1)
+     ════════════════════════════════════════════════════════════════════ -->
+<section id="s8" class="screen">
+  <div class="app-layout">
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <img src="co-journey-assets/renologic-logo.png" alt="RenoLogic">
+      </div>
+      <nav class="sidebar-nav">
+        <button class="sidebar-link"><span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Dashboard</button>
+        <button class="sidebar-link"><span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Browse Jobs</button>
+        <button class="sidebar-link active"><span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg></span>My Projects</button>
+        <button class="sidebar-link"><span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></span>Team</button>
+        <button class="sidebar-link"><span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg></span>Certs &amp; Insurance</button>
+        <button class="sidebar-link"><span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg></span>Subscription</button>
+        <button class="sidebar-link"><span class="sidebar-link-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></span>Profile</button>
+      </nav>
+      <div class="sidebar-sub-strip active"><strong>Contractor Standard — Active</strong>Renews 28 May 2026</div>
+      <div class="sidebar-footer">
+        <span class="sidebar-avatar">MC</span>
+        <div>
+          <div class="sidebar-user-name">Mark Chen</div>
+          <div class="sidebar-user-role">Contractor Owner</div>
+        </div>
+      </div>
+    </aside>
+    <main class="app-content">
+      <button class="btn btn-ghost btn-sm" style="padding-left:0;margin-bottom:16px" onclick="goTo('s7')">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        Back to Dashboard
+      </button>
+      <div class="page-head">
+        <div>
+          <h1>Create Draft Quote</h1>
+          <div class="sub">Step 1 of 3 — Enter the project details to start your draft.</div>
+        </div>
+      </div>
+
+      <div class="qb-stepper">
+        <div class="qb-step active"><span class="qb-step-num">1</span><span class="qb-step-label">Project Details</span></div>
+        <span class="qb-step-sep"></span>
+        <div class="qb-step"><span class="qb-step-num">2</span><span class="qb-step-label">Milestones</span></div>
+        <span class="qb-step-sep"></span>
+        <div class="qb-step"><span class="qb-step-num">3</span><span class="qb-step-label">Review &amp; Send</span></div>
+      </div>
+
+      <div class="card" style="max-width:760px">
+        <h3 style="margin-bottom:18px">Project details</h3>
+        <div class="form-stack">
+          <div class="input-group"><label for="q-title">Project title</label><input id="q-title" type="text" placeholder="e.g. Bondi Bathroom Refresh"></div>
+          <div class="input-group"><label for="q-trade">Trade category</label>
+            <select id="q-trade">
+              <option>General Building</option><option>Plumbing</option><option>Electrical</option>
+              <option>Carpentry</option><option>Tiling</option><option>Painting</option>
+            </select>
+          </div>
+          <div class="input-group"><label for="q-addr">Site address</label><input id="q-addr" type="text" placeholder="e.g. 12 Hall St"></div>
+          <div class="form-row">
+            <div class="input-group"><label for="q-suburb">Suburb</label><input id="q-suburb" type="text" placeholder="e.g. Bondi"></div>
+            <div class="input-group"><label for="q-state">State</label>
+              <select id="q-state"><option>NSW</option><option>VIC</option><option>QLD</option><option>WA</option><option>SA</option><option>TAS</option><option>ACT</option><option>NT</option></select>
+            </div>
+            <div class="input-group"><label for="q-pc">Postcode</label><input id="q-pc" type="text" placeholder="e.g. 2026"></div>
+          </div>
+          <div class="form-row">
+            <div class="input-group"><label for="q-start">Estimated start</label><input id="q-start" type="text" placeholder="DD MMM YYYY"></div>
+            <div class="input-group"><label for="q-dur">Duration (weeks)</label><input id="q-dur" type="number" placeholder="e.g. 6"></div>
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px">
+            <button class="btn btn-outline">Save Draft</button>
+            <button class="btn btn-accent">Continue to Milestones</button>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</section>
+
+<script>
+function goTo(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  const t=document.getElementById(id);
+  if(t){t.classList.add('active');window.scrollTo(0,0);}
+}
+
+/* Document upload simulation */
+const fakeFiles = {
+  lic: { name:'builders-licence-2026.pdf', size:'1.4 MB' },
+  pli: { name:'pli-cert-2026.pdf',         size:'982 KB' },
+  abn: { name:'abn-registration.pdf',      size:'341 KB' },
+  wci: { name:'workers-comp-2026.pdf',     size:'1.1 MB' }
+};
+const docState = { lic:false, pli:false, abn:false, wci:false, wciNa:false };
+
+function pickFile(key){
+  const card = document.querySelector('.doc-card[data-doc="'+key+'"]');
+  if(!card) return;
+  const drop = card.querySelector('.doc-drop');
+  if(!drop) return;
+  const f = fakeFiles[key];
+  drop.outerHTML = '<div class="doc-uploaded">' +
+    '<span class="doc-uploaded-ico"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span>' +
+    '<div class="doc-uploaded-info"><div class="doc-uploaded-name">'+f.name+'</div><div class="doc-uploaded-meta">'+f.size+' · uploaded just now</div></div>' +
+    '<button class="doc-remove" onclick="removeFile(\''+key+'\')">Remove</button>' +
+    '</div>';
+  docState[key] = true;
+  // If we just uploaded WCI, the "not applicable" checkbox should clear
+  if(key==='wci'){
+    const na = document.getElementById('wci-na');
+    if(na){ na.checked = false; docState.wciNa = false; }
+  }
+  refreshSubmit();
+}
+
+function removeFile(key){
+  const card = document.querySelector('.doc-card[data-doc="'+key+'"]');
+  if(!card) return;
+  const up = card.querySelector('.doc-uploaded');
+  if(!up) return;
+  up.outerHTML =
+    '<div class="doc-drop" onclick="pickFile(\''+key+'\')">' +
+      '<div class="doc-drop-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg></div>' +
+      '<div class="doc-drop-text">Click to upload PDF or image</div>' +
+      '<div class="doc-drop-hint">Up to 10 MB</div>' +
+    '</div>';
+  docState[key] = false;
+  refreshSubmit();
+}
+
+function toggleWciNA(checked){
+  docState.wciNa = checked;
+  // If user marks N/A and a file was uploaded, leave file in place but ignore it for gating
+  refreshSubmit();
+}
+
+function refreshSubmit(){
+  const wciOk = docState.wci || docState.wciNa;
+  const allOk = docState.lic && docState.pli && docState.abn && wciOk;
+  const btn = document.getElementById('submit-docs');
+  if(btn) btn.disabled = !allOk;
+}
+</script>
+
+</body>
+</html>

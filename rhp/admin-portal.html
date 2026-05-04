@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RenoLogic — RL Admin Portal</title>
+<style>
+/* ═══ DESIGN TOKENS (mirrors Renologic platform) ═════════════════════════ */
+:root{
+  --color-primary:#1E1E1E;
+  --color-accent:#FF7A1A;
+  --color-accent-dark:#E06510;
+  --color-accent-soft:#FFF5EF;
+  --color-bg:#F8F9FB;
+  --color-surface:#FFFFFF;
+  --color-success:#16A34A;
+  --color-success-bg:#ECFDF3;
+  --color-warning:#B45309;
+  --color-warning-bg:#FFFBEB;
+  --color-error:#DC2626;
+  --color-error-bg:#FEF2F2;
+  --color-info:#1D4ED8;
+  --color-info-bg:#EFF6FF;
+  --color-border:#E5E7EB;
+  --color-border-light:#F0F0F0;
+  --color-muted:#6B7280;
+  --color-muted-micro:#9E9E9E;
+  --color-muted-bg:#F5F5F5;
+  --shadow-card:0 1px 2px rgba(0,0,0,0.05),0 1px 3px rgba(0,0,0,0.04);
+  --shadow-card-hover:0 4px 16px rgba(0,0,0,0.09),0 2px 6px rgba(0,0,0,0.04);
+  --shadow-modal:0 8px 32px rgba(0,0,0,0.16),0 2px 8px rgba(0,0,0,0.08);
+  --r-sm:8px;--r-md:12px;--r-lg:16px;
+  --nav-w:240px;
+  --tr:150ms ease;
+}
+*,*::before,*::after{box-sizing:border-box}
+html,body{margin:0;padding:0;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI",Roboto,sans-serif;background:var(--color-bg);color:var(--color-primary);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button{font-family:inherit}
+a{color:var(--color-accent);text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ─── BUTTONS ───────────────────────────────────────────────────────────── */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;min-height:38px;padding:0 16px;font-size:14px;font-weight:600;border-radius:var(--r-sm);border:1.5px solid transparent;cursor:pointer;transition:all 120ms;white-space:nowrap}
+.btn:active{transform:scale(0.97)}
+.btn-accent{background:var(--color-accent);color:#fff;border-color:var(--color-accent)}
+.btn-accent:hover{background:var(--color-accent-dark);border-color:var(--color-accent-dark)}
+.btn-outline{background:transparent;color:var(--color-accent);border-color:var(--color-accent)}
+.btn-outline:hover{background:var(--color-accent-soft)}
+.btn-ghost{background:transparent;color:var(--color-muted);border-color:transparent}
+.btn-ghost:hover{background:var(--color-muted-bg);color:var(--color-primary)}
+.btn-error{background:var(--color-error);color:#fff;border-color:var(--color-error)}
+.btn-error:hover{background:#B91C1C;border-color:#B91C1C}
+.btn-success{background:var(--color-success);color:#fff;border-color:var(--color-success)}
+.btn-success:hover{background:#15803D;border-color:#15803D}
+.btn-secondary{background:#fff;color:var(--color-primary);border-color:var(--color-border)}
+.btn-secondary:hover{background:#FAFAFA;border-color:#D1D5DB}
+.btn-sm{min-height:32px;padding:0 12px;font-size:13px;border-radius:6px}
+.btn-link{background:none;border:none;color:var(--color-accent);font-weight:500;cursor:pointer;padding:0;font-size:13px}
+.btn-link:hover{text-decoration:underline}
+
+/* ─── INPUTS ────────────────────────────────────────────────────────────── */
+input[type="text"],input[type="email"],input[type="tel"],input[type="password"],input[type="search"],input[type="date"],select,textarea{
+  width:100%;padding:10px 12px;font-size:14px;font-family:inherit;border:1.5px solid var(--color-border);border-radius:var(--r-sm);background:#fff;color:var(--color-primary);transition:border-color 120ms,box-shadow 120ms;
+}
+input::placeholder,textarea::placeholder{color:#9CA3AF}
+input:focus,textarea:focus,select:focus{outline:none;border-color:var(--color-accent);box-shadow:0 0 0 3px rgba(255,122,26,0.12)}
+textarea{min-height:96px;resize:vertical;line-height:1.5}
+label{display:block;font-size:13px;font-weight:500;color:#5F5E5A;margin-bottom:6px}
+.field{margin-bottom:14px}
+.input-with-icon{position:relative}
+.input-with-icon svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:#9CA3AF;pointer-events:none}
+.input-with-icon input{padding-left:36px}
+
+/* ─── BADGES ────────────────────────────────────────────────────────────── */
+.badge{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:600;padding:4px 10px;border-radius:6px;border:1px solid transparent;line-height:1.2;white-space:nowrap}
+.badge-success{background:var(--color-success-bg);color:var(--color-success);border-color:#BBF7D0}
+.badge-warning{background:var(--color-warning-bg);color:var(--color-warning);border-color:#FDE68A}
+.badge-accent{background:#FFF7ED;color:#C2410C;border-color:#FFE4CC}
+.badge-error{background:var(--color-error-bg);color:var(--color-error);border-color:#FECACA}
+.badge-info{background:var(--color-info-bg);color:var(--color-info);border-color:#DBEAFE}
+.badge-muted{background:#F3F4F6;color:#6B7280;border-color:#E5E7EB}
+.badge-primary{background:#1E1E1E;color:#fff;border-color:#1E1E1E}
+.badge-purple{background:#EDE7F6;color:#4527A0;border-color:#D1C4E9}
+.badge-dot{width:6px;height:6px;border-radius:50%;background:currentColor}
+
+/* ─── CARDS ─────────────────────────────────────────────────────────────── */
+.card{background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-card);border:1px solid rgba(0,0,0,0.04);padding:20px}
+.card-lg{padding:24px}
+.card-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;flex-wrap:wrap}
+.card-header h3{font-size:15px;font-weight:600;margin:0}
+.card-footer{padding-top:12px;margin-top:8px;border-top:1px solid var(--color-border-light);display:flex;justify-content:flex-end}
+
+/* ─── LAYOUT ────────────────────────────────────────────────────────────── */
+.app-layout{display:flex;min-height:100vh}
+
+/* Sidebar — dark per spec */
+.sidebar{width:var(--nav-w);flex-shrink:0;background:#0F0F12;color:#E5E7EB;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto;border-right:1px solid #1F1F24}
+.sidebar-logo{padding:20px 18px 18px;display:flex;align-items:center;gap:10px;border-bottom:1px solid #1F1F24}
+.sidebar-logo-mark{width:30px;height:30px;border-radius:8px;background:var(--color-accent);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:14px;flex-shrink:0}
+.sidebar-logo-text{font-size:16px;font-weight:700;letter-spacing:-0.3px;color:#fff}
+.sidebar-logo-text span{color:var(--color-accent)}
+.sidebar-section-label{padding:14px 18px 6px;font-size:10.5px;font-weight:600;text-transform:uppercase;letter-spacing:0.6px;color:#6B7280}
+.sidebar-nav{display:flex;flex-direction:column;gap:2px;padding:6px 10px;flex:1}
+.sidebar-link{display:flex;align-items:center;gap:11px;padding:0 12px;height:38px;border-radius:8px;font-size:13.5px;font-weight:500;color:#9CA3AF;cursor:pointer;background:none;border:none;font-family:inherit;text-align:left;width:100%;transition:all 120ms}
+.sidebar-link:hover{background:#1A1A1F;color:#F3F4F6}
+.sidebar-link.active{background:rgba(255,122,26,0.14);color:var(--color-accent);font-weight:600}
+.sidebar-link-icon{width:18px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sidebar-link-icon svg{display:block}
+.sidebar-link-badge{margin-left:auto;background:var(--color-accent);color:#fff;font-size:11px;font-weight:700;border-radius:99px;padding:2px 7px;min-width:20px;text-align:center}
+.sidebar-footer{padding:14px;border-top:1px solid #1F1F24;display:flex;align-items:center;gap:10px}
+.sidebar-footer-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,#FF7A1A,#E06510);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0}
+.sidebar-footer-info{flex:1;min-width:0}
+.sidebar-footer-name{font-size:13px;font-weight:600;color:#F3F4F6;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sidebar-footer-role{font-size:11px;color:#6B7280}
+
+/* Main area */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:64px;background:#fff;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;padding:0 24px;position:sticky;top:0;z-index:40;gap:12px}
+.topbar-title{font-size:18px;font-weight:600;color:var(--color-primary);min-width:0;display:flex;align-items:center;gap:10px}
+.menu-btn{display:none;background:none;border:none;cursor:pointer;padding:8px;border-radius:6px;color:var(--color-primary)}
+.menu-btn:hover{background:var(--color-muted-bg)}
+.topbar-right{display:flex;align-items:center;gap:12px}
+.bell-btn{position:relative;background:none;border:none;cursor:pointer;width:40px;height:40px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--color-muted);transition:background 120ms}
+.bell-btn:hover{background:var(--color-muted-bg);color:var(--color-primary)}
+.bell-badge{position:absolute;top:6px;right:6px;background:var(--color-error);color:#fff;font-size:10px;font-weight:700;border-radius:99px;padding:1px 5px;min-width:16px;text-align:center;border:2px solid #fff;line-height:1}
+
+.content{flex:1;padding:28px;overflow-x:hidden}
+.page-header{margin-bottom:24px}
+.page-header h1{font-size:22px;font-weight:700;margin:0 0 4px;letter-spacing:-0.3px}
+.page-header p{margin:0;color:var(--color-muted);font-size:14px}
+.page-header-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px;flex-wrap:wrap}
+
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;font-weight:500;color:var(--color-muted);background:none;border:none;cursor:pointer;padding:0;margin-bottom:14px;transition:color 120ms}
+.back-btn:hover{color:var(--color-accent)}
+
+/* ─── STATS GRID ────────────────────────────────────────────────────────── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:16px;margin-bottom:24px}
+.stat-card{background:#fff;border-radius:var(--r-md);padding:18px 20px;box-shadow:var(--shadow-card);border:1px solid rgba(0,0,0,0.04);position:relative}
+.stat-label{font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:8px;display:flex;align-items:center;gap:6px}
+.stat-value{font-size:28px;font-weight:700;color:var(--color-primary);line-height:1.1;letter-spacing:-0.6px;display:flex;align-items:baseline;gap:8px}
+.stat-value-warn{color:var(--color-warning)}
+.stat-meta{font-size:12px;color:var(--color-muted);margin-top:6px}
+.stat-link{display:inline-block;margin-top:10px;font-size:12.5px;font-weight:500;color:var(--color-accent);cursor:pointer}
+.stat-link:hover{text-decoration:underline}
+
+/* ─── TABLES ────────────────────────────────────────────────────────────── */
+.tbl-wrap{background:#fff;border-radius:var(--r-md);overflow:hidden;border:1px solid var(--color-border);box-shadow:var(--shadow-card)}
+.tbl-scroll{overflow-x:auto}
+.tbl{width:100%;border-collapse:separate;border-spacing:0;min-width:560px}
+.tbl thead{background:#FAFAFA}
+.tbl th{font-size:11px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;padding:11px 16px;text-align:left;border-bottom:1px solid var(--color-border);white-space:nowrap}
+.tbl td{font-size:13.5px;color:var(--color-primary);padding:13px 16px;border-bottom:1px solid #F5F5F5;vertical-align:middle}
+.tbl tbody tr:last-child td{border-bottom:none}
+.tbl tbody tr{transition:background 80ms}
+.tbl tbody tr:hover{background:#FAFAFA}
+.tbl-empty{padding:32px;text-align:center;color:var(--color-muted)}
+
+/* ─── AVATAR ────────────────────────────────────────────────────────────── */
+.avatar{width:32px;height:32px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#fff;flex-shrink:0;letter-spacing:0.2px}
+.avatar-md{width:40px;height:40px;font-size:13px}
+.avatar-lg{width:64px;height:64px;font-size:20px}
+.avatar-xl{width:80px;height:80px;font-size:26px}
+.av-1{background:#FF7A1A}
+.av-2{background:#1565C0}
+.av-3{background:#43A047}
+.av-4{background:#7E57C2}
+.av-5{background:#E91E63}
+.av-6{background:#00897B}
+.av-7{background:#5C6BC0}
+.av-8{background:#F4511E}
+.user-cell{display:flex;align-items:center;gap:10px;min-width:0}
+.user-cell-info{min-width:0}
+.user-cell-name{font-weight:600;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.user-cell-sub{font-size:12px;color:var(--color-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+
+/* ─── FILTER TABS ───────────────────────────────────────────────────────── */
+.filter-tabs{display:flex;gap:4px;background:#F3F4F6;padding:4px;border-radius:10px;flex-wrap:wrap}
+.filter-tab{padding:7px 14px;border-radius:7px;font-size:13px;font-weight:500;color:var(--color-muted);background:transparent;border:none;cursor:pointer;font-family:inherit;transition:all 120ms;display:inline-flex;align-items:center;gap:6px}
+.filter-tab:hover{color:var(--color-primary)}
+.filter-tab.active{background:#fff;color:var(--color-primary);font-weight:600;box-shadow:0 1px 2px rgba(0,0,0,0.06)}
+.filter-tab .badge{font-size:11px;padding:1px 7px;font-weight:600}
+
+/* ─── DETAIL TABS ───────────────────────────────────────────────────────── */
+.detail-tabs{display:flex;gap:0;border-bottom:1px solid var(--color-border);margin-bottom:20px;overflow-x:auto}
+.detail-tab{padding:12px 18px;font-size:14px;font-weight:500;color:var(--color-muted);background:transparent;border:none;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:all 120ms;display:inline-flex;align-items:center;gap:8px}
+.detail-tab:hover{color:var(--color-primary)}
+.detail-tab.active{color:var(--color-accent);border-bottom-color:var(--color-accent);font-weight:600}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* ─── SCREENS ───────────────────────────────────────────────────────────── */
+.screen{display:none}
+.screen.active{display:block}
+
+/* ─── DASHBOARD PANELS ──────────────────────────────────────────────────── */
+.panel-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px}
+@media(max-width:1100px){.panel-grid{grid-template-columns:1fr}}
+.panel-list-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid #F5F5F5;gap:12px;font-size:13.5px}
+.panel-list-row:last-child{border-bottom:none}
+
+/* ─── ACCOUNT HEADER ────────────────────────────────────────────────────── */
+.account-header{background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-card);border:1px solid rgba(0,0,0,0.04);padding:24px;margin-bottom:20px;display:flex;gap:18px;align-items:flex-start;flex-wrap:wrap}
+.account-header-info{flex:1;min-width:240px}
+.account-header-name{font-size:20px;font-weight:700;letter-spacing:-0.3px;margin:0 0 4px}
+.account-header-meta{display:flex;flex-wrap:wrap;gap:14px;color:var(--color-muted);font-size:13px;margin-top:8px}
+.account-header-meta strong{color:var(--color-primary);font-weight:600}
+.account-header-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* ─── DETAIL FIELDS ─────────────────────────────────────────────────────── */
+.fields-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px 24px}
+.field-block{display:flex;flex-direction:column;gap:4px}
+.field-label{font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px}
+.field-value{font-size:14px;font-weight:500;color:var(--color-primary)}
+
+/* ─── BANNERS ───────────────────────────────────────────────────────────── */
+.banner{padding:14px 18px;border-radius:var(--r-sm);font-size:13.5px;display:flex;gap:12px;align-items:flex-start;margin-bottom:16px;border:1px solid}
+.banner-info{background:var(--color-info-bg);border-color:#DBEAFE;color:#1E40AF}
+.banner-warn{background:var(--color-warning-bg);border-color:#FDE68A;color:#92400E}
+.banner-error{background:var(--color-error-bg);border-color:#FECACA;color:#991B1B}
+.banner-icon{flex-shrink:0;margin-top:1px}
+
+/* ─── DOCUMENT CARDS ────────────────────────────────────────────────────── */
+.doc-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px}
+.doc-card{background:#fff;border:1px solid var(--color-border);border-radius:var(--r-md);padding:16px;display:flex;flex-direction:column;gap:8px;transition:box-shadow 120ms}
+.doc-card:hover{box-shadow:var(--shadow-card-hover)}
+.doc-card-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+.doc-icon{width:38px;height:38px;border-radius:8px;background:var(--color-accent-soft);color:var(--color-accent);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.doc-type{font-size:13px;font-weight:600;color:var(--color-primary);margin-bottom:2px}
+.doc-file{font-size:12.5px;color:var(--color-muted);word-break:break-all}
+.doc-meta{font-size:12px;color:var(--color-muted-micro);display:flex;justify-content:space-between;align-items:center;margin-top:4px}
+
+/* ─── EVIDENCE GRID ─────────────────────────────────────────────────────── */
+.ev-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.ev-card{background:#fff;border:1px solid var(--color-border);border-radius:var(--r-md);overflow:hidden;display:flex;flex-direction:column}
+.ev-thumb{height:80px;background:linear-gradient(135deg,#F3F4F6,#E5E7EB);display:flex;align-items:center;justify-content:center;color:var(--color-muted)}
+.ev-body{padding:12px;display:flex;flex-direction:column;gap:6px;flex:1}
+.ev-name{font-size:13px;font-weight:600;word-break:break-all}
+.ev-sub{font-size:11.5px;color:var(--color-muted)}
+
+/* ─── AUDIT LIST ────────────────────────────────────────────────────────── */
+.audit-list{display:flex;flex-direction:column;gap:0;background:#fff;border-radius:var(--r-md);border:1px solid var(--color-border);overflow:hidden}
+.audit-row{display:flex;align-items:center;gap:14px;padding:12px 18px;border-bottom:1px solid #F5F5F5;font-size:13px}
+.audit-row:last-child{border-bottom:none}
+.audit-row-time{color:var(--color-muted);font-size:12px;font-variant-numeric:tabular-nums;white-space:nowrap;width:140px;flex-shrink:0}
+.audit-row-event{flex-shrink:0}
+.audit-row-meta{flex:1;color:var(--color-muted);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* ─── COMMENTS ──────────────────────────────────────────────────────────── */
+.comment-thread{display:flex;flex-direction:column;gap:14px}
+.comment-item{display:flex;gap:12px;align-items:flex-start}
+.comment-bubble{flex:1;background:#FAFAFA;border:1px solid var(--color-border-light);border-radius:0 var(--r-md) var(--r-md) var(--r-md);padding:12px 14px}
+.comment-bubble.alt{background:var(--color-accent-soft);border-color:#FFE4CC;border-radius:var(--r-md) 0 var(--r-md) var(--r-md)}
+.comment-header{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:4px}
+.comment-author{font-size:13px;font-weight:600}
+.comment-time{font-size:11.5px;color:var(--color-muted);margin-left:auto}
+.comment-text{font-size:13.5px;line-height:1.55}
+
+/* ─── DRAWER ────────────────────────────────────────────────────────────── */
+.drawer-overlay{position:fixed;inset:0;background:rgba(15,15,18,0.45);z-index:200;display:none;animation:fadeIn 150ms ease}
+.drawer-overlay.open{display:block}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:440px;max-width:100%;background:#fff;z-index:201;transform:translateX(100%);transition:transform 220ms ease;box-shadow:-8px 0 24px rgba(0,0,0,0.12);display:flex;flex-direction:column}
+.drawer.open{transform:translateX(0)}
+.drawer-header{padding:18px 20px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.drawer-header h3{font-size:16px;font-weight:600;margin:0}
+.drawer-body{flex:1;overflow-y:auto;padding:20px}
+.drawer-section{margin-bottom:22px}
+.drawer-section h4{font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 10px}
+.drawer-close{background:none;border:none;cursor:pointer;padding:6px;border-radius:6px;color:var(--color-muted);display:flex;align-items:center;justify-content:center}
+.drawer-close:hover{background:var(--color-muted-bg);color:var(--color-primary)}
+
+/* ─── MODAL ─────────────────────────────────────────────────────────────── */
+.modal-overlay{position:fixed;inset:0;background:rgba(15,15,18,0.5);z-index:300;display:none;align-items:center;justify-content:center;padding:20px;animation:fadeIn 150ms ease}
+.modal-overlay.open{display:flex}
+.modal{background:#fff;border-radius:var(--r-md);box-shadow:var(--shadow-modal);width:100%;max-width:520px;max-height:calc(100vh - 40px);display:flex;flex-direction:column;animation:scaleIn 180ms ease}
+.modal-header{padding:18px 22px;border-bottom:1px solid var(--color-border);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.modal-header h3{font-size:17px;font-weight:600;margin:0}
+.modal-body{padding:20px 22px;overflow-y:auto;font-size:14px;line-height:1.55}
+.modal-footer{padding:14px 22px;border-top:1px solid var(--color-border);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+@keyframes scaleIn{from{transform:scale(0.96);opacity:0}to{transform:scale(1);opacity:1}}
+
+/* ─── TOAST ─────────────────────────────────────────────────────────────── */
+.toast-container{position:fixed;bottom:24px;right:24px;z-index:400;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+.toast{background:#1E1E1E;color:#fff;padding:12px 18px;border-radius:var(--r-sm);font-size:14px;font-weight:500;box-shadow:0 8px 24px rgba(0,0,0,0.18);display:flex;align-items:center;gap:10px;animation:toastIn 220ms ease;pointer-events:auto;max-width:380px}
+.toast-success{background:var(--color-success)}
+.toast-error{background:var(--color-error)}
+@keyframes toastIn{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+
+/* ─── SEARCH BAR (project search hero) ─────────────────────────────────── */
+.search-hero{background:#fff;border-radius:var(--r-md);padding:18px;border:1px solid var(--color-border);box-shadow:var(--shadow-card);margin-bottom:18px}
+.search-hero-input{position:relative}
+.search-hero-input input{padding:14px 14px 14px 46px;font-size:15px;height:50px}
+.search-hero-input svg{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:var(--color-muted)}
+
+/* ─── TOOLBARS ──────────────────────────────────────────────────────────── */
+.toolbar{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+.toolbar-spacer{flex:1}
+.toolbar-search{flex:1;max-width:340px;min-width:200px;position:relative}
+.toolbar-search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--color-muted)}
+.toolbar-search input{padding-left:36px}
+
+/* ─── SECTION HEADERS ───────────────────────────────────────────────────── */
+.section-h{font-size:14px;font-weight:600;margin:0 0 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.section-h-sub{font-size:13px;color:var(--color-muted);font-weight:500}
+
+/* ─── COLLAPSIBLE ───────────────────────────────────────────────────────── */
+.collapsible-head{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;background:#FAFAFA;border:1px solid var(--color-border);border-radius:var(--r-md);cursor:pointer;font-weight:600;font-size:14px}
+.collapsible-head:hover{background:#F3F4F6}
+.collapsible-head .chev{transition:transform 180ms}
+.collapsible.open .collapsible-head .chev{transform:rotate(90deg)}
+.collapsible-body{display:none;margin-top:12px}
+.collapsible.open .collapsible-body{display:block}
+
+/* ─── PROFILE ───────────────────────────────────────────────────────────── */
+.profile-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid #F5F5F5;gap:14px}
+.profile-row:last-child{border-bottom:none}
+.profile-row-label{font-size:13px;color:var(--color-muted);font-weight:500}
+.profile-row-value{font-size:14px;font-weight:500;text-align:right}
+.profile-row-value input{max-width:280px;text-align:right}
+
+.toggle-switch{width:42px;height:24px;border-radius:12px;border:none;cursor:pointer;position:relative;flex-shrink:0;padding:0;background:#E5E7EB;transition:background 150ms}
+.toggle-switch.on{background:var(--color-accent)}
+.toggle-knob{width:18px;height:18px;border-radius:50%;background:#fff;position:absolute;top:3px;left:3px;transition:left 150ms;box-shadow:0 1px 3px rgba(0,0,0,0.2)}
+.toggle-switch.on .toggle-knob{left:21px}
+
+/* ─── NOTIFICATIONS DRAWER (top-right) ─────────────────────────────────── */
+.notif-drawer{position:fixed;top:0;right:0;bottom:0;width:380px;max-width:100%;background:#fff;z-index:201;transform:translateX(100%);transition:transform 220ms ease;box-shadow:-8px 0 24px rgba(0,0,0,0.12);display:flex;flex-direction:column}
+.notif-drawer.open{transform:translateX(0)}
+.notif-row{display:flex;gap:11px;padding:14px 18px;border-bottom:1px solid #F5F5F5;cursor:pointer;align-items:flex-start;transition:background 120ms}
+.notif-row:hover{background:#FAFAFA}
+.notif-row.unread{background:#FFFBF5}
+.notif-row.unread:hover{background:#FFF5EB}
+.notif-dot{width:8px;height:8px;border-radius:50%;background:var(--color-accent);flex-shrink:0;margin-top:6px}
+.notif-row:not(.unread) .notif-dot{background:transparent}
+.notif-text{flex:1;min-width:0}
+.notif-title{font-size:13.5px;font-weight:600;margin-bottom:2px}
+.notif-sub{font-size:12.5px;color:var(--color-muted);line-height:1.45}
+.notif-time{font-size:11.5px;color:var(--color-muted-micro);margin-top:4px}
+
+/* ─── EXPORT GRID ───────────────────────────────────────────────────────── */
+.radio-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+.radio-card{padding:14px 16px;border:1.5px solid var(--color-border);border-radius:var(--r-sm);cursor:pointer;display:flex;align-items:center;gap:10px;font-size:13.5px;font-weight:500;transition:all 120ms;background:#fff}
+.radio-card:hover{border-color:#D1D5DB}
+.radio-card.active{border-color:var(--color-accent);background:var(--color-accent-soft);color:var(--color-accent-dark);font-weight:600}
+.radio-card .radio-dot{width:18px;height:18px;border-radius:50%;border:2px solid var(--color-border);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.radio-card.active .radio-dot{border-color:var(--color-accent)}
+.radio-card.active .radio-dot::after{content:'';width:8px;height:8px;border-radius:50%;background:var(--color-accent)}
+
+/* ─── DOC EXPIRED CHIP ─────────────────────────────────────────────────── */
+.locked-banner{background:#1E1E1E;color:#fff;padding:14px 18px;border-radius:var(--r-md);margin-bottom:16px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.locked-banner-info{flex:1;min-width:200px}
+.locked-banner h4{margin:0 0 2px;font-size:14px;font-weight:600;display:flex;align-items:center;gap:8px}
+.locked-banner p{margin:0;font-size:12.5px;color:#9CA3AF;line-height:1.5}
+
+/* ─── DEFINITION TABLE ──────────────────────────────────────────────────── */
+.def-table{display:grid;grid-template-columns:auto 1fr;gap:10px 24px;font-size:13.5px}
+.def-table dt{color:var(--color-muted);font-weight:500}
+.def-table dd{margin:0;font-weight:500}
+
+/* ─── EMPTY STATE ──────────────────────────────────────────────────────── */
+.empty-state{padding:48px 20px;text-align:center;color:var(--color-muted)}
+.empty-state svg{margin-bottom:12px;color:#D1D5DB}
+.empty-state h4{font-size:15px;font-weight:600;color:var(--color-primary);margin:0 0 4px}
+.empty-state p{font-size:13.5px;margin:0}
+
+/* ─── RESPONSIVE ────────────────────────────────────────────────────────── */
+@media(max-width:900px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;z-index:150;transform:translateX(-100%);transition:transform 220ms ease}
+  .sidebar.open{transform:translateX(0)}
+  .menu-btn{display:flex;align-items:center;justify-content:center}
+  .topbar{padding:0 16px}
+  .content{padding:20px 16px}
+  .topbar-title{font-size:16px}
+  .account-header{padding:18px}
+  .drawer{width:100%}
+  .notif-drawer{width:100%}
+}
+
+/* SVG icon stroke defaults */
+.ico{stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;display:block;flex-shrink:0}
+</style>
+</head>
+<body>
+
+<div class="app-layout">
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="sidebar-logo-mark">R</div>
+      <div class="sidebar-logo-text">Reno<span>Logic</span></div>
+    </div>
+    <div class="sidebar-section-label">Admin</div>
+    <nav class="sidebar-nav" id="sidebarNav">
+      <button class="sidebar-link active" data-screen="dashboard" onclick="goTo('dashboard')">
+        <span class="sidebar-link-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg></span>
+        <span>Dashboard</span>
+      </button>
+      <button class="sidebar-link" data-screen="contractors" onclick="goTo('contractors')">
+        <span class="sidebar-link-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><path d="M2 21v-2a4 4 0 0 1 4-4h6a4 4 0 0 1 4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>
+        <span>Contractor List</span>
+        <span class="sidebar-link-badge">4</span>
+      </button>
+      <button class="sidebar-link" data-screen="homeowners" onclick="goTo('homeowners')">
+        <span class="sidebar-link-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z"/><path d="M9 22V12h6v10"/></svg></span>
+        <span>Homeowner List</span>
+      </button>
+      <button class="sidebar-link" data-screen="search" onclick="goTo('search')">
+        <span class="sidebar-link-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><path d="M3 7h18M3 12h18M3 17h18"/></svg></span>
+        <span>Projects</span>
+      </button>
+      <button class="sidebar-link" data-screen="audit" onclick="goTo('audit')">
+        <span class="sidebar-link-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></span>
+        <span>Audit Trail</span>
+      </button>
+      <button class="sidebar-link" data-screen="reconciliation" onclick="goTo('reconciliation')">
+        <span class="sidebar-link-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg></span>
+        <span>Reconciliation</span>
+        <span class="sidebar-link-badge">3</span>
+      </button>
+      <button class="sidebar-link" data-screen="export" onclick="goTo('export')">
+        <span class="sidebar-link-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg></span>
+        <span>Record Export</span>
+      </button>
+      <button class="sidebar-link" data-screen="profile" onclick="goTo('profile')">
+        <span class="sidebar-link-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></span>
+        <span>My Profile</span>
+      </button>
+    </nav>
+    <div class="sidebar-footer">
+      <div class="sidebar-footer-avatar">DT</div>
+      <div class="sidebar-footer-info">
+        <div class="sidebar-footer-name">Dana Thorne</div>
+        <div class="sidebar-footer-role">RL Admin</div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main">
+
+    <!-- TOPBAR -->
+    <header class="topbar">
+      <div class="topbar-title">
+        <button class="menu-btn" onclick="toggleSidebar()" aria-label="Open menu">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        </button>
+        <span id="topTitle">Dashboard</span>
+      </div>
+      <div class="topbar-right">
+        <button class="bell-btn" onclick="openNotifs()" aria-label="Notifications">
+          <svg class="ico" width="22" height="22" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21a2 2 0 0 0 4 0"/></svg>
+          <span class="bell-badge">5</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="content">
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 1 — DASHBOARD                                        -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen active" id="screen-dashboard">
+        <div class="page-header">
+          <h1>Dashboard</h1>
+          <p>Platform overview · Monday, 4 May 2026</p>
+        </div>
+
+        <!-- Summary stats -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Pending Contractors <span class="badge badge-warning" style="font-size:10.5px;padding:2px 7px">4 new</span></div>
+            <div class="stat-value stat-value-warn">4</div>
+            <div class="stat-meta">Awaiting document review</div>
+            <span class="stat-link" onclick="goTo('contractors','pending')">View pending →</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Active Contractors</div>
+            <div class="stat-value">142</div>
+            <div class="stat-meta">+6 this month</div>
+            <span class="stat-link" onclick="goTo('contractors','active')">View active →</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Registered Homeowners</div>
+            <div class="stat-value">1,287</div>
+            <div class="stat-meta">+38 this week</div>
+            <span class="stat-link" onclick="goTo('homeowners')">View all →</span>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Locked Projects</div>
+            <div class="stat-value">3</div>
+            <div class="stat-meta">2 awaiting review</div>
+            <span class="stat-link" onclick="goTo('search')">View all →</span>
+          </div>
+        </div>
+
+        <!-- Pending contractors panel -->
+        <div class="panel-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Pending Contractors</h3>
+              <span class="btn-link" onclick="goTo('contractors','pending')">View all →</span>
+            </div>
+            <div class="tbl-scroll">
+              <table class="tbl" style="min-width:0">
+                <thead><tr><th>Firm</th><th>Owner</th><th>Registered</th><th></th></tr></thead>
+                <tbody id="dashPendingBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Recent Audit Activity</h3>
+              <span class="btn-link" onclick="goTo('audit')">View full trail →</span>
+            </div>
+            <div id="dashAuditList"></div>
+          </div>
+        </div>
+
+        <div class="panel-grid">
+          <div class="card">
+            <div class="card-header">
+              <h3>Locked Projects</h3>
+              <span class="btn-link" onclick="goTo('search')">View all →</span>
+            </div>
+            <div class="tbl-scroll">
+              <table class="tbl" style="min-width:0">
+                <thead><tr><th>Job ID</th><th>Firm</th><th>Locked By</th><th>Date</th><th></th></tr></thead>
+                <tbody id="dashLockedBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h3>Reconciliation Status</h3>
+              <span class="btn-link" onclick="goTo('reconciliation')">View reconciliation →</span>
+            </div>
+            <div style="font-size:12.5px;color:var(--color-muted);margin-bottom:10px">Today · Mon 4 May 2026</div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px">
+              <div style="padding:14px;background:var(--color-success-bg);border-radius:8px;border:1px solid #BBF7D0">
+                <div style="font-size:11px;font-weight:600;color:var(--color-success);text-transform:uppercase;letter-spacing:0.5px">Cleared</div>
+                <div style="font-size:24px;font-weight:700;color:var(--color-success);margin-top:4px">87</div>
+                <div style="font-size:12px;color:var(--color-success);margin-top:2px">$214,800 reconciled</div>
+              </div>
+              <div style="padding:14px;background:var(--color-warning-bg);border-radius:8px;border:1px solid #FDE68A">
+                <div style="font-size:11px;font-weight:600;color:var(--color-warning);text-transform:uppercase;letter-spacing:0.5px">Uncleared</div>
+                <div style="font-size:24px;font-weight:700;color:var(--color-warning);margin-top:4px">3</div>
+                <div style="font-size:12px;color:var(--color-warning);margin-top:2px">$8,420 pending</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 2 — CONTRACTOR LIST                                  -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-contractors">
+        <div class="page-header">
+          <h1>Contractor List</h1>
+          <p>Review, approve, and manage contractor firm accounts.</p>
+        </div>
+
+        <div class="toolbar">
+          <div class="filter-tabs" id="contractorTabs">
+            <button class="filter-tab active" data-status="all" onclick="filterContractors('all')">All <span class="badge badge-muted">152</span></button>
+            <button class="filter-tab" data-status="pending" onclick="filterContractors('pending')">Pending <span class="badge badge-warning">4</span></button>
+            <button class="filter-tab" data-status="active" onclick="filterContractors('active')">Active <span class="badge badge-muted">142</span></button>
+            <button class="filter-tab" data-status="suspended" onclick="filterContractors('suspended')">Suspended <span class="badge badge-muted">2</span></button>
+            <button class="filter-tab" data-status="rejected" onclick="filterContractors('rejected')">Rejected <span class="badge badge-muted">4</span></button>
+          </div>
+          <div class="toolbar-spacer"></div>
+          <div class="toolbar-search">
+            <svg class="ico" width="16" height="16" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="contractorSearch" placeholder="Search firm name or email" oninput="renderContractors()">
+          </div>
+        </div>
+
+        <div class="tbl-wrap">
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Firm Name</th>
+                  <th>Owner</th>
+                  <th>Email</th>
+                  <th>Registered</th>
+                  <th>Tier</th>
+                  <th>Status</th>
+                  <th style="text-align:right">Actions</th>
+                </tr>
+              </thead>
+              <tbody id="contractorsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 3 — CONTRACTOR DETAIL                                -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-contractorDetail">
+        <button class="back-btn" onclick="goTo('contractors')">
+          <svg class="ico" width="14" height="14" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          Back to Contractor List
+        </button>
+
+        <div class="account-header">
+          <div class="avatar avatar-xl av-1" id="cdAvatar">NW</div>
+          <div class="account-header-info">
+            <h2 class="account-header-name" id="cdFirmName">—</h2>
+            <div style="color:var(--color-muted);font-size:13.5px" id="cdOwnerLine">—</div>
+            <div class="account-header-meta">
+              <span><strong id="cdRegDate">—</strong> registered</span>
+              <span>Tier · <strong id="cdTier">—</strong></span>
+              <span id="cdStatusWrap"></span>
+            </div>
+          </div>
+          <div class="account-header-actions" id="cdActions"></div>
+        </div>
+
+        <div class="detail-tabs">
+          <button class="detail-tab active" data-tab="details" onclick="cdTab('details')">Details</button>
+          <button class="detail-tab" data-tab="documents" onclick="cdTab('documents')">Documents</button>
+          <button class="detail-tab" data-tab="projects" onclick="cdTab('projects')">Projects</button>
+          <button class="detail-tab" data-tab="audit" onclick="cdTab('audit')">Audit Trail</button>
+        </div>
+
+        <!-- Details tab -->
+        <div class="tab-pane active" id="cd-details">
+          <div class="card card-lg">
+            <div class="card-header"><h3>Firm Details</h3></div>
+            <div class="fields-grid" id="cdDetailsGrid"></div>
+          </div>
+        </div>
+
+        <!-- Documents tab -->
+        <div class="tab-pane" id="cd-documents">
+          <div id="cdDocBanner"></div>
+          <div class="doc-grid" id="cdDocGrid"></div>
+        </div>
+
+        <!-- Projects tab -->
+        <div class="tab-pane" id="cd-projects">
+          <div class="tbl-wrap">
+            <div class="tbl-scroll">
+              <table class="tbl">
+                <thead><tr><th>Job ID</th><th>Title</th><th>Status</th><th>Suburb</th><th>Created</th><th></th></tr></thead>
+                <tbody id="cdProjectsBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Audit tab -->
+        <div class="tab-pane" id="cd-audit">
+          <div class="audit-list" id="cdAuditList"></div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 4 — HOMEOWNER LIST                                   -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-homeowners">
+        <div class="page-header">
+          <h1>Homeowner List</h1>
+          <p>View-only registry of all platform homeowners.</p>
+        </div>
+
+        <div class="toolbar">
+          <div class="filter-tabs" id="homeownerTabs">
+            <button class="filter-tab active" data-status="all" onclick="filterHomeowners('all')">All <span class="badge badge-muted">1,287</span></button>
+            <button class="filter-tab" data-status="active" onclick="filterHomeowners('active')">Active <span class="badge badge-muted">1,164</span></button>
+            <button class="filter-tab" data-status="inactive" onclick="filterHomeowners('inactive')">Inactive <span class="badge badge-muted">123</span></button>
+          </div>
+          <div class="toolbar-spacer"></div>
+          <div class="toolbar-search">
+            <svg class="ico" width="16" height="16" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="homeownerSearch" placeholder="Search name or email" oninput="renderHomeowners()">
+          </div>
+        </div>
+
+        <div class="tbl-wrap">
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Name</th><th>Email</th><th>Registered</th><th>Path</th>
+                  <th style="text-align:center">Active Jobs</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody id="homeownersBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 5 — PROJECT SEARCH                                   -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-search">
+        <div class="page-header">
+          <h1>Projects</h1>
+          <p>Find any project across all firms.</p>
+        </div>
+
+        <div class="search-hero">
+          <div class="search-hero-input">
+            <svg class="ico" width="20" height="20" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+            <input type="search" id="projectSearch" placeholder="Search by Job ID, firm name, homeowner suburb, or file hash" oninput="renderProjects()">
+          </div>
+          <div class="toolbar" style="margin-top:14px;margin-bottom:0">
+            <div style="flex:1;min-width:140px">
+              <label style="font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">From</label>
+              <input type="date" value="2026-01-01">
+            </div>
+            <div style="flex:1;min-width:140px">
+              <label style="font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">To</label>
+              <input type="date" value="2026-05-04">
+            </div>
+            <div style="flex:1;min-width:140px">
+              <label style="font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Status</label>
+              <select id="searchStatus" onchange="renderProjects()">
+                <option value="all">All statuses</option>
+                <option value="Active">Active</option>
+                <option value="Paused">Paused</option>
+                <option value="Locked">Locked</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+            <div style="flex:1;min-width:140px">
+              <label style="font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;margin-bottom:4px">Trade</label>
+              <select id="searchTrade" onchange="renderProjects()">
+                <option value="all">All trades</option>
+                <option>Carpentry</option><option>Electrical</option><option>Plumbing</option>
+                <option>Roofing</option><option>Tiling</option><option>Landscaping</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-h">
+          <span id="searchResultsLabel">Recent Projects</span>
+          <span class="section-h-sub" id="searchResultsCount">4 results</span>
+        </div>
+
+        <div class="tbl-wrap">
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Job ID</th>
+                  <th>Title</th>
+                  <th>Firm</th>
+                  <th>Suburb</th>
+                  <th>Trade</th>
+                  <th>Status</th>
+                  <th>Created</th>
+                  <th style="text-align:right">Action</th>
+                </tr>
+              </thead>
+              <tbody id="searchResults"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 6 — PROJECT DETAIL                                   -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-projectDetail">
+        <button class="back-btn" onclick="goTo('search')">
+          <svg class="ico" width="14" height="14" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg>
+          Back to Projects
+        </button>
+
+        <div id="pdLockedBanner"></div>
+
+        <div class="account-header">
+          <div style="width:64px;height:64px;border-radius:14px;background:var(--color-accent-soft);color:var(--color-accent);display:flex;align-items:center;justify-content:center">
+            <svg class="ico" width="30" height="30" viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V21a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V9.5z"/></svg>
+          </div>
+          <div class="account-header-info">
+            <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+              <span style="font-size:12px;font-weight:600;color:var(--color-muted);font-variant-numeric:tabular-nums" id="pdJobId">JOB-1247</span>
+              <span id="pdStatusBadge"></span>
+            </div>
+            <h2 class="account-header-name" id="pdTitle">—</h2>
+            <div class="account-header-meta">
+              <span>Trade · <strong id="pdTrade">—</strong></span>
+              <span>Created <strong id="pdCreated">—</strong></span>
+              <span>Firm · <strong id="pdFirm">—</strong></span>
+              <span>Suburb · <strong id="pdSuburb">—</strong></span>
+            </div>
+          </div>
+          <div class="account-header-actions" id="pdActions"></div>
+        </div>
+
+        <div class="detail-tabs">
+          <button class="detail-tab active" data-tab="overview" onclick="pdTab('overview')">Overview</button>
+          <button class="detail-tab" data-tab="milestones" onclick="pdTab('milestones')">Milestones</button>
+          <button class="detail-tab" data-tab="evidence" onclick="pdTab('evidence')">Evidence</button>
+          <button class="detail-tab" data-tab="comments" onclick="pdTab('comments')">Comments</button>
+          <button class="detail-tab" data-tab="audit" onclick="pdTab('audit')">Audit Trail</button>
+        </div>
+
+        <div class="tab-pane active" id="pd-overview">
+          <div class="card card-lg" style="margin-bottom:14px">
+            <div class="card-header"><h3>Job Overview</h3></div>
+            <div class="fields-grid">
+              <div class="field-block"><div class="field-label">Description</div><div class="field-value" id="pdDesc">—</div></div>
+              <div class="field-block"><div class="field-label">Preferred Start</div><div class="field-value" id="pdStart">—</div></div>
+              <div class="field-block"><div class="field-label">Location</div><div class="field-value" id="pdLocation">—</div></div>
+            </div>
+          </div>
+          <div class="card card-lg" style="margin-bottom:14px">
+            <div class="card-header"><h3>Quote Summary</h3></div>
+            <dl class="def-table">
+              <dt>Quote ID</dt><dd>QT-2086</dd>
+              <dt>Contract value</dt><dd>$28,400.00</dd>
+              <dt>GST</dt><dd>$2,840.00</dd>
+              <dt>Status</dt><dd><span class="badge badge-success">Accepted</span></dd>
+              <dt>Submitted</dt><dd>12 Mar 2026</dd>
+              <dt>Accepted</dt><dd>15 Mar 2026</dd>
+            </dl>
+          </div>
+          <div class="card card-lg">
+            <div class="card-header"><h3>Escrow Reference</h3></div>
+            <dl class="def-table">
+              <dt>Provider</dt><dd>MarketBridge Escrow Pty Ltd</dd>
+              <dt>Reference ID</dt><dd style="font-family:'SF Mono',monospace">MB-ESC-1247-AU</dd>
+            </dl>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="pd-milestones">
+          <div class="tbl-wrap">
+            <div class="tbl-scroll">
+              <table class="tbl">
+                <thead><tr><th>Seq</th><th>Milestone</th><th>Value</th><th>Status</th><th style="text-align:center">Evidence</th><th>Acknowledged</th></tr></thead>
+                <tbody>
+                  <tr><td>1</td><td>Site preparation &amp; demolition</td><td>$5,400.00</td><td><span class="badge badge-success">Complete</span></td><td style="text-align:center">3</td><td>Yes</td></tr>
+                  <tr><td>2</td><td>Frame &amp; structural works</td><td>$8,200.00</td><td><span class="badge badge-success">Complete</span></td><td style="text-align:center">5</td><td>Yes</td></tr>
+                  <tr><td>3</td><td>Electrical rough-in</td><td>$6,400.00</td><td><span class="badge badge-info">In progress</span></td><td style="text-align:center">2</td><td>—</td></tr>
+                  <tr><td>4</td><td>Plumbing rough-in</td><td>$4,800.00</td><td><span class="badge badge-muted">Not started</span></td><td style="text-align:center">0</td><td>—</td></tr>
+                  <tr><td>5</td><td>Final fit-out &amp; certification</td><td>$3,600.00</td><td><span class="badge badge-muted">Not started</span></td><td style="text-align:center">0</td><td>—</td></tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="pd-evidence">
+          <div class="ev-grid">
+            <div class="ev-card"><div class="ev-thumb"><svg class="ico" width="32" height="32" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div><div class="ev-body"><span class="badge badge-info" style="align-self:flex-start;font-size:10.5px">Photo</span><div class="ev-name">site-prep-before.jpg</div><div class="ev-sub">Contractor Owner · M1 · 18 Mar 2026</div></div></div>
+            <div class="ev-card"><div class="ev-thumb"><svg class="ico" width="32" height="32" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div><div class="ev-body"><span class="badge badge-info" style="align-self:flex-start;font-size:10.5px">Photo</span><div class="ev-name">site-prep-after.jpg</div><div class="ev-sub">Contractor Owner · M1 · 19 Mar 2026</div></div></div>
+            <div class="ev-card"><div class="ev-thumb"><svg class="ico" width="32" height="32" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><div class="ev-body"><span class="badge badge-purple" style="align-self:flex-start;font-size:10.5px">PDF</span><div class="ev-name">frame-inspection.pdf</div><div class="ev-sub">Site Manager · M2 · 02 Apr 2026</div></div></div>
+            <div class="ev-card"><div class="ev-thumb"><svg class="ico" width="32" height="32" viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/></svg></div><div class="ev-body"><span class="badge badge-info" style="align-self:flex-start;font-size:10.5px">Photo</span><div class="ev-name">framing-complete-01.jpg</div><div class="ev-sub">Contractor Owner · M2 · 04 Apr 2026</div></div></div>
+            <div class="ev-card"><div class="ev-thumb"><svg class="ico" width="32" height="32" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><div class="ev-body"><span class="badge badge-purple" style="align-self:flex-start;font-size:10.5px">PDF</span><div class="ev-name">electrical-permit.pdf</div><div class="ev-sub">Project Manager · M3 · 12 Apr 2026</div></div></div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="pd-comments">
+          <div class="card">
+            <div class="comment-thread">
+              <div class="comment-item"><div class="avatar av-1">NW</div><div class="comment-bubble"><div class="comment-header"><span class="comment-author">Contractor Owner</span><span class="badge badge-muted">CO</span><span class="comment-time">12 Mar · 10:22</span></div><div class="comment-text">Quote submitted. Lead time of 4 weeks once homeowner accepts and escrow is funded.</div></div></div>
+              <div class="comment-item"><div class="avatar av-3">JM</div><div class="comment-bubble alt"><div class="comment-header"><span class="comment-author">Homeowner</span><span class="badge badge-muted">HO</span><span class="comment-time">13 Mar · 19:08</span></div><div class="comment-text">Thanks Nick. Could you confirm the kitchen demolition is included in M1 — wasn't sure from the quote line items.</div></div></div>
+              <div class="comment-item"><div class="avatar av-1">NW</div><div class="comment-bubble"><div class="comment-header"><span class="comment-author">Contractor Owner</span><span class="badge badge-muted">CO</span><span class="comment-time">14 Mar · 08:14</span></div><div class="comment-text">Confirmed — kitchen demolition is bundled into Site Preparation. Updated the description so it's clearer.</div></div></div>
+              <div class="comment-item"><div class="avatar av-3">JM</div><div class="comment-bubble alt"><div class="comment-header"><span class="comment-author">Homeowner</span><span class="badge badge-muted">HO</span><span class="comment-time">15 Mar · 11:40</span></div><div class="comment-text">Quote accepted. Funding the escrow today.</div></div></div>
+            </div>
+            <div style="font-size:12px;color:var(--color-muted-micro);margin-top:14px;font-style:italic">Comments are read-only for RL Admin.</div>
+          </div>
+        </div>
+
+        <div class="tab-pane" id="pd-audit">
+          <div class="audit-list" id="pdAuditList"></div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 7 — AUDIT TRAIL                                      -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-audit">
+        <div class="page-header-row">
+          <div class="page-header" style="margin-bottom:0">
+            <h1>Audit Trail</h1>
+            <p>Platform-wide immutable event log.</p>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-secondary" onclick="exportAudit('csv')">
+              <svg class="ico" width="14" height="14" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              Export CSV
+            </button>
+            <button class="btn btn-secondary" onclick="exportAudit('json')">
+              <svg class="ico" width="14" height="14" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              Export JSON
+            </button>
+          </div>
+        </div>
+
+        <div class="card" style="padding:16px;margin-bottom:16px">
+          <div class="toolbar" style="margin-bottom:0">
+            <div style="display:flex;gap:8px;align-items:center">
+              <input type="date" value="2026-04-01" style="width:150px">
+              <span style="color:var(--color-muted)">—</span>
+              <input type="date" value="2026-05-04" style="width:150px">
+            </div>
+            <select style="width:200px"><option>All event types (16)</option><option>CO_REGISTERED</option><option>CO_APPROVED</option><option>CO_REJECTED</option><option>HO_REGISTERED</option><option>JOB_CREATED</option><option>JOB_LOCKED</option><option>QUOTE_ACCEPTED</option><option>MILESTONE_RELEASED</option></select>
+            <input type="search" placeholder="Firm name" style="width:180px">
+            <input type="search" placeholder="User ID" style="width:160px;font-family:monospace">
+            <div class="toolbar-spacer"></div>
+            <span style="font-size:13px;color:var(--color-muted)">Showing 12 of 8,427</span>
+          </div>
+        </div>
+
+        <div class="tbl-wrap">
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>Timestamp</th><th>Event</th><th>User</th><th>Role</th><th>Entity</th><th>Details</th></tr></thead>
+              <tbody id="auditTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 8 — RECONCILIATION                                   -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-reconciliation">
+        <div class="page-header-row">
+          <div class="page-header" style="margin-bottom:0">
+            <h1>Reconciliation Dashboard</h1>
+            <p>Daily MarketBridge ledger reconciliation.</p>
+          </div>
+          <div>
+            <input type="date" id="reconDate" value="2026-05-04" style="width:170px">
+          </div>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-label">Total Transactions</div><div class="stat-value">90</div><div class="stat-meta">For selected date</div></div>
+          <div class="stat-card"><div class="stat-label">Cleared</div><div class="stat-value" style="color:var(--color-success)">87</div><div class="stat-meta">96.7% match rate</div></div>
+          <div class="stat-card"><div class="stat-label">Uncleared <span class="badge badge-warning" style="font-size:10.5px;padding:2px 7px">3</span></div><div class="stat-value stat-value-warn">3</div><div class="stat-meta">Need attention</div></div>
+          <div class="stat-card"><div class="stat-label">Cleared Value</div><div class="stat-value" style="font-size:22px">$214,800</div><div class="stat-meta">87 transactions</div></div>
+          <div class="stat-card"><div class="stat-label">Uncleared Value</div><div class="stat-value stat-value-warn" style="font-size:22px">$8,420</div><div class="stat-meta">3 exceptions</div></div>
+        </div>
+
+        <h3 class="section-h"><span>Uncleared Exceptions</span> <span class="section-h-sub">3 require review</span></h3>
+        <div class="tbl-wrap" style="margin-bottom:24px">
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>Transaction</th><th>Firm</th><th>Amount</th><th>Date</th><th>Reason</th><th>Notes</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+              <tbody id="reconBody"></tbody>
+            </table>
+          </div>
+        </div>
+
+        <div class="collapsible" id="clearedCollapse">
+          <div class="collapsible-head" onclick="document.getElementById('clearedCollapse').classList.toggle('open')">
+            <span>Cleared Transactions · 87</span>
+            <span class="chev"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg></span>
+          </div>
+          <div class="collapsible-body">
+            <div class="tbl-wrap" style="margin-top:0">
+              <div class="tbl-scroll">
+                <table class="tbl">
+                  <thead><tr><th>Transaction</th><th>Firm</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+                  <tbody>
+                    <tr><td style="font-family:monospace">TXN-558102</td><td>Sandstone Carpentry</td><td>$8,200.00</td><td>04 May 2026</td><td><span class="badge badge-success">Cleared</span></td></tr>
+                    <tr><td style="font-family:monospace">TXN-558103</td><td>Hartley Plumbing &amp; Gas</td><td>$3,400.00</td><td>04 May 2026</td><td><span class="badge badge-success">Cleared</span></td></tr>
+                    <tr><td style="font-family:monospace">TXN-558104</td><td>Marrickville Electrical Co</td><td>$5,200.00</td><td>04 May 2026</td><td><span class="badge badge-success">Cleared</span></td></tr>
+                    <tr><td style="font-family:monospace">TXN-558105</td><td>Bayside Tiling</td><td>$2,800.00</td><td>04 May 2026</td><td><span class="badge badge-success">Cleared</span></td></tr>
+                    <tr><td colspan="5" style="text-align:center;color:var(--color-muted);padding:18px">Showing 4 of 87 cleared transactions</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 9 — RECORD EXPORT                                    -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-export">
+        <div class="page-header">
+          <h1>Record Export</h1>
+          <p>Export immutable platform records for audit and compliance.</p>
+        </div>
+
+        <div class="card card-lg" style="margin-bottom:16px">
+          <div class="card-header"><h3>New Export</h3></div>
+
+          <div class="field">
+            <label>Export type</label>
+            <div class="radio-grid" id="exportTypeGrid">
+              <div class="radio-card active" data-type="audit"><div class="radio-dot"></div>Audit Trail</div>
+              <div class="radio-card" data-type="contractors"><div class="radio-dot"></div>Contractor Accounts</div>
+              <div class="radio-card" data-type="homeowners"><div class="radio-dot"></div>Homeowner Accounts</div>
+              <div class="radio-card" data-type="projects"><div class="radio-dot"></div>Project Records</div>
+              <div class="radio-card" data-type="reconciliation"><div class="radio-dot"></div>Reconciliation Summary</div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:14px">
+            <div class="field"><label>From date</label><input type="date" value="2026-04-01"></div>
+            <div class="field"><label>To date</label><input type="date" value="2026-05-04"></div>
+            <div class="field">
+              <label>Format</label>
+              <div style="display:flex;gap:8px">
+                <button class="radio-card active" id="fmt-csv" onclick="setFormat('csv')" style="flex:1"><div class="radio-dot"></div>CSV</button>
+                <button class="radio-card" id="fmt-json" onclick="setFormat('json')" style="flex:1"><div class="radio-dot"></div>JSON</button>
+              </div>
+            </div>
+          </div>
+
+          <div id="exportContextual" style="margin-top:6px"></div>
+
+          <div class="card-footer">
+            <button class="btn btn-accent" onclick="runExport()">
+              <svg class="ico" width="14" height="14" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 10 5 5 5-5"/><path d="M12 15V3"/></svg>
+              Generate Export
+            </button>
+          </div>
+        </div>
+
+        <h3 class="section-h"><span>Recent Exports</span></h3>
+        <div class="tbl-wrap">
+          <div class="tbl-scroll">
+            <table class="tbl">
+              <thead><tr><th>Type</th><th>Date Range</th><th>Format</th><th>Exported By</th><th>Created</th><th style="text-align:right">Action</th></tr></thead>
+              <tbody id="exportsBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <!-- SCREEN 10 — MY PROFILE                                      -->
+      <!-- ════════════════════════════════════════════════════════════ -->
+      <section class="screen" id="screen-profile">
+        <div class="page-header"><h1>My Profile</h1><p>Manage your RL Admin account.</p></div>
+
+        <div class="account-header">
+          <div class="avatar avatar-xl av-1">DT</div>
+          <div class="account-header-info">
+            <h2 class="account-header-name">Dana Thorne</h2>
+            <div style="color:var(--color-muted);font-size:13.5px"><span class="badge badge-primary" style="margin-right:8px">RL Admin</span>dana.thorne@renologic.com.au</div>
+            <div class="account-header-meta">
+              <span>Last login · <strong>04 May 2026, 09:14 AEST</strong></span>
+              <span>Brisbane, QLD</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card card-lg" style="margin-bottom:14px">
+          <div class="card-header"><h3>Personal Details</h3><button class="btn btn-secondary btn-sm" onclick="toggleProfileEdit()">Edit</button></div>
+          <div id="profileFields">
+            <div class="profile-row"><div class="profile-row-label">Full name</div><div class="profile-row-value" data-field="name">Dana Thorne</div></div>
+            <div class="profile-row"><div class="profile-row-label">Email</div><div class="profile-row-value" data-field="email">dana.thorne@renologic.com.au</div></div>
+            <div class="profile-row"><div class="profile-row-label">Mobile</div><div class="profile-row-value" data-field="mobile">+61 412 384 029</div></div>
+          </div>
+          <div id="profileEditFooter" style="display:none" class="card-footer">
+            <button class="btn btn-ghost" onclick="toggleProfileEdit(true)">Cancel</button>
+            <button class="btn btn-accent" onclick="saveProfile()">Save changes</button>
+          </div>
+        </div>
+
+        <div class="card card-lg" style="margin-bottom:14px">
+          <div class="card-header"><h3>Security</h3></div>
+          <div class="profile-row">
+            <div><div style="font-weight:600">Password</div><div style="font-size:12.5px;color:var(--color-muted);margin-top:2px">Last changed 22 Feb 2026</div></div>
+            <button class="btn btn-secondary btn-sm" onclick="openModal('mdlChangePw')">Change password</button>
+          </div>
+          <div class="profile-row">
+            <div><div style="font-weight:600">Two-Factor Authentication</div><div style="font-size:12.5px;color:var(--color-muted);margin-top:2px">Authenticator app · Required for RL Admin role</div></div>
+            <button class="toggle-switch on" onclick="this.classList.toggle('on');toast('2FA setting updated.')"><span class="toggle-knob"></span></button>
+          </div>
+          <div class="profile-row">
+            <div><div style="font-weight:600">Last login</div><div style="font-size:12.5px;color:var(--color-muted);margin-top:2px">Mon 4 May 2026 · 09:14 AEST · Chrome on macOS · Brisbane</div></div>
+          </div>
+        </div>
+
+        <div class="card card-lg" style="margin-bottom:14px">
+          <div class="card-header"><h3>Notification Preferences</h3></div>
+          <table style="width:100%;border-collapse:separate;border-spacing:0">
+            <thead>
+              <tr style="text-align:left">
+                <th style="font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;padding:8px 0;border-bottom:1px solid var(--color-border-light);width:auto"></th>
+                <th style="font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;padding:8px 16px;border-bottom:1px solid var(--color-border-light);text-align:center;width:80px">Email</th>
+                <th style="font-size:11.5px;font-weight:600;color:var(--color-muted);text-transform:uppercase;letter-spacing:0.5px;padding:8px 16px;border-bottom:1px solid var(--color-border-light);text-align:center;width:80px">SMS</th>
+              </tr>
+            </thead>
+            <tbody id="notifPrefsBody"></tbody>
+          </table>
+        </div>
+
+        <div style="margin-top:24px">
+          <button class="btn btn-error" onclick="toast('Logged out (demo).','success')">
+            <svg class="ico" width="14" height="14" viewBox="0 0 24 24"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/></svg>
+            Log out
+          </button>
+        </div>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<!-- ═══ HOMEOWNER DRAWER ═══ -->
+<div class="drawer-overlay" id="hoDrawerOverlay" onclick="closeHomeownerDrawer()"></div>
+<aside class="drawer" id="hoDrawer">
+  <div class="drawer-header">
+    <h3>Homeowner Profile</h3>
+    <button class="drawer-close" onclick="closeHomeownerDrawer()" aria-label="Close">
+      <svg class="ico" width="20" height="20" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>
+    </button>
+  </div>
+  <div class="drawer-body" id="hoDrawerBody"></div>
+</aside>
+
+<!-- ═══ NOTIFICATIONS DRAWER ═══ -->
+<div class="drawer-overlay" id="notifOverlay" onclick="closeNotifs()"></div>
+<aside class="notif-drawer" id="notifDrawer">
+  <div class="drawer-header">
+    <h3>Notifications</h3>
+    <div style="display:flex;align-items:center;gap:6px">
+      <button class="btn-link" onclick="markAllRead()" style="font-size:12.5px">Mark all as read</button>
+      <button class="drawer-close" onclick="closeNotifs()"><svg class="ico" width="20" height="20" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button>
+    </div>
+  </div>
+  <div class="drawer-body" id="notifList" style="padding:0"></div>
+</aside>
+
+<!-- ═══ MODALS ═══ -->
+<div class="modal-overlay" id="mdlApprove">
+  <div class="modal">
+    <div class="modal-header"><h3>Approve Contractor Account</h3></div>
+    <div class="modal-body">
+      <p style="margin-top:0">You are about to approve <strong id="approveFirmName">—</strong>.</p>
+      <p style="color:var(--color-muted);font-size:13px">Confirm that you have reviewed all submitted documents:</p>
+      <ul style="font-size:13.5px;line-height:1.8;padding-left:20px;margin:8px 0">
+        <li>Builder's Licence</li>
+        <li>Public Liability Insurance</li>
+        <li>ABN Registration Confirmation</li>
+        <li>Workers Compensation Insurance</li>
+      </ul>
+      <p style="color:var(--color-muted);font-size:13px;margin-bottom:0">An audit event (CO_APPROVED) will be created and the firm will gain platform access.</p>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-success" onclick="confirmApprove()">Confirm Approval</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mdlReject">
+  <div class="modal">
+    <div class="modal-header"><h3>Reject Contractor Account</h3></div>
+    <div class="modal-body">
+      <p style="margin-top:0">Rejecting <strong id="rejectFirmName">—</strong>. The contractor will be notified with the reason below.</p>
+      <div class="field">
+        <label>Reason code</label>
+        <select id="rejectReason">
+          <option>Incomplete or Unverifiable Information</option>
+          <option>Licence or Insurance Concerns</option>
+          <option>Expired Documents</option>
+          <option>Duplicate Account</option>
+          <option>Platform Policy Violation</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Explanation</label>
+        <textarea id="rejectExplanation" placeholder="Provide details that will be sent to the contractor"></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-error" onclick="confirmReject()">Confirm Rejection</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mdlRequestDocs">
+  <div class="modal">
+    <div class="modal-header"><h3>Request Additional Documents</h3></div>
+    <div class="modal-body">
+      <div class="field" style="margin-bottom:0">
+        <label>What's needed?</label>
+        <textarea id="docsRequestBody" placeholder="e.g. Public Liability certificate is illegible — please upload a clear copy of the current policy."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="confirmRequestDocs()">Send Request</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mdlLock">
+  <div class="modal">
+    <div class="modal-header"><h3>Lock Project</h3></div>
+    <div class="modal-body">
+      <p style="margin-top:0;color:var(--color-muted);font-size:13.5px">Locking will prevent any further state changes (milestone releases, comments, evidence uploads) by anyone other than RL Admin until unlocked.</p>
+      <div class="field">
+        <label>Reason code</label>
+        <select id="lockReason">
+          <option>Compliance Investigation</option>
+          <option>Dispute Raised</option>
+          <option>Suspected Fraud</option>
+          <option>Court Order</option>
+          <option>Operational Hold</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <div class="field" style="margin-bottom:0">
+        <label>Description</label>
+        <textarea id="lockDesc" placeholder="Internal note describing why this project is being locked."></textarea>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-error" onclick="confirmLock()">Confirm Lock</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="mdlChangePw">
+  <div class="modal">
+    <div class="modal-header"><h3>Change Password</h3></div>
+    <div class="modal-body">
+      <div class="field"><label>Current password</label><input type="password"></div>
+      <div class="field"><label>New password</label><input type="password"></div>
+      <div class="field" style="margin-bottom:0"><label>Confirm new password</label><input type="password"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-accent" onclick="closeModal();toast('Password updated.','success')">Update Password</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ TOAST CONTAINER ═══ -->
+<div class="toast-container" id="toastContainer"></div>
+
+<script>
+/* ═══ ICONS ═══ */
+const ico = {
+  chev: '<svg class="ico" width="14" height="14" viewBox="0 0 24 24"><path d="m9 6 6 6-6 6"/></svg>',
+  doc: '<svg class="ico" width="18" height="18" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 13h6M9 17h6"/></svg>',
+  open: '<svg class="ico" width="14" height="14" viewBox="0 0 24 24"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M21 14v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>',
+  lock: '<svg class="ico" width="14" height="14" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>',
+  unlock: '<svg class="ico" width="14" height="14" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>',
+};
+
+/* ═══ DATA ═══ */
+const screenTitles = {
+  dashboard:'Dashboard',
+  contractors:'Contractor List',
+  contractorDetail:'Contractor Account',
+  homeowners:'Homeowner List',
+  search:'Projects',
+  projectDetail:'Project Detail',
+  audit:'Audit Trail',
+  reconciliation:'Reconciliation',
+  export:'Record Export',
+  profile:'My Profile'
+};
+
+const sidebarMap = {
+  dashboard:'dashboard', contractors:'contractors', contractorDetail:'contractors',
+  homeowners:'homeowners', search:'search', projectDetail:'search',
+  audit:'audit', reconciliation:'reconciliation', export:'export', profile:'profile'
+};
+
+const tiers = ['Starter','Trade Pro','Trade Pro+','Enterprise'];
+
+const contractors = [
+  {id:'CO-024', firm:"Northbridge Carpentry & Joinery", owner:'Nicholas Whitlam', email:'nick@northbridgecj.com.au', abn:'48 109 224 778', trade:'Carpentry', location:'Northbridge, NSW', mobile:'+61 412 776 901', registered:'2 May 2026', tier:'Trade Pro', status:'pending', avatar:'av-1', initials:'NW'},
+  {id:'CO-023', firm:"Hartley Plumbing & Gas", owner:'Sienna Hartley', email:'sienna@hartleyplumb.com.au', abn:'62 884 117 309', trade:'Plumbing', location:'Coorparoo, QLD', mobile:'+61 433 220 487', registered:'1 May 2026', tier:'Starter', status:'pending', avatar:'av-2', initials:'SH'},
+  {id:'CO-022', firm:"Marrickville Electrical Co", owner:'Daniel Polidoros', email:'dan@marrickelec.com.au', abn:'71 200 488 612', trade:'Electrical', location:'Marrickville, NSW', mobile:'+61 401 663 098', registered:'30 Apr 2026', tier:'Trade Pro+', status:'pending', avatar:'av-3', initials:'DP'},
+  {id:'CO-021', firm:"Bayside Tiling Solutions", owner:'Marco Russo', email:'marco@baysidetile.com.au', abn:'33 901 552 264', trade:'Tiling', location:'Brighton, VIC', mobile:'+61 422 119 005', registered:'29 Apr 2026', tier:'Starter', status:'pending', avatar:'av-4', initials:'MR'},
+  {id:'CO-018', firm:"Sandstone Carpentry", owner:'Olivia Bennett', email:'olivia@sandstonecarp.com.au', abn:'21 446 880 142', trade:'Carpentry', location:'Glebe, NSW', mobile:'+61 414 802 776', registered:'15 Mar 2026', tier:'Trade Pro+', status:'active', avatar:'av-5', initials:'OB'},
+  {id:'CO-017', firm:"Apex Roofing & Gutters", owner:'James O\u2019Donnell', email:'james@apexroofing.au', abn:'58 109 113 244', trade:'Roofing', location:'Hawthorn, VIC', mobile:'+61 419 553 028', registered:'8 Mar 2026', tier:'Trade Pro', status:'active', avatar:'av-6', initials:'JO'},
+  {id:'CO-016', firm:"Riverside Landscaping", owner:'Amelia Truong', email:'amelia@riversidelg.com.au', abn:'14 660 885 117', trade:'Landscaping', location:'Subiaco, WA', mobile:'+61 423 220 884', registered:'22 Feb 2026', tier:'Starter', status:'active', avatar:'av-7', initials:'AT'},
+  {id:'CO-015', firm:"Kingsford Kitchens & Bath", owner:'Liam McKenzie', email:'liam@kkbau.com.au', abn:'29 008 712 446', trade:'Carpentry', location:'Kingsford, NSW', mobile:'+61 408 992 116', registered:'17 Feb 2026', tier:'Enterprise', status:'active', avatar:'av-8', initials:'LM'},
+  {id:'CO-009', firm:"Coastal Concrete Co", owner:'Harriet Vasquez', email:'harriet@coastalconcrete.au', abn:'77 553 991 028', trade:'Concrete', location:'Mona Vale, NSW', mobile:'+61 411 770 220', registered:'4 Dec 2025', tier:'Trade Pro', status:'suspended', avatar:'av-2', initials:'HV'},
+  {id:'CO-007', firm:"Inner West Glaziers", owner:'Theo Constantinou', email:'theo@iwglaze.com.au', abn:'62 113 887 002', trade:'Glazing', location:'Erskineville, NSW', mobile:'+61 425 008 663', registered:'12 Nov 2025', tier:'Starter', status:'rejected', avatar:'av-3', initials:'TC'}
+];
+
+const homeowners = [
+  {name:'Jane Mitchell', email:'jane.mitchell@gmail.com', registered:'12 Mar 2026', path:'self', activeJobs:1, status:'active', avatar:'av-3', initials:'JM', mobile:'+61 412 008 776', suburb:'Glebe, NSW', jobs:[{title:'Kitchen renovation',firm:'Northbridge Carpentry & Joinery',status:'Active'}]},
+  {name:'Robert Tan', email:'rtan@outlook.com', registered:'2 Apr 2026', path:'invited', activeJobs:1, status:'active', avatar:'av-2', initials:'RT', mobile:'+61 433 770 088', suburb:'Coorparoo, QLD', jobs:[{title:'Bathroom plumbing rework',firm:'Hartley Plumbing & Gas',status:'Active'}]},
+  {name:'Aleesha Khan', email:'aleesha.khan@gmail.com', registered:'18 Apr 2026', path:'self', activeJobs:0, status:'active', avatar:'av-5', initials:'AK', mobile:'+61 401 882 116', suburb:'Hawthorn, VIC', jobs:[{title:'Roof gutter replacement',firm:'Apex Roofing & Gutters',status:'Closed'}]},
+  {name:'Charles Webb', email:'cwebb88@gmail.com', registered:'21 Apr 2026', path:'invited', activeJobs:2, status:'active', avatar:'av-7', initials:'CW', mobile:'+61 408 770 552', suburb:'Subiaco, WA', jobs:[{title:'Front yard landscaping',firm:'Riverside Landscaping',status:'Active'},{title:'Driveway replacement',firm:'Coastal Concrete Co',status:'Paused'}]},
+  {name:'Priya Patel', email:'priya.p@hotmail.com', registered:'25 Apr 2026', path:'self', activeJobs:1, status:'active', avatar:'av-4', initials:'PP', mobile:'+61 419 008 226', suburb:'Marrickville, NSW', jobs:[{title:'Switchboard upgrade',firm:'Marrickville Electrical Co',status:'Active'}]},
+  {name:'Tom Riley', email:'tom.riley@gmail.com', registered:'5 Jan 2026', path:'self', activeJobs:0, status:'inactive', avatar:'av-6', initials:'TR', mobile:'+61 423 117 990', suburb:'Brighton, VIC', jobs:[{title:'Bathroom retile',firm:'Bayside Tiling Solutions',status:'Closed'}]}
+];
+
+const projects = [
+  {jobId:'JOB-1247', title:'Full kitchen renovation', firm:'Northbridge Carpentry & Joinery', suburb:'Glebe, NSW', trade:'Carpentry', status:'Active', created:'15 Mar 2026', desc:'Demolition of existing kitchen, new cabinetry, stone benchtops, plumbing & electrical fit-out.', start:'18 Mar 2026', location:'Glebe, NSW 2037', locked:false},
+  {jobId:'JOB-1241', title:'Bathroom plumbing rework', firm:'Hartley Plumbing & Gas', suburb:'Coorparoo, QLD', trade:'Plumbing', status:'Active', created:'4 Apr 2026', desc:'Replace failing waste lines and reposition vanity plumbing.', start:'8 Apr 2026', location:'Coorparoo, QLD 4151', locked:false},
+  {jobId:'JOB-1228', title:'Front yard landscaping', firm:'Riverside Landscaping', suburb:'Subiaco, WA', trade:'Landscaping', status:'Paused', created:'22 Apr 2026', desc:'Native garden bed install, irrigation, paving.', start:'28 Apr 2026', location:'Subiaco, WA 6008', locked:false},
+  {jobId:'JOB-1212', title:'Driveway replacement', firm:'Coastal Concrete Co', suburb:'Subiaco, WA', trade:'Concrete', status:'Locked', created:'10 Apr 2026', desc:'Strip existing driveway, lay reinforced concrete, edge formwork.', start:'14 Apr 2026', location:'Subiaco, WA 6008', locked:true, lockReason:'Dispute Raised', lockedBy:'Dana Thorne (RL Admin)', lockedDate:'29 Apr 2026'},
+  {jobId:'JOB-1203', title:'Switchboard upgrade', firm:'Marrickville Electrical Co', suburb:'Marrickville, NSW', trade:'Electrical', status:'Active', created:'25 Apr 2026', desc:'Three-phase switchboard upgrade with smart sub-circuits.', start:'30 Apr 2026', location:'Marrickville, NSW 2204', locked:false},
+  {jobId:'JOB-1198', title:'Bathroom retile', firm:'Bayside Tiling Solutions', suburb:'Brighton, VIC', trade:'Tiling', status:'Closed', created:'8 Jan 2026', desc:'Strip existing tiles, waterproof, new tiles to floor and walls.', start:'15 Jan 2026', location:'Brighton, VIC 3186', locked:false}
+];
+
+const lockedProjects = projects.filter(p=>p.locked).concat([
+  {jobId:'JOB-1189', title:'Roof gutter replacement', firm:'Apex Roofing & Gutters', lockedBy:'Dana Thorne (RL Admin)', lockedDate:'27 Apr 2026'},
+  {jobId:'JOB-1175', title:'Carport build', firm:'Sandstone Carpentry', lockedBy:'Marcus Lee (RL Admin)', lockedDate:'24 Apr 2026'}
+]);
+
+const auditEvents = [
+  {time:'04 May 2026, 10:14:22', type:'CO_REGISTERED', userId:'co_24_owner', role:'CO', entity:'CO-024', detail:'Northbridge Carpentry & Joinery submitted registration'},
+  {time:'04 May 2026, 09:47:08', type:'DOCUMENTS_UPLOADED', userId:'co_24_owner', role:'CO', entity:'CO-024', detail:"4 documents uploaded — Builder's Licence, PLI, ABN, WC"},
+  {time:'04 May 2026, 09:42:33', type:'HO_REGISTERED', userId:'ho_3091', role:'HO', entity:'HO-3091', detail:'Self-registered from invitation link'},
+  {time:'04 May 2026, 09:14:01', type:'RL_ADMIN_LOGIN', userId:'rl_dana', role:'RL', entity:'RL-DT', detail:'Successful login from Brisbane, QLD'},
+  {time:'03 May 2026, 18:22:59', type:'JOB_LOCKED', userId:'rl_dana', role:'RL', entity:'JOB-1212', detail:'Locked — reason: Dispute Raised'},
+  {time:'03 May 2026, 16:08:42', type:'MILESTONE_RELEASED', userId:'ho_2811', role:'HO', entity:'JOB-1247', detail:'M2 released — $8,200.00 to Northbridge CJ'},
+  {time:'03 May 2026, 14:55:11', type:'QUOTE_ACCEPTED', userId:'ho_3014', role:'HO', entity:'JOB-1241', detail:'Quote QT-2074 accepted ($14,800)'},
+  {time:'03 May 2026, 12:30:08', type:'JOB_CREATED', userId:'co_18_pm', role:'CO', entity:'JOB-1252', detail:'Job created by Sandstone Carpentry'},
+  {time:'02 May 2026, 17:19:45', type:'CO_APPROVED', userId:'rl_marcus', role:'RL', entity:'CO-019', detail:'Approved Eastern Hills Painting'},
+  {time:'02 May 2026, 14:02:17', type:'CO_REJECTED', userId:'rl_dana', role:'RL', entity:'CO-014', detail:'Rejected — Expired Documents'},
+  {time:'02 May 2026, 10:48:30', type:'EVIDENCE_UPLOADED', userId:'co_18_sm', role:'CO', entity:'JOB-1233', detail:'3 photos uploaded for M2'},
+  {time:'01 May 2026, 09:14:55', type:'DOCUMENTS_UPLOADED', userId:'co_23_owner', role:'CO', entity:'CO-023', detail:'4 documents uploaded'}
+];
+
+const projectAuditEvents = [
+  {time:'15 Mar 2026, 11:22:08', type:'JOB_CREATED', userId:'co_018_pm', role:'CO', entity:'JOB-1247', detail:'Job created by Northbridge CJ'},
+  {time:'15 Mar 2026, 11:35:12', type:'QUOTE_SUBMITTED', userId:'co_018_pm', role:'CO', entity:'QT-2086', detail:'Quote submitted: $28,400 across 5 milestones'},
+  {time:'15 Mar 2026, 18:44:33', type:'QUOTE_ACCEPTED', userId:'ho_2811', role:'HO', entity:'QT-2086', detail:'Homeowner accepted quote'},
+  {time:'16 Mar 2026, 09:08:21', type:'ESCROW_FUNDED', userId:'ho_2811', role:'HO', entity:'JOB-1247', detail:'$31,240 (incl GST) funded via MarketBridge'},
+  {time:'19 Mar 2026, 16:22:08', type:'EVIDENCE_UPLOADED', userId:'co_018_owner', role:'CO', entity:'M1', detail:'3 photos for site preparation'},
+  {time:'20 Mar 2026, 10:14:55', type:'MILESTONE_RELEASED', userId:'ho_2811', role:'HO', entity:'M1', detail:'M1 released — $5,400.00'},
+  {time:'04 Apr 2026, 14:08:42', type:'EVIDENCE_UPLOADED', userId:'co_018_owner', role:'CO', entity:'M2', detail:'5 photos for framing'},
+  {time:'05 Apr 2026, 09:30:18', type:'MILESTONE_RELEASED', userId:'ho_2811', role:'HO', entity:'M2', detail:'M2 released — $8,200.00'}
+];
+
+const reconExceptions = [
+  {txn:'TXN-558018', firm:'Hartley Plumbing & Gas', amount:'$3,400.00', date:'04 May 2026', reason:'Amount mismatch', notes:'Bank shows $3,420 — $20 fee not in ledger', status:'open'},
+  {txn:'TXN-558044', firm:'Coastal Concrete Co', amount:'$3,200.00', date:'04 May 2026', reason:'Missing in MarketBridge feed', notes:'', status:'open'},
+  {txn:'TXN-558061', firm:'Inner West Glaziers', amount:'$1,820.00', date:'04 May 2026', reason:'Date mismatch', notes:'Recorded 03 May in our ledger, 04 May at MB', status:'open'}
+];
+
+const recentExports = [
+  {type:'Audit Trail', range:'1 Apr – 30 Apr 2026', format:'CSV', by:'Dana Thorne', created:'02 May 2026, 09:18'},
+  {type:'Reconciliation Summary', range:'1 Apr – 30 Apr 2026', format:'CSV', by:'Dana Thorne', created:'02 May 2026, 09:14'},
+  {type:'Contractor Accounts', range:'All time', format:'JSON', by:'Marcus Lee', created:'29 Apr 2026, 16:42'},
+  {type:'Project Records', range:'1 Mar – 31 Mar 2026', format:'CSV', by:'Dana Thorne', created:'02 Apr 2026, 10:08'}
+];
+
+const notifications = [
+  {title:'4 contractors awaiting review', sub:'Northbridge CJ, Hartley Plumbing, Marrickville Electrical and 1 more', time:'10 min ago', unread:true},
+  {title:'Reconciliation: 3 uncleared exceptions', sub:'Daily reconciliation completed for 4 May 2026', time:'1 hr ago', unread:true},
+  {title:'JOB-1212 was locked', sub:'You locked Driveway replacement — Dispute Raised', time:'Yesterday, 18:22', unread:true},
+  {title:'Marcus Lee approved CO-019', sub:'Eastern Hills Painting is now Active', time:'2 May, 17:19', unread:true},
+  {title:'Monthly export ready', sub:'April reconciliation summary is ready for download', time:'1 May, 09:00', unread:true},
+  {title:'CO-014 rejected', sub:'You rejected Stillwater Roofing — Expired Documents', time:'2 May, 14:02', unread:false},
+  {title:'New homeowner registered', sub:'15 new homeowners joined this week', time:'30 Apr, 08:00', unread:false}
+];
+
+const notifPrefs = [
+  ['New contractor registrations', true, false],
+  ['Reconciliation summary', true, true],
+  ['Uncleared exception alerts', true, true],
+  ['Project locked by another admin', true, false],
+  ['Export completed', true, false]
+];
+
+/* ═══ STATE ═══ */
+let state = {
+  currentScreen:'dashboard',
+  contractorFilter:'all',
+  homeownerFilter:'all',
+  exportType:'audit',
+  exportFormat:'csv',
+  selectedContractor:null,
+  selectedProject:null,
+  modalOpen:null,
+  drawerOpen:null
+};
+
+/* ═══ NAVIGATION ═══ */
+function goTo(screen, sub){
+  // hide all screens
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById('screen-'+screen).classList.add('active');
+  state.currentScreen = screen;
+
+  // update topbar title
+  document.getElementById('topTitle').textContent = screenTitles[screen]||screen;
+
+  // update sidebar active link
+  document.querySelectorAll('.sidebar-link').forEach(l=>l.classList.remove('active'));
+  const sbScreen = sidebarMap[screen]||screen;
+  const link = document.querySelector(`.sidebar-link[data-screen="${sbScreen}"]`);
+  if(link) link.classList.add('active');
+
+  // sub-handlers
+  if(screen==='contractors' && sub){
+    state.contractorFilter = sub;
+    document.querySelectorAll('#contractorTabs .filter-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===sub));
+    renderContractors();
+  }
+
+  // close mobile sidebar
+  document.getElementById('sidebar').classList.remove('open');
+  // scroll to top of content
+  document.querySelector('.content').scrollTop = 0;
+  window.scrollTo(0,0);
+}
+
+function toggleSidebar(){
+  document.getElementById('sidebar').classList.toggle('open');
+}
+
+/* ═══ CONTRACTORS ═══ */
+function statusBadge(status){
+  const m = {pending:['warning','Pending'], active:['success','Active'], suspended:['muted','Suspended'], rejected:['error','Rejected']};
+  const [tone,label] = m[status]||['muted',status];
+  return `<span class="badge badge-${tone}">${label}</span>`;
+}
+
+function renderContractors(){
+  const q = (document.getElementById('contractorSearch').value||'').toLowerCase();
+  const f = state.contractorFilter;
+  const rows = contractors.filter(c=>{
+    const okFilter = f==='all' || c.status===f;
+    const okSearch = !q || c.firm.toLowerCase().includes(q) || c.email.toLowerCase().includes(q) || c.owner.toLowerCase().includes(q);
+    return okFilter && okSearch;
+  });
+  const tbody = document.getElementById('contractorsBody');
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="7" class="tbl-empty">No contractors match the current filter.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map(c=>`
+    <tr style="cursor:pointer" onclick="openContractor('${c.id}')">
+      <td><div class="user-cell"><div class="avatar ${c.avatar}">${c.initials}</div><div class="user-cell-info"><div class="user-cell-name">${c.firm}</div><div class="user-cell-sub">${c.id}</div></div></div></td>
+      <td>${c.owner}</td>
+      <td><span style="color:var(--color-muted)">${c.email}</span></td>
+      <td>${c.registered}</td>
+      <td>${c.tier}</td>
+      <td>${statusBadge(c.status)}</td>
+      <td style="text-align:right">${c.status==='pending' ? '<button class="btn btn-accent btn-sm" onclick="event.stopPropagation();openContractor(\''+c.id+'\')">Review</button>' : '<button class="btn-link" onclick="event.stopPropagation();openContractor(\''+c.id+'\')">View →</button>'}</td>
+    </tr>`).join('');
+}
+
+function filterContractors(s){
+  state.contractorFilter = s;
+  document.querySelectorAll('#contractorTabs .filter-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===s));
+  renderContractors();
+}
+
+function openContractor(id){
+  const c = contractors.find(x=>x.id===id); if(!c) return;
+  state.selectedContractor = c;
+  // header
+  document.getElementById('cdAvatar').className = 'avatar avatar-xl '+c.avatar;
+  document.getElementById('cdAvatar').textContent = c.initials;
+  document.getElementById('cdFirmName').textContent = c.firm;
+  document.getElementById('cdOwnerLine').innerHTML = `Owned by <strong>${c.owner}</strong> · ${c.email} · ${c.mobile}`;
+  document.getElementById('cdRegDate').textContent = c.registered;
+  document.getElementById('cdTier').textContent = c.tier;
+  document.getElementById('cdStatusWrap').innerHTML = statusBadge(c.status);
+  // actions
+  const act = document.getElementById('cdActions');
+  act.innerHTML = '';
+  if(c.status==='pending'){
+    act.innerHTML = `
+      <button class="btn btn-secondary" onclick="openModal('mdlRequestDocs')">Request Documents</button>
+      <button class="btn btn-error" onclick="openRejectModal()">Reject</button>
+      <button class="btn btn-success" onclick="openApproveModal()">Approve</button>
+    `;
+  }
+  // details fields
+  document.getElementById('cdDetailsGrid').innerHTML = `
+    <div class="field-block"><div class="field-label">Firm Name</div><div class="field-value">${c.firm}</div></div>
+    <div class="field-block"><div class="field-label">ABN</div><div class="field-value" style="font-family:monospace">${c.abn}</div></div>
+    <div class="field-block"><div class="field-label">Trade Category</div><div class="field-value">${c.trade}</div></div>
+    <div class="field-block"><div class="field-label">Location</div><div class="field-value">${c.location}</div></div>
+    <div class="field-block"><div class="field-label">Owner Name</div><div class="field-value">${c.owner}</div></div>
+    <div class="field-block"><div class="field-label">Owner Email</div><div class="field-value">${c.email}</div></div>
+    <div class="field-block"><div class="field-label">Owner Mobile</div><div class="field-value">${c.mobile}</div></div>
+    <div class="field-block"><div class="field-label">Registered</div><div class="field-value">${c.registered}</div></div>
+    <div class="field-block"><div class="field-label">Subscription Tier</div><div class="field-value">${c.tier}</div></div>
+    <div class="field-block"><div class="field-label">Account Status</div><div class="field-value">${statusBadge(c.status)}</div></div>
+  `;
+  // documents banner
+  document.getElementById('cdDocBanner').innerHTML = c.status==='pending'
+    ? `<div class="banner banner-info"><span class="banner-icon"><svg class="ico" width="16" height="16" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg></span>Review all documents below before approving or rejecting this account.</div>`
+    : '';
+  // documents grid (with one expired)
+  const docs = [
+    {type:"Builder's Licence", file:'builders-licence-2026.pdf', date:'2 May 2026', expired:false},
+    {type:'Public Liability Insurance', file:'pli-cert-2026.pdf', date:'2 May 2026', expired:false},
+    {type:'ABN Registration Confirmation', file:'abn-extract.pdf', date:'2 May 2026', expired:false},
+    {type:'Workers Compensation Insurance', file:'wc-policy-2025.pdf', date:'2 May 2026', expired:c.status==='pending'}
+  ];
+  document.getElementById('cdDocGrid').innerHTML = docs.map(d=>`
+    <div class="doc-card">
+      <div class="doc-card-top">
+        <div class="doc-icon">${ico.doc}</div>
+        ${d.expired?'<span class="badge badge-error">Expired</span>':'<span class="badge badge-success">Valid</span>'}
+      </div>
+      <div>
+        <div class="doc-type">${d.type}</div>
+        <div class="doc-file">${d.file}</div>
+      </div>
+      <div class="doc-meta">
+        <span>Uploaded ${d.date}</span>
+        <button class="btn-link" onclick="toast('Document opened (demo).')">${ico.open} Open</button>
+      </div>
+    </div>
+  `).join('');
+  // projects
+  const cdProjects = projects.filter(p=>p.firm===c.firm);
+  document.getElementById('cdProjectsBody').innerHTML = cdProjects.length ? cdProjects.map(p=>`
+    <tr style="cursor:pointer" onclick="openProject('${p.jobId}')">
+      <td style="font-family:monospace">${p.jobId}</td>
+      <td>${p.title}</td>
+      <td>${projectStatusBadge(p.status)}</td>
+      <td>${p.suburb}</td>
+      <td>${p.created}</td>
+      <td style="text-align:right"><button class="btn-link" onclick="event.stopPropagation();openProject('${p.jobId}')">View →</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="6" class="tbl-empty">No projects yet for this firm.</td></tr>`;
+  // audit
+  const events = [
+    {time:c.registered+', 09:48:14', type:'CO_REGISTERED', userId:c.id.toLowerCase()+'_owner', role:'CO', entity:c.id, detail:c.firm+' submitted registration'},
+    {time:c.registered+', 10:11:02', type:'DOCUMENTS_UPLOADED', userId:c.id.toLowerCase()+'_owner', role:'CO', entity:c.id, detail:'4 documents uploaded'},
+    ...(c.status!=='pending' ? [{time:c.registered+', 14:22:08', type:'RL_ADMIN_REVIEW_OPENED', userId:'rl_dana', role:'RL', entity:c.id, detail:'Review opened by Dana Thorne'}] : []),
+    ...(c.status==='active' ? [{time:c.registered+', 16:08:55', type:'CO_APPROVED', userId:'rl_dana', role:'RL', entity:c.id, detail:'Approved'}] : []),
+    ...(c.status==='rejected' ? [{time:c.registered+', 16:14:33', type:'CO_REJECTED', userId:'rl_dana', role:'RL', entity:c.id, detail:'Rejected — Licence or Insurance Concerns'}] : []),
+    ...(c.status==='suspended' ? [{time:'15 Apr 2026, 11:30:08', type:'CO_SUSPENDED', userId:'rl_marcus', role:'RL', entity:c.id, detail:'Suspended — under investigation'}] : [])
+  ];
+  document.getElementById('cdAuditList').innerHTML = events.map(e=>auditRow(e)).join('');
+  // reset to details tab
+  cdTab('details');
+  goTo('contractorDetail');
+}
+
+function cdTab(t){
+  document.querySelectorAll('#screen-contractorDetail .detail-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
+  document.querySelectorAll('#screen-contractorDetail .tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('cd-'+t).classList.add('active');
+}
+
+function openApproveModal(){
+  document.getElementById('approveFirmName').textContent = state.selectedContractor.firm;
+  openModal('mdlApprove');
+}
+function openRejectModal(){
+  document.getElementById('rejectFirmName').textContent = state.selectedContractor.firm;
+  openModal('mdlReject');
+}
+
+function confirmApprove(){
+  const c = state.selectedContractor;
+  c.status = 'active';
+  closeModal();
+  document.getElementById('cdStatusWrap').innerHTML = statusBadge('active');
+  document.getElementById('cdActions').innerHTML = '';
+  document.getElementById('cdDocBanner').innerHTML = '';
+  toast(`${c.firm} approved.`,'success');
+  renderContractors();
+  renderDashboard();
+}
+
+function confirmReject(){
+  const c = state.selectedContractor;
+  c.status = 'rejected';
+  closeModal();
+  document.getElementById('cdStatusWrap').innerHTML = statusBadge('rejected');
+  document.getElementById('cdActions').innerHTML = '';
+  document.getElementById('cdDocBanner').innerHTML = '';
+  toast(`${c.firm} rejected.`,'success');
+  renderContractors();
+  renderDashboard();
+}
+
+function confirmRequestDocs(){
+  closeModal();
+  toast('Request sent to the contractor.','success');
+}
+
+/* ═══ HOMEOWNERS ═══ */
+function pathBadge(p){
+  return p==='self' ? '<span class="badge badge-info">Self Registered</span>' : '<span class="badge badge-purple">Invited by Contractor</span>';
+}
+function hoStatusBadge(s){
+  return s==='active' ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-muted">Inactive</span>';
+}
+
+function renderHomeowners(){
+  const q = (document.getElementById('homeownerSearch').value||'').toLowerCase();
+  const f = state.homeownerFilter;
+  const rows = homeowners.filter(h=>{
+    const okFilter = f==='all' || h.status===f;
+    const okSearch = !q || h.name.toLowerCase().includes(q) || h.email.toLowerCase().includes(q);
+    return okFilter && okSearch;
+  });
+  const tbody = document.getElementById('homeownersBody');
+  if(!rows.length){
+    tbody.innerHTML = `<tr><td colspan="6" class="tbl-empty">No homeowners match the current filter.</td></tr>`;
+    return;
+  }
+  tbody.innerHTML = rows.map((h,i)=>`
+    <tr style="cursor:pointer" onclick="openHomeowner(${homeowners.indexOf(h)})">
+      <td><div class="user-cell"><div class="avatar ${h.avatar}">${h.initials}</div><div class="user-cell-info"><div class="user-cell-name">${h.name}</div><div class="user-cell-sub">${h.suburb}</div></div></div></td>
+      <td><span style="color:var(--color-muted)">${h.email}</span></td>
+      <td>${h.registered}</td>
+      <td>${pathBadge(h.path)}</td>
+      <td style="text-align:center;font-weight:600">${h.activeJobs}</td>
+      <td>${hoStatusBadge(h.status)}</td>
+    </tr>
+  `).join('');
+}
+
+function filterHomeowners(s){
+  state.homeownerFilter = s;
+  document.querySelectorAll('#homeownerTabs .filter-tab').forEach(t=>t.classList.toggle('active', t.dataset.status===s));
+  renderHomeowners();
+}
+
+function openHomeowner(idx){
+  const h = homeowners[idx];
+  document.getElementById('hoDrawerBody').innerHTML = `
+    <div style="display:flex;gap:14px;align-items:center;margin-bottom:18px">
+      <div class="avatar avatar-lg ${h.avatar}">${h.initials}</div>
+      <div>
+        <div style="font-size:17px;font-weight:700">${h.name}</div>
+        <div style="font-size:13px;color:var(--color-muted)">${h.email}</div>
+      </div>
+    </div>
+    <div class="drawer-section">
+      <h4>Profile</h4>
+      <dl class="def-table">
+        <dt>Registered</dt><dd>${h.registered}</dd>
+        <dt>Path</dt><dd>${pathBadge(h.path)}</dd>
+        <dt>Mobile</dt><dd>${h.mobile}</dd>
+        <dt>Suburb</dt><dd>${h.suburb}</dd>
+        <dt>Status</dt><dd>${hoStatusBadge(h.status)}</dd>
+      </dl>
+    </div>
+    <div class="drawer-section">
+      <h4>Job History (${h.jobs.length})</h4>
+      ${h.jobs.map(j=>`
+        <div style="padding:12px 0;border-bottom:1px solid #F5F5F5">
+          <div style="font-weight:600;font-size:13.5px">${j.title}</div>
+          <div style="font-size:12.5px;color:var(--color-muted);margin:2px 0">${j.firm}</div>
+          ${projectStatusBadge(j.status)}
+        </div>
+      `).join('')}
+    </div>
+    <div class="drawer-section">
+      <h4>Recent Audit Events</h4>
+      <div class="audit-list" style="border:none">
+        ${[
+          {time:h.registered+', 14:22:08', type:'HO_REGISTERED', userId:'ho_'+(idx+3000), role:'HO', entity:'HO-'+(idx+3000), detail:h.path==='self'?'Self-registered':'Invited by '+(h.jobs[0]?.firm||'contractor')},
+          {time:'21 Apr 2026, 09:14:55', type:'JOB_ACCEPTED', userId:'ho_'+(idx+3000), role:'HO', entity:'JOB-1247', detail:'Accepted quote'}
+        ].map(e=>auditRow(e,true)).join('')}
+      </div>
+    </div>
+  `;
+  document.getElementById('hoDrawer').classList.add('open');
+  document.getElementById('hoDrawerOverlay').classList.add('open');
+  state.drawerOpen = 'ho';
+}
+
+function closeHomeownerDrawer(){
+  document.getElementById('hoDrawer').classList.remove('open');
+  document.getElementById('hoDrawerOverlay').classList.remove('open');
+  state.drawerOpen = null;
+}
+
+/* ═══ PROJECT SEARCH ═══ */
+function projectStatusBadge(s){
+  const m = {Active:'success', Paused:'warning', Locked:'error', Closed:'muted'};
+  return `<span class="badge badge-${m[s]||'muted'}">${s}</span>`;
+}
+
+function renderProjects(){
+  const q = (document.getElementById('projectSearch').value||'').toLowerCase();
+  const st = document.getElementById('searchStatus').value;
+  const tr = document.getElementById('searchTrade').value;
+  const rows = projects.filter(p=>{
+    const okSearch = !q || p.jobId.toLowerCase().includes(q) || p.firm.toLowerCase().includes(q) || p.suburb.toLowerCase().includes(q);
+    const okStatus = st==='all' || p.status===st;
+    const okTrade = tr==='all' || p.trade===tr;
+    return okSearch && okStatus && okTrade;
+  });
+  document.getElementById('searchResultsLabel').textContent = q || st!=='all' || tr!=='all' ? 'Search Results' : 'Recent Projects';
+  document.getElementById('searchResultsCount').textContent = `${rows.length} result${rows.length===1?'':'s'}`;
+  document.getElementById('searchResults').innerHTML = rows.length ? rows.map(p=>`
+    <tr style="cursor:pointer" onclick="openProject('${p.jobId}')">
+      <td style="font-family:monospace;font-size:12.5px;color:var(--color-muted);font-weight:600">${p.jobId}</td>
+      <td style="font-weight:600">${p.title}</td>
+      <td>${p.firm}</td>
+      <td>${p.suburb}</td>
+      <td>${p.trade}</td>
+      <td>${projectStatusBadge(p.status)}</td>
+      <td style="color:var(--color-muted)">${p.created}</td>
+      <td style="text-align:right"><button class="btn-link" onclick="event.stopPropagation();openProject('${p.jobId}')">View →</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="8" class="tbl-empty">No projects match the current filters.</td></tr>`;
+}
+
+function openProject(jobId){
+  const p = projects.find(x=>x.jobId===jobId); if(!p) return;
+  state.selectedProject = p;
+  document.getElementById('pdJobId').textContent = p.jobId;
+  document.getElementById('pdStatusBadge').innerHTML = projectStatusBadge(p.status);
+  document.getElementById('pdTitle').textContent = p.title;
+  document.getElementById('pdTrade').textContent = p.trade;
+  document.getElementById('pdCreated').textContent = p.created;
+  document.getElementById('pdFirm').textContent = p.firm;
+  document.getElementById('pdSuburb').textContent = p.suburb;
+  document.getElementById('pdDesc').textContent = p.desc;
+  document.getElementById('pdStart').textContent = p.start;
+  document.getElementById('pdLocation').textContent = p.location;
+  // locked state
+  renderProjectLockedState();
+  // audit list
+  document.getElementById('pdAuditList').innerHTML = projectAuditEvents.map(e=>auditRow(e)).join('');
+  pdTab('overview');
+  goTo('projectDetail');
+}
+
+function renderProjectLockedState(){
+  const p = state.selectedProject;
+  const banner = document.getElementById('pdLockedBanner');
+  const actions = document.getElementById('pdActions');
+  if(p.locked){
+    banner.innerHTML = `
+      <div class="locked-banner">
+        <div class="locked-banner-info">
+          <h4>${ico.lock} Project locked by RL Admin</h4>
+          <p><strong>Reason:</strong> ${p.lockReason} · <strong>Locked by:</strong> ${p.lockedBy} · <strong>On:</strong> ${p.lockedDate}</p>
+        </div>
+        <button class="btn btn-secondary btn-sm" onclick="unlockProject()">${ico.unlock} Unlock</button>
+      </div>`;
+    actions.innerHTML = '';
+  } else {
+    banner.innerHTML = '';
+    actions.innerHTML = `<button class="btn btn-error" onclick="openModal('mdlLock')">${ico.lock} Lock Project</button>`;
+  }
+}
+
+function pdTab(t){
+  document.querySelectorAll('#screen-projectDetail .detail-tab').forEach(b=>b.classList.toggle('active', b.dataset.tab===t));
+  document.querySelectorAll('#screen-projectDetail .tab-pane').forEach(p=>p.classList.remove('active'));
+  document.getElementById('pd-'+t).classList.add('active');
+}
+
+function confirmLock(){
+  const p = state.selectedProject;
+  p.locked = true;
+  p.lockReason = document.getElementById('lockReason').value;
+  p.lockedBy = 'Dana Thorne (RL Admin)';
+  p.lockedDate = new Date().toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});
+  p.status = 'Locked';
+  closeModal();
+  renderProjectLockedState();
+  document.getElementById('pdStatusBadge').innerHTML = projectStatusBadge(p.status);
+  toast('Project locked.','success');
+}
+
+function unlockProject(){
+  const p = state.selectedProject;
+  p.locked = false;
+  p.status = 'Active';
+  renderProjectLockedState();
+  document.getElementById('pdStatusBadge').innerHTML = projectStatusBadge(p.status);
+  toast('Project unlocked.','success');
+}
+
+/* ═══ AUDIT ═══ */
+function eventBadge(type){
+  const cat = type.startsWith('CO_') ? 'info' : type.startsWith('HO_') ? 'purple' : type.startsWith('RL_') ? 'primary' : type.startsWith('JOB_') || type.startsWith('QUOTE') ? 'accent' : type==='MILESTONE_RELEASED' || type==='ESCROW_FUNDED' ? 'success' : 'muted';
+  return `<span class="badge badge-${cat}" style="font-family:'SF Mono','Menlo',monospace;font-size:11px">${type}</span>`;
+}
+function roleBadge(role){
+  return `<span class="badge badge-muted" style="font-size:11px">${role}</span>`;
+}
+function auditRow(e, compact){
+  return `<div class="audit-row" ${compact?'style="padding:10px 0"':''}>
+    <span class="audit-row-time">${e.time}</span>
+    <span class="audit-row-event">${eventBadge(e.type)}</span>
+    <span style="font-family:monospace;font-size:12px;color:var(--color-muted)">${e.userId}</span>
+    <span>${roleBadge(e.role)}</span>
+    <span style="font-family:monospace;font-size:12px">${e.entity}</span>
+    <span class="audit-row-meta">${e.detail}</span>
+  </div>`;
+}
+
+function renderAuditTable(){
+  document.getElementById('auditTableBody').innerHTML = auditEvents.map(e=>`
+    <tr>
+      <td style="font-variant-numeric:tabular-nums;color:var(--color-muted);font-size:12.5px;white-space:nowrap">${e.time}</td>
+      <td>${eventBadge(e.type)}</td>
+      <td style="font-family:monospace;font-size:12px;color:var(--color-muted)">${e.userId}</td>
+      <td>${roleBadge(e.role)}</td>
+      <td style="font-family:monospace;font-size:12px">${e.entity}</td>
+      <td style="color:var(--color-muted)">${e.detail}</td>
+    </tr>
+  `).join('');
+}
+
+function exportAudit(fmt){ toast(`Audit trail exporting as ${fmt.toUpperCase()}…`,'success'); }
+
+/* ═══ RECONCILIATION ═══ */
+function renderRecon(){
+  document.getElementById('reconBody').innerHTML = reconExceptions.map((r,i)=>`
+    <tr>
+      <td style="font-family:monospace;font-size:12.5px">${r.txn}</td>
+      <td>${r.firm}</td>
+      <td style="font-weight:600">${r.amount}</td>
+      <td>${r.date}</td>
+      <td><span class="badge badge-warning">${r.reason}</span></td>
+      <td><input type="text" value="${r.notes.replace(/"/g,'&quot;')}" data-recon-idx="${i}" oninput="reconExceptions[${i}].notes=this.value" placeholder="Add note…" style="font-size:12.5px;padding:6px 10px;min-height:32px"></td>
+      <td><span class="badge badge-${r.status==='flagged'?'info':'warning'}">${r.status==='flagged'?'Flagged for MB':'Open'}</span></td>
+      <td style="text-align:right">
+        <button class="btn btn-secondary btn-sm" onclick="addReconNote(${i})">Add note</button>
+        <button class="btn btn-outline btn-sm" onclick="flagForMB(${i})">Flag for MB</button>
+      </td>
+    </tr>
+  `).join('');
+}
+
+function addReconNote(i){
+  const inp = document.querySelector(`[data-recon-idx="${i}"]`);
+  inp.focus();
+  toast('Add a note then click anywhere to save.');
+}
+
+function flagForMB(i){
+  reconExceptions[i].status = 'flagged';
+  renderRecon();
+  toast('Flagged for MarketBridge review.','success');
+}
+
+/* ═══ EXPORT ═══ */
+function setExportType(type){
+  state.exportType = type;
+  document.querySelectorAll('#exportTypeGrid .radio-card').forEach(c=>c.classList.toggle('active', c.dataset.type===type));
+  renderExportContextual();
+}
+
+function setFormat(f){
+  state.exportFormat = f;
+  document.getElementById('fmt-csv').classList.toggle('active', f==='csv');
+  document.getElementById('fmt-json').classList.toggle('active', f==='json');
+}
+
+function renderExportContextual(){
+  const t = state.exportType;
+  let html = '';
+  if(t==='audit'){
+    html = `<div class="field"><label>Event types</label><select multiple style="height:100px"><option>All event types</option><option>CO_REGISTERED</option><option>CO_APPROVED</option><option>CO_REJECTED</option><option>JOB_LOCKED</option><option>MILESTONE_RELEASED</option></select></div>`;
+  } else if(t==='contractors'){
+    html = `<div class="field"><label>Status filter</label><select><option>All statuses</option><option>Pending</option><option>Active</option><option>Suspended</option><option>Rejected</option></select></div>`;
+  } else if(t==='homeowners'){
+    html = `<div class="field"><label>Registration path</label><select><option>All paths</option><option>Self Registered</option><option>Invited by Contractor</option></select></div>`;
+  } else if(t==='projects'){
+    html = `<div class="field"><label>Project status</label><select><option>All statuses</option><option>Active</option><option>Paused</option><option>Locked</option><option>Closed</option></select></div>`;
+  } else if(t==='reconciliation'){
+    html = `<div class="field"><label>Include</label>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+        <label style="display:inline-flex;align-items:center;gap:6px;font-weight:500"><input type="checkbox" checked style="width:auto;margin:0"> Cleared transactions</label>
+        <label style="display:inline-flex;align-items:center;gap:6px;font-weight:500"><input type="checkbox" checked style="width:auto;margin:0"> Uncleared exceptions</label>
+        <label style="display:inline-flex;align-items:center;gap:6px;font-weight:500"><input type="checkbox" style="width:auto;margin:0"> Notes &amp; resolutions</label>
+      </div></div>`;
+  }
+  document.getElementById('exportContextual').innerHTML = html;
+}
+
+function runExport(){
+  toast(`${state.exportType} export queued — you'll be notified when it's ready.`,'success');
+  // Prepend to recent exports
+  recentExports.unshift({type:({audit:'Audit Trail',contractors:'Contractor Accounts',homeowners:'Homeowner Accounts',projects:'Project Records',reconciliation:'Reconciliation Summary'})[state.exportType], range:'1 Apr – 4 May 2026', format:state.exportFormat.toUpperCase(), by:'Dana Thorne', created:'just now'});
+  renderExportsTable();
+}
+
+function renderExportsTable(){
+  document.getElementById('exportsBody').innerHTML = recentExports.map(e=>`
+    <tr>
+      <td style="font-weight:600">${e.type}</td>
+      <td>${e.range}</td>
+      <td><span class="badge badge-muted">${e.format}</span></td>
+      <td>${e.by}</td>
+      <td style="color:var(--color-muted)">${e.created}</td>
+      <td style="text-align:right"><button class="btn-link" onclick="toast('Download started (demo).')">Download</button></td>
+    </tr>
+  `).join('');
+}
+
+/* ═══ DASHBOARD ═══ */
+function renderDashboard(){
+  // Pending contractors
+  const pending = contractors.filter(c=>c.status==='pending').slice(0,3);
+  document.getElementById('dashPendingBody').innerHTML = pending.length ? pending.map(c=>`
+    <tr>
+      <td><div class="user-cell"><div class="avatar ${c.avatar}">${c.initials}</div><div class="user-cell-info"><div class="user-cell-name">${c.firm}</div><div class="user-cell-sub">${c.trade}</div></div></div></td>
+      <td>${c.owner}</td>
+      <td style="color:var(--color-muted)">${c.registered}</td>
+      <td style="text-align:right"><button class="btn btn-accent btn-sm" onclick="openContractor('${c.id}')">Review</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="4" class="tbl-empty">No pending registrations.</td></tr>`;
+  // Audit list (top 5)
+  document.getElementById('dashAuditList').innerHTML = `
+    <div class="audit-list" style="border:none">
+      ${auditEvents.slice(0,5).map(e=>`
+        <div class="audit-row" style="padding:11px 0">
+          <span style="font-size:12px;color:var(--color-muted);white-space:nowrap;width:120px;flex-shrink:0;font-variant-numeric:tabular-nums">${e.time.split(',')[0]}</span>
+          ${eventBadge(e.type)}
+          <span class="audit-row-meta" style="font-size:13px">${e.detail}</span>
+        </div>
+      `).join('')}
+    </div>`;
+  // Locked
+  document.getElementById('dashLockedBody').innerHTML = lockedProjects.length ? lockedProjects.slice(0,3).map(p=>`
+    <tr>
+      <td style="font-family:monospace">${p.jobId}</td>
+      <td>${p.firm}</td>
+      <td style="color:var(--color-muted)">${p.lockedBy}</td>
+      <td style="color:var(--color-muted)">${p.lockedDate}</td>
+      <td style="text-align:right"><button class="btn-link" onclick="openProject('${p.jobId}')">View →</button></td>
+    </tr>
+  `).join('') : `<tr><td colspan="5" class="tbl-empty">No locked projects.</td></tr>`;
+
+  // update the stat values
+  document.querySelector('#screen-dashboard .stats-grid .stat-card:nth-child(1) .stat-value').textContent = contractors.filter(c=>c.status==='pending').length;
+  document.querySelector('#screen-dashboard .stats-grid .stat-card:nth-child(2) .stat-value').textContent = contractors.filter(c=>c.status==='active').length;
+}
+
+/* ═══ PROFILE ═══ */
+function renderProfile(){
+  document.getElementById('notifPrefsBody').innerHTML = notifPrefs.map((p,i)=>`
+    <tr>
+      <td style="padding:14px 0;border-bottom:1px solid #F5F5F5;font-size:13.5px;font-weight:500">${p[0]}</td>
+      <td style="padding:14px 16px;border-bottom:1px solid #F5F5F5;text-align:center"><button class="toggle-switch ${p[1]?'on':''}" onclick="this.classList.toggle('on');notifPrefs[${i}][1]=!notifPrefs[${i}][1];toast('Preferences updated.')"><span class="toggle-knob"></span></button></td>
+      <td style="padding:14px 16px;border-bottom:1px solid #F5F5F5;text-align:center"><button class="toggle-switch ${p[2]?'on':''}" onclick="this.classList.toggle('on');notifPrefs[${i}][2]=!notifPrefs[${i}][2];toast('Preferences updated.')"><span class="toggle-knob"></span></button></td>
+    </tr>
+  `).join('');
+}
+
+function toggleProfileEdit(cancel){
+  const fields = document.querySelectorAll('#profileFields .profile-row-value');
+  const editing = fields[0].querySelector('input');
+  const footer = document.getElementById('profileEditFooter');
+  if(editing || cancel){
+    fields.forEach(f=>{ f.textContent = f.dataset.original || f.textContent; });
+    footer.style.display = 'none';
+  } else {
+    fields.forEach(f=>{
+      f.dataset.original = f.textContent;
+      const v = f.textContent;
+      f.innerHTML = `<input type="text" value="${v}" style="text-align:right;max-width:280px">`;
+    });
+    footer.style.display = 'flex';
+  }
+}
+
+function saveProfile(){
+  document.querySelectorAll('#profileFields .profile-row-value').forEach(f=>{
+    const inp = f.querySelector('input');
+    if(inp) f.textContent = inp.value;
+  });
+  document.getElementById('profileEditFooter').style.display = 'none';
+  toast('Profile saved.','success');
+}
+
+/* ═══ NOTIFICATIONS ═══ */
+function renderNotifs(){
+  document.getElementById('notifList').innerHTML = notifications.map((n,i)=>`
+    <div class="notif-row ${n.unread?'unread':''}" onclick="readNotif(${i})">
+      <span class="notif-dot"></span>
+      <div class="notif-text">
+        <div class="notif-title">${n.title}</div>
+        <div class="notif-sub">${n.sub}</div>
+        <div class="notif-time">${n.time}</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function openNotifs(){
+  document.getElementById('notifDrawer').classList.add('open');
+  document.getElementById('notifOverlay').classList.add('open');
+  state.drawerOpen = 'notif';
+}
+
+function closeNotifs(){
+  document.getElementById('notifDrawer').classList.remove('open');
+  document.getElementById('notifOverlay').classList.remove('open');
+  state.drawerOpen = null;
+}
+
+function readNotif(i){
+  notifications[i].unread = false;
+  renderNotifs();
+  updateBellBadge();
+}
+
+function markAllRead(){
+  notifications.forEach(n=>n.unread=false);
+  renderNotifs();
+  updateBellBadge();
+  toast('All notifications marked as read.','success');
+}
+
+function updateBellBadge(){
+  const c = notifications.filter(n=>n.unread).length;
+  const badge = document.querySelector('.bell-badge');
+  if(c>0){ badge.textContent = c; badge.style.display=''; }
+  else { badge.style.display='none'; }
+}
+
+/* ═══ MODAL CONTROL ═══ */
+function openModal(id){
+  const m = document.getElementById(id);
+  if(!m) return;
+  m.classList.add('open');
+  state.modalOpen = id;
+}
+function closeModal(){
+  if(state.modalOpen){
+    document.getElementById(state.modalOpen).classList.remove('open');
+    state.modalOpen = null;
+  }
+}
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape'){
+    if(state.modalOpen) closeModal();
+    else if(state.drawerOpen==='ho') closeHomeownerDrawer();
+    else if(state.drawerOpen==='notif') closeNotifs();
+    else document.getElementById('sidebar').classList.remove('open');
+  }
+});
+document.querySelectorAll('.modal-overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o) closeModal(); });
+});
+
+/* ═══ TOAST ═══ */
+function toast(msg, kind){
+  const div = document.createElement('div');
+  div.className = 'toast' + (kind==='success'?' toast-success':kind==='error'?' toast-error':'');
+  div.innerHTML = (kind==='success' ? '<svg class="ico" width="18" height="18" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>' : '') + '<span>'+msg+'</span>';
+  document.getElementById('toastContainer').appendChild(div);
+  setTimeout(()=>{ div.style.opacity='0'; div.style.transition='opacity 200ms'; setTimeout(()=>div.remove(),200); }, 3000);
+}
+
+/* ═══ EXPORT TYPE radio click handlers ═══ */
+document.querySelectorAll('#exportTypeGrid .radio-card').forEach(c=>{
+  c.addEventListener('click',()=>setExportType(c.dataset.type));
+});
+
+/* ═══ INIT ═══ */
+function init(){
+  renderDashboard();
+  renderContractors();
+  renderHomeowners();
+  renderProjects();
+  renderAuditTable();
+  renderRecon();
+  renderExportsTable();
+  renderExportContextual();
+  renderProfile();
+  renderNotifs();
+}
+init();
+</script>
+</body>
+</html>

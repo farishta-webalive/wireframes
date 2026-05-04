@@ -612,6 +612,19 @@ label{display:block;font-size:13px;font-weight:500;color:#5F5E5A;margin-bottom:6
 @media(min-width:768px){.two-col{grid-template-columns:1fr 1fr}}
 .form-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:16px}
 .form-section-title{font-size:14px;font-weight:600;color:#1E1E1E;margin-bottom:10px;margin-top:20px}
+/* Job attachments */
+.job-attach-drop{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;padding:24px 16px;border:1.5px dashed #D9D9D9;border-radius:10px;background:#FAFAFA;cursor:pointer;transition:all .15s ease;text-align:center}
+.job-attach-drop:hover{border-color:var(--color-accent);background:#FFF7F2}
+.job-attach-drop.dragover{border-color:var(--color-accent);background:#FFEEE3}
+.job-attach-drop-title{font-size:14px;font-weight:600;color:#1E1E1E}
+.job-attach-drop-sub{font-size:12px;color:var(--color-muted)}
+.job-attach-list{list-style:none;padding:0;margin:10px 0 0;display:flex;flex-direction:column;gap:6px}
+.job-attach-item{display:flex;align-items:center;gap:10px;padding:8px 10px;background:#FAFAFA;border:1px solid #EEE;border-radius:8px;font-size:13px}
+.job-attach-item-icon{width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0;background:#FFF;border:1px solid #EEE}
+.job-attach-item-name{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#1E1E1E;font-weight:500}
+.job-attach-item-size{color:var(--color-muted);font-size:12px;flex-shrink:0}
+.job-attach-item-remove{background:transparent;border:0;color:var(--color-muted);cursor:pointer;padding:4px;border-radius:4px;display:flex;align-items:center;justify-content:center}
+.job-attach-item-remove:hover{color:var(--color-error);background:#FFEBEE}
 .check-list{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:10px}
 .check-list li{position:relative;padding-left:26px;font-size:14.5px;line-height:1.55;color:#1E1E1E}
 .check-list li::before{content:'';position:absolute;left:0;top:3px;width:18px;height:18px;border-radius:50%;background:#DCFCE7 url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20' fill='%2316A34A'><path d='M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0l-3.5-3.5a1 1 0 011.4-1.4l2.8 2.8 6.8-6.8a1 1 0 011.4 0z'/></svg>") center/12px no-repeat}
@@ -2381,6 +2394,80 @@ body.empty-state-co [data-empty-show-grid]{display:grid!important}
 body.empty-state-co [data-empty-show-block]{display:block!important}
 [data-empty-show-flex],[data-empty-show-grid],[data-empty-show-block]{display:none}
 
+/* ─── CO PENDING / VERIFICATION STATE ──────────────────────────────────── */
+/* Banner — fixed-feel strip at top of dashboard content */
+.co-verif-banner{display:flex;align-items:flex-start;gap:14px;padding:14px 18px;border-radius:12px;margin-bottom:18px;border:1px solid;font-size:14px;line-height:1.5}
+.co-verif-banner-pending{background:#FFF6EB;border-color:#FFD9A8;color:#8A4A00}
+.co-verif-banner-rejected{background:#FFEBEE;border-color:#FFCDD2;color:#A1241B}
+.co-verif-banner-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.co-verif-banner-pending .co-verif-banner-icon{background:#FF8A1F;color:#fff}
+.co-verif-banner-rejected .co-verif-banner-icon{background:#E53935;color:#fff}
+.co-verif-banner-body{flex:1;min-width:0}
+.co-verif-banner-title{font-weight:700;margin-bottom:3px;font-size:14.5px}
+.co-verif-banner-msg{font-size:13.5px;color:inherit;opacity:.92}
+.co-verif-banner-msg strong{font-weight:600}
+
+/* Get Verified panel */
+.co-verif-panel{background:#fff;border:1px solid #EAEAEA;border-radius:14px;padding:24px 24px 20px;box-shadow:0 1px 2px rgba(0,0,0,0.03);margin-bottom:24px}
+.co-verif-panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:14px;flex-wrap:wrap;margin-bottom:18px}
+.co-verif-panel-head-left h2{font-size:18px;font-weight:700;color:#1E1E1E;margin-bottom:4px}
+.co-verif-panel-head-left p{font-size:13.5px;color:var(--color-muted);max-width:560px;line-height:1.55}
+.co-verif-progress-pill{display:inline-flex;align-items:center;gap:8px;padding:8px 14px;border-radius:999px;background:#FFF5EE;color:#FF6F1A;font-weight:700;font-size:13px;border:1px solid #FFD9A8;flex-shrink:0}
+.co-verif-progress-bar{height:6px;background:#F0F0F0;border-radius:999px;overflow:hidden;margin-bottom:18px}
+.co-verif-progress-fill{height:100%;background:linear-gradient(90deg,#FF8A1F,#FF6F1A);border-radius:999px;transition:width .3s ease}
+
+/* Checklist items */
+.co-verif-list{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.co-verif-item{display:flex;gap:14px;padding:14px 14px 14px 14px;border:1px solid #EEE;border-radius:10px;background:#FAFAFA;align-items:flex-start;transition:all .15s ease}
+.co-verif-item:hover{border-color:#DDD;background:#fff}
+.co-verif-item-step{width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;font-weight:700;background:#fff;border:1.5px solid #DDD;color:#9E9E9E;margin-top:2px}
+.co-verif-item-body{flex:1;min-width:0}
+.co-verif-item-row1{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:3px}
+.co-verif-item-title{font-size:14.5px;font-weight:600;color:#1E1E1E}
+.co-verif-item-required{font-size:11px;font-weight:700;color:#E53935;text-transform:uppercase;letter-spacing:0.4px}
+.co-verif-item-optional{font-size:11px;font-weight:700;color:#9E9E9E;text-transform:uppercase;letter-spacing:0.4px}
+.co-verif-item-desc{font-size:12.5px;color:var(--color-muted);line-height:1.5;margin-bottom:8px}
+.co-verif-item-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.co-verif-item-status{display:inline-flex;align-items:center;gap:5px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:999px}
+.co-verif-item-status-uploaded{background:#E8F5E9;color:#1B5E20}
+.co-verif-item-status-rejected{background:#FFEBEE;color:#A1241B}
+.co-verif-item-status-pending{background:#FFF5EE;color:#8A4A00}
+.co-verif-item-fname{font-size:12.5px;color:var(--color-muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:260px}
+.co-verif-item-rejected-reason{font-size:12.5px;color:#A1241B;background:#FFEBEE;border:1px solid #FFCDD2;border-radius:8px;padding:8px 10px;margin-top:8px}
+
+/* Completed step */
+.co-verif-item-done{background:#F1F8E9;border-color:#C5E1A5}
+.co-verif-item-done .co-verif-item-step{background:#43A047;border-color:#43A047;color:#fff}
+.co-verif-item-done .co-verif-item-title{color:#1B5E20}
+/* Locked (admin review/approval) */
+.co-verif-item-locked .co-verif-item-step{background:#F5F5F5;color:#BDBDBD;border-color:#E0E0E0}
+.co-verif-item-locked .co-verif-item-title{color:#9E9E9E}
+
+/* Locked dashboard tiles when status=pending: visually muted, click intercepted */
+body.co-pending .dash-panel,
+body.co-pending .dash-action-panel,
+body.co-pending .dash-section[data-empty-hide],
+body.co-pending .dash-kpi-grid{filter:grayscale(.4) opacity(.55);pointer-events:none;user-select:none}
+/* Soft lock overlay on the create-quote button */
+body.co-pending .btn-accent[onclick*="cs12c"],
+body.co-pending .btn-accent[onclick*="cs13"]{opacity:.5;pointer-events:none;cursor:not-allowed!important}
+
+/* Empty-state CTAs (Create a job / Browse open jobs / Invite a homeowner)
+   are also locked while CO verification is pending. */
+body.co-pending .dash-empty-cta{position:relative}
+body.co-pending .dash-empty-cta .dash-empty-card{opacity:.5;pointer-events:none;cursor:not-allowed!important;filter:grayscale(.3)}
+body.co-pending .dash-empty-cta::after{
+  content:'Locked until your account is verified';
+  position:absolute;top:14px;right:14px;
+  background:#FFF7ED;border:1px solid #FED7AA;color:#9A3412;
+  padding:4px 10px;border-radius:999px;font-size:11px;font-weight:600;
+  letter-spacing:.02em;display:inline-flex;align-items:center;gap:6px
+}
+
+/* Sidebar lock icons during pending */
+body.co-pending .sidebar-link[data-pending-locked]{opacity:.55;pointer-events:none;cursor:not-allowed}
+body.co-pending .sidebar-link[data-pending-locked]::after{content:'';display:inline-block;width:12px;height:12px;margin-left:auto;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%239E9E9E' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='3' y='11' width='18' height='11' rx='2'/%3E%3Cpath d='M7 11V7a5 5 0 0 1 10 0v4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:center}
+
 /* Empty-state KPI value styling — softer, signals "nothing yet" */
 .dash-kpi-val-zero{color:#BDBDBD!important;font-weight:600!important}
 
@@ -2696,16 +2783,64 @@ body.empty-state-co [data-empty-show-block]{display:block!important}
 </div>
 
 <div id="modal-co-invite-team" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcit">
-  <div class="modal-sheet">
+  <div class="modal-sheet" style="max-width:480px">
     <h2 class="modal-title" id="mcit">Invite Team Member</h2>
+    <p class="modal-subtitle" style="margin:4px 0 14px;font-size:13px;color:#757575">They'll receive an email to accept and join your firm.</p>
+
+    <!-- Seat usage notice (shown when at/over the included-seat limit) -->
+    <div id="mcit-seat-notice" style="display:none;margin-bottom:14px;padding:12px 14px;border-radius:8px;background:#fff5ef;border:1px solid #ffd9bc;gap:10px;align-items:flex-start">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      <div style="font-size:12.5px;color:#1A1A1A;line-height:1.5">
+        <div style="font-weight:600;margin-bottom:2px">You've reached your 5 included seats.</div>
+        Adding this member will add <strong>$5.00/month</strong> to your subscription. You'll confirm the charge on the next step.
+      </div>
+    </div>
+
     <div class="form-stack">
       <div class="input-group"><label for="inv-name">Full Name</label><input type="text" id="inv-name" placeholder="e.g. Sam Lee"></div>
       <div class="input-group"><label for="inv-email">Email Address</label><input type="email" id="inv-email" placeholder="sam@pacificbuild.com.au"></div>
       <div class="input-group"><label for="inv-role">Sub-role</label><select id="inv-role"><option value="">Select role...</option><option>Project Manager</option><option>Estimator</option><option>Admin</option><option>Site Manager</option></select></div>
     </div>
     <div class="modal-actions mt-16">
-      <button class="btn btn-accent" onclick="sendTeamInvite()">Send Invitation</button>
+      <button class="btn btn-accent" id="mcit-send" onclick="sendTeamInvite()">Send Invitation</button>
       <button class="btn btn-outline" onclick="closeModal('modal-co-invite-team')">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- CO TEAM SEAT OVERAGE — CONFIRM CHARGE MODAL -->
+<div id="modal-co-team-overage" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcto-title">
+  <div class="modal-sheet" style="max-width:480px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">
+      <h2 class="modal-title" id="mcto-title" style="margin:0">Confirm additional seat</h2>
+      <button class="icon-btn" onclick="closeModal('modal-co-team-overage')" aria-label="Close" style="background:none;border:none;padding:4px;cursor:pointer;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <p class="modal-subtitle" style="margin:0 0 14px;font-size:13.5px;color:#757575">You're adding a member beyond your 5 included seats. Review the change to your subscription before confirming.</p>
+
+    <div class="card" style="background:#FAFAFA;border:1px solid #EAEAEA;padding:14px 16px;display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:#757575">New member</span><span id="mcto-name" style="color:#1A1A1A;font-weight:600;text-align:right">—</span></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:#757575">Email</span><span id="mcto-email" style="color:#1A1A1A;font-weight:600;text-align:right;word-break:break-all">—</span></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:#757575">Sub-role</span><span id="mcto-role" style="color:#1A1A1A;font-weight:600;text-align:right">—</span></div>
+    </div>
+
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9E9E9E;margin-bottom:8px">SUBSCRIPTION CHANGE</div>
+    <div class="card" style="background:#fff;border:1px solid #EAEAEA;padding:14px 16px;display:flex;flex-direction:column;gap:8px;margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:#1A1A1A">Current subscription</span><span style="color:#1A1A1A">$50.00<span style="font-size:11px;color:#9E9E9E">/mo</span></span></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:#1A1A1A">Extra seat (×<span id="mcto-extra-count">1</span>)</span><span style="color:var(--color-accent);font-weight:600">+$<span id="mcto-extra-amt">5.00</span><span style="font-size:11px;color:#9E9E9E;font-weight:500">/mo</span></span></div>
+      <div style="border-top:1px solid #EAEAEA;padding-top:8px;margin-top:2px;display:flex;justify-content:space-between;gap:12px;align-items:center"><span style="font-size:13px;font-weight:600;color:#1A1A1A">New monthly total</span><span style="font-size:18px;font-weight:700;color:var(--color-accent)">$<span id="mcto-new-total">55.00</span><span style="font-size:11px;color:#9E9E9E;font-weight:500">/mo</span></span></div>
+      <div style="font-size:11.5px;color:#757575;margin-top:4px;line-height:1.5">A prorated charge of <strong>$<span id="mcto-prorated">3.55</span></strong> will apply for the remainder of this billing cycle. Future months will be billed at the new total on <strong>28 May 2026</strong>.</div>
+    </div>
+
+    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#757575;margin-bottom:14px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      <span>Charged to Visa ending <strong>4242</strong>. <a href="#" onclick="closeModal('modal-co-team-overage');goTo('cs24');return false" style="color:var(--color-accent);text-decoration:none">Manage payment method</a></span>
+    </div>
+
+    <div class="modal-actions" style="display:flex;gap:10px;margin-top:0">
+      <button class="btn btn-outline" onclick="closeModal('modal-co-team-overage')" style="flex:1;min-height:44px">Cancel</button>
+      <button class="btn btn-accent" onclick="confirmTeamOverage()" style="flex:2;min-height:44px">Confirm &amp; Send Invite</button>
     </div>
   </div>
 </div>
@@ -2801,6 +2936,54 @@ body.empty-state-co [data-empty-show-block]{display:block!important}
   </div>
 </div>
 
+<!-- CO CONFIRM INVITE MODAL (opens from cs12c wizard step 3) -->
+<div id="modal-co-confirm-invite" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcci-title">
+  <div class="modal-sheet" style="max-width:480px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:6px">
+      <h2 class="modal-title" id="mcci-title" style="margin:0">Send Invitation?</h2>
+      <button class="icon-btn" onclick="closeModal('modal-co-confirm-invite')" aria-label="Close" style="background:none;border:none;padding:4px;cursor:pointer;flex-shrink:0">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <p class="modal-subtitle" style="margin:0 0 14px;font-size:13.5px;color:#757575">Review the invitation details before sending. The homeowner will receive an email with the project details and quote summary.</p>
+
+    <div style="display:inline-flex;align-items:center;gap:6px;background:#fff5ef;color:var(--color-accent);padding:6px 12px;border-radius:18px;font-size:13px;font-weight:600;margin-bottom:14px">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
+      <span id="mcci-project-chip">Project</span>
+    </div>
+
+    <div class="card" style="background:#FAFAFA;border:1px solid #EAEAEA;padding:14px 16px;display:flex;flex-direction:column;gap:10px">
+      <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:#757575">Homeowner</span><span id="mcci-name" style="color:#1A1A1A;font-weight:600;text-align:right">—</span></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:#757575">Email</span><span id="mcci-email" style="color:#1A1A1A;font-weight:600;text-align:right;word-break:break-all">—</span></div>
+      <div style="display:flex;justify-content:space-between;gap:12px;font-size:13px"><span style="color:#757575">Quote expiry</span><span id="mcci-expiry" style="color:#1A1A1A;font-weight:600;text-align:right">—</span></div>
+      <div style="border-top:1px solid #EAEAEA;padding-top:10px;display:flex;justify-content:space-between;align-items:center;gap:12px"><span style="font-size:13px;color:#1A1A1A;font-weight:600">Total Quote Value</span><span id="mcci-total" style="font-size:16px;font-weight:700;color:var(--color-accent)">$0.00</span></div>
+    </div>
+
+    <div style="border-top:1px solid #EAEAEA;margin:18px 0 12px"></div>
+    <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9E9E9E;margin-bottom:10px">SHARE INVITATION VIA</div>
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <button class="mcci-channel" data-channel="email" onclick="mcciSelectChannel('email')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1.5px solid var(--color-accent);border-radius:8px;background:#fff;cursor:pointer;text-align:left;width:100%">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+        <span style="flex:1;font-size:14px;font-weight:500">Send via Email</span>
+        <span style="background:#E6F5EA;color:#2E7D32;font-size:11px;font-weight:600;padding:3px 8px;border-radius:6px">Recommended</span>
+      </button>
+      <button class="mcci-channel" data-channel="qr" onclick="mcciSelectChannel('qr')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;border:1px solid #EAEAEA;border-radius:8px;background:#fff;cursor:pointer;text-align:left;width:100%">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><rect x="3" y="3" width="6" height="6" rx="1"/><rect x="15" y="3" width="6" height="6" rx="1"/><rect x="3" y="15" width="6" height="6" rx="1"/><rect x="15" y="15" width="3" height="3"/><rect x="18" y="18" width="3" height="3"/><rect x="13" y="11" width="3" height="2"/></svg>
+        <span style="flex:1;font-size:14px;font-weight:500">Show QR Code</span>
+      </button>
+    </div>
+
+    <div class="modal-actions" style="margin-top:16px;display:flex;gap:10px">
+      <button class="btn btn-outline" onclick="closeModal('modal-co-confirm-invite')" style="flex:1;min-height:44px">Cancel</button>
+      <button class="btn btn-accent" onclick="mcciConfirmSend()" style="flex:2;min-height:44px">Confirm &amp; Send</button>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center;gap:6px;margin-top:10px;font-size:12px;color:#757575">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+      <span>This invitation is scoped to <strong id="mcci-scope-name">Project</strong> only. Expires in 7 days.</span>
+    </div>
+  </div>
+</div>
+
 <!-- CO INVITE HOMEOWNER MODAL (project-scoped, opens from cs12c) -->
 <div id="modal-co-invite-ho" class="modal-overlay" role="dialog" aria-modal="true" aria-labelledby="mcih-title">
   <div class="modal-sheet" style="max-width:480px">
@@ -2810,7 +2993,7 @@ body.empty-state-co [data-empty-show-block]{display:block!important}
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
-    <p class="modal-subtitle" style="margin:0 0 14px;font-size:13.5px;color:#757575">They'll receive an email to create their account and join this project.</p>
+    <p class="modal-subtitle" style="margin:0 0 14px;font-size:13.5px;color:#757575">They'll receive an email with the project details and quote summary to create their account and join.</p>
 
     <div style="display:inline-flex;align-items:center;gap:6px;background:#fff5ef;color:var(--color-accent);padding:6px 12px;border-radius:18px;font-size:13px;font-weight:600;margin-bottom:18px">
       <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg>
@@ -3775,6 +3958,17 @@ function toggleMobileMenu(){
           <p class="form-section-title">Optional Details</p>
           <div class="input-group"><label for="job-date">Preferred Start Date</label><input type="date" id="job-date"></div>
           <div class="input-group"><label for="job-access">Site Access Notes</label><textarea id="job-access" placeholder="e.g. Key in lockbox, park on street..." rows="2" style="min-height:80px"></textarea></div>
+          <div class="input-group">
+            <label for="job-attach">Attachments</label>
+            <p class="muted small" style="margin:-4px 0 8px">Upload photos, PDFs, or videos to help contractors understand the scope. Optional.</p>
+            <label for="job-attach" class="job-attach-drop" id="job-attach-drop">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" style="color:var(--color-muted)"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+              <div class="job-attach-drop-title">Click to upload or drag &amp; drop</div>
+              <div class="job-attach-drop-sub">Images, PDFs or videos · up to 25 MB each</div>
+              <input type="file" id="job-attach" multiple accept="image/*,application/pdf,video/*" style="display:none" onchange="handleJobAttachmentPick(event)">
+            </label>
+            <ul id="job-attach-list" class="job-attach-list" style="display:none"></ul>
+          </div>
         </div>
       </div>
       <div class="form-actions">
@@ -4493,6 +4687,39 @@ function completeOnboarding(){
   console.log('[AUDIT] ONBOARDING_COMPLETE | '+new Date().toISOString()+' | userID:sarah_chen');
   goTo('s11');
 }
+window._jobAttachments = window._jobAttachments || [];
+function fmtFileSize(b){if(b<1024)return b+' B';if(b<1048576)return (b/1024).toFixed(1)+' KB';return (b/1048576).toFixed(1)+' MB'}
+function jobAttachIcon(t){
+  if(t.startsWith('image/'))return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#7A5CFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21"/></svg>';
+  if(t.startsWith('video/'))return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#0D8F6F" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>';
+  if(t==='application/pdf')return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#E53935" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+  return '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9E9E9E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>';
+}
+function renderJobAttachList(){
+  var list=document.getElementById('job-attach-list');if(!list)return;
+  if(!window._jobAttachments.length){list.style.display='none';list.innerHTML='';return}
+  list.style.display='flex';
+  list.innerHTML=window._jobAttachments.map(function(f,i){
+    return '<li class="job-attach-item"><span class="job-attach-item-icon">'+jobAttachIcon(f.type||'')+'</span><span class="job-attach-item-name">'+f.name+'</span><span class="job-attach-item-size">'+fmtFileSize(f.size)+'</span><button type="button" class="job-attach-item-remove" aria-label="Remove" onclick="removeJobAttachment('+i+')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button></li>';
+  }).join('');
+}
+function handleJobAttachmentPick(ev){
+  var files=Array.from(ev.target.files||[]);
+  files.forEach(function(f){window._jobAttachments.push(f)});
+  renderJobAttachList();
+  ev.target.value='';
+}
+function removeJobAttachment(i){window._jobAttachments.splice(i,1);renderJobAttachList()}
+document.addEventListener('DOMContentLoaded',function(){
+  var drop=document.getElementById('job-attach-drop');if(!drop)return;
+  ['dragenter','dragover'].forEach(function(e){drop.addEventListener(e,function(ev){ev.preventDefault();ev.stopPropagation();drop.classList.add('dragover')})});
+  ['dragleave','drop'].forEach(function(e){drop.addEventListener(e,function(ev){ev.preventDefault();ev.stopPropagation();drop.classList.remove('dragover')})});
+  drop.addEventListener('drop',function(ev){
+    var files=Array.from(ev.dataTransfer.files||[]);
+    files.forEach(function(f){window._jobAttachments.push(f)});
+    renderJobAttachList();
+  });
+});
 function saveJobDraft(){
   console.log('[AUDIT] JOB_STATE_CHANGE | '+new Date().toISOString()+' | userID:sarah_chen | transition:→Draft');
   showToast('Job saved as Draft (#JB-NEW)');
@@ -4918,17 +5145,92 @@ function generateInvite(){
   showToast('Invite link generated — valid for 7 days');
   console.log('[AUDIT] INVITE_GENERATED | '+new Date().toISOString()+' | userID:mark_chen | projectID:'+proj);
 }
+// ── Team seats & overage ──
+window.__teamSeats = window.__teamSeats || { included: 5, base: 5, extras: 0, perSeat: 5 };
+
+function teamRefreshSeatNotice(){
+  const s=window.__teamSeats;
+  const used=s.base+s.extras;
+  const notice=document.getElementById('mcit-seat-notice');
+  if(notice){
+    if(used>=s.included){notice.style.display='flex';} else {notice.style.display='none';}
+  }
+}
+
+function openInviteTeamModal(){
+  // reset fields & refresh seat-notice each open
+  ['inv-name','inv-email','inv-role'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  teamRefreshSeatNotice();
+  openModal('modal-co-invite-team');
+}
+
 function sendTeamInvite(){
-  const name=document.getElementById('inv-name').value;
-  const email=document.getElementById('inv-email').value;
+  const name=document.getElementById('inv-name').value.trim();
+  const email=document.getElementById('inv-email').value.trim();
   const role=document.getElementById('inv-role').value;
   if(!name||!email||!role){showToast('Please fill in all fields');return;}
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){showToast('Please enter a valid email address');return;}
+
+  const s=window.__teamSeats;
+  const used=s.base+s.extras;
+  if(used>=s.included){
+    // Over included seats — confirm extra seat charge first
+    const extraCount=(used-s.included)+1;
+    const extraAmt=extraCount*s.perSeat;
+    const newTotal=50+extraAmt;
+    const prorated=(extraAmt*0.71).toFixed(2); // ~21 of 30 days remaining
+    const setText=(id,v)=>{const el=document.getElementById(id);if(el)el.textContent=v;};
+    setText('mcto-name',name);setText('mcto-email',email);setText('mcto-role',role);
+    setText('mcto-extra-count',String(extraCount));
+    setText('mcto-extra-amt',extraAmt.toFixed(2));
+    setText('mcto-new-total',newTotal.toFixed(2));
+    setText('mcto-prorated',prorated);
+    window.__pendingTeamInvite={name,email,role};
+    closeModal('modal-co-invite-team');
+    openModal('modal-co-team-overage');
+    return;
+  }
+
+  // Within included seats — send straight away
   closeModal('modal-co-invite-team');
   showToast('Invitation sent to '+email);
   document.getElementById('inv-name').value='';
   document.getElementById('inv-email').value='';
   document.getElementById('inv-role').value='';
   console.log('[AUDIT] TEAM_INVITE_SENT | '+new Date().toISOString()+' | userID:mark_chen | invitee:'+email+' | role:'+role);
+}
+
+function confirmTeamOverage(){
+  const p=window.__pendingTeamInvite||{};
+  const s=window.__teamSeats;
+  s.extras=(s.extras||0)+1;
+  const extraAmt=s.extras*s.perSeat;
+  const newTotal=50+extraAmt;
+  // Update the Subscription page Team Add-ons row + monthly total
+  try{
+    const teamRow=document.querySelectorAll('.sub-summary-row')[1];
+    if(teamRow){
+      const sub=teamRow.querySelector('.sub-summary-sub[data-empty-hide]')||teamRow.querySelector('.sub-summary-sub');
+      if(sub)sub.textContent=(s.included)+' included + '+s.extras+' extra';
+      const amt=teamRow.querySelector('.sub-summary-amt');
+      if(amt){amt.classList.remove('sub-summary-amt-zero');amt.innerHTML='+$'+extraAmt.toFixed(2)+'<span class="sub-summary-suf">/mo</span>';}
+    }
+    const totalRow=document.querySelector('.sub-summary-total .sub-summary-amt-total');
+    if(totalRow)totalRow.innerHTML='$'+newTotal.toFixed(2)+'<span class="sub-summary-suf">/mo</span>';
+    // Update hero card price
+    const heroAmt=document.querySelector('.sub-hero-amount');
+    if(heroAmt)heroAmt.textContent=String(newTotal);
+    // Update team-member count chip on hero ("X team members")
+    document.querySelectorAll('.sub-hero-meta-item, .sub-hero-meta, .sub-hero-row .meta-team').forEach(el=>{
+      if(el && /\d+\s+team members/i.test(el.textContent||'')){
+        el.textContent=el.textContent.replace(/\d+\s+team members/i,(s.included+s.extras)+' team members');
+      }
+    });
+  }catch(e){}
+  closeModal('modal-co-team-overage');
+  showToast(p.name+' invited. $'+(s.perSeat).toFixed(2)+'/mo added — new total $'+newTotal.toFixed(2)+'/mo.');
+  console.log('[AUDIT] TEAM_INVITE_SENT | '+new Date().toISOString()+' | userID:mark_chen | invitee:'+p.email+' | role:'+p.role+' | seat_overage:1 | new_mrr:'+newTotal);
+  window.__pendingTeamInvite=null;
 }
 function coSubscribeSuccess(){
   const msg=document.getElementById('sub-success-msg');
@@ -5160,9 +5462,171 @@ function coOnboardingComplete() {
   if (renEl) renEl.textContent = dateStr;
   console.log('[AUDIT] CO_ONBOARDING_COMPLETE | '+new Date().toISOString()+' | userID:mark_chen');
   console.log('[AUDIT] CO_DASHBOARD_FIRST_VISIT | '+new Date().toISOString()+' | userID:mark_chen');
+  // After onboarding the contractor enters Pending RL Admin Approval state.
+  // Empty-state for cs12 stays on (no jobs/projects yet either way).
+  document.body.classList.remove('empty-state-co','empty-state-ho','empty-state-pm','empty-state-sm');
+  document.body.classList.add('empty-state-co');
+  if(typeof coVerifSetStatus==='function') coVerifSetStatus('pending');
   goTo('cs12');
-  showWelcomeBanner();
+  // No welcome banner during pending — verification banner takes precedence
 }
+
+// ─── CO VERIFICATION / PENDING-APPROVAL STATE ─────────────────────────────
+window.coVerification = {
+  status: 'approved', // 'pending' | 'approved' | 'rejected'
+  docs: [
+    { id:'license',   title:'Business License',                 desc:'Trade or contractor license issued by your state authority.', required:true,  status:'missing', filename:'', reason:'' },
+    { id:'insurance', title:'Public Liability Insurance',       desc:'Current Certificate of Currency, min. $5M cover.',              required:true,  status:'missing', filename:'', reason:'' },
+    { id:'abn',       title:'ABN / ACN Certificate',            desc:'Australian Business Number registration document.',            required:true,  status:'missing', filename:'', reason:'' },
+    { id:'photoid',   title:'Photo ID',                          desc:'Driver licence or passport for the Contractor Owner.',         required:true,  status:'missing', filename:'', reason:'' },
+    { id:'portfolio', title:'Portfolio Samples',                 desc:'2+ photos of recent completed projects.',                       required:false, status:'missing', filename:'', reason:'' },
+    { id:'refs',      title:'Client References',                 desc:'Names and contact details of 2 previous clients.',              required:false, status:'missing', filename:'', reason:'' }
+  ],
+  rejectionNote: ''
+};
+function coVerifSetStatus(status){
+  window.coVerification.status = status;
+  if(status === 'approved'){
+    window.coVerification.docs.forEach(d => { if(d.status==='rejected') d.status='uploaded'; });
+  }
+  if(status === 'rejected'){
+    // Mark a couple of required docs rejected for demo realism
+    var d1 = window.coVerification.docs.find(d=>d.id==='insurance');
+    var d2 = window.coVerification.docs.find(d=>d.id==='photoid');
+    if(d1){ d1.status='rejected'; d1.reason='Certificate has expired (Mar 2026). Please upload current one.'; }
+    if(d2){ d2.status='rejected'; d2.reason='Image is blurry — please re-scan in good lighting.'; }
+    window.coVerification.rejectionNote = 'Some documents need to be resubmitted. See details below.';
+  }
+  coVerifApply();
+}
+function coVerifSimulateAllUploaded(){
+  window.coVerification.docs.forEach(d => { if(d.required) d.status='uploaded'; if(d.required) d.filename = d.title.toLowerCase().replace(/[^a-z]/g,'-')+'.pdf'; });
+  coVerifRender();
+}
+function coVerifApply(){
+  document.body.classList.remove('co-pending','co-rejected','co-approved');
+  document.body.classList.add('co-'+window.coVerification.status);
+  // Show/hide banner + panel
+  var banner = document.getElementById('co-verif-banner');
+  var panel  = document.getElementById('co-verif-panel');
+  if(window.coVerification.status === 'approved'){
+    if(banner) banner.style.display='none';
+    if(panel)  panel.style.display='none';
+  } else {
+    if(banner){
+      banner.style.display='flex';
+      banner.classList.toggle('co-verif-banner-rejected', window.coVerification.status==='rejected');
+      banner.classList.toggle('co-verif-banner-pending',  window.coVerification.status!=='rejected');
+      var msg = document.getElementById('co-verif-banner-msg');
+      var titleEl = banner.querySelector('.co-verif-banner-title');
+      if(window.coVerification.status === 'rejected'){
+        if(titleEl) titleEl.textContent = 'Action required — resubmit documents';
+        if(msg) msg.innerHTML = 'RenoLogic reviewed your submission and needs updated copies of some documents. <strong>Please resubmit the items flagged below.</strong>';
+      } else {
+        if(titleEl) titleEl.textContent = 'Account under review';
+        if(msg) msg.innerHTML = 'Your account is being reviewed by RenoLogic. <strong>Wait until RenoLogic Admin approves you.</strong> While you wait, complete your verification documents below to speed up approval.';
+      }
+    }
+    if(panel) panel.style.display='block';
+    coVerifRender();
+  }
+  coVerifApplySidebarLocks();
+}
+function coVerifApplySidebarLocks(){
+  // Tag the gated CO sidebar links so the CSS lock can apply.
+  // We tag links whose onclick targets the four gated screens.
+  var gatedScreens = ['cs13','cs12c','cs15','cs19','cs22']; // browse jobs, create draft quote, certificates, team, invite
+  document.querySelectorAll('section[id^="cs"] aside.sidebar .sidebar-link').forEach(function(a){
+    var oc = a.getAttribute('onclick')||'';
+    var matched = gatedScreens.some(function(s){ return oc.indexOf("'"+s+"'") !== -1; });
+    if(matched) a.setAttribute('data-pending-locked','true');
+  });
+}
+function coVerifRender(){
+  var list = document.getElementById('co-verif-list');
+  if(!list) return;
+  var v = window.coVerification;
+  // progress = uploaded required / total required
+  var req = v.docs.filter(function(d){return d.required});
+  var done = req.filter(function(d){return d.status==='uploaded'}).length;
+  var total = req.length;
+  var allReqDone = done===total && v.docs.filter(function(d){return d.status==='rejected'}).length===0;
+  document.getElementById('co-verif-progress-count').textContent = done+'/'+total;
+  document.getElementById('co-verif-progress-fill').style.width = (total?Math.round(done/total*100):0)+'%';
+
+  var docHtml = v.docs.map(function(d, i){
+    var stepNum = i+1;
+    var isDone = d.status==='uploaded';
+    var isReject = d.status==='rejected';
+    var stateChip = '';
+    if(isDone) stateChip = '<span class="co-verif-item-status co-verif-item-status-uploaded"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>Uploaded</span>';
+    else if(isReject) stateChip = '<span class="co-verif-item-status co-verif-item-status-rejected">Needs resubmission</span>';
+    else stateChip = '<span class="co-verif-item-status co-verif-item-status-pending">Not uploaded</span>';
+
+    var actionBtn = isDone
+      ? '<button class="btn btn-ghost btn-sm" onclick="coVerifPickDoc(\''+d.id+'\')">Replace</button><button class="btn btn-ghost btn-sm" style="color:var(--color-error)" onclick="coVerifRemoveDoc(\''+d.id+'\')">Remove</button>'
+      : '<button class="btn btn-accent btn-sm" onclick="coVerifPickDoc(\''+d.id+'\')"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>'+(isReject?'Resubmit':'Upload')+'</button>';
+
+    var fnameRow = (isDone || isReject) && d.filename
+      ? '<span class="co-verif-item-fname"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="#9E9E9E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin-right:4px;vertical-align:-1px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>'+d.filename+'</span>' : '';
+
+    var rejectBox = isReject ? '<div class="co-verif-item-rejected-reason"><strong>Reviewer note:</strong> '+(d.reason||'Document needs to be re-uploaded.')+'</div>' : '';
+
+    return '<li class="co-verif-item'+(isDone?' co-verif-item-done':'')+'">'+
+      '<span class="co-verif-item-step">'+(isDone?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':stepNum)+'</span>'+
+      '<div class="co-verif-item-body">'+
+        '<div class="co-verif-item-row1"><span class="co-verif-item-title">'+d.title+'</span><span class="'+(d.required?'co-verif-item-required':'co-verif-item-optional')+'">'+(d.required?'Required':'Optional')+'</span>'+stateChip+'</div>'+
+        '<div class="co-verif-item-desc">'+d.desc+'</div>'+
+        rejectBox+
+        '<div class="co-verif-item-actions">'+actionBtn+fnameRow+'</div>'+
+      '</div>'+
+    '</li>';
+  }).join('');
+
+  // Trailing meta steps: review + unlock
+  var reviewDone = window.coVerification.status === 'approved';
+  var reviewActive = allReqDone && window.coVerification.status === 'pending';
+  var reviewClass = reviewDone ? 'co-verif-item-done' : (reviewActive ? '' : 'co-verif-item-locked');
+  docHtml += '<li class="co-verif-item '+reviewClass+'">'+
+    '<span class="co-verif-item-step">'+(reviewDone?'<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>':(v.docs.length+1))+'</span>'+
+    '<div class="co-verif-item-body">'+
+      '<div class="co-verif-item-row1"><span class="co-verif-item-title">RenoLogic admin review</span><span class="co-verif-item-optional">Automatic</span>'+
+        (reviewActive ? '<span class="co-verif-item-status co-verif-item-status-pending"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>In progress</span>' : '') +
+      '</div>'+
+      '<div class="co-verif-item-desc">RenoLogic verifies your documents. Approval typically takes 1 business day.</div>'+
+    '</div>'+
+  '</li>';
+
+  list.innerHTML = docHtml;
+}
+// Doc upload simulation — opens hidden picker, on file pick marks doc as uploaded
+window._coVerifPickTarget = null;
+function coVerifPickDoc(docId){
+  window._coVerifPickTarget = docId;
+  var fp = document.getElementById('co-verif-file-picker');
+  if(fp) fp.click();
+}
+function coVerifRemoveDoc(docId){
+  var d = window.coVerification.docs.find(function(x){return x.id===docId});
+  if(d){ d.status='missing'; d.filename=''; d.reason=''; }
+  coVerifRender();
+  if(typeof showToast === 'function') showToast('Document removed');
+}
+document.addEventListener('DOMContentLoaded', function(){
+  var fp = document.getElementById('co-verif-file-picker');
+  if(fp) fp.addEventListener('change', function(ev){
+    var file = ev.target.files && ev.target.files[0];
+    if(!file || !window._coVerifPickTarget) { ev.target.value=''; return; }
+    var d = window.coVerification.docs.find(function(x){return x.id===window._coVerifPickTarget});
+    if(d){ d.status='uploaded'; d.filename=file.name; d.reason=''; }
+    window._coVerifPickTarget = null;
+    ev.target.value='';
+    coVerifRender();
+    if(typeof showToast === 'function') showToast('Document uploaded');
+  });
+  // Apply state on initial load (default approved → no-op visually)
+  coVerifApply();
+});
 
 function showWelcomeBanner() {
   if (coState2.welcomeDismissed) return;
@@ -5418,6 +5882,9 @@ function devGoToSmDash() { goTo('sm01'); }
       var renEl = document.getElementById('cs11-renewal');
       if (renEl) renEl.textContent = dateStr;
     }
+    // Re-apply verification UI any time we navigate (sidebar locks live in each
+    // section, banner+panel live inside cs12).
+    if (typeof coVerifApply === 'function') setTimeout(coVerifApply, 30);
     // Admin hooks
     if (id.startsWith('ad')) setTimeout(adRenderStats, 10);
     // SM hooks
@@ -6192,32 +6659,32 @@ function devGoToEstimatorDash(){
           <div class="co-invite-step">
             <div class="co-invite-step-num">1</div>
             <div class="co-invite-step-body-wrap">
-              <div class="co-invite-step-title">Generate invite</div>
-              <div class="co-invite-step-body">From your dashboard, in under 30 seconds.</div>
+              <div class="co-invite-step-title">Project details</div>
+              <div class="co-invite-step-body">Title, trade, location and scope — internal-only until invite.</div>
             </div>
           </div>
           <div class="co-invite-step-divider" aria-hidden="true"></div>
           <div class="co-invite-step">
             <div class="co-invite-step-num">2</div>
             <div class="co-invite-step-body-wrap">
-              <div class="co-invite-step-title">Share link or QR</div>
-              <div class="co-invite-step-body">Email, SMS, or in person.</div>
+              <div class="co-invite-step-title">Add milestones</div>
+              <div class="co-invite-step-body">Break the work into milestones with values — total auto-calculates.</div>
             </div>
           </div>
           <div class="co-invite-step-divider" aria-hidden="true"></div>
           <div class="co-invite-step">
             <div class="co-invite-step-num">3</div>
             <div class="co-invite-step-body-wrap">
-              <div class="co-invite-step-title">Homeowner signs up</div>
-              <div class="co-invite-step-body">Auto-linked to your firm with project context.</div>
+              <div class="co-invite-step-title">Quote &amp; invite</div>
+              <div class="co-invite-step-body">Set GST, expiry, then send via email or QR with the homeowner's details.</div>
             </div>
           </div>
           <div class="co-invite-step-divider" aria-hidden="true"></div>
           <div class="co-invite-step">
             <div class="co-invite-step-num">4</div>
             <div class="co-invite-step-body-wrap">
-              <div class="co-invite-step-title">Quote unlocked</div>
-              <div class="co-invite-step-body">Quote Builder available immediately.</div>
+              <div class="co-invite-step-title">Homeowner accepts</div>
+              <div class="co-invite-step-body">They sign up, auto-linked to your firm with the quote ready to review.</div>
             </div>
           </div>
         </div>
@@ -6422,6 +6889,31 @@ function devGoToEstimatorDash(){
   <button class="co-welcome-banner-link" onclick="goTo('cs13')" style="background:none;border:none;color:#fff;font-size:13px;font-weight:600;text-decoration:underline;cursor:pointer;min-height:44px">Browse Jobs</button>
   <button class="co-welcome-banner-close" onclick="dismissWelcomeBanner()" style="background:none;border:none;color:#fff;cursor:pointer;font-size:20px;min-width:44px;min-height:44px;display:flex;align-items:center;justify-content:center">×</button>
 </div>
+
+<!-- ─── PENDING-APPROVAL BANNER + GET VERIFIED PANEL ─────────────────────── -->
+<div id="co-verif-banner" class="co-verif-banner co-verif-banner-pending" style="display:none">
+  <span class="co-verif-banner-icon">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+  </span>
+  <div class="co-verif-banner-body">
+    <div class="co-verif-banner-title">Account under review</div>
+    <div class="co-verif-banner-msg" id="co-verif-banner-msg">Your account is being reviewed by RenoLogic. Wait until RenoLogic Admin approves you. While you wait, complete your verification documents below to speed up approval.</div>
+  </div>
+</div>
+
+<div id="co-verif-panel" class="co-verif-panel" style="display:none">
+  <div class="co-verif-panel-head">
+    <div class="co-verif-panel-head-left">
+      <h2 id="co-verif-panel-title">Get verified</h2>
+      <p id="co-verif-panel-sub">Upload the documents below so RenoLogic can verify your business. The more complete your submission, the faster we can approve your account.</p>
+    </div>
+    <div class="co-verif-progress-pill"><span id="co-verif-progress-count">0/4</span><span style="opacity:.7">required</span></div>
+  </div>
+  <div class="co-verif-progress-bar"><div class="co-verif-progress-fill" id="co-verif-progress-fill" style="width:0%"></div></div>
+  <ul class="co-verif-list" id="co-verif-list"></ul>
+  <input type="file" id="co-verif-file-picker" style="display:none" accept="image/*,application/pdf">
+</div>
+
 <!-- HERO HEADER -->
 <div class="dash-hero">
   <div class="dash-hero-left">
@@ -6437,7 +6929,7 @@ function devGoToEstimatorDash(){
     </button>
     <button class="btn btn-accent btn-sm" onclick="goTo('cs12c')" style="min-height:44px">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      Create Job
+      Create Draft Quote
     </button>
   </div>
 </div>
@@ -6654,7 +7146,7 @@ function devGoToEstimatorDash(){
   <div class="page-header" style="margin-bottom:0"><h1>My Projects</h1><p>Pacific Build Co · All projects you're delivering</p></div>
   <button class="btn btn-accent btn-sm" onclick="goTo('cs12c')" style="min-height:44px">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-    Create Job
+    Create Draft Quote
   </button>
 </div>
 
@@ -6679,19 +7171,9 @@ function devGoToEstimatorDash(){
 <div class="dash-empty-cta" data-empty-show>
   <div class="dash-empty-cta-head">
     <h2 class="dash-panel-title">No projects yet</h2>
-    <p class="dash-panel-sub">Three ways to get your first project on RenoLogic.</p>
+    <p class="dash-panel-sub">Two ways to get your first project on RenoLogic.</p>
   </div>
   <div class="dash-empty-cta-grid">
-    <button class="dash-empty-card" onclick="goTo('cs12c')">
-      <span class="dash-empty-card-icon">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      </span>
-      <div class="dash-empty-card-body">
-        <div class="dash-empty-card-title">Create a job</div>
-        <div class="dash-empty-card-sub">Set up a project from scratch — invite the homeowner after.</div>
-      </div>
-      <span class="dash-empty-card-cta">Create<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
-    </button>
     <button class="dash-empty-card" onclick="goTo('cs13')">
       <span class="dash-empty-card-icon">
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
@@ -6774,7 +7256,7 @@ function devGoToEstimatorDash(){
     <span class="muted small" style="font-size:13px;color:#757575">Projects you've created. Invite the homeowner to bring them onto the platform.</span>
   </div>
 
-  <div class="co-job-card" onclick="goTo('cs14')" style="cursor:pointer;border-left:3px solid #7C3AED;background:#fff">
+  <div class="co-job-card" onclick="coEditDraft('JB-0051')" style="cursor:pointer;border-left:3px solid #7C3AED;background:#fff">
     <div class="co-job-card-header">
       <div>
         <div class="co-job-card-title">Paddington Roof Repair</div>
@@ -6819,10 +7301,29 @@ function devGoToEstimatorDash(){
   <button class="back-link" onclick="goTo('cs12b')" style="display:inline-flex;align-items:center;gap:6px;color:var(--color-muted);font-size:13px;margin-bottom:14px;background:none;border:none;cursor:pointer;padding:0;max-width:880px;margin-left:auto;margin-right:auto;width:100%">
     <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg> Back to My Projects
   </button>
-  <div class="page-header" style="max-width:880px;margin-left:auto;margin-right:auto"><h1>Create a new job</h1><p>Set up the project, then invite the homeowner to join. Jobs created here are <strong>team-internal only</strong> until the homeowner accepts.</p></div>
+  <div class="page-header" style="max-width:880px;margin-left:auto;margin-right:auto"><h1>Create a Draft Quote</h1><p>Set up the project details, add your milestones, then invite the homeowner. This draft is <strong>only visible to your team</strong> until the homeowner joins.</p></div>
 
-  <div class="card card-lg" style="max-width:880px;padding:28px;margin-left:auto;margin-right:auto">
-    <form id="cj-form" onsubmit="return false" style="display:flex;flex-direction:column;gap:18px">
+  <!-- Step indicator (shared across all 3 steps) -->
+  <div id="cj-stepper" style="max-width:880px;margin:0 auto 18px;display:flex;align-items:center;gap:10px;flex-wrap:wrap">
+    <div class="cj-step" data-step="1" style="display:flex;align-items:center;gap:10px;flex:1;min-width:180px">
+      <div class="cj-step-circle" style="width:30px;height:30px;border-radius:50%;background:var(--color-accent);color:#fff;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">1</div>
+      <div class="cj-step-label" style="font-size:13px;font-weight:600;color:#1A1A1A">Project Details</div>
+    </div>
+    <div class="cj-step-bar" style="flex:0 0 28px;height:2px;background:#E0E0E0"></div>
+    <div class="cj-step" data-step="2" style="display:flex;align-items:center;gap:10px;flex:1;min-width:180px">
+      <div class="cj-step-circle" style="width:30px;height:30px;border-radius:50%;background:#F0F0F0;color:#9E9E9E;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">2</div>
+      <div class="cj-step-label" style="font-size:13px;font-weight:600;color:#9E9E9E">Milestones</div>
+    </div>
+    <div class="cj-step-bar" style="flex:0 0 28px;height:2px;background:#E0E0E0"></div>
+    <div class="cj-step" data-step="3" style="display:flex;align-items:center;gap:10px;flex:1;min-width:180px">
+      <div class="cj-step-circle" style="width:30px;height:30px;border-radius:50%;background:#F0F0F0;color:#9E9E9E;display:inline-flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">3</div>
+      <div class="cj-step-label" style="font-size:13px;font-weight:600;color:#9E9E9E">Quote &amp; Invite</div>
+    </div>
+  </div>
+
+  <!-- STEP 1 — Project Details -->
+  <div id="cj-step-1" class="card card-lg" style="max-width:880px;padding:28px;margin-left:auto;margin-right:auto">
+    <form onsubmit="return false" style="display:flex;flex-direction:column;gap:18px">
 
       <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9E9E9E">PROJECT BASICS</div>
 
@@ -6878,14 +7379,119 @@ function devGoToEstimatorDash(){
 
       <div class="card" style="background:#fff5ef;border:1px solid #ffd9bc;padding:12px 14px;display:flex;gap:10px;align-items:flex-start;margin-top:4px">
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--color-accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:2px"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-        <div style="font-size:12.5px;color:#1A1A1A;line-height:1.5">This job is <strong>not</strong> visible on the public Browse Jobs marketplace. It will only become visible to the homeowner once they accept your invitation.</div>
+        <div style="font-size:12.5px;color:#1A1A1A;line-height:1.5">This draft quote is <strong>not</strong> visible on the public Browse Jobs marketplace. It will only become visible to the homeowner once they accept your invitation.</div>
       </div>
 
-      <div style="display:flex;gap:12px;margin-top:8px;flex-wrap:wrap">
-        <button class="btn btn-outline" onclick="cjSaveDraft()" style="flex:1;min-height:44px;min-width:160px">Save as Draft</button>
-        <button class="btn btn-accent" onclick="cjSaveAndInvite()" style="flex:1;min-height:44px;min-width:200px">Save &amp; Invite Homeowner</button>
+      <div style="display:flex;justify-content:flex-end;margin-top:8px">
+        <button class="btn btn-accent" onclick="cjGoStep(2)" style="min-height:44px;min-width:160px">Continue</button>
       </div>
     </form>
+  </div>
+
+  <!-- STEP 2 — Milestones -->
+  <div id="cj-step-2" class="card card-lg" style="max-width:880px;padding:28px;margin-left:auto;margin-right:auto;display:none">
+    <div style="display:flex;flex-direction:column;gap:18px">
+
+      <!-- Project summary strip -->
+      <div class="card" style="background:#FAFAFA;border:1px solid #EAEAEA;padding:12px 14px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap">
+        <div>
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#9E9E9E">PROJECT</div>
+          <div id="cj-summary-title" style="font-size:14px;font-weight:600;color:#1A1A1A;margin-top:2px">—</div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#9E9E9E">TRADE</div>
+          <div id="cj-summary-trade" style="font-size:14px;font-weight:600;color:#1A1A1A;margin-top:2px">—</div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9E9E9E">MILESTONES</div>
+
+      <div id="cj-milestones-list" style="display:flex;flex-direction:column;gap:14px"></div>
+
+      <div>
+        <button class="btn btn-outline" onclick="cjAddMilestone()" style="min-height:40px">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;vertical-align:-2px"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+          Add Milestone
+        </button>
+      </div>
+
+      <div class="card" style="background:#FAFAFA;border:1px solid #EAEAEA;padding:14px 16px;display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;margin-top:4px">
+        <div>
+          <div style="font-size:13px;font-weight:600;color:#1A1A1A">Total Quote Value</div>
+          <div style="font-size:11px;color:#757575;margin-top:2px">auto-calculated from milestones</div>
+        </div>
+        <div id="cj-total-value" style="font-size:22px;font-weight:700;color:var(--color-accent)">$0.00</div>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-outline" onclick="cjGoStep(1)" style="min-height:44px;min-width:120px">Back</button>
+        <button class="btn btn-accent" onclick="cjGoStep(3)" style="min-height:44px;min-width:160px">Continue</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 — Quote & Invite -->
+  <div id="cj-step-3" class="card card-lg" style="max-width:880px;padding:28px;margin-left:auto;margin-right:auto;display:none">
+    <div style="display:flex;flex-direction:column;gap:18px">
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9E9E9E">QUOTE DETAILS</div>
+
+      <div class="input-group">
+        <label>GST</label>
+        <div id="cj-gst-toggle" style="display:inline-flex;border:1px solid #E0E0E0;border-radius:999px;padding:4px;background:#F5F5F5;width:max-content">
+          <button type="button" class="cj-gst-pill" data-gst="inclusive" onclick="cjSetGst('inclusive')" style="border:none;background:var(--color-accent);color:#fff;font-size:13px;font-weight:600;padding:8px 18px;border-radius:999px;cursor:pointer">Inclusive</button>
+          <button type="button" class="cj-gst-pill" data-gst="exclusive" onclick="cjSetGst('exclusive')" style="border:none;background:transparent;color:#1A1A1A;font-size:13px;font-weight:600;padding:8px 18px;border-radius:999px;cursor:pointer">Exclusive</button>
+        </div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="input-group">
+          <label for="cj-issue-date">Issue date</label>
+          <input type="date" id="cj-issue-date" style="min-height:48px">
+        </div>
+        <div class="input-group">
+          <label for="cj-expiry-date">Expiry date <span style="color:var(--color-error)">*</span></label>
+          <input type="date" id="cj-expiry-date" style="min-height:48px" required>
+        </div>
+      </div>
+
+      <div>
+        <label style="display:block;font-size:13px;font-weight:600;color:#1A1A1A;margin-bottom:6px">Quote Summary</label>
+        <div class="card" style="background:#FAFAFA;border:1px solid #EAEAEA;padding:14px 16px">
+          <div id="cj-quote-summary-list" style="display:flex;flex-direction:column;gap:8px"></div>
+          <div style="border-top:1px solid #EAEAEA;margin-top:12px;padding-top:12px;display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:13px;font-weight:600;color:#1A1A1A">Total Quote Value</div>
+            <div id="cj-summary-total" style="font-size:20px;font-weight:700;color:var(--color-accent)">$0.00</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.1em;color:#9E9E9E;margin-top:8px">INVITE HOMEOWNER</div>
+
+      <div class="input-group">
+        <label for="cj-ho-name">Homeowner full name <span style="color:var(--color-error)">*</span></label>
+        <input type="text" id="cj-ho-name" placeholder="e.g. Sarah Mitchell" style="min-height:48px" required>
+      </div>
+
+      <div class="input-group">
+        <label for="cj-ho-email">Homeowner email address <span style="color:var(--color-error)">*</span></label>
+        <input type="email" id="cj-ho-email" placeholder="e.g. sarah@example.com" style="min-height:48px" required>
+        <div style="font-size:12px;color:#757575;margin-top:6px;line-height:1.5">They'll receive an email with the project details and quote summary. This invitation expires in 7 days.</div>
+      </div>
+
+      <div class="input-group">
+        <label for="cj-ho-msg">Personal message</label>
+        <textarea id="cj-ho-msg" placeholder="Add a personal note to your invitation... (optional)" style="min-height:90px;resize:vertical;padding:12px 14px;font-family:inherit"></textarea>
+      </div>
+
+      <div style="display:flex;justify-content:space-between;gap:12px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-outline" onclick="cjGoStep(2)" style="min-height:44px;min-width:120px">Back</button>
+        <div style="display:flex;gap:12px;flex-wrap:wrap">
+          <button class="btn btn-outline" onclick="cjSaveDraft()" style="min-height:44px;min-width:140px">Save as Draft</button>
+          <button class="btn btn-accent" onclick="cjSendInvitation()" style="min-height:44px;min-width:160px">Send Invitation</button>
+        </div>
+      </div>
+    </div>
   </div>
 
   <p class="fin-disclaimer" style="margin-top:18px"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg> Record-keeping only — RenoLogic does not process or verify payments.</p>
@@ -6893,7 +7499,10 @@ function devGoToEstimatorDash(){
 <nav class="bottom-nav" aria-label="Bottom navigation"><button class="bottom-nav-item" onclick="goTo('cs12')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg></span>Dashboard</button><button class="bottom-nav-item" onclick="goTo('cs13')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg></span>Browse</button><button class="bottom-nav-item active" aria-current="page" onclick="goTo('cs12b')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></span>Projects</button><button class="bottom-nav-item" onclick="goTo('cs23')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>Team</button><button class="bottom-nav-item" onclick="openModal('modal-co-more')"><span class="bottom-nav-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="5" cy="12" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/></svg></span>More</button></nav>
 </div>
 <script>
-function cjValidate(){
+// ───────── Create Draft Quote — 3-step wizard ─────────
+window.__cjState = window.__cjState || { milestones: [{ name:'', desc:'', value:'', evidence:true, retention:false }], gst:'inclusive' };
+
+function cjValidateStep1(){
   const t=document.getElementById('cj-title').value.trim();
   const tr=document.getElementById('cj-trade').value;
   const su=document.getElementById('cj-suburb').value.trim();
@@ -6903,19 +7512,304 @@ function cjValidate(){
   if(!/^[0-9]{4}$/.test(pc)){alert('Postcode must be 4 digits.');return false;}
   return true;
 }
-function cjSaveDraft(){if(!cjValidate())return;showToast('Draft saved — Awaiting Homeowner');setTimeout(()=>goTo('cs12b'),700);}
-function cjSaveAndInvite(){
-  if(!cjValidate())return;
-  const title=document.getElementById('cj-title').value.trim();
-  const chip=document.getElementById('mcih-project-chip');
-  const scope=document.getElementById('mcih-scope-name');
-  if(chip)chip.textContent=title;
-  if(scope)scope.textContent=title;
-  // reset modal state
-  ['mcih-name','mcih-email','mcih-msg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-  mcihSelectChannel('email');
-  openModal('modal-co-invite-ho');
+function cjValidateStep2(){
+  const ms=window.__cjState.milestones;
+  const ok=ms.some(m=>m.name && String(m.name).trim() && Number(m.value)>0);
+  if(!ok){alert('Add at least one milestone with a name and value.');return false;}
+  return true;
 }
+function cjValidateStep3(){
+  const exp=document.getElementById('cj-expiry-date').value;
+  const name=document.getElementById('cj-ho-name').value.trim();
+  const email=document.getElementById('cj-ho-email').value.trim();
+  if(!exp){alert('Please select a quote expiry date.');return false;}
+  if(!name){alert('Please enter the homeowner\'s name.');return false;}
+  if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address.');return false;}
+  return true;
+}
+
+function cjSetStepUI(n){
+  for(let i=1;i<=3;i++){
+    const panel=document.getElementById('cj-step-'+i);
+    if(panel)panel.style.display=(i===n)?'':'none';
+  }
+  document.querySelectorAll('#cj-stepper .cj-step').forEach(el=>{
+    const s=Number(el.dataset.step);
+    const circle=el.querySelector('.cj-step-circle');
+    const label=el.querySelector('.cj-step-label');
+    if(!circle||!label)return;
+    if(s<n){
+      circle.style.background='var(--color-accent)';circle.style.color='#fff';
+      circle.innerHTML='<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+      label.style.color='#1A1A1A';
+    } else if(s===n){
+      circle.style.background='var(--color-accent)';circle.style.color='#fff';circle.textContent=String(s);
+      label.style.color='#1A1A1A';
+    } else {
+      circle.style.background='#F0F0F0';circle.style.color='#9E9E9E';circle.textContent=String(s);
+      label.style.color='#9E9E9E';
+    }
+  });
+  const bars=document.querySelectorAll('#cj-stepper .cj-step-bar');
+  bars.forEach((b,i)=>{ b.style.background=(i+1)<n?'var(--color-accent)':'#E0E0E0'; });
+}
+
+function cjGoStep(n){
+  if(n===2){
+    if(!cjValidateStep1())return;
+    // populate summary strip
+    const t=document.getElementById('cj-title').value.trim();
+    const tr=document.getElementById('cj-trade').value;
+    const st=document.getElementById('cj-summary-title');if(st)st.textContent=t||'—';
+    const str=document.getElementById('cj-summary-trade');if(str)str.textContent=tr||'—';
+    cjRenderMilestones();
+  }
+  if(n===3){
+    if(!cjValidateStep2())return;
+    cjRenderQuoteSummary();
+    // default issue date = today
+    const id=document.getElementById('cj-issue-date');
+    if(id && !id.value){const d=new Date();id.value=d.toISOString().slice(0,10);}
+  }
+  cjSetStepUI(n);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function cjResetWizard(){
+  // header
+  const hdr=document.querySelector('#cs12c .page-header h1');if(hdr)hdr.textContent='Create a Draft Quote';
+  // step 1
+  ['cj-title','cj-trade','cj-suburb','cj-postcode','cj-desc','cj-start','cj-access'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});  // step 3
+  ['cj-issue-date','cj-expiry-date','cj-ho-name','cj-ho-email','cj-ho-msg'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  window.__cjState={milestones:[{name:'',desc:'',value:'',evidence:true,retention:false}],gst:'inclusive'};
+  cjSetGst('inclusive');
+  cjSetStepUI(1);
+}
+
+// ── Milestones
+function cjAddMilestone(){
+  window.__cjState.milestones.push({name:'',desc:'',value:'',evidence:true,retention:false});
+  cjRenderMilestones();
+}
+function cjRemoveMilestone(idx){
+  if(window.__cjState.milestones.length<=1)return;
+  window.__cjState.milestones.splice(idx,1);
+  cjRenderMilestones();
+}
+function cjUpdateMilestone(idx,key,val){
+  if(!window.__cjState.milestones[idx])return;
+  window.__cjState.milestones[idx][key]=val;
+  cjUpdateTotal();
+}
+function cjFmtMoney(n){
+  const v=Number(n)||0;
+  return '$'+v.toLocaleString('en-AU',{minimumFractionDigits:2,maximumFractionDigits:2});
+}
+function cjUpdateTotal(){
+  const total=window.__cjState.milestones.reduce((s,m)=>s+(Number(m.value)||0),0);
+  const el=document.getElementById('cj-total-value');if(el)el.textContent=cjFmtMoney(total);
+  const st=document.getElementById('cj-summary-total');if(st)st.textContent=cjFmtMoney(total);
+}
+function cjRenderMilestones(){
+  const list=document.getElementById('cj-milestones-list');
+  if(!list)return;
+  const ms=window.__cjState.milestones;
+  list.innerHTML='';
+  ms.forEach((m,idx)=>{
+    const card=document.createElement('div');
+    card.className='card';
+    card.style.cssText='border:1px solid #EAEAEA;padding:16px;background:#fff;position:relative';
+    const removeBtn=ms.length>1
+      ? '<button type="button" onclick="cjRemoveMilestone('+idx+')" aria-label="Remove milestone" style="position:absolute;top:10px;right:10px;background:none;border:none;cursor:pointer;color:#9E9E9E;padding:4px;line-height:0"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>'
+      : '';
+    card.innerHTML=
+      '<div style="font-size:11px;font-weight:700;letter-spacing:0.08em;color:#9E9E9E;margin-bottom:10px">MILESTONE '+(idx+1)+'</div>'+
+      removeBtn+
+      '<div class="input-group">'+
+        '<label>Milestone name <span style="color:var(--color-error)">*</span></label>'+
+        '<input type="text" placeholder="e.g. M'+(idx+1)+' — Site Preparation" style="min-height:44px" value="'+(m.name||'').replace(/"/g,'&quot;')+'" oninput="cjUpdateMilestone('+idx+',\'name\',this.value)">'+
+      '</div>'+
+      '<div class="input-group" style="margin-top:12px">'+
+        '<label>Description</label>'+
+        '<textarea placeholder="Optional — describe what this milestone covers" style="min-height:70px;resize:vertical;padding:10px 12px;font-family:inherit" oninput="cjUpdateMilestone('+idx+',\'desc\',this.value)">'+(m.desc||'').replace(/</g,'&lt;')+'</textarea>'+
+      '</div>'+
+      '<div class="input-group" style="margin-top:12px">'+
+        '<label>Milestone Value ($AUD) <span style="color:var(--color-error)">*</span></label>'+
+        '<input type="number" min="0" step="0.01" placeholder="0.00" style="min-height:44px" value="'+(m.value||'')+'" oninput="cjUpdateMilestone('+idx+',\'value\',this.value)">'+
+      '</div>'+
+      '<div style="display:flex;gap:18px;flex-wrap:wrap;margin-top:14px">'+
+        cjToggleHTML(idx,'evidence','Evidence required',!!m.evidence)+
+        cjToggleHTML(idx,'retention','Retention applied',!!m.retention)+
+      '</div>';
+    list.appendChild(card);
+  });
+  cjUpdateTotal();
+}
+function cjToggleHTML(idx,key,label,on){
+  const trackBg=on?'var(--color-accent)':'#D0D0D0';
+  const knobX=on?'18px':'2px';
+  return '<label style="display:inline-flex;align-items:center;gap:10px;font-size:13px;color:#1A1A1A;cursor:pointer;user-select:none">'+
+    '<span data-cjt="'+idx+'-'+key+'" onclick="cjFlipToggle('+idx+',\''+key+'\')" style="position:relative;display:inline-block;width:38px;height:22px;background:'+trackBg+';border-radius:999px;transition:background .15s">'+
+      '<span style="position:absolute;top:2px;left:'+knobX+';width:18px;height:18px;background:#fff;border-radius:50%;box-shadow:0 1px 2px rgba(0,0,0,0.2);transition:left .15s"></span>'+
+    '</span>'+label+
+  '</label>';
+}
+function cjFlipToggle(idx,key){
+  const m=window.__cjState.milestones[idx];if(!m)return;
+  m[key]=!m[key];
+  cjRenderMilestones();
+}
+
+// ── Step 3 helpers
+function cjSetGst(v){
+  window.__cjState.gst=v;
+  document.querySelectorAll('#cj-gst-toggle .cj-gst-pill').forEach(b=>{
+    const sel=b.dataset.gst===v;
+    b.style.background=sel?'var(--color-accent)':'transparent';
+    b.style.color=sel?'#fff':'#1A1A1A';
+  });
+}
+function cjRenderQuoteSummary(){
+  const list=document.getElementById('cj-quote-summary-list');
+  if(!list)return;
+  list.innerHTML='';
+  const ms=window.__cjState.milestones.filter(m=>(m.name||'').trim()||Number(m.value)>0);
+  if(!ms.length){
+    list.innerHTML='<div style="font-size:13px;color:#757575">No milestones added.</div>';
+  } else {
+    ms.forEach((m,i)=>{
+      const row=document.createElement('div');
+      row.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px';
+      row.innerHTML='<span style="color:#1A1A1A">'+(i+1)+'. '+((m.name||'Milestone '+(i+1)).replace(/</g,'&lt;'))+'</span><span style="color:#1A1A1A;font-weight:600">'+cjFmtMoney(m.value)+'</span>';
+      list.appendChild(row);
+    });
+  }
+  cjUpdateTotal();
+}
+
+// ── Submission
+function cjSaveDraft(){
+  if(!cjValidateStep1()){cjGoStep(1);return;}
+  if(!cjValidateStep2()){cjGoStep(2);return;}
+  showToast('Draft quote saved. You can invite the homeowner from your project dashboard.');
+  setTimeout(()=>{cjResetWizard();goTo('cs12b');},700);
+}
+function cjSendInvitation(){
+  if(!cjValidateStep1()){cjGoStep(1);return;}
+  if(!cjValidateStep2()){cjGoStep(2);return;}
+  if(!cjValidateStep3())return;
+  const title=document.getElementById('cj-title').value.trim();
+  const name=document.getElementById('cj-ho-name').value.trim();
+  const email=document.getElementById('cj-ho-email').value.trim();
+  const exp=document.getElementById('cj-expiry-date').value;
+  // Populate confirmation modal
+  const chip=document.getElementById('mcci-project-chip');if(chip)chip.textContent=title;
+  const scope=document.getElementById('mcci-scope-name');if(scope)scope.textContent=title;
+  const nEl=document.getElementById('mcci-name');if(nEl)nEl.textContent=name;
+  const eEl=document.getElementById('mcci-email');if(eEl)eEl.textContent=email;
+  const xEl=document.getElementById('mcci-expiry');if(xEl){
+    try{const d=new Date(exp);xEl.textContent=isNaN(d)?exp:d.toLocaleDateString('en-AU',{day:'2-digit',month:'short',year:'numeric'});}catch(e){xEl.textContent=exp;}
+  }
+  const tEl=document.getElementById('mcci-total');
+  const total=window.__cjState.milestones.reduce((s,m)=>s+(Number(m.value)||0),0);
+  if(tEl)tEl.textContent=cjFmtMoney(total);
+  mcciSelectChannel('email');
+  window.__cjPendingHoName=name;
+  window.__cjPendingHoEmail=email;
+  window.__cjPendingProject=title;
+  openModal('modal-co-confirm-invite');
+}
+
+function mcciSelectChannel(ch){
+  window.__mcciChannel=ch;
+  document.querySelectorAll('#modal-co-confirm-invite .mcci-channel').forEach(b=>{
+    const sel=b.dataset.channel===ch;
+    b.style.border=sel?'1.5px solid var(--color-accent)':'1px solid #EAEAEA';
+    const icon=b.querySelector('svg:first-child');
+    if(icon)icon.setAttribute('stroke',sel?'var(--color-accent)':'#1A1A1A');
+  });
+}
+
+function mcciConfirmSend(){
+  const ch=window.__mcciChannel||'email';
+  const name=window.__cjPendingHoName||'';
+  const email=window.__cjPendingHoEmail||'';
+  const title=window.__cjPendingProject||'Project';
+  closeModal('modal-co-confirm-invite');
+  if(ch==='qr'){
+    const proj=document.getElementById('mciq-project');if(proj)proj.textContent=title;
+    openModal('modal-co-invite-qr');
+    showToast('QR code generated for '+name+'.');
+  } else {
+    showToast('Draft quote created and invitation sent to '+name+'.');
+    setTimeout(()=>{try{cjResetWizard();}catch(e){}goTo('cs12b');},900);
+  }
+  window.__cjPendingHoName=null;
+  window.__cjPendingHoEmail=null;
+  window.__cjPendingProject=null;
+}
+
+// Wrap goTo to reset wizard whenever the user enters cs12c
+(function(){
+  const origGoTo=window.goTo;
+  if(typeof origGoTo==='function' && !origGoTo.__cjWrapped){
+    window.goTo=function(id){
+      const r=origGoTo.apply(this,arguments);
+      if(id==='cs12c' && !window.__cjEditing){try{cjResetWizard();}catch(e){}}
+      window.__cjEditing=false;
+      return r;
+    };
+    window.goTo.__cjWrapped=true;
+  }
+})();
+
+// Open the wizard pre-filled with an existing draft for editing
+window.__coDraftFixtures = {
+  'JB-0051': {
+    title:'Paddington Roof Repair',
+    trade:'Roofing',
+    suburb:'Paddington',
+    postcode:'2021',
+    desc:'Replace damaged tiles on the rear roof slope, repoint ridge capping, inspect and reseal flashings around the chimney, and gutter clean-out. Heritage area — like-for-like terracotta tiles required.',
+    start:'2026-05-20',
+    access:'Side gate keypad 4471. Off-street parking on Glenmore Rd.',
+    milestones:[
+      {name:'M1 — Site setup & scaffold', desc:'Erect scaffolding to rear elevation, edge protection, ground sheeting.', value:'1800', evidence:true, retention:false},
+      {name:'M2 — Tile replacement & repoint', desc:'Strip damaged tiles, replace with matched terracotta, repoint ridge.', value:'4200', evidence:true, retention:false},
+      {name:'M3 — Flashings & gutters', desc:'Reseal chimney flashings, clean and inspect gutters and downpipes.', value:'1500', evidence:true, retention:false}
+    ],
+    gst:'inclusive',
+    issueDate:'',
+    expiryDate:'',
+    hoName:'',
+    hoEmail:'',
+    hoMsg:''
+  }
+};
+
+function coEditDraft(jobId){
+  const d=window.__coDraftFixtures[jobId];
+  if(!d){goTo('cs12c');return;}
+  window.__cjEditing=true;
+  goTo('cs12c');
+  // Populate Step 1
+  setTimeout(()=>{
+    const set=(id,v)=>{const el=document.getElementById(id);if(el)el.value=v||'';};
+    set('cj-title',d.title);set('cj-trade',d.trade);set('cj-suburb',d.suburb);set('cj-postcode',d.postcode);
+    set('cj-desc',d.desc);set('cj-start',d.start);set('cj-access',d.access);
+    // Populate state
+    window.__cjState={milestones:JSON.parse(JSON.stringify(d.milestones||[{name:'',desc:'',value:'',evidence:true,retention:false}])),gst:d.gst||'inclusive'};
+    // Populate Step 3 fields
+    set('cj-issue-date',d.issueDate);set('cj-expiry-date',d.expiryDate);
+    set('cj-ho-name',d.hoName);set('cj-ho-email',d.hoEmail);set('cj-ho-msg',d.hoMsg);
+    if(typeof cjSetGst==='function')cjSetGst(d.gst||'inclusive');
+    // Update header copy to indicate editing
+    const hdr=document.querySelector('#cs12c .page-header h1');if(hdr)hdr.textContent='Edit Draft Quote';
+    cjSetStepUI(1);
+  },50);
+}
+// Legacy alias for any leftover callsites
+function cjSaveAndInvite(){cjSendInvitation();}
 function coOpenInviteForDraft(title){
   const chip=document.getElementById('mcih-project-chip');
   const scope=document.getElementById('mcih-scope-name');
@@ -6956,8 +7850,14 @@ function mcihSendInvitation(){
   if(!email||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){alert('Please enter a valid email address.');return;}
   const ch=window.__mcihChannel||'email';
   closeModal('modal-co-invite-ho');
-  showToast(ch==='qr'?'QR code generated — share with homeowner':'Invitation email sent to '+email+'. Link expires in 7 days.');
-  setTimeout(()=>goTo('cs12b'),900);
+  if(window.__cjPendingHoName){
+    showToast('Draft quote created and invitation sent to '+window.__cjPendingHoName+'.');
+    window.__cjPendingHoName=null;
+    setTimeout(()=>{try{cjResetWizard();}catch(e){}goTo('cs12b');},900);
+  } else {
+    showToast(ch==='qr'?'QR code generated — share with homeowner':'Invitation email sent to '+email+'. Link expires in 7 days.');
+    setTimeout(()=>goTo('cs12b'),900);
+  }
 }
 </script>
 </section>
@@ -7557,7 +8457,7 @@ function mcihSendInvitation(){
       <p class="team-hero-sub">Manage who can access projects, upload evidence, and act on behalf of your firm.</p>
     </div>
     <div class="team-hero-right">
-      <button class="btn btn-accent team-hero-cta" onclick="openModal('modal-co-invite-team')">
+      <button class="btn btn-accent team-hero-cta" onclick="openInviteTeamModal()">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Invite Team Member
       </button>
@@ -7614,7 +8514,7 @@ function mcihSendInvitation(){
       <div class="team-card-meta">Since Apr 2026</div>
     </div>
     <!-- EMPTY-STATE: invite first teammate -->
-    <button class="team-card team-card-invite" data-empty-show onclick="openModal('modal-co-invite-team')" style="border:1.5px dashed #FFD9BD;background:#FFFAF5;cursor:pointer;text-align:left;font-family:inherit;width:100%">
+    <button class="team-card team-card-invite" data-empty-show onclick="openInviteTeamModal()" style="border:1.5px dashed #FFD9BD;background:#FFFAF5;cursor:pointer;text-align:left;font-family:inherit;width:100%">
       <div class="team-card-avatar" style="background:#FFF1E8;color:#FF6F1A">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
@@ -10648,6 +11548,11 @@ function filterTeam(q){
     </div>
     <div style="font-size:12px;color:#757575;margin-bottom:14px">Compare accent colors across the system</div>
     <div id="tweaks-swatches" style="display:flex;flex-direction:column;gap:8px"></div>
+    <div style="margin-top:14px;padding-top:12px;border-top:1px solid #F0F0F0">
+      <div style="font-size:13px;font-weight:700;color:#1E1E1E;margin-bottom:4px">Contractor verification status</div>
+      <div style="font-size:11px;color:#9E9E9E;margin-bottom:10px;line-height:1.5">Simulate the RL Admin approval flow on the Contractor Owner dashboard.</div>
+      <div id="tweaks-verif-radio" style="display:flex;gap:6px;flex-direction:column"></div>
+    </div>
     <div style="margin-top:14px;padding-top:12px;border-top:1px solid #F0F0F0;font-size:11px;color:#9E9E9E;line-height:1.5">Updates buttons, focus rings, hovers, gradients, badges everywhere. Click around to compare on real screens.</div>
   `;
   document.body.appendChild(panel);
@@ -10692,17 +11597,87 @@ function filterTeam(q){
   // Tweaks protocol
   window.addEventListener('message', (e) => {
     const d = e.data; if(!d || !d.type) return;
-    if(d.type === '__activate_edit_mode'){ panel.style.display = 'block'; }
-    if(d.type === '__deactivate_edit_mode'){ panel.style.display = 'none'; }
+    if(d.type === '__activate_edit_mode'){ panel.style.display = 'block'; if(fab) fab.style.display='none'; }
+    if(d.type === '__deactivate_edit_mode'){ panel.style.display = 'none'; if(fab && isStandalone) fab.style.display='flex'; }
   });
   panel.querySelector('#tweaks-close').addEventListener('click', () => {
     panel.style.display = 'none';
+    if(fab && isStandalone) fab.style.display='flex';
     try { window.parent.postMessage({type:'__edit_mode_dismissed'}, '*'); } catch(e){}
   });
+
+  // ─── Floating Tweaks button (only when running standalone, e.g. downloaded HTML) ───
+  // We detect "standalone" as: no parent frame OR parent doesn't acknowledge
+  // __edit_mode_available within 800ms (i.e. no host toolbar). When standalone
+  // we show a small bottom-right pill that toggles the panel.
+  const isStandalone = (window.parent === window);
+  let fab = null;
+  if(isStandalone){
+    fab = document.createElement('button');
+    fab.type = 'button';
+    fab.setAttribute('aria-label','Open Tweaks');
+    fab.style.cssText = 'position:fixed;bottom:20px;right:20px;z-index:99998;display:flex;align-items:center;gap:8px;padding:10px 14px;border-radius:999px;border:1.5px solid #1E1E1E;background:#1E1E1E;color:#fff;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,0.18);transition:transform 120ms';
+    fab.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09a1.65 1.65 0 0 0-1-1.51 1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09a1.65 1.65 0 0 0 1.51-1 1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33h0a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51h0a1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82v0a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg><span>Tweaks</span>';
+    fab.addEventListener('mouseenter', ()=>{ fab.style.transform='translateY(-1px)'; });
+    fab.addEventListener('mouseleave', ()=>{ fab.style.transform='none'; });
+    fab.addEventListener('click', () => {
+      panel.style.display = 'block';
+      fab.style.display = 'none';
+    });
+    document.body.appendChild(fab);
+  }
 
   // Apply default + announce availability
   applySwatch(currentKey);
   paintSelection();
+
+  // ─── Verification status radio ─────────────────────────────────────────
+  const verifWrap = panel.querySelector('#tweaks-verif-radio');
+  const VERIF_OPTS = [
+    { key:'pending',  label:'Pending',  desc:'New CO awaiting RL Admin approval', color:'#FF8A1F' },
+    { key:'approved', label:'Approved', desc:'Full dashboard unlocked',           color:'#43A047' },
+    { key:'rejected', label:'Rejected', desc:'Some docs need to be resubmitted',  color:'#E53935' }
+  ];
+  function getCurrentVerif(){ return (window.coVerification && window.coVerification.status) || 'approved'; }
+  function paintVerif(){
+    const cur = getCurrentVerif();
+    verifWrap.querySelectorAll('button').forEach(b => {
+      const sel = b.dataset.vkey === cur;
+      const c = VERIF_OPTS.find(o=>o.key===b.dataset.vkey).color;
+      b.style.borderColor = sel ? c : '#EAEAEA';
+      b.style.background = sel ? '#FFFBF7' : '#fff';
+      const dot = b.querySelector('.tweaks-vcheck');
+      dot.style.borderColor = sel ? c : '#DDD';
+      dot.style.background  = sel ? c : 'transparent';
+      dot.innerHTML = sel ? '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>' : '';
+    });
+  }
+  VERIF_OPTS.forEach(o => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.dataset.vkey = o.key;
+    b.style.cssText = 'display:flex;align-items:center;gap:10px;padding:9px 11px;border-radius:9px;border:1.5px solid #EAEAEA;background:#fff;cursor:pointer;text-align:left;font-family:inherit;transition:all 120ms;width:100%';
+    b.innerHTML = `<span style="width:10px;height:10px;border-radius:50%;background:${o.color};flex-shrink:0;box-shadow:0 0 0 3px ${o.color}22"></span>
+      <span style="flex:1;min-width:0">
+        <span style="display:block;font-size:12.5px;font-weight:600;color:#1E1E1E">${o.label}</span>
+        <span style="display:block;font-size:10.5px;color:#9E9E9E;margin-top:1px">${o.desc}</span>
+      </span>
+      <span class="tweaks-vcheck" style="width:16px;height:16px;border-radius:50%;border:1.5px solid #DDD;flex-shrink:0;display:flex;align-items:center;justify-content:center"></span>`;
+    b.addEventListener('click', () => {
+      if(typeof coVerifSetStatus === 'function') coVerifSetStatus(o.key);
+      // If switching to pending and we're on a CO workspace screen, ensure we're on cs12 to see the panel
+      if(o.key !== 'approved'){
+        const active = document.querySelector('section.screen.active');
+        if(active && /^cs1[2-9]/.test(active.id) === false){
+          if(typeof goTo === 'function') goTo('cs12');
+        }
+      }
+      paintVerif();
+    });
+    verifWrap.appendChild(b);
+  });
+  paintVerif();
+
   try { window.parent.postMessage({type:'__edit_mode_available'}, '*'); } catch(e){}
 })();
 </script>
