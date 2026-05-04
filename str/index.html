@@ -1009,8 +1009,77 @@ function buildSchemas() {
   reg('NAR','fresh-produce','Fresh Produce Irradiation','Gamma',
     [ commonCustomerDetails(), commonConsignment([{ key:'commodity', label:'Commodity', type:'select', required:true, source:'commodities' }]),
       gammaParamsStandard, conditionalSections, uploads(['MSDS']), commonDeclaration() ]);
-  reg('NAR','treatment','Treatment (FRM-0203)','Gamma',
-    [ commonCustomerDetails(), commonConsignment(), gammaParamsStandard, conditionalSections, uploads(['MSDS']), commonDeclaration() ]);
+  reg('NAR','treatment','QLD Request for Treatment (FRM-0203)','Gamma', [
+    // 1. Customer Details
+    { id:'customer', title:'Customer Details', prefill:true,
+      subtitle:'All fields marked with an asterisk (*) are mandatory and required to be completed for all request submissions.',
+      fields:[
+        { key:'company_name',        label:'Company Name',                 type:'text',  required:true, prefill:'company' },
+        { key:'contact_name',        label:'Contact Name',                 type:'text',  required:true, prefill:'contact' },
+        { key:'qld_customer_number', label:'Steritech QLD Customer Number',type:'text',
+          help:'6 Digit Number found on previous Invoice, COI, or Customer Agreement' },
+        { key:'business_phone',      label:'Business Phone',               type:'phone', required:true, prefill:'phone' },
+        { key:'mobile_phone',        label:'Mobile Phone',                 type:'phone' },
+        { key:'address',             label:'Address',                      type:'text',  required:true },
+        { key:'email',               label:'Email',                        type:'email', required:true, prefill:'email' },
+      ]
+    },
+    // 2. Consignment Details
+    { id:'consignment', title:'Consignment Details',
+      fields:[
+        { key:'po_reference',         label:'Purchase Order/Reference Number',     type:'text' },
+        { key:'batch_number',         label:'Batch Number',                        type:'text' },
+        { key:'reference_dose_range', label:'Reference Dosimeter Dose Range (3kGy)', type:'text', required:true,
+          help:'Provided range must be >3kGy' },
+        { key:'quantity_description', label:'Quantity and Description of Goods',   type:'textarea', required:true, rows:4 },
+      ]
+    },
+    // 3. Additional Information — Yes/No questions
+    { id:'additional_info', title:'Additional Information',
+      subtitle:'Does this consignment:',
+      fields:[
+        { key:'dangerous_goods',  label:'Contain dangerous goods?',  type:'radio', options:['Yes','No'], required:true,
+          help:'If yes, please attach an MSDS' },
+        { key:'kept_frozen',      label:'Need to be kept frozen?',   type:'radio', options:['Yes','No'], required:true },
+        { key:'refrigerated',     label:'Need to be refrigerated?',  type:'radio', options:['Yes','No'], required:true },
+        { key:'fragile_goods',    label:'Contain fragile goods?',    type:'radio', options:['Yes','No'], required:true },
+        { key:'require_dry_ice',  label:'Require dry ice?',          type:'radio', options:['Yes','No'], required:true },
+        { key:'dry_ice_kg',       label:'If yes, quantity to be manufactured (KG)', type:'number', min:0,
+          showIf:{ key:'require_dry_ice', equals:['Yes'] } },
+        { key:'tga_apvma',        label:'Contain goods regulated by the TGA or APVMA?', type:'radio', options:['Yes','No'], required:true },
+        { key:'iso11137',         label:'Require processing compliant to ISO 11137',    type:'radio', options:['Yes','No'], required:true,
+          help:'If yes, please provide the below — ISO11137 TREATMENTS ONLY' },
+        { key:'rpi_number',       label:'RPI Number', type:'text', required:true,
+          showIf:{ key:'iso11137', equals:['Yes'] } },
+        { key:'product_dose_range', label:'Product Dose Range (kGy)', type:'text', required:true,
+          showIf:{ key:'iso11137', equals:['Yes'] } },
+      ]
+    },
+    // 4. Quarantine Goods
+    { id:'quarantine', title:'Quarantine Goods',
+      subtitle:'All fields marked with an asterisk (*) are mandatory and required to be completed for specialised goods request submissions.',
+      legal:'For all goods with an associated Treatment Direction or Biosecurity Permit, the below fields are required. Please verify the goods are directed to facility Q1279, and a copy of the Treatment Direction and/or permit is supplied. If no Treatment Direction is supplied, DAFF will not be notified of the completion of treatment.',
+      fields:[
+        { key:'quarantine_reference', label:'Quarantine Reference Number', type:'text', required:true },
+        { key:'container_number',     label:'Container Number',            type:'text' },
+        { key:'broker_reference',     label:'Broker Reference',            type:'text' },
+        { key:'permit_number',        label:'Permit Number/Reference',     type:'text' },
+      ]
+    },
+    // 5. Steritech Requirements (informational)
+    { id:'steritech_requirements', title:'Steritech Requirements',
+      legal:'Pallet Dimensions and Weight — The maximum allowable dimensions of a pallet are 220cm × 120cm × 120cm (Height × Width × Length). The maximum allowable weight of a pallet is 1050kg. Please contact Steritech if you have unusual or large sized items.\n\nProduct Identification — Pallets must be clearly marked with identification that can connect them to the customer name listed on this form and at least one unique identifier such as, but not limited to: user purchase order reference, user batch/lot reference.\n\nPallet Security — Products that contain any liquid, need to be completely sealed to prevent leakage.\n\nTransport — Please inform all transport/courier drivers that goods will only be released if a valid Steritech lot number or invoice number can be provided on pickup.\n\nAdditional Charges — Additional charges may apply if any breaches/discrepancies to the above are identified.'
+    },
+    // 6. Authorisation
+    { id:'authorisation', title:'Authorisation',
+      legal:'I authorise this consignment to be irradiated and confirm the details are correct and true.',
+      fields:[
+        { key:'auth_name',      label:'Name',      type:'text',      required:true, prefill:'contact' },
+        { key:'auth_signature', label:'Signature', type:'signature', required:true },
+        { key:'auth_date',      label:'Date',      type:'date',      required:true, prefillToday:true },
+      ]
+    },
+  ], { declaration:{ type:'signature' } });
   reg('NAR','bee-equipment','Request for Treatment of Bee Equipment (FRM-0240)','Gamma', [
     { id:'customer', title:'Customer Details', prefill:true,
       fields:[
@@ -3662,7 +3731,7 @@ const FormRenderer = {
             </header>
 
             <!-- Legal blurb for declaration -->
-            <div v-if="sec.legal" class="px-6 py-4 bg-slate-50 border-b border-slate-100 text-xs text-slate-600 leading-relaxed">
+            <div v-if="sec.legal" class="px-6 py-4 bg-slate-50 border-b border-slate-100 text-xs text-slate-600 leading-relaxed whitespace-pre-line">
               {{ sec.legal }}
             </div>
 
@@ -3808,6 +3877,7 @@ const FormRenderer = {
                     <span class="text-base text-slate-800">I agree to the declaration above.</span>
                   </label>
 
+                  <p v-if="f.help" class="mt-1 text-xs text-slate-500">{{ f.help }}</p>
                   <div v-if="submitAttempted && errors[f.key]" role="alert" class="mt-1 text-sm text-red-600 flex items-center gap-1">
                     <Icon name="alert-circle" :size="14"/>{{ errors[f.key] }}
                   </div>
