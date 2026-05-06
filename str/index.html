@@ -901,22 +901,22 @@ function buildSchemas() {
     { id:'customer', title:'Customer Details', prefill:true,
       fields:[
         { key:'date',            label:'Date',            type:'date',  required:true, prefillToday:true },
-        { key:'contact',         label:'Contact name',    type:'text',  required:true, prefill:'name' },
-        { key:'phone',           label:'Phone',           type:'phone', required:true, prefill:'phone' },
-        { key:'business_name',   label:'Business name',   type:'text',  required:true, prefill:'company' },
-        { key:'address_line_1',  label:'Address line 1',  type:'text',  required:true },
-        { key:'address_line_2',  label:'Address line 2',  type:'text' },
+        { key:'contact',         label:'Contact',         type:'text',  required:true, prefill:'name' },
+        { key:'phone',           label:'Phone no',        type:'phone', required:true, prefill:'phone' },
+        { key:'business_name',   label:'Business Name',   type:'text',  required:true, prefill:'company' },
+        { key:'address_line_1',  label:'Address',         type:'text',  required:true },
         { key:'email',           label:'Email',           type:'email', required:true, prefill:'email' },
       ]
     },
     { id:'checklist', title:'Pre-treatment Checklist',
-      subtitle:'Confirm each item before dispatching to Dandenong.',
+      subtitle:'The following guidelines must be adhered to:',
+      note:'If you do not comply with the above Steritech may refuse acceptance of hives.',
       fields:[
-        { key:'hives_clean',         label:'Hives clean and free of honey?',  type:'radio', options:['Yes','No'], required:true },
-        { key:'hives_strapped',      label:'Hives strapped and M-locked?',    type:'radio', options:['Yes','No'], required:true },
-        { key:'hives_under_25kg',    label:'Hives under 25 kg in weight?',    type:'radio', options:['Yes','No'], required:true },
-        { key:'hives_insect_free',   label:'Hives insect and spider free?',   type:'radio', options:['Yes','No'], required:true },
-        { key:'hives_double_bagged', label:'Hives double bagged?',            type:'radio', options:['Yes','No'], required:true },
+        { key:'hives_clean',         label:'Are all hives clean and free of honey',      type:'radio', options:['Yes','No'], required:true },
+        { key:'hives_strapped',      label:'Are all hives strapped and M Locked',        type:'radio', options:['Yes','No'], required:true },
+        { key:'hives_under_25kg',    label:'Are all hives under 25 kilograms in weight', type:'radio', options:['Yes','No'], required:true },
+        { key:'hives_insect_free',   label:'Are all hives insect and spider free',       type:'radio', options:['Yes','No'], required:true },
+        { key:'hives_double_bagged', label:'Are all hives double bagged',                type:'radio', options:['Yes','No'], required:true },
       ]
     },
     { id:'lineItems', title:'Line Items & Pricing',
@@ -925,8 +925,8 @@ function buildSchemas() {
         seed:[{ product:'', quantity:1, unitPrice:0, lineTotal:0 }],
         columns:[
           { key:'product',   label:'Product',   type:'select', w:'flex-1',
-            options:['Triple Deck $49','Double Deck $49','Single Deck $29','Buckets $29'],
-            priceMap:{ 'Triple Deck $49':49, 'Double Deck $49':49, 'Single Deck $29':29, 'Buckets $29':29 } },
+            options:['Number of Triple Deck $49 + GST','Number of Double Deck $49 + GST','Number of Single Deck $29 + GST','Number of Buckets $29 + GST'],
+            priceMap:{ 'Number of Triple Deck $49 + GST':49, 'Number of Double Deck $49 + GST':49, 'Number of Single Deck $29 + GST':29, 'Number of Buckets $29 + GST':29 } },
           { key:'quantity',  label:'Qty',        type:'number', min:1, w:'w-24' },
           { key:'unitPrice', label:'Unit price', type:'readonly-number', w:'w-28' },
           { key:'lineTotal', label:'Line total', type:'calculated', formula:'quantity*unitPrice', w:'w-32' },
@@ -939,7 +939,7 @@ function buildSchemas() {
       }
     },
     { id:'declaration', title:'Declaration',
-      legal:'I do hereby authorise Steritech Pty Ltd to arrange for the treatment of the said goods by Gamma Irradiation, and further agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods. $100 + GST clean-up fee applies for honey leakage.',
+      legal:'I do hereby authorise Steritech Pty Ltd to arrange for the treatment of the said goods by Gamma Irradiation, and further agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods.\n\nYou will be charged a clean up fee of $100 + GST for any honey leakage in our Warehouse or Irradiation Chamber.\n\n*Additional charges will apply for container unloading and cleaning if applicable.',
       fields:[
         { key:'decl_name',      label:'Name',      type:'text',      required:true },
         { key:'decl_signature', label:'Signature', type:'signature', required:true },
@@ -951,28 +951,29 @@ function buildSchemas() {
   const danIrradSections = [
     { id:'customer', title:'Customer Details', prefill:true,
       fields:[
-        { key:'date',             label:'Date',            type:'date',  required:true, prefillToday:true },
-        { key:'business_name',    label:'Business name',   type:'text',  required:true, prefill:'company' },
-        { key:'contact_name',     label:'Contact name',    type:'text',  required:true, prefill:'name' },
-        { key:'business_address', label:'Business address',type:'text',  required:true },
-        { key:'phone',            label:'Phone',           type:'phone', required:true, prefill:'phone' },
-        { key:'email',            label:'Email',           type:'email', required:true, prefill:'email' },
+        { key:'date',             label:'Date',                 type:'date',  required:true, prefillToday:true },
+        { key:'business_name',    label:'Business (User) Name', type:'text',  required:true, prefill:'company' },
+        { key:'contact_name',     label:'Contact Name',         type:'text',  required:true, prefill:'name' },
+        { key:'business_address', label:'Business Address',     type:'text',  required:true },
+        { key:'phone',            label:'Phone Number',         type:'phone', required:true, prefill:'phone' },
+        { key:'email',            label:'Email Address',        type:'email', required:true, prefill:'email' },
       ]
     },
     { id:'consignment', title:'Consignment Details',
       fields:[
-        { key:'description_of_goods', label:'Description of goods', type:'textarea', required:true,
-          help:'E.g. medical devices, pharmaceuticals, packaging, imported goods for quarantine, polymers for cross-linking.' },
-        { key:'quantity_cartons', label:'Quantity — cartons', type:'number', min:0 },
-        { key:'quantity_pallets', label:'Quantity — pallets', type:'number', min:0 },
-        { key:'purchase_order',   label:'Purchase order',     type:'text' },
+        { key:'description_of_goods', label:'Description of Goods', type:'textarea', required:true,
+          help:'Please provide a description of the product/s, e.g. medical devices, pharmaceutical, packaging, imported goods for Quarantine treatment, polymers for cross-linking, etc.' },
+        { key:'qty_heading',      label:'Quantity:',         type:'heading' },
+        { key:'quantity_cartons', label:'Carton',            type:'number', min:0 },
+        { key:'quantity_pallets', label:'Pallets',           type:'number', min:0 },
+        { key:'purchase_order',   label:'Purchase Order No (if applicable)', type:'text' },
       ]
     },
     { id:'treatment', title:'Treatment',
       fields:[
-        { key:'dose_required', label:'Dose required', type:'radio', required:true,
-          options:['5 kGy','10 kGy','15 kGy','25 kGy','50 kGy','Other'] },
-        { key:'other_dose',    label:'Other dose — please state', type:'text', required:true,
+        { key:'dose_required', label:'Minimum Irradiation Dose Required (kGy)', type:'radio', required:true,
+          options:['5','10','15','25','50','Other'] },
+        { key:'other_dose',    label:'Please State', type:'text', required:true,
           showIf:{ key:'dose_required', equals:['Other'] } },
       ]
     },
@@ -987,8 +988,70 @@ function buildSchemas() {
   reg('DAN','irradiation',          'Request for Irradiation Treatment','Gamma', danIrradSections);
   reg('DAN','irradiation-treatment','Request for Irradiation Treatment','Gamma', danIrradSections);
 
-  reg('DAN','eto-treatment','Ethylene Oxide Treatment','ETO',
-    [ commonCustomerDetails(), commonConsignment(), etoParams, conditionalSections, uploads(['MSDS']), commonDeclaration() ]);
+  // DAN — ETO Treatment (Dandenong: "Request for Ethylene Oxide Treatment")
+  reg('DAN','eto-treatment','Request for Ethylene Oxide Treatment','ETO', [
+    { id:'customer', title:'Customer Details', prefill:true,
+      fields:[
+        { key:'date',             label:'Date',                 type:'date',  required:true, prefillToday:true },
+        { key:'business_name',    label:'Business (User) Name', type:'text',  required:true, prefill:'company' },
+        { key:'contact_name',     label:'Contact Name',         type:'text',  required:true, prefill:'contact' },
+        { key:'business_address', label:'Business Address',     type:'text',  required:true },
+        { key:'phone',            label:'Phone Number',         type:'phone', required:true, prefill:'phone' },
+        { key:'email',            label:'Email Address',        type:'email', required:true, prefill:'email' },
+      ]
+    },
+    { id:'goods', title:'Description of Goods',
+      fields:[
+        { key:'product_codes',   label:'Product code/s',       type:'text' },
+        { key:'batch_numbers',   label:'Batch number/s',       type:'text' },
+        { key:'product_names',   label:'Product name/s',       type:'text' },
+        { key:'additional_desc', label:'Additional description', type:'textarea',
+          help:'e.g. medical devices, pharmaceutical, packaging, imported goods for Quarantine treatment, etc.' },
+      ]
+    },
+    { id:'storage', title:'Any special storage conditions required',
+      fields:[
+        { key:'storage_uncontrolled', label:'Uncontrolled',      type:'checkbox', options:['Yes'] },
+        { key:'storage_customer',     label:'Customer-specific', type:'checkbox', options:['Yes'] },
+        { key:'storage_specify',      label:'Please specify',    type:'text',
+          showIf:{ key:'storage_customer', equals:['Yes'] } },
+      ]
+    },
+    { id:'consignment', title:'Consignment Details',
+      fields:[
+        { key:'qty_heading',  label:'Quantity:',                    type:'heading' },
+        { key:'qty_cartons',  label:'cartons',                      type:'number', min:0 },
+        { key:'qty_pallets',  label:'pallets',                      type:'number', min:0 },
+        { key:'purchase_order', label:'Purchase Order No (if applicable)', type:'text' },
+      ]
+    },
+    { id:'us_market', title:'US Market',
+      fields:[
+        { key:'us_market_import', label:'Are the goods intended for import into the US market?', type:'radio', required:true,
+          options:['No','Yes (Supply NDC/510(k) details as attachments)'],
+          help:'NOTE: If the products are not therapeutic goods, select NO.' },
+        { key:'ndc_upload', label:'NDC / 510(k) attachments', type:'file-upload', accept:'.pdf',
+          showIf:{ key:'us_market_import', equals:['Yes (Supply NDC/510(k) details as attachments)'] } },
+      ]
+    },
+    { id:'eo_treatment', title:'EO Fumigation Treatment',
+      fields:[
+        { key:'eo_type', label:'Ethylene Oxide (EO) Fumigation Treatment Requested (tick one)', type:'radio', required:true,
+          options:['Unvalidated (Biosecurity EO Cycle - AQIS 1200mg)','Routine','Validation'] },
+        { key:'routine_rpi',    label:'Routine - RPI No',    type:'text',
+          showIf:{ key:'eo_type', equals:['Routine'] } },
+        { key:'validation_rpi', label:'Validation - RPI No', type:'text',
+          showIf:{ key:'eo_type', equals:['Validation'] } },
+      ]
+    },
+    { id:'declaration', title:'Declaration',
+      legal:'I/we do hereby authorise Steritech Pty Ltd to arrange for the treatment of said goods by Ethylene Oxide (ETO) and further agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods.',
+      fields:[
+        { key:'decl_name',      label:'Name',      type:'text',      required:true },
+        { key:'decl_signature', label:'Signature', type:'signature', required:true },
+      ]
+    },
+  ]);
 
   // WPK
   reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma+ETO', [
@@ -4240,6 +4303,9 @@ const FormRenderer = {
                            :class="[inputCls(f),'pl-8']"/>
                   </div>
 
+                  <!-- Heading / group label (no input) -->
+                  <template v-else-if="f.type==='heading'"></template>
+
                   <!-- File -->
                   <FileUploadField v-else-if="f.type==='file-upload'"
                                    v-model="data[f.key]" :accept="f.accept" :id="'fld-'+f.key"/>
@@ -4263,6 +4329,7 @@ const FormRenderer = {
                   <div v-if="submitAttempted && errors[f.key]" role="alert" class="mt-1 text-sm text-red-600 flex items-center gap-1">
                     <Icon name="alert-circle" :size="14"/>{{ errors[f.key] }}
                   </div>
+                  <p v-if="f.help" class="mt-1 text-xs text-slate-500">{{ f.help }}</p>
                 </div>
               </div>
 
@@ -4491,6 +4558,11 @@ const FormRenderer = {
               </template>
               <!-- /Pallet Repeater -->
 
+            </div>
+
+            <!-- Section footer note -->
+            <div v-if="sec.note" class="px-6 py-3 border-t border-slate-100 text-xs text-slate-600 leading-relaxed">
+              {{ sec.note }}
             </div>
           </section>
 
