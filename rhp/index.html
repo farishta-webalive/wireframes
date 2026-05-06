@@ -1,2 +1,92 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta http-equiv="refresh" content="0; url=s01.html"><title>RenoLogic — Homeowner Platform</title></head><body><script>location.replace('s01.html');</script><p>Loading <a href="s01.html">s01.html</a>...</p></body></html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>RenoLogic Wireframes</title>
+<style>
+  :root {
+    --bg: #0b0c0f;
+    --panel: #14161b;
+    --border: #232730;
+    --text: #e7e9ee;
+    --muted: #9aa1ad;
+    --accent: #5eead4;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    line-height: 1.5;
+  }
+  .wrap { max-width: 880px; margin: 0 auto; padding: 64px 24px; }
+  h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.01em; }
+  p.lead { color: var(--muted); margin: 0 0 40px; }
+  h2 { font-size: 14px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 32px 0 12px; font-weight: 600; }
+  .grid { display: grid; gap: 12px; }
+  a.card {
+    display: block;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    color: var(--text);
+    text-decoration: none;
+    transition: border-color 0.15s, transform 0.15s;
+  }
+  a.card:hover { border-color: var(--accent); transform: translateY(-1px); }
+  .card-title { font-weight: 600; font-size: 15px; margin: 0 0 4px; }
+  .card-desc { color: var(--muted); font-size: 13px; margin: 0; }
+  footer { margin-top: 48px; color: var(--muted); font-size: 12px; }
+  footer a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>RenoLogic Wireframes</h1>
+    <p class="lead">Interactive prototypes for the RenoLogic homeowner platform and admin portal.</p>
+
+    <h2>Homeowner Platform</h2>
+    <div class="grid">
+      <a class="card" href="homeowner-platform.html">
+        <p class="card-title">Homeowner Platform</p>
+        <p class="card-desc">Full single-page prototype covering all homeowner flows.</p>
+      </a>
+      <a class="card" href="mobile-preview.html">
+        <p class="card-title">Mobile Preview</p>
+        <p class="card-desc">iPhone frame preview of the homeowner platform.</p>
+      </a>
+    </div>
+
+    <h2>Admin Portal</h2>
+    <div class="grid">
+      <a class="card" href="admin-portal.html">
+        <p class="card-title">RL Admin Portal</p>
+        <p class="card-desc">Internal admin portal with approval workflow.</p>
+      </a>
+      <a class="card" href="admin-portal-no-approval.html">
+        <p class="card-title">RL Admin Portal (No Approval)</p>
+        <p class="card-desc">Variant without approval gate.</p>
+      </a>
+    </div>
+
+    <h2>Contractor Onboarding</h2>
+    <div class="grid">
+      <a class="card" href="co-registration.html">
+        <p class="card-title">CO Registration Journey</p>
+        <p class="card-desc">Latest contractor registration flow.</p>
+      </a>
+      <a class="card" href="co-registration-v1.html">
+        <p class="card-title">CO Registration Journey v1</p>
+        <p class="card-desc">Earlier iteration of the registration flow.</p>
+      </a>
+    </div>
+
+    <footer>
+      <a href="../">&larr; All wireframes</a>
+    </footer>
+  </div>
+</body>
+</html>
