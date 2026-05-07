@@ -236,7 +236,7 @@ const FORM_CATALOG = [
   { facility:'MER', key:'fresh-produce-dom',  code:'ICA-55',   name:'Fresh Produce Irradiation — Domestic', description:'Use this to send fresh produce for ICA-55 gamma irradiation within Australia.', treatment:'Gamma', shared_with:[] },
   { facility:'MER', key:'fresh-produce-exp',  code:'FRM-0118', name:'Fresh Produce Irradiation — Export',   description:'Use this to send fresh produce for gamma irradiation before export.', treatment:'Gamma', shared_with:[] },
   { facility:'MER', key:'bee-equipment',      code:'FRM-0121', name:'Bee Equipment Irradiation',            description:'Use this to send hive boxes, frames, and other beekeeping equipment for gamma sterilisation.', treatment:'Gamma', shared_with:[] },
-  { facility:'MER', key:'rfi-general',        code:'RFI',      name:'Request for Irradiation — General',    description:'Use this for general gamma irradiation requests that do not fit a more specific form.', treatment:'Gamma', shared_with:[] },
+  { facility:'MER', key:'rfi-general',        code:'RFI',      name:'Request for Irradiation (RFI)',    description:'Use this for general gamma irradiation requests that do not fit a more specific form.', treatment:'Gamma', shared_with:[] },
   { facility:'MER', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', description:'Use this to send TGA-listed herbal medicine for GMP-certified packing and labelling.', treatment:'GMP', shared_with:['MER','NAR'] },
 
   { facility:'DAN', key:'bee-equipment',      code:'FRM-0088', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Dandenong.', treatment:'Gamma', shared_with:[] },
@@ -879,22 +879,253 @@ function buildSchemas() {
       uploads(['MSDS']),
       commonDeclaration(),
     ]);
-  reg('MER','bee-equipment','Bee Equipment Irradiation','Gamma',
-    [ commonCustomerDetails(), commonConsignment(), gammaParamsStandard, beeLineItems, uploads(['MSDS']), commonDeclaration() ]);
-  reg('MER','rfi-general','Request for Irradiation — General (RFI)','Gamma',
-    [ commonCustomerDetails(), commonConsignment(), gammaParamsStandard, conditionalSections, uploads([]), commonDeclaration() ]);
-  reg('MER','herbal-medicine','Packing & Labelling — Herbal Medicine (FRM-0359)','GMP',
-    [ commonCustomerDetails(), commonConsignment(),
-      { id:'gmp', title:'GMP Packing Parameters',
-        fields:[
-          { key:'batchSize',  label:'Batch size (units)', type:'number', required:true, min:1 },
-          { key:'packFormat', label:'Pack format',        type:'select', options:['Bottle','Sachet','Blister','Pouch'], required:true },
-          { key:'labelType',  label:'Label type',         type:'select', options:['AUST-L','AUST-R','Export only'], required:true },
-          { key:'taceReview', label:'TGA artwork reviewed', type:'radio', options:['Yes','No'], required:true },
+  reg('MER','bee-equipment','Bee Equipment Irradiation Request','Gamma', [
+    { id:'customer', title:'Request Details', prefill:true,
+      fields:[
+        { key:'company',      label:'Company Name',  type:'text',  required:true, prefill:'company' },
+        { key:'contact',      label:'Contact Name',  type:'text',  required:true, prefill:'contact' },
+        { key:'mobile',       label:'Mobile',        type:'phone', required:true, prefill:'phone' },
+        { key:'email',        label:'Email',         type:'email', required:true, prefill:'email',
+          help:'We will send an invoice to this address.' },
+        { key:'deliveryDate', label:'Delivery Date', type:'date',  required:true },
+      ]
+    },
+    { id:'pricing', title:'Pricing',
+      repeater:{
+        key:'beeItems', minRows:1, maxRows:3,
+        seed:[{ product:'', unitPrice:0, quantity:1, lineTotal:0 }],
+        columns:[
+          { key:'product',   label:'15 kGy Dose', type:'select', w:'flex-1',
+            options:[
+              'Full Pallet (hives up to 2.4m height)',
+              'Half Pallet (hives up to 1.2m height)',
+              'Triple Stack',
+            ],
+            priceMap:{
+              'Full Pallet (hives up to 2.4m height)': 617,
+              'Half Pallet (hives up to 1.2m height)': 320,
+              'Triple Stack': 94,
+            } },
+          { key:'unitPrice', label:'Cost',        type:'readonly-number', suffix:'+ GST', w:'w-44' },
+          { key:'quantity',  label:'Qty',        type:'number', min:1, w:'w-24' },
+          { key:'lineTotal', label:'Line total',  type:'calculated', formula:'quantity*unitPrice', w:'w-36' },
+        ],
+        totals:[
+          { key:'subtotal',   label:'Subtotal',   formula:'sum:lineTotal' },
+          { key:'gst',        label:'GST (10%)',  formula:'subtotal*0.1' },
+          { key:'grandTotal', label:'Total',      formula:'subtotal+gst' },
         ]
-      },
-      uploads(['MSDS']), commonDeclaration()
-    ]);
+      }
+    },
+    { id:'terms', title:'Terms of Treatment',
+      legal:'1. Hives must not contain any Honey, Bees, Hive Beetle, Larvae, or equipment.\n2. Hives and pallets must be completely sealed, wrapped with plastic top and bottom. (see examples on opposite page)\n3. Treated Hives must be collected within 14 days of invoice.\n4. Steritech will refuse the delivery of any pallets containing live bees.',
+      fields:[]
+    },
+    { id:'fees', title:'Clean Up & Storage Fees',
+      legal:'Honey leakage in Warehouse or Irradiation chamber — $199.50 (min charge)\nBees/Hive Beetle/Lave present in the pallet or escaping from it — $172.20 (min charge)\nStorage begining on the 7th day after notification of completion — $55.65/pallet per week\nOverweight pallet (maximum weight 670kg) — $567',
+      fields:[]
+    },
+    { id:'declaration', title:'Declaration',
+      legal:'I hereby authorise Steritech Pty Ltd to arrange the treatment of the above listed goods by Irradiation. I agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods. I understand and agree to the Terms of Treatment, including collection and Clean Up & Storage Fees as set out above.',
+      fields:[
+        { key:'declSig',   label:'Signature', type:'signature', required:true },
+        { key:'declName',  label:'Full name', type:'text',      required:true, prefill:'contact' },
+        { key:'declDate',  label:'Date',      type:'date',      required:true, prefillToday:true },
+      ]
+    },
+  ]);
+  reg('MER','rfi-general','Request for Irradiation (RFI)','Gamma', [
+    { id:'customer', title:'Customer Details', prefill:true,
+      fields:[
+        { key:'company',       label:'Company Name',    type:'text',  required:true, prefill:'company' },
+        { key:'contact',       label:'Contact Name',    type:'text',  required:true, prefill:'contact' },
+        { key:'contactNumber', label:'Contact Number',  type:'phone', required:true, prefill:'phone' },
+        { key:'email',         label:'Email',           type:'email', required:true, prefill:'email' },
+        { key:'address',       label:'Address',         type:'text',  required:true },
+      ]
+    },
+    { id:'consignment', title:'Consignment Details',
+      fields:[
+        { key:'poNumber',     label:'P.O Number',                         type:'text' },
+        { key:'deliveryDate', label:'Delivery Date Request',              type:'date' },
+        { key:'goodsDesc',    label:'Quantity and Description of Goods',  type:'textarea', rows:5,
+          help:'Include dimensions and weight of each carton/pallet. Include expected delivery date.' },
+      ]
+    },
+    { id:'quarantine', title:'Quarantine Goods (Biosecurity Directed)',
+      fields:[
+        { key:'biosecurity25',    label:'Biosecurity 25kGy',   type:'radio', options:['Yes','No'] },
+        { key:'biosecurity50',    label:'Biosecurity 50kGy',   type:'radio', options:['Yes','No'] },
+        { key:'importConditions', label:'Are there conditions on the Import Permit that Steritech needs to be aware of? If yes, attach Import Permit',
+          type:'radio', options:['Yes','No'] },
+        { key:'affRef',          label:'AFF Quarantine Direction Ref', type:'text' },
+        { key:'brokerBondRef',   label:'Broker\'s Client Bond Ref',    type:'text' },
+        { key:'containerNumber', label:'Container Number',             type:'text' },
+      ]
+    },
+    { id:'validated', title:'Validated Goods',
+      fields:[
+        { key:'validatedProcess', label:'Validated Process',          type:'radio', options:['Yes','No'] },
+        { key:'tgaLicense',       label:'TGA/APVMA License Number',   type:'text' },
+        { key:'batchNumbers',     label:'Batch Number/s',             type:'textarea', rows:3 },
+        { key:'doseRange',        label:'Product Min-Max Dose Range', type:'text', placeholder:'kGy' },
+        { key:'rpi',              label:'RPI',                        type:'text' },
+      ]
+    },
+    { id:'conditions', title:'Consignment Conditions',
+      fields:[
+        { key:'dangerousGoods', label:'Does this consignment contain dangerous goods? If yes, please attach an MSDS.', type:'radio', options:['Yes','No'] },
+        { key:'frozen',         label:'Does this consignment need to be kept frozen?',       type:'radio', options:['Yes','No'] },
+        { key:'refrigerated',   label:'Does this consignment need to be refrigerated?',      type:'radio', options:['Yes','No'] },
+        { key:'fragile',        label:'Does this consignment contain fragile goods?',        type:'radio', options:['Yes','No'] },
+        { key:'targetDose',     label:'Target Dose Range',  type:'text' },
+      ]
+    },
+    { id:'requirements', title:'Steritech Requirements',
+      legal:'Pallet Dimensions — The maximum allowable dimensions of a pallet are 240cm x 120cm x 120cm (Height x Width x Length). Extra charges may apply if pallet dimensions exceed these limits. Please contact Steritech if you have unusual or large sized items.\n\nPallet Weight — The maximum allowable weight of a pallet is 1000kg. Extra charges may apply if pallets exceed this limit.\n\nProduct Identification — Pallets must be labelled clearly with identification that can connect them to the customer name listed on this form and either the purchase order number or the quarantine direction reference listed on this form.\n\nPallet Security — Products that contain any liquid, including honey, need to be completely sealed to prevent leakage.\n\nTransport — Please inform all transport/courier drivers that goods will only be released if a valid purchase order number or a Steritech Order number or invoice number can be provided on pickup.',
+      fields:[]
+    },
+    { id:'authorisation', title:'Authorisation',
+      agreeText:'I authorise Steritech Pty Ltd to irradiate the goods described in this request, and agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods.',
+      fields:[
+        { key:'authSig',  label:'Signature', type:'signature', required:true },
+        { key:'authName', label:'Full name', type:'text',      required:true, prefill:'contact' },
+        { key:'authDate', label:'Date',      type:'date',      required:true, prefillToday:true },
+      ]
+    },
+  ]);
+  reg('MER','herbal-medicine','Request for Packing and Labelling Form — Non-Sterile Herbal Medicine Product','GMP', [
+    { id:'customer', title:'Customer Details', prefill:true,
+      fields:[
+        { key:'company',       label:'Company Name',   type:'text',  required:true, prefill:'company' },
+        { key:'contact',       label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
+        { key:'contactNumber', label:'Contact Number', type:'phone', required:true, prefill:'phone' },
+        { key:'email',         label:'Email',          type:'email', required:true, prefill:'email' },
+        { key:'address',       label:'Address',        type:'text',  required:true },
+      ]
+    },
+    { id:'consignment', title:'Consignment Details',
+      fields:[
+        { key:'poNumber',      label:'P.O Number',              type:'text', help:'if applicable' },
+        { key:'etaDate',       label:'ETA to Steritech – Date', type:'date', help:'if not already' },
+        { key:'productName',   label:'Product Name',            type:'text', required:true },
+        { key:'flowerBatchNo', label:'Flower Batch Number',     type:'text' },
+        { key:'strainName',    label:'Strain Name',             type:'text' },
+        { key:'growerCountry', label:'Grower Country',          type:'text' },
+        { key:'totalWeight',   label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0,
+          help:'Enter to 3 decimal places' },
+        { key:'bulkTested', label:'Bulk batch (TGO 93) tested at GMP approved lab prior to Steritech?',
+          type:'checkbox', options:[
+            'No – Steritech to send bulk sample to GMP-approved, Steritech-evaluated onshore lab for testing.',
+            'Yes – Test lab COA(s) attached.',
+          ] },
+        { key:'irradiatedOther', label:'Has the Flower been irradiated by a party other than Steritech?',
+          type:'checkbox', options:['No', 'Yes – treatment certificate attached.'] },
+        { key:'odcImport', label:'Has the Flower been imported under Steritech\'s ODC import license?',
+          type:'radio', options:['No','Yes'] },
+        { key:'importPermitNo', label:'Import permit number', type:'text',
+          showIf:{ key:'odcImport', equals:['Yes'] } },
+      ]
+    },
+    { id:'primaryPkg', title:'Manufacturing Requirements for Finished Product', subtitle:'Primary Packaging',
+      fields:[
+        { key:'packagingSuppliedBy', label:'Packaging supplied by', type:'radio', required:true,
+          options:['Steritech supplied','Customer supplied'] },
+
+        { key:'steriSupplied', label:'If Steritech supplied (tick one only)', type:'radio',
+          showIf:{ key:'packagingSuppliedBy', equals:['Steritech supplied'] },
+          options:['Black 250ml HDPE Jar','White 250ml HDPE Jar','Glass (amber) 250ml Jar','PE Pouch','Other (please specify)'] },
+        { key:'steriOtherSpec', label:'Please specify', type:'text',
+          showIf:{ allOf:[
+            { key:'packagingSuppliedBy', equals:['Steritech supplied'] },
+            { key:'steriSupplied',       equals:['Other (please specify)'] },
+          ]}},
+
+        { key:'custSupplied', label:'If Customer supplied (tick one only)', type:'radio',
+          showIf:{ key:'packagingSuppliedBy', equals:['Customer supplied'] },
+          options:['Jar and Lid','Pouch'] },
+        { key:'jarMaterial',  label:'Jar — Material',      type:'text',
+          showIf:{ allOf:[{ key:'packagingSuppliedBy', equals:['Customer supplied'] }, { key:'custSupplied', equals:['Jar and Lid'] }] } },
+        { key:'jarColour',    label:'Jar — Colour',        type:'text',
+          showIf:{ allOf:[{ key:'packagingSuppliedBy', equals:['Customer supplied'] }, { key:'custSupplied', equals:['Jar and Lid'] }] } },
+        { key:'jarVolume',    label:'Jar — Volume (ml)',   type:'number', min:0,
+          showIf:{ allOf:[{ key:'packagingSuppliedBy', equals:['Customer supplied'] }, { key:'custSupplied', equals:['Jar and Lid'] }] } },
+        { key:'lidDiameter',  label:'Lid — Diameter (mm)', type:'number', min:0,
+          showIf:{ allOf:[{ key:'packagingSuppliedBy', equals:['Customer supplied'] }, { key:'custSupplied', equals:['Jar and Lid'] }] } },
+        { key:'pouchMaterial', label:'Pouch — Material',  type:'text',
+          showIf:{ allOf:[{ key:'packagingSuppliedBy', equals:['Customer supplied'] }, { key:'custSupplied', equals:['Pouch'] }] } },
+        { key:'pouchColour',   label:'Pouch — Colour',    type:'text',
+          showIf:{ allOf:[{ key:'packagingSuppliedBy', equals:['Customer supplied'] }, { key:'custSupplied', equals:['Pouch'] }] } },
+        { key:'pouchDims',     label:'Pouch — Dimensions', type:'text',
+          showIf:{ allOf:[{ key:'packagingSuppliedBy', equals:['Customer supplied'] }, { key:'custSupplied', equals:['Pouch'] }] } },
+      ]
+    },
+    { id:'pkgAdditives', title:'Primary Packaging Additives',
+      subtitle:'Tick as needed',
+      fields:[
+        { key:'additives', label:'Additives', type:'checkbox',
+          options:['None','Humidity pack (please specify)','Other (please specify)'] },
+        { key:'humidityStrength', label:'Humidity pack — Strength (%)',          type:'number', min:0, max:100,
+          showIf:{ key:'additives', equals:['Humidity pack (please specify)'] } },
+        { key:'humidityQty',      label:'Humidity pack — No. of packs per unit', type:'number', min:0,
+          showIf:{ key:'additives', equals:['Humidity pack (please specify)'] } },
+        { key:'additivesOther',   label:'Other (please specify)',                 type:'text',
+          showIf:{ key:'additives', equals:['Other (please specify)'] } },
+      ]
+    },
+    { id:'secondaryPkg', title:'Secondary Packaging',
+      fields:[
+        { key:'secondaryPkgReq', label:'Secondary packaging required', type:'radio', options:['No','Yes'] },
+      ]
+    },
+    { id:'weightLabel', title:'Weight and Label Details',
+      fields:[
+        { key:'targetWeight',  label:'Primary packed unit net target weight (g)', type:'text', required:true },
+        { key:'productLabel',  label:'Product name as per label',                 type:'text', required:true },
+        { key:'labelPotency',  label:'Label claim potency', type:'radio',
+          options:['THC active only (specify percentage)','CBD active only (specify percentage)','Balanced (specify percentage)','Other (please specify active)'] },
+        { key:'thcPct',  label:'THC %', type:'number', step:0.01, min:0,
+          showIf:{ key:'labelPotency', equals:['THC active only (specify percentage)','Balanced (specify percentage)'] } },
+        { key:'cbdPct',  label:'CBD %', type:'number', step:0.01, min:0,
+          showIf:{ key:'labelPotency', equals:['CBD active only (specify percentage)','Balanced (specify percentage)'] } },
+        { key:'otherPct', label:'Specify active (%)', type:'text',
+          showIf:{ key:'labelPotency', equals:['Other (please specify active)'] } },
+      ],
+      note:'NOTE: Steritech will send bulk samples for cannabinoid testing prior to packing commencement.'
+    },
+    { id:'releaseSupply', title:'Release for Supply',
+      fields:[
+        { key:'releaseForSupply', label:'Steritech to perform Release for Supply?', type:'radio', options:['Yes','No'] },
+        { key:'stabilityData',    label:'Is the release to occur against client-owned stability data?',
+          type:'radio', options:['No','Yes'], showIf:{ key:'releaseForSupply', equals:['Yes'] } },
+        { key:'stabilityRef',     label:'Yes – Report Reference (and copy provided to Steritech)', type:'text',
+          showIf:{ allOf:[{ key:'releaseForSupply', equals:['Yes'] }, { key:'stabilityData', equals:['Yes'] }] } },
+        { key:'marketingAuth',    label:'Are there any marketing authorisations that the product requires?',
+          type:'radio', options:['No','Yes'], showIf:{ key:'releaseForSupply', equals:['Yes'] } },
+        { key:'marketingAuthSpec', label:'Yes (please specify)', type:'text',
+          showIf:{ allOf:[{ key:'releaseForSupply', equals:['Yes'] }, { key:'marketingAuth', equals:['Yes'] }] } },
+        { key:'mraCert',          label:'Does the sponsor require a copy of Steritech\'s MRA certificate?',
+          type:'radio', options:['No','Yes'], showIf:{ key:'releaseForSupply', equals:['Yes'] } },
+        { key:'mraMarket',        label:'Yes (specify market)', type:'text',
+          showIf:{ allOf:[{ key:'releaseForSupply', equals:['Yes'] }, { key:'mraCert', equals:['Yes'] }] } },
+        { key:'odcExport',        label:'Is the finished product to be exported under Steritech\'s ODC export license?',
+          type:'radio', options:['Not applicable','No','Yes'] },
+        { key:'exportPermitNo',   label:'Yes – Export permit number', type:'text',
+          showIf:{ key:'odcExport', equals:['Yes'] } },
+        { key:'additionalComments',     label:'Additional Comments', type:'radio', options:['No','Yes'] },
+        { key:'additionalCommentsText', label:'Please specify', type:'textarea',
+          showIf:{ key:'additionalComments', equals:['Yes'] } },
+      ]
+    },
+    { id:'declaration', title:'Customer Declaration',
+      legal:'I hereby authorise Steritech Pty Ltd to arrange the manufacturing of the above-nominated goods. I confirm that the information provided is accurate and acknowledge that the manufacturing will be conducted in accordance with the terms of the relevant Steritech Packing, Labelling, and Release For Supply (if applicable) Agreements. Furthermore, I confirm that I have read, understood, and agree to comply with all conditions outlined on this form applicable to the designated Steritech manufacturing site.',
+      fields:[
+        { key:'declSig',  label:'Signature', type:'signature', required:true },
+        { key:'declName', label:'Full name', type:'text',      required:true, prefill:'contact' },
+        { key:'declDate', label:'Date',      type:'date',      required:true, prefillToday:true },
+      ]
+    },
+  ]);
 
   // DAN — Bee Equipment (Dandenong: "Request for Irradiation of Bee Equipment", 15 kGy)
   reg('DAN','bee-equipment','Request for Irradiation of Bee Equipment','Gamma', [
@@ -4322,14 +4553,13 @@ const FormRenderer = {
                            :checked="data[f.key]==='YES'"
                            @change="data[f.key] = $event.target.checked ? 'YES' : 'NO'"
                            class="mt-0.5 h-4 w-4 rounded accent-teal-600"/>
-                    <span class="text-base text-slate-800">I agree to the declaration above.</span>
+                    <span class="text-base text-slate-800">{{ sec.agreeText || 'I agree to the declaration above.' }}</span>
                   </label>
 
                   <p v-if="f.help" class="mt-1 text-xs text-slate-500">{{ f.help }}</p>
                   <div v-if="submitAttempted && errors[f.key]" role="alert" class="mt-1 text-sm text-red-600 flex items-center gap-1">
                     <Icon name="alert-circle" :size="14"/>{{ errors[f.key] }}
                   </div>
-                  <p v-if="f.help" class="mt-1 text-xs text-slate-500">{{ f.help }}</p>
                 </div>
               </div>
 
@@ -4367,7 +4597,10 @@ const FormRenderer = {
                             <input v-else-if="c.type==='google-address'" v-model="row[c.key]" type="text"
                                    :maxlength="c.maxLength" :placeholder="c.placeholder || 'Start typing an address…'"
                                    :class="rowInputCls(sec, i, c)"/>
-                            <input v-else-if="c.type==='readonly-number'" :value="row[c.key]" readonly class="w-full rounded border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-slate-500 tabular-nums"/>
+                            <template v-else-if="c.type==='readonly-number'">
+                              <div v-if="c.suffix" class="py-1.5 text-sm text-slate-500 tabular-nums whitespace-nowrap">{{ row[c.key] ? fmtMoney(row[c.key]) + ' ' + c.suffix : '' }}</div>
+                              <input v-else :value="row[c.key]" readonly class="w-full rounded border border-slate-200 bg-slate-50 px-2 py-1.5 text-sm text-slate-500 tabular-nums"/>
+                            </template>
                             <div v-else-if="c.type==='calculated'" class="px-2 py-1.5 text-sm text-navy-900 font-medium tabular-nums">{{ fmtMoney(calc(c, row)) }}</div>
                             <div v-if="submitAttempted && rowErrors[sec.repeater.key+'.'+i]?.[c.key]"
                                  class="mt-1 text-[11px] text-red-600 flex items-start gap-1 leading-snug">
