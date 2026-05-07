@@ -191,7 +191,7 @@ const { createRouter, createWebHashHistory, RouterView, RouterLink, useRoute, us
 const FACILITIES = [
   { code:'MER', name:'Merrifield',      state:'VIC', address:'1725 Mickleham Rd, Merrifield VIC 3064',     services:['Gamma','GMP'] },
   { code:'DAN', name:'Dandenong',       state:'VIC', address:'14 Williamson Rd, Dandenong South VIC 3175', services:['Gamma','ETO'] },
-  { code:'WPK', name:'Wetherill Park',  state:'NSW', address:'12 Cooper St, Wetherill Park NSW 2164',      services:['Gamma','ETO'] },
+  { code:'WPK', name:'Wetherill Park',  state:'NSW', address:'12 Cooper St, Wetherill Park NSW 2164',      services:['Gamma'] },
   { code:'NAR', name:'Narangba',        state:'QLD', address:'7 Potassium St, Narangba QLD 4504',          services:['Gamma','GMP'] },
 ];
 
@@ -230,8 +230,8 @@ const seedCustomers = [
     facilities:['NAR'],                  services:['Gamma'],              status:'Active',   created:'2025-06-03', orders:7  },
 ];
 
-// 13 forms across 4 facilities (FRM-0359 is shared MER + NAR -> 14 rows)
-// `shared_with`: facilities sharing the same canonical schema (Prompt 7). Empty = facility-exclusive.
+// Forms across 4 facilities. `shared_with` lets one canonical row serve multiple facilities
+// (e.g. FRM-0359 shared MER + NAR). Empty = facility-exclusive.
 const FORM_CATALOG = [
   { facility:'MER', key:'fresh-produce-dom',  code:'ICA-55',   name:'Fresh Produce Irradiation — Domestic', description:'Use this to send fresh produce for ICA-55 gamma irradiation within Australia.', treatment:'Gamma', shared_with:[] },
   { facility:'MER', key:'fresh-produce-exp',  code:'FRM-0118', name:'Fresh Produce Irradiation — Export',   description:'Use this to send fresh produce for gamma irradiation before export.', treatment:'Gamma', shared_with:[] },
@@ -243,14 +243,13 @@ const FORM_CATALOG = [
   { facility:'DAN', key:'irradiation',        code:'FRM-0091', name:'Irradiation Treatment',                description:'Use this for general goods needing gamma irradiation at Dandenong.', treatment:'Gamma' },
   { facility:'DAN', key:'eto-treatment',      code:'FRM-0092', name:'Ethylene Oxide Treatment',             description:'Use this for ethylene oxide sterilisation of medical and industrial product.', treatment:'ETO'   },
 
-  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for treatment requests at Wetherill Park — gamma or ethylene oxide.', treatment:'Gamma+ETO' },
+  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for gamma irradiation treatment requests at Wetherill Park.', treatment:'Gamma' },
   { facility:'WPK', key:'bee-equipment',      code:'FRM-0038', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Wetherill Park.', treatment:'Gamma' },
 
   { facility:'NAR', key:'fresh-produce',      code:'FRM-0202', name:'Fresh Produce Irradiation',            description:'Use this to send fresh produce for gamma irradiation at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'treatment',          code:'FRM-0203', name:'Treatment',                            description:'Use this for general goods needing gamma irradiation at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'bee-equipment',      code:'FRM-0240', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'blood-serum',        code:'FRM-0241', name:'Blood Serum',                          description:'Use this to send bovine or other animal blood serum for gamma sterilisation.', treatment:'Gamma' },
-  { facility:'NAR', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', description:'Use this to send TGA-listed herbal medicine for GMP-certified packing and labelling.', treatment:'GMP', shared_with:['MER','NAR'] },
 ];
 
 /* Treatment chip styles — single source of truth used by TreatmentChip
@@ -1285,7 +1284,7 @@ function buildSchemas() {
   ]);
 
   // WPK
-  reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma+ETO', [
+  const wpkTreatmentSections = [
     // 1. Customer Details
     { id:'customer', title:'Customer Details', prefill:true,
       fields:[
@@ -1411,7 +1410,8 @@ function buildSchemas() {
         { key:'auth_signature', label:'Signature', type:'signature', required:true },
       ]
     },
-  ]);
+  ];
+  reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma', wpkTreatmentSections);
   reg('WPK','bee-equipment','Request for Irradiation of Bee Equipment (FRM-0038)','Gamma', [
     // 3. Customer Details
     { id:'customer', title:'Customer Details', prefill:true,
@@ -3080,16 +3080,19 @@ const DashboardPage = {
     fac(){ return currentFacility(); },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    facilityOrders(){
+      return state.orders.filter(o => o.facility === state.profile.currentFacility);
+    },
     activeOrders(){
       // Active = anything not in a terminal state (Cancelled / Completed).
       const terminal = ['Cancelled','Completed'];
-      return state.orders.filter(o => !terminal.includes(o.status));
+      return this.facilityOrders.filter(o => !terminal.includes(o.status));
     },
     completedOrders(){
-      return state.orders.filter(o => o.status === 'Completed');
+      return this.facilityOrders.filter(o => o.status === 'Completed');
     },
     recentOrders(){
-      return [...state.orders].slice(0, 8);
+      return [...this.facilityOrders].slice(0, 8);
     },
     availableForms(){
       return FORM_CATALOG.filter(f => f.facility === state.profile.currentFacility);
@@ -3100,7 +3103,7 @@ const DashboardPage = {
     },
     stats(){
       return [
-        { label:'Total orders',     value: state.orders.length,           sub:'lifetime' },
+        { label:'Total orders',     value: this.facilityOrders.length,    sub:'lifetime' },
         { label:'Active right now', value: this.activeOrders.length,      sub:'in progress or awaiting collection' },
         { label:'Completed',        value: this.completedOrders.length,   sub:'lifetime' },
       ];
@@ -3275,9 +3278,8 @@ const StartRequestPage = {
     treatmentOptions(){
       if (!this.activeFacility) return [];
       const set = new Set(this.activeFacility.services);
-      const order = ['Gamma','ETO','GMP','Gamma+ETO'];
-      const hasCombined = set.has('Gamma') && set.has('ETO');
-      return order.filter(t => set.has(t) || (t === 'Gamma+ETO' && hasCombined));
+      const order = ['Gamma','ETO','GMP'];
+      return order.filter(t => set.has(t));
     },
     matchingForms(){
       if (!this.facility || !this.treatment) return [];
