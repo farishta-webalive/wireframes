@@ -764,7 +764,7 @@ function buildSchemas() {
         subtitle:'Pallet Spaces and Cheps are calculated automatically from your Treatment Details.',
         fields:[
           { key:'po_number',             label:'P.O. (if applicable)', type:'text', placeholder:'P.O. (if applicable)' },
-          { key:'pallet_spaces_total',   label:'Pallet Spaces',        type:'computed', formula:'sumPallet:no_spaces', tabular:true },
+          { key:'pallet_spaces_total',   label:'Pallet Spaces',        type:'computed', formula:'sumPallet:no_spaces', tabular:true, required:true },
           { key:'cheps_total',           label:'Cheps',                type:'computed', formula:'sumCommodities:no_cheps',  tabular:true },
           { key:'eta_to_steritech_date', label:'ETA to Steritech – Date', type:'date', required:true },
         ]
@@ -803,17 +803,17 @@ function buildSchemas() {
               options:['1°C – 4°C','5°C – 10°C','11°C – 16°C'] },
           ],
           commodityFields:[
-            { key:'commodity',     label:'Commodity',      type:'searchable-dropdown', source:'commodities', required:true, maxLength:250, w:'min-w-[180px]' },
-            { key:'grower',        label:'Grower',         type:'text',   required:true, maxLength:250, w:'min-w-[160px]' },
-            { key:'no_of_cartons', label:'No. of Cartons', type:'number', required:true, min:0, w:'w-28' },
-            { key:'no_cheps',      label:'No. Cheps',      type:'number', required:true, min:0, w:'w-24' },
-            { key:'pulp_temp_min', label:'Pulp Temp Min',  type:'number', required:true, w:'w-28', placeholder:'Min' },
-            { key:'pulp_temp_max', label:'Pulp Temp Max',  type:'number', required:true, w:'w-28', placeholder:'Max' },
-            { key:'address',       label:'Pickup Address', type:'google-address', required:true, maxLength:250, w:'min-w-[200px]' },
+            { key:'commodity',     label:'Commodity',      type:'searchable-dropdown', source:'commodities', required:true, maxLength:250, w:'min-w-[180px]', optionalKinds:['non_irradiated'] },
+            { key:'grower',        label:'Grower',         type:'text',   required:true, maxLength:250, w:'min-w-[160px]', optionalKinds:['non_irradiated'] },
+            { key:'no_of_cartons', label:'No. of Cartons', type:'number', required:true, min:0, w:'w-32', optionalKinds:['non_irradiated'] },
+            { key:'no_cheps',      label:'No. Cheps',      type:'number', required:true, min:0, w:'w-32', excludeKinds:['non_irradiated'] },
+            { key:'pulp_temp_min', label:'Pulp Temp Min',  type:'number', required:true, w:'w-28', placeholder:'Min', optionalKinds:['non_irradiated'] },
+            { key:'pulp_temp_max', label:'Pulp Temp Max',  type:'number', required:true, w:'w-28', placeholder:'Max', optionalKinds:['non_irradiated'] },
+            { key:'address',       label:'Pickup Address', type:'google-address', required:true, maxLength:250, w:'min-w-[200px]', excludeKinds:['non_irradiated'] },
           ],
           rollups:[ // shown in pallet-space header
-            { key:'no_cartons_sum', label:'Cartons', formula:'sum:no_of_cartons' },
-            { key:'no_cheps_sum',   label:'Cheps',   formula:'sum:no_cheps' },
+            { key:'no_cartons_sum', label:'No. Cartons', formula:'sum:no_of_cartons' },
+            { key:'no_cheps_sum',   label:'No. Cheps',   formula:'sum:no_cheps', excludeKinds:['non_irradiated'] },
           ],
           seed:[
             { id:'ps-1', kind:'irradiated', no_spaces:null, storage_temp:'',
@@ -824,6 +824,7 @@ function buildSchemas() {
           ],
           addIrradiatedLabel:'Add Another Pallet Space',
           addNonIrradiatedLabel:'Add Non Irradiated Pallet Space',
+          addNonIrradiatedAnotherLabel:'Add Another Non Irradiated Pallet Space',
         }
       },
       // 5. Collection From Steritech
@@ -840,6 +841,17 @@ function buildSchemas() {
           { key:'charge', label:'Charge', type:'text',
             showIf:{ key:'steritech_to_book_transport', equals:['Yes'] },
             placeholder:'STERITECH' },
+          { key:'dispatch_address', label:'Address', type:'google-address',
+            showIf:{ key:'steritech_to_book_transport', equals:['No'] },
+            requiredWhenVisible:true,
+            placeholder:'Search' },
+          { key:'expected_dispatch_date', label:'Expected Dispatch Date', type:'date',
+            showIf:{ key:'steritech_to_book_transport', equals:['No'] },
+            requiredWhenVisible:true },
+          { key:'third_party_truck_company', label:'Third Party Truck Company Name', type:'text',
+            showIf:{ key:'steritech_to_book_transport', equals:['No'] },
+            requiredWhenVisible:true,
+            placeholder:'Third Party Truck Company Name' },
           { key:'documents', label:'Upload Your Documents', type:'file-multi',
             help:'POD / Delivery Docket / Drop transfer, etc.',
             accept:'.png,.jpg,.jpeg,.pdf', acceptLabel:'PNG, JPG or PDF' },
@@ -848,7 +860,7 @@ function buildSchemas() {
       // 6. Notes
       { id:'notes', title:'Notes',
         fields:[
-          { key:'notes', label:'Notes', type:'textarea', rows:4, maxLength:250, charCounter:true, placeholder:'Write text here…' },
+          { key:'notes', label:'', type:'textarea', rows:4, maxLength:250, charCounter:true, placeholder:'Write text here…' },
         ]
       },
       // 7. Declaration
@@ -3960,7 +3972,11 @@ const FormRenderer = {
           let isRequired = !!f.required;
           if (f.requiredWhenVisible) isRequired = true;
           if (f.requiredUnless && matches(f.requiredUnless)) isRequired = false;
-          if (isRequired && isEmpty(v)) {
+          if (isRequired && f.type==='computed') {
+            if (!(Number(this.computedValue(f)) > 0)) {
+              errs[f.key] = f.label + ' is required';
+            }
+          } else if (isRequired && isEmpty(v)) {
             errs[f.key] = f.label + ' is required';
           } else if (f.type==='signature' && this.declarationOpts.type==='checkbox' && f.required && v !== 'YES') {
             errs[f.key] = 'You must agree to the declaration';
@@ -4035,8 +4051,10 @@ const FormRenderer = {
             // commodities
             (ps.commodities || []).forEach((com, cIdx) => {
               for (const cf of (rep.commodityFields || [])) {
+                if ((cf.excludeKinds || []).includes(ps.kind)) continue;
+                const isOptionalHere = (cf.optionalKinds || []).includes(ps.kind);
                 const v = com[cf.key];
-                if (cf.required && isEmpty(v)) {
+                if (cf.required && !isOptionalHere && isEmpty(v)) {
                   rowErrs['ps.'+psIdx+'.com.'+cIdx+'.'+cf.key] = cf.label + ' is required';
                 }
               }
@@ -4415,7 +4433,7 @@ const FormRenderer = {
               <!-- Regular fields -->
               <div v-for="f in sec.fields || []" :key="f.key">
                 <div v-if="visibleField(f) && !hiddenInDeclaration(sec, f)">
-                  <label :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
+                  <label v-if="f.label" :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
                     {{ f.label }}
                     <span v-if="isFieldRequired(f)" class="text-red-600" aria-hidden="true">*</span>
                     <span v-if="sec.prefill && f.prefill" class="ml-2 text-xs text-slate-500 font-normal">filled from your profile</span>
@@ -4453,7 +4471,7 @@ const FormRenderer = {
                   <!-- Computed (auto-calculated, readonly) -->
                   <input v-else-if="f.type==='computed'"
                          :id="'fld-'+f.key" :value="computedValue(f)" readonly
-                         :class="['w-full h-11 rounded-md border border-slate-200 bg-slate-50 px-3 text-base text-slate-700 focus-ring', f.tabular ? 'tabular-nums' : '']"/>
+                         :class="['w-full h-11 rounded-md border px-3 text-base text-slate-700 focus-ring', (submitAttempted && errors[f.key]) ? 'border-red-400 bg-red-50/40' : 'border-slate-200 bg-slate-50', f.tabular ? 'tabular-nums' : '']"/>
 
                   <!-- File upload (multi) -->
                   <div v-else-if="f.type==='file-multi'" :id="'fld-'+f.key" class="space-y-2">
@@ -4703,9 +4721,9 @@ const FormRenderer = {
                                   </select>
                                 </div>
                                 <!-- Rollups -->
-                                <div v-for="r in sec.palletRepeater.rollups" :key="r.key" class="text-right">
-                                  <div class="text-[10px] uppercase tracking-wider text-slate-500">{{ r.label }}</div>
-                                  <div class="text-sm font-semibold text-navy-900 tabular-nums">{{ palletRollup(ps, r.formula.split(':')[1]) }}</div>
+                                <div v-for="r in sec.palletRepeater.rollups.filter(r => !(r.excludeKinds || []).includes(ps.kind))" :key="r.key" class="w-32">
+                                  <div class="text-[12px] text-slate-500 mb-1">{{ r.label }}</div>
+                                  <div class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-navy-900 tabular-nums">{{ palletRollup(ps, r.formula.split(':')[1]) }}</div>
                                 </div>
                               </div>
                               <!-- Remove pallet space -->
@@ -4723,8 +4741,8 @@ const FormRenderer = {
                                 <thead class="bg-slate-50 border-b border-slate-200 text-[13px] text-slate-600">
                                   <tr>
                                     <th class="pl-4 pr-2 py-2 text-left font-medium w-8">#</th>
-                                    <th class="px-3 py-2 text-left font-medium" v-for="cf in sec.palletRepeater.commodityFields" :key="cf.key" :class="cf.w">
-                                      {{ cf.label }}<span v-if="cf.required" class="text-red-600" aria-hidden="true">*</span>
+                                    <th class="px-3 py-2 text-left font-medium" v-for="cf in sec.palletRepeater.commodityFields.filter(c => !(c.excludeKinds || []).includes(ps.kind))" :key="cf.key" :class="cf.w">
+                                      {{ cf.label }}<span v-if="cf.required && !(cf.optionalKinds || []).includes(ps.kind)" class="text-red-600" aria-hidden="true">*</span>
                                     </th>
                                     <th class="w-10 sticky right-0 bg-slate-50"></th>
                                   </tr>
@@ -4732,7 +4750,7 @@ const FormRenderer = {
                                 <tbody class="divide-y divide-slate-100">
                                   <tr v-for="(com, cIdx) in ps.commodities" :key="cIdx">
                                     <td class="pl-4 pr-2 py-2 align-top text-xs text-slate-400 tabular-nums pt-3">{{ cIdx + 1 }}</td>
-                                    <td v-for="cf in sec.palletRepeater.commodityFields" :key="cf.key" class="px-3 py-2 align-top" :class="cf.w">
+                                    <td v-for="cf in sec.palletRepeater.commodityFields.filter(c => !(c.excludeKinds || []).includes(ps.kind))" :key="cf.key" class="px-3 py-2 align-top" :class="cf.w">
                                       <input v-if="cf.type==='text'" v-model="com[cf.key]" :maxlength="cf.maxLength" :placeholder="cf.placeholder"
                                              :class="['w-full rounded border px-2 py-1.5 text-sm focus-ring',
                                                       submitAttempted && rowErrors['ps.'+psIdx+'.com.'+cIdx+'.'+cf.key] ? 'border-red-400 bg-red-50/40' : 'border-slate-300']"/>
@@ -4785,7 +4803,7 @@ const FormRenderer = {
                   <button type="button" @click="addPalletSpace('non_irradiated')"
                           class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium">
                     <span class="inline-block h-2 w-2 rounded-full bg-amber-500" aria-hidden="true"></span>
-                    <Icon name="plus" :size="14"/> {{ sec.palletRepeater.addNonIrradiatedLabel || 'Add non-irradiated pallet space' }}
+                    <Icon name="plus" :size="14"/> {{ data[sec.palletRepeater.key].some(p => p.kind === 'non_irradiated') ? (sec.palletRepeater.addNonIrradiatedAnotherLabel || 'Add Another Non Irradiated Pallet Space') : (sec.palletRepeater.addNonIrradiatedLabel || 'Add non-irradiated pallet space') }}
                   </button>
                 </div>
               </template>
