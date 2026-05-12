@@ -191,7 +191,7 @@ const { createRouter, createWebHashHistory, RouterView, RouterLink, useRoute, us
 const FACILITIES = [
   { code:'MER', name:'Merrifield',      state:'VIC', address:'1725 Mickleham Rd, Merrifield VIC 3064',     services:['Gamma','GMP'] },
   { code:'DAN', name:'Dandenong',       state:'VIC', address:'14 Williamson Rd, Dandenong South VIC 3175', services:['Gamma','ETO'] },
-  { code:'WPK', name:'Wetherill Park',  state:'NSW', address:'12 Cooper St, Wetherill Park NSW 2164',      services:['Gamma','ETO'] },
+  { code:'WPK', name:'Wetherill Park',  state:'NSW', address:'12 Cooper St, Wetherill Park NSW 2164',      services:['Gamma'] },
   { code:'NAR', name:'Narangba',        state:'QLD', address:'7 Potassium St, Narangba QLD 4504',          services:['Gamma','GMP'] },
 ];
 
@@ -230,8 +230,8 @@ const seedCustomers = [
     facilities:['NAR'],                  services:['Gamma'],              status:'Active',   created:'2025-06-03', orders:7  },
 ];
 
-// 13 forms across 4 facilities (FRM-0359 is shared MER + NAR -> 14 rows)
-// `shared_with`: facilities sharing the same canonical schema (Prompt 7). Empty = facility-exclusive.
+// Forms across 4 facilities. `shared_with` lets one canonical row serve multiple facilities
+// (e.g. FRM-0359 shared MER + NAR). Empty = facility-exclusive.
 const FORM_CATALOG = [
   { facility:'MER', key:'fresh-produce-dom',  code:'ICA-55',   name:'Fresh Produce Irradiation — Domestic', description:'Use this to send fresh produce for ICA-55 gamma irradiation within Australia.', treatment:'Gamma', shared_with:[] },
   { facility:'MER', key:'fresh-produce-exp',  code:'FRM-0118', name:'Fresh Produce Irradiation — Export',   description:'Use this to send fresh produce for gamma irradiation before export.', treatment:'Gamma', shared_with:[] },
@@ -243,14 +243,13 @@ const FORM_CATALOG = [
   { facility:'DAN', key:'irradiation',        code:'FRM-0091', name:'Irradiation Treatment',                description:'Use this for general goods needing gamma irradiation at Dandenong.', treatment:'Gamma' },
   { facility:'DAN', key:'eto-treatment',      code:'FRM-0092', name:'Ethylene Oxide Treatment',             description:'Use this for ethylene oxide sterilisation of medical and industrial product.', treatment:'ETO'   },
 
-  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for treatment requests at Wetherill Park — gamma or ethylene oxide.', treatment:'Gamma+ETO' },
+  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for gamma irradiation treatment requests at Wetherill Park.', treatment:'Gamma' },
   { facility:'WPK', key:'bee-equipment',      code:'FRM-0038', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Wetherill Park.', treatment:'Gamma' },
 
   { facility:'NAR', key:'fresh-produce',      code:'FRM-0202', name:'Fresh Produce Irradiation',            description:'Use this to send fresh produce for gamma irradiation at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'treatment',          code:'FRM-0203', name:'Treatment',                            description:'Use this for general goods needing gamma irradiation at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'bee-equipment',      code:'FRM-0240', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'blood-serum',        code:'FRM-0241', name:'Blood Serum',                          description:'Use this to send bovine or other animal blood serum for gamma sterilisation.', treatment:'Gamma' },
-  { facility:'NAR', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', description:'Use this to send TGA-listed herbal medicine for GMP-certified packing and labelling.', treatment:'GMP', shared_with:['MER','NAR'] },
 ];
 
 /* Treatment chip styles — single source of truth used by TreatmentChip
@@ -271,6 +270,25 @@ const TREATMENT_LABELS = {
   'GMP':       'GMP-certified packing',
   'Gamma+ETO': 'Gamma + Ethylene Oxide',
 };
+
+/* Per-form icon, keyed by FORM_CATALOG.key. Re-uses lucide names already loaded
+   for the treatment-option tiles (radiation / flask-conical) so the form-picker
+   tile and the treatment tile share visual language. Carries forward the old
+   digital-asset-kit logic: bee-equipment → honeycomb (hexagon), fresh produce
+   → leaf. Fallback is a generic doc icon for any future form key. */
+const FORM_ICONS = {
+  'bee-equipment':     'hexagon',         // honeycomb-style — MER/DAN/WPK/NAR
+  'fresh-produce':     'leaf',            // NAR
+  'fresh-produce-dom': 'leaf',            // MER (domestic)
+  'fresh-produce-exp': 'leaf',            // MER (export)
+  'rfi-general':       'clipboard-list',  // MER — generic Request for Irradiation
+  'irradiation':       'radiation',       // DAN — matches Gamma treatment tile
+  'treatment':         'radiation',       // WPK + NAR — matches Gamma treatment tile
+  'eto-treatment':     'flask-conical',   // DAN — matches ETO treatment tile
+  'herbal-medicine':   'sprout',          // MER + NAR — herbal/TGA-listed
+  'blood-serum':       'droplet',         // NAR — animal serum
+};
+function formIconName(key){ return FORM_ICONS[key] || 'file-text'; }
 
 /* BC sync chip styles */
 const BC_SYNC_STYLES = {
@@ -1285,7 +1303,7 @@ function buildSchemas() {
   ]);
 
   // WPK
-  reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma+ETO', [
+  const wpkTreatmentSections = [
     // 1. Customer Details
     { id:'customer', title:'Customer Details', prefill:true,
       fields:[
@@ -1411,7 +1429,8 @@ function buildSchemas() {
         { key:'auth_signature', label:'Signature', type:'signature', required:true },
       ]
     },
-  ]);
+  ];
+  reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma', wpkTreatmentSections);
   reg('WPK','bee-equipment','Request for Irradiation of Bee Equipment (FRM-0038)','Gamma', [
     // 3. Customer Details
     { id:'customer', title:'Customer Details', prefill:true,
@@ -3080,16 +3099,20 @@ const DashboardPage = {
     fac(){ return currentFacility(); },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
+    facilityOrders(){
+      return state.orders.filter(o => o.facility === state.profile.currentFacility);
+    },
     activeOrders(){
       // Active = anything not in a terminal state (Cancelled / Completed).
       const terminal = ['Cancelled','Completed'];
-      return state.orders.filter(o => !terminal.includes(o.status));
+      return this.facilityOrders.filter(o => !terminal.includes(o.status));
     },
     completedOrders(){
-      return state.orders.filter(o => o.status === 'Completed');
+      return this.facilityOrders.filter(o => o.status === 'Completed');
     },
     recentOrders(){
-      return [...state.orders].slice(0, 8);
+      return [...this.facilityOrders].slice(0, 8);
     },
     availableForms(){
       return FORM_CATALOG.filter(f => f.facility === state.profile.currentFacility);
@@ -3100,7 +3123,7 @@ const DashboardPage = {
     },
     stats(){
       return [
-        { label:'Total orders',     value: state.orders.length,           sub:'lifetime' },
+        { label:'Total orders',     value: this.facilityOrders.length,    sub:'lifetime' },
         { label:'Active right now', value: this.activeOrders.length,      sub:'in progress or awaiting collection' },
         { label:'Completed',        value: this.completedOrders.length,   sub:'lifetime' },
       ];
@@ -3226,6 +3249,9 @@ const DashboardPage = {
         <li v-if="!availableForms.length" class="px-5 sm:px-6 py-6 text-sm text-slate-500 text-center">No forms configured for this facility.</li>
         <li v-for="f in availableForms" :key="f.facility+f.key">
           <router-link :to="'/forms/'+f.facility+'/'+f.key" class="px-5 sm:px-6 py-4 flex items-center gap-4 hover:bg-slate-50 group">
+            <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+              <Icon :name="formIcons[f.key] || 'file-text'" :size="20"/>
+            </span>
             <div class="min-w-0 flex-1">
               <div class="text-base font-medium text-navy-900 leading-snug">{{ f.name }}</div>
               <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-600">
@@ -3272,12 +3298,12 @@ const StartRequestPage = {
     activeFacility(){ return FACILITIES.find(f => f.code === this.facility) || null; },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     treatmentOptions(){
       if (!this.activeFacility) return [];
       const set = new Set(this.activeFacility.services);
-      const order = ['Gamma','ETO','GMP','Gamma+ETO'];
-      const hasCombined = set.has('Gamma') && set.has('ETO');
-      return order.filter(t => set.has(t) || (t === 'Gamma+ETO' && hasCombined));
+      const order = ['Gamma','ETO','GMP'];
+      return order.filter(t => set.has(t));
     },
     matchingForms(){
       if (!this.facility || !this.treatment) return [];
@@ -3482,6 +3508,9 @@ const StartRequestPage = {
           <button @click="go(r)"
                   type="button"
                   class="w-full bg-white border border-slate-200 rounded-md p-4 text-left hover:border-slate-400 hover:bg-slate-50/40 transition-colors flex items-center gap-4 focus-ring">
+            <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+              <Icon :name="formIcons[r.key] || 'file-text'" :size="20"/>
+            </span>
             <span class="flex-1 min-w-0">
               <span class="block text-base font-semibold text-navy-900 leading-snug">{{ r.name }}</span>
               <span class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-600">
@@ -3526,6 +3555,7 @@ const FormPickerPage = {
     isSingle(){ return this.myFacilities.length <= 1; },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     activeFacilityCode(){
       if (this.isSingle && this.myFacilities[0]) return this.myFacilities[0].code;
       return this.filter === 'ALL' ? null : this.filter;
@@ -3623,7 +3653,11 @@ const FormPickerPage = {
           <router-link :to="'/forms/'+g.code+'/'+r.key"
                        class="block bg-white border border-slate-200 rounded-md px-5 py-4 hover:border-slate-300 hover:bg-slate-50 focus-ring">
             <div class="flex items-start justify-between gap-4 flex-wrap">
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 flex items-start gap-4">
+                <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700 mt-0.5" aria-hidden="true">
+                  <Icon :name="formIcons[r.key] || 'file-text'" :size="20"/>
+                </span>
+                <div class="min-w-0 flex-1">
                 <p class="text-base font-medium text-slate-900 leading-snug">{{ r.name }}</p>
                 <p v-if="r.description" class="mt-1 text-sm text-slate-600 leading-snug">{{ r.description }}</p>
                 <div class="mt-2 inline-flex items-center gap-2 text-xs text-slate-500 flex-wrap">
@@ -3637,6 +3671,7 @@ const FormPickerPage = {
                     <span aria-hidden="true">&middot;</span>
                     <span>Shared form</span>
                   </template>
+                </div>
                 </div>
               </div>
               <span class="text-sm text-slate-700 whitespace-nowrap shrink-0 mt-0.5">Start</span>
@@ -6750,6 +6785,20 @@ const OnboardCustomerPage = {
       TREATMENT_SERVICES.forEach(s => { row[s] = false; });
       access[f.code] = row;
     });
+    // Per-form access, keyed by [facility code][form key]. Stays in sync with
+    // the matrix above: ticking a treatment defaults its forms ON, unticking
+    // defaults them OFF. Forms with shared_with appear under each facility
+    // they're shared with, and each (facility,form) selection is independent.
+    const formAccess = {};
+    FACILITIES.forEach(fac => {
+      const row = {};
+      FORM_CATALOG.forEach(form => {
+        const sharedWith = (form.shared_with && form.shared_with.length) ? form.shared_with : null;
+        const offeredHere = sharedWith ? sharedWith.includes(fac.code) : (form.facility === fac.code);
+        if (offeredHere) row[form.key] = false;
+      });
+      formAccess[fac.code] = row;
+    });
     return {
       f: {
         company:'',
@@ -6763,6 +6812,7 @@ const OnboardCustomerPage = {
         addrPostcode:'',
       },
       access,
+      formAccess,
       submitAttempted: false,
     };
   },
@@ -6784,6 +6834,48 @@ const OnboardCustomerPage = {
     grantedFacilities(){
       return FACILITIES.filter(f => TREATMENT_SERVICES.some(s => this.access[f.code][s]));
     },
+    /* Form-by-treatment groupings for every granted (facility, treatment) combo.
+       Each entry: { fac, treatments: [{ service, forms: [FORM_CATALOG row...] }] }.
+       Drives the "Form access" card. */
+    formGroups(){
+      const groups = [];
+      for (const fac of this.grantedFacilities) {
+        const treatments = [];
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = this.formsAt(fac.code, s);
+          if (forms.length) treatments.push({ service: s, forms });
+        }
+        if (treatments.length) groups.push({ fac, treatments });
+      }
+      return groups;
+    },
+    totalFormsGranted(){
+      let n = 0;
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          for (const form of this.formsAt(fac.code, s)) {
+            if (this.formAccess[fac.code][form.key]) n++;
+          }
+        }
+      }
+      return n;
+    },
+    /* For each granted (fac, service), did the admin leave it without any form ticked? */
+    treatmentsMissingForms(){
+      const missing = [];
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = this.formsAt(fac.code, s);
+          if (!forms.length) continue; // no forms configured at all → not the admin's problem
+          const anyTicked = forms.some(f => this.formAccess[fac.code][f.key]);
+          if (!anyTicked) missing.push({ fac: fac.code, service: s });
+        }
+      }
+      return missing;
+    },
     detailsValid(){
       const f = this.f;
       return f.company.trim() && f.contact.trim() && f.abn.trim() && f.phone.trim() && f.email.trim();
@@ -6795,22 +6887,52 @@ const OnboardCustomerPage = {
     accessValid(){
       return this.grantedFacilities.length > 0;
     },
+    formAccessValid(){
+      return this.treatmentsMissingForms.length === 0;
+    },
     formValid(){
-      return this.detailsValid && this.addressValid && this.accessValid;
+      return this.detailsValid && this.addressValid && this.accessValid && this.formAccessValid;
     },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     issueCount(){
       let n = 0;
       if (!this.detailsValid) n++;
       if (!this.addressValid) n++;
       if (!this.accessValid) n++;
+      if (this.accessValid && !this.formAccessValid) n++;
       return n;
     },
   },
   methods:{
     facName(code){ const f = FACILITIES.find(x => x.code===code); return f ? f.name : code; },
     facState(code){ const f = FACILITIES.find(x => x.code===code); return f ? f.state : ''; },
+    /* Forms offered at a facility for a given treatment, honouring shared_with. */
+    formsAt(facCode, service){
+      const out = [];
+      for (const form of FORM_CATALOG) {
+        if (form.treatment !== service) continue;
+        const sharedWith = (form.shared_with && form.shared_with.length) ? form.shared_with : null;
+        const offeredHere = sharedWith ? sharedWith.includes(facCode) : (form.facility === facCode);
+        if (offeredHere) out.push(form);
+      }
+      return out;
+    },
+    /* Toggle handler for the matrix checkbox: on flip ON, default every form in
+       (fac, service) to true; on flip OFF, clear them. Keeps form-access in
+       sync with the matrix without separate book-keeping. */
+    onTreatmentToggle(facCode, service){
+      const isOn = !!this.access[facCode][service];
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = isOn;
+      }
+    },
+    toggleAllForms(facCode, service, value){
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = value;
+      }
+    },
     cancel(){ this.$router.push('/admin'); },
     sendInvite(){
       this.submitAttempted = true;
@@ -6941,6 +7063,7 @@ const OnboardCustomerPage = {
                 <td v-for="s in services" :key="s" class="px-4 py-3.5 text-center">
                   <input v-if="canCheck[fac.code][s]" type="checkbox"
                          v-model="access[fac.code][s]"
+                         @change="onTreatmentToggle(fac.code, s)"
                          :aria-label="s + ' at ' + fac.name"
                          class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
                   <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
@@ -6948,6 +7071,73 @@ const OnboardCustomerPage = {
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- Form access card: per-form picker, only for ticked (facility, treatment) cells -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="file-check-2" :size="14" cls="text-slate-500"/> Form access
+          <span class="ml-auto text-sm text-slate-500 font-normal">
+            <span v-if="formGroups.length === 0">Tick a treatment above to grant forms.</span>
+            <span v-else>{{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted</span>
+          </span>
+        </header>
+        <p class="px-5 pt-4 text-sm text-slate-500">
+          The customer will only see the forms ticked here. By default every form under a ticked treatment is granted &mdash; untick to restrict access to specific forms.
+        </p>
+
+        <div v-if="formGroups.length === 0" class="px-5 pt-3 pb-6 text-sm text-slate-500">
+          No treatments ticked yet. Use the matrix above to grant a facility &amp; treatment, then come back to choose forms.
+        </div>
+
+        <div v-else class="px-5 pt-3 pb-5 space-y-5">
+          <div v-for="g in formGroups" :key="g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
+            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+              <span class="text-sm font-medium text-navy-900">{{ g.fac.name }}, {{ g.fac.state }}</span>
+              <span class="text-xs text-slate-500">{{ g.fac.code }}</span>
+            </div>
+            <div class="divide-y divide-slate-200">
+              <div v-for="t in g.treatments" :key="t.service" class="px-4 py-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[t.service] && treatmentStyles[t.service].dot]" aria-hidden="true"></span>
+                  <span class="text-sm font-medium text-slate-700">{{ treatmentLabels[t.service] || t.service }}</span>
+                  <span class="text-xs text-slate-500">{{ t.forms.length }} {{ t.forms.length === 1 ? 'form' : 'forms' }}</span>
+                  <span class="ml-auto inline-flex items-center gap-3 text-xs">
+                    <button type="button" @click="toggleAllForms(g.fac.code, t.service, true)" class="text-teal-600 hover:underline focus-ring rounded">Select all</button>
+                    <button type="button" @click="toggleAllForms(g.fac.code, t.service, false)" class="text-slate-600 hover:underline focus-ring rounded">Clear</button>
+                  </span>
+                </div>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <li v-for="form in t.forms" :key="form.key">
+                    <label :for="'fa-' + g.fac.code + '-' + form.key"
+                           class="flex items-center gap-3 p-2.5 rounded-md border border-slate-200 hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
+                      <input type="checkbox"
+                             :id="'fa-' + g.fac.code + '-' + form.key"
+                             v-model="formAccess[g.fac.code][form.key]"
+                             :aria-label="form.name + ' at ' + g.fac.name"
+                             class="w-4 h-4 rounded accent-teal-600 cursor-pointer shrink-0"/>
+                      <span class="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+                        <Icon :name="formIcons[form.key] || 'file-text'" :size="18"/>
+                      </span>
+                      <span class="flex-1 min-w-0">
+                        <span class="block text-sm font-medium text-navy-900 leading-tight">{{ form.name }}</span>
+                        <span class="block text-xs text-slate-500 mt-0.5 font-mono">{{ form.code }}</span>
+                      </span>
+                      <span v-if="form.shared_with && form.shared_with.length"
+                            class="shrink-0 text-[11px] uppercase tracking-wide text-slate-500 px-1.5 py-0.5 rounded bg-slate-100"
+                            title="This form is also offered at other facilities">Shared</span>
+                    </label>
+                  </li>
+                </ul>
+                <p v-if="submitAttempted && !t.forms.some(f => formAccess[g.fac.code][f.key])"
+                   role="alert" class="mt-2 text-xs text-red-600 inline-flex items-center gap-1.5">
+                  <Icon name="alert-circle" :size="12" aria-hidden="true"/>
+                  Pick at least one {{ treatmentLabels[t.service] || t.service }} form, or untick this treatment in the matrix above.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
