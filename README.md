@@ -8,10 +8,6 @@ Shared repository for hosting interactive HTML wireframes via GitHub Pages. Each
 
 | Project | Folder | Live Link |
 |---------|--------|-----------|
-| Genotype Health | `/gth` | [farishta-webalive.github.io/wireframes/gth/](https://farishta-webalive.github.io/wireframes/gth/) |
-| CMW | `/cmw` | [farishta-webalive.github.io/wireframes/cmw/](https://farishta-webalive.github.io/wireframes/cmw/) |
-| Melbourne Pest Control | `/mpc` | [farishta-webalive.github.io/wireframes/mpc/](https://farishta-webalive.github.io/wireframes/mpc/) |
-| Renologic Homeowner Platform | `/rhp` | [farishta-webalive.github.io/wireframes/rhp/](https://farishta-webalive.github.io/wireframes/rhp/) |
 | Steritech Gen 2 Portal | `/str` | [farishta-webalive.github.io/wireframes/str/](https://farishta-webalive.github.io/wireframes/str/) |
 | SteriScan Warehouse App | `/scn` | [farishta-webalive.github.io/wireframes/scn/](https://farishta-webalive.github.io/wireframes/scn/) |
 
@@ -112,9 +108,8 @@ GitHub Pages automatically serves static files from this repository. The URL str
 Repository structure                  Live URL
 ---------------------------------------------------------------------------------------------------------
 wireframes/                           https://farishta-webalive.github.io/wireframes/
-  gth/index.html                      https://farishta-webalive.github.io/wireframes/gth/
-  cmw/index.html                      https://farishta-webalive.github.io/wireframes/cmw/
-  mpc/index.html                      https://farishta-webalive.github.io/wireframes/mpc/
+  str/index.html                      https://farishta-webalive.github.io/wireframes/str/
+  scn/index.html                      https://farishta-webalive.github.io/wireframes/scn/
   your-project/index.html             https://farishta-webalive.github.io/wireframes/your-project/
 ```
 
