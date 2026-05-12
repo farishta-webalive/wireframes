@@ -865,20 +865,83 @@ function buildSchemas() {
       declaration: { type:'checkbox' },
     });
   reg('MER','fresh-produce-exp','Fresh Produce Irradiation — Export','Gamma',
-    [ commonCustomerDetails(),
-      commonConsignment([{ key:'commodity', label:'Commodity', type:'select', required:true, source:'commodities' }]),
-      { id:'export', title:'Export Parameters',
+    [
+      // 1. Request Details (2-col grid)
+      { id:'request', title:'Request Details', prefill:true, grid:2,
         fields:[
-          { key:'destCountry', label:'Destination country', type:'select', options:['USA','China','Japan','NZ','Singapore','UAE','UK'], required:true },
-          { key:'protocol',    label:'Phytosanitary protocol', type:'text', placeholder:'USDA T105-a-1', required:true },
-          { key:'minDose',     label:'Minimum dose (kGy)', type:'number', step:0.01, required:true },
+          { key:'company_name', label:'Company Name', type:'text',  required:true, prefill:'company' },
+          { key:'contact_name', label:'Contact Name', type:'text',  required:true, prefill:'contact' },
+          { key:'mobile',       label:'Mobile',       type:'phone', required:true, prefill:'phone'   },
+          { key:'email',        label:'Email',        type:'email', required:true, prefill:'email'   },
         ]
       },
-      gammaParamsStandard,
-      conditionalSections,
-      uploads(['MSDS']),
-      commonDeclaration(),
-    ]);
+      // 2. Order Details (2-col grid, ETA spans left col only)
+      { id:'order', title:'Order Details', grid:2,
+        fields:[
+          { key:'po_number',         label:'P.O (if applicable)',    type:'text',   placeholder:'P.O (if applicable)' },
+          { key:'rfp',               label:'RFP',                   type:'text',   placeholder:'RFP' },
+          { key:'freight_forwarder', label:'Freight Forwarder',     type:'text',   required:true },
+          { key:'number_of_pallets', label:'Number of Pallets',     type:'number', required:true, min:0, placeholder:'0' },
+          { key:'eta_to_steritech_date', label:'ETA to Steritech - Date', type:'date', required:true },
+        ]
+      },
+      // 3. Treatment Details — Market select + commodity repeater
+      { id:'treatment', title:'Treatment Details',
+        fields:[
+          { key:'market', label:'Market', type:'select', required:true, placeholder:'Select',
+            options:[
+              'Indonesia 150Gy',
+              'Lebanon 100Gy',
+              'New Zealand 150Gy',
+              'New Zealand 400Gy',
+              'Vietnam 150Gy',
+              'Vietnam 200Gy',
+              'Vietnam 400Gy',
+            ] },
+        ],
+        repeater:{
+          key:'commodities', minRows:1,
+          seed:[{ commodity:'', grower_name:'', no_of_cartons:null, no_of_spaces:null }],
+          columns:[
+            { key:'commodity',     label:'Commodity',      type:'text', required:true, placeholder:'Commodity', w:'flex-1' },
+            { key:'grower_name',   label:'Grower Name',    type:'text', required:true, w:'flex-1' },
+            { key:'no_of_cartons', label:'No. of Cartons', type:'number', required:true, w:'w-32' },
+            { key:'no_of_spaces',  label:'No. of Spaces',  type:'number', required:true, w:'w-32' },
+          ],
+          addLabel:'Add Another',
+        }
+      },
+      // 4. Collection From Steritech (2-col grid, Dispatch Date left only, Upload full width)
+      { id:'collection', title:'Collection From Steritech', grid:2,
+        fields:[
+          { key:'truck_company',  label:'Truck Company',  type:'text',   required:true },
+          { key:'freight_method', label:'Freight Method',  type:'select', required:true, placeholder:'Select',
+            options:['Air','Sea'] },
+          { key:'dispatch_date',  label:'Dispatch Date',  type:'date',   required:true },
+          { key:'documents',      label:'Upload Your Documents', type:'file-multi', span:2,
+            help:'POD / Delivery docket / Chep transfer, etc...',
+            accept:'.png,.jpg,.jpeg,.pdf', acceptLabel:'PNG, JPG or PDF' },
+        ]
+      },
+      // 5. Notes
+      { id:'notes', title:'Notes',
+        fields:[
+          { key:'notes', label:'Notes', type:'textarea', rows:4, maxLength:250, charCounter:true, placeholder:'Write text here ...' },
+        ]
+      },
+      // 6. Declaration
+      { id:'declaration', title:'Declaration',
+        legal:'By submitting this Request for Irradiation, I authorise the irradiation of this consignment and accept the responsibilities and conditions specified in Steritech\u2019s Agreement for Fresh Produce Irradiation Processing.',
+        fields:[
+          { key:'signed', label:'I agree to the declaration above.', type:'signature', required:true },
+        ]
+      },
+    ],
+    {
+      layout:      { stepper:false, single_scroll:true, wide:true },
+      errors:      { banner_mode:'inline_only' },
+      declaration: { type:'checkbox' },
+    });
   reg('MER','bee-equipment','Bee Equipment Irradiation Request','Gamma', [
     { id:'customer', title:'Request Details', prefill:true,
       fields:[
@@ -4411,11 +4474,11 @@ const FormRenderer = {
               {{ sec.legal }}
             </div>
 
-            <div class="p-6 space-y-5">
+            <div :class="sec.grid === 2 ? 'p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5' : 'p-6 space-y-5'">
               <!-- Regular fields -->
-              <div v-for="f in sec.fields || []" :key="f.key">
+              <div v-for="f in sec.fields || []" :key="f.key" :class="sec.grid && f.span === 2 ? 'sm:col-span-2' : ''">
                 <div v-if="visibleField(f) && !hiddenInDeclaration(sec, f)">
-                  <label :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
+                  <label v-if="!(f.type==='signature' && declarationOpts.type==='checkbox')" :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
                     {{ f.label }}
                     <span v-if="isFieldRequired(f)" class="text-red-600" aria-hidden="true">*</span>
                     <span v-if="sec.prefill && f.prefill" class="ml-2 text-xs text-slate-500 font-normal">filled from your profile</span>
@@ -4569,7 +4632,7 @@ const FormRenderer = {
                   <table class="w-full text-sm">
                     <thead class="bg-slate-50 border-y border-slate-200 text-[13px] text-slate-600">
                       <tr>
-                        <th class="px-6 py-2.5 text-left font-medium" v-for="c in sec.repeater.columns" :key="c.key" :class="c.w">{{ c.label }}</th>
+                        <th class="px-6 py-2.5 text-left font-medium" v-for="c in sec.repeater.columns" :key="c.key" :class="c.w">{{ c.label }}<span v-if="c.required" class="text-red-600"> *</span></th>
                         <th class="w-10 sticky right-0 bg-slate-50"></th>
                       </tr>
                     </thead>
