@@ -191,7 +191,7 @@ const { createRouter, createWebHashHistory, RouterView, RouterLink, useRoute, us
 const FACILITIES = [
   { code:'MER', name:'Merrifield',      state:'VIC', address:'1725 Mickleham Rd, Merrifield VIC 3064',     services:['Gamma','GMP'] },
   { code:'DAN', name:'Dandenong',       state:'VIC', address:'14 Williamson Rd, Dandenong South VIC 3175', services:['Gamma','ETO'] },
-  { code:'WPK', name:'Wetherill Park',  state:'NSW', address:'12 Cooper St, Wetherill Park NSW 2164',      services:['Gamma','ETO'] },
+  { code:'WPK', name:'Wetherill Park',  state:'NSW', address:'12 Cooper St, Wetherill Park NSW 2164',      services:['Gamma'] },
   { code:'NAR', name:'Narangba',        state:'QLD', address:'7 Potassium St, Narangba QLD 4504',          services:['Gamma','GMP'] },
 ];
 
@@ -230,8 +230,8 @@ const seedCustomers = [
     facilities:['NAR'],                  services:['Gamma'],              status:'Active',   created:'2025-06-03', orders:7  },
 ];
 
-// 13 forms across 4 facilities (FRM-0359 is shared MER + NAR -> 14 rows)
-// `shared_with`: facilities sharing the same canonical schema (Prompt 7). Empty = facility-exclusive.
+// Forms across 4 facilities. `shared_with` lets one canonical row serve multiple facilities
+// (e.g. FRM-0359 shared MER + NAR). Empty = facility-exclusive.
 const FORM_CATALOG = [
   { facility:'MER', key:'fresh-produce-dom',  code:'ICA-55',   name:'Fresh Produce Irradiation — Domestic', description:'Use this to send fresh produce for ICA-55 gamma irradiation within Australia.', treatment:'Gamma', shared_with:[] },
   { facility:'MER', key:'fresh-produce-exp',  code:'FRM-0118', name:'Fresh Produce Irradiation — Export',   description:'Use this to send fresh produce for gamma irradiation before export.', treatment:'Gamma', shared_with:[] },
@@ -243,14 +243,13 @@ const FORM_CATALOG = [
   { facility:'DAN', key:'irradiation',        code:'FRM-0091', name:'Irradiation Treatment',                description:'Use this for general goods needing gamma irradiation at Dandenong.', treatment:'Gamma' },
   { facility:'DAN', key:'eto-treatment',      code:'FRM-0092', name:'Ethylene Oxide Treatment',             description:'Use this for ethylene oxide sterilisation of medical and industrial product.', treatment:'ETO'   },
 
-  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for treatment requests at Wetherill Park — gamma or ethylene oxide.', treatment:'Gamma+ETO' },
+  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for gamma irradiation treatment requests at Wetherill Park.', treatment:'Gamma' },
   { facility:'WPK', key:'bee-equipment',      code:'FRM-0038', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Wetherill Park.', treatment:'Gamma' },
 
   { facility:'NAR', key:'fresh-produce',      code:'FRM-0202', name:'Fresh Produce Irradiation',            description:'Use this to send fresh produce for gamma irradiation at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'treatment',          code:'FRM-0203', name:'Treatment',                            description:'Use this for general goods needing gamma irradiation at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'bee-equipment',      code:'FRM-0240', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'blood-serum',        code:'FRM-0241', name:'Blood Serum',                          description:'Use this to send bovine or other animal blood serum for gamma sterilisation.', treatment:'Gamma' },
-  { facility:'NAR', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', description:'Use this to send TGA-listed herbal medicine for GMP-certified packing and labelling.', treatment:'GMP', shared_with:['MER','NAR'] },
 ];
 
 /* Treatment chip styles — single source of truth used by TreatmentChip
@@ -271,6 +270,25 @@ const TREATMENT_LABELS = {
   'GMP':       'GMP-certified packing',
   'Gamma+ETO': 'Gamma + Ethylene Oxide',
 };
+
+/* Per-form icon, keyed by FORM_CATALOG.key. Re-uses lucide names already loaded
+   for the treatment-option tiles (radiation / flask-conical) so the form-picker
+   tile and the treatment tile share visual language. Carries forward the old
+   digital-asset-kit logic: bee-equipment → honeycomb (hexagon), fresh produce
+   → leaf. Fallback is a generic doc icon for any future form key. */
+const FORM_ICONS = {
+  'bee-equipment':     'hexagon',         // honeycomb-style — MER/DAN/WPK/NAR
+  'fresh-produce':     'leaf',            // NAR
+  'fresh-produce-dom': 'leaf',            // MER (domestic)
+  'fresh-produce-exp': 'leaf',            // MER (export)
+  'rfi-general':       'clipboard-list',  // MER — generic Request for Irradiation
+  'irradiation':       'radiation',       // DAN — matches Gamma treatment tile
+  'treatment':         'radiation',       // WPK + NAR — matches Gamma treatment tile
+  'eto-treatment':     'flask-conical',   // DAN — matches ETO treatment tile
+  'herbal-medicine':   'sprout',          // MER + NAR — herbal/TGA-listed
+  'blood-serum':       'droplet',         // NAR — animal serum
+};
+function formIconName(key){ return FORM_ICONS[key] || 'file-text'; }
 
 /* BC sync chip styles */
 const BC_SYNC_STYLES = {
@@ -764,7 +782,7 @@ function buildSchemas() {
         subtitle:'Pallet Spaces and Cheps are calculated automatically from your Treatment Details.',
         fields:[
           { key:'po_number',             label:'P.O. (if applicable)', type:'text', placeholder:'P.O. (if applicable)' },
-          { key:'pallet_spaces_total',   label:'Pallet Spaces',        type:'computed', formula:'sumPallet:no_spaces', tabular:true },
+          { key:'pallet_spaces_total',   label:'Pallet Spaces',        type:'computed', formula:'sumPallet:no_spaces', tabular:true, required:true },
           { key:'cheps_total',           label:'Cheps',                type:'computed', formula:'sumCommodities:no_cheps',  tabular:true },
           { key:'eta_to_steritech_date', label:'ETA to Steritech – Date', type:'date', required:true },
         ]
@@ -803,17 +821,17 @@ function buildSchemas() {
               options:['1°C – 4°C','5°C – 10°C','11°C – 16°C'] },
           ],
           commodityFields:[
-            { key:'commodity',     label:'Commodity',      type:'searchable-dropdown', source:'commodities', required:true, maxLength:250, w:'min-w-[180px]' },
-            { key:'grower',        label:'Grower',         type:'text',   required:true, maxLength:250, w:'min-w-[160px]' },
-            { key:'no_of_cartons', label:'No. of Cartons', type:'number', required:true, min:0, w:'w-28' },
-            { key:'no_cheps',      label:'No. Cheps',      type:'number', required:true, min:0, w:'w-24' },
-            { key:'pulp_temp_min', label:'Pulp Temp Min',  type:'number', required:true, w:'w-28', placeholder:'Min' },
-            { key:'pulp_temp_max', label:'Pulp Temp Max',  type:'number', required:true, w:'w-28', placeholder:'Max' },
-            { key:'address',       label:'Pickup Address', type:'google-address', required:true, maxLength:250, w:'min-w-[200px]' },
+            { key:'commodity',     label:'Commodity',      type:'searchable-dropdown', source:'commodities', required:true, maxLength:250, w:'min-w-[180px]', optionalKinds:['non_irradiated'] },
+            { key:'grower',        label:'Grower',         type:'text',   required:true, maxLength:250, w:'min-w-[160px]', optionalKinds:['non_irradiated'] },
+            { key:'no_of_cartons', label:'No. of Cartons', type:'number', required:true, min:0, w:'w-32', optionalKinds:['non_irradiated'] },
+            { key:'no_cheps',      label:'No. Cheps',      type:'number', required:true, min:0, w:'w-32', excludeKinds:['non_irradiated'] },
+            { key:'pulp_temp_min', label:'Pulp Temp Min',  type:'number', required:true, w:'w-28', placeholder:'Min', optionalKinds:['non_irradiated'] },
+            { key:'pulp_temp_max', label:'Pulp Temp Max',  type:'number', required:true, w:'w-28', placeholder:'Max', optionalKinds:['non_irradiated'] },
+            { key:'address',       label:'Pickup Address', type:'google-address', required:true, maxLength:250, w:'min-w-[200px]', excludeKinds:['non_irradiated'] },
           ],
           rollups:[ // shown in pallet-space header
-            { key:'no_cartons_sum', label:'Cartons', formula:'sum:no_of_cartons' },
-            { key:'no_cheps_sum',   label:'Cheps',   formula:'sum:no_cheps' },
+            { key:'no_cartons_sum', label:'No. Cartons', formula:'sum:no_of_cartons' },
+            { key:'no_cheps_sum',   label:'No. Cheps',   formula:'sum:no_cheps', excludeKinds:['non_irradiated'] },
           ],
           seed:[
             { id:'ps-1', kind:'irradiated', no_spaces:null, storage_temp:'',
@@ -824,6 +842,7 @@ function buildSchemas() {
           ],
           addIrradiatedLabel:'Add Another Pallet Space',
           addNonIrradiatedLabel:'Add Non Irradiated Pallet Space',
+          addNonIrradiatedAnotherLabel:'Add Another Non Irradiated Pallet Space',
         }
       },
       // 5. Collection From Steritech
@@ -840,6 +859,17 @@ function buildSchemas() {
           { key:'charge', label:'Charge', type:'text',
             showIf:{ key:'steritech_to_book_transport', equals:['Yes'] },
             placeholder:'STERITECH' },
+          { key:'dispatch_address', label:'Address', type:'google-address',
+            showIf:{ key:'steritech_to_book_transport', equals:['No'] },
+            requiredWhenVisible:true,
+            placeholder:'Search' },
+          { key:'expected_dispatch_date', label:'Expected Dispatch Date', type:'date',
+            showIf:{ key:'steritech_to_book_transport', equals:['No'] },
+            requiredWhenVisible:true },
+          { key:'third_party_truck_company', label:'Third Party Truck Company Name', type:'text',
+            showIf:{ key:'steritech_to_book_transport', equals:['No'] },
+            requiredWhenVisible:true,
+            placeholder:'Third Party Truck Company Name' },
           { key:'documents', label:'Upload Your Documents', type:'file-multi',
             help:'POD / Delivery Docket / Drop transfer, etc.',
             accept:'.png,.jpg,.jpeg,.pdf', acceptLabel:'PNG, JPG or PDF' },
@@ -848,7 +878,7 @@ function buildSchemas() {
       // 6. Notes
       { id:'notes', title:'Notes',
         fields:[
-          { key:'notes', label:'Notes', type:'textarea', rows:4, maxLength:250, charCounter:true, placeholder:'Write text here…' },
+          { key:'notes', label:'', type:'textarea', rows:4, maxLength:250, charCounter:true, placeholder:'Write text here…' },
         ]
       },
       // 7. Declaration
@@ -1348,7 +1378,7 @@ function buildSchemas() {
   ]);
 
   // WPK
-  reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma+ETO', [
+  const wpkTreatmentSections = [
     // 1. Customer Details
     { id:'customer', title:'Customer Details', prefill:true,
       fields:[
@@ -1474,7 +1504,8 @@ function buildSchemas() {
         { key:'auth_signature', label:'Signature', type:'signature', required:true },
       ]
     },
-  ]);
+  ];
+  reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma', wpkTreatmentSections);
   reg('WPK','bee-equipment','Request for Irradiation of Bee Equipment (FRM-0038)','Gamma', [
     // 3. Customer Details
     { id:'customer', title:'Customer Details', prefill:true,
@@ -3143,16 +3174,20 @@ const DashboardPage = {
     fac(){ return currentFacility(); },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
+    facilityOrders(){
+      return state.orders.filter(o => o.facility === state.profile.currentFacility);
+    },
     activeOrders(){
       // Active = anything not in a terminal state (Cancelled / Completed).
       const terminal = ['Cancelled','Completed'];
-      return state.orders.filter(o => !terminal.includes(o.status));
+      return this.facilityOrders.filter(o => !terminal.includes(o.status));
     },
     completedOrders(){
-      return state.orders.filter(o => o.status === 'Completed');
+      return this.facilityOrders.filter(o => o.status === 'Completed');
     },
     recentOrders(){
-      return [...state.orders].slice(0, 8);
+      return [...this.facilityOrders].slice(0, 8);
     },
     availableForms(){
       return FORM_CATALOG.filter(f => f.facility === state.profile.currentFacility);
@@ -3163,7 +3198,7 @@ const DashboardPage = {
     },
     stats(){
       return [
-        { label:'Total orders',     value: state.orders.length,           sub:'lifetime' },
+        { label:'Total orders',     value: this.facilityOrders.length,    sub:'lifetime' },
         { label:'Active right now', value: this.activeOrders.length,      sub:'in progress or awaiting collection' },
         { label:'Completed',        value: this.completedOrders.length,   sub:'lifetime' },
       ];
@@ -3289,6 +3324,9 @@ const DashboardPage = {
         <li v-if="!availableForms.length" class="px-5 sm:px-6 py-6 text-sm text-slate-500 text-center">No forms configured for this facility.</li>
         <li v-for="f in availableForms" :key="f.facility+f.key">
           <router-link :to="'/forms/'+f.facility+'/'+f.key" class="px-5 sm:px-6 py-4 flex items-center gap-4 hover:bg-slate-50 group">
+            <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+              <Icon :name="formIcons[f.key] || 'file-text'" :size="20"/>
+            </span>
             <div class="min-w-0 flex-1">
               <div class="text-base font-medium text-navy-900 leading-snug">{{ f.name }}</div>
               <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-600">
@@ -3335,12 +3373,12 @@ const StartRequestPage = {
     activeFacility(){ return FACILITIES.find(f => f.code === this.facility) || null; },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     treatmentOptions(){
       if (!this.activeFacility) return [];
       const set = new Set(this.activeFacility.services);
-      const order = ['Gamma','ETO','GMP','Gamma+ETO'];
-      const hasCombined = set.has('Gamma') && set.has('ETO');
-      return order.filter(t => set.has(t) || (t === 'Gamma+ETO' && hasCombined));
+      const order = ['Gamma','ETO','GMP'];
+      return order.filter(t => set.has(t));
     },
     matchingForms(){
       if (!this.facility || !this.treatment) return [];
@@ -3545,6 +3583,9 @@ const StartRequestPage = {
           <button @click="go(r)"
                   type="button"
                   class="w-full bg-white border border-slate-200 rounded-md p-4 text-left hover:border-slate-400 hover:bg-slate-50/40 transition-colors flex items-center gap-4 focus-ring">
+            <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+              <Icon :name="formIcons[r.key] || 'file-text'" :size="20"/>
+            </span>
             <span class="flex-1 min-w-0">
               <span class="block text-base font-semibold text-navy-900 leading-snug">{{ r.name }}</span>
               <span class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-600">
@@ -3589,6 +3630,7 @@ const FormPickerPage = {
     isSingle(){ return this.myFacilities.length <= 1; },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     activeFacilityCode(){
       if (this.isSingle && this.myFacilities[0]) return this.myFacilities[0].code;
       return this.filter === 'ALL' ? null : this.filter;
@@ -3686,7 +3728,11 @@ const FormPickerPage = {
           <router-link :to="'/forms/'+g.code+'/'+r.key"
                        class="block bg-white border border-slate-200 rounded-md px-5 py-4 hover:border-slate-300 hover:bg-slate-50 focus-ring">
             <div class="flex items-start justify-between gap-4 flex-wrap">
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 flex items-start gap-4">
+                <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700 mt-0.5" aria-hidden="true">
+                  <Icon :name="formIcons[r.key] || 'file-text'" :size="20"/>
+                </span>
+                <div class="min-w-0 flex-1">
                 <p class="text-base font-medium text-slate-900 leading-snug">{{ r.name }}</p>
                 <p v-if="r.description" class="mt-1 text-sm text-slate-600 leading-snug">{{ r.description }}</p>
                 <div class="mt-2 inline-flex items-center gap-2 text-xs text-slate-500 flex-wrap">
@@ -3700,6 +3746,7 @@ const FormPickerPage = {
                     <span aria-hidden="true">&middot;</span>
                     <span>Shared form</span>
                   </template>
+                </div>
                 </div>
               </div>
               <span class="text-sm text-slate-700 whitespace-nowrap shrink-0 mt-0.5">Start</span>
@@ -4023,7 +4070,11 @@ const FormRenderer = {
           let isRequired = !!f.required;
           if (f.requiredWhenVisible) isRequired = true;
           if (f.requiredUnless && matches(f.requiredUnless)) isRequired = false;
-          if (isRequired && isEmpty(v)) {
+          if (isRequired && f.type==='computed') {
+            if (!(Number(this.computedValue(f)) > 0)) {
+              errs[f.key] = f.label + ' is required';
+            }
+          } else if (isRequired && isEmpty(v)) {
             errs[f.key] = f.label + ' is required';
           } else if (f.type==='signature' && this.declarationOpts.type==='checkbox' && f.required && v !== 'YES') {
             errs[f.key] = 'You must agree to the declaration';
@@ -4098,8 +4149,10 @@ const FormRenderer = {
             // commodities
             (ps.commodities || []).forEach((com, cIdx) => {
               for (const cf of (rep.commodityFields || [])) {
+                if ((cf.excludeKinds || []).includes(ps.kind)) continue;
+                const isOptionalHere = (cf.optionalKinds || []).includes(ps.kind);
                 const v = com[cf.key];
-                if (cf.required && isEmpty(v)) {
+                if (cf.required && !isOptionalHere && isEmpty(v)) {
                   rowErrs['ps.'+psIdx+'.com.'+cIdx+'.'+cf.key] = cf.label + ' is required';
                 }
               }
@@ -4478,7 +4531,7 @@ const FormRenderer = {
               <!-- Regular fields -->
               <div v-for="f in sec.fields || []" :key="f.key" :class="sec.grid && f.span === 2 ? 'sm:col-span-2' : ''">
                 <div v-if="visibleField(f) && !hiddenInDeclaration(sec, f)">
-                  <label v-if="!(f.type==='signature' && declarationOpts.type==='checkbox')" :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
+                  <label v-if="f.label && !(f.type==='signature' && declarationOpts.type==='checkbox')" :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
                     {{ f.label }}
                     <span v-if="isFieldRequired(f)" class="text-red-600" aria-hidden="true">*</span>
                     <span v-if="sec.prefill && f.prefill" class="ml-2 text-xs text-slate-500 font-normal">filled from your profile</span>
@@ -4516,7 +4569,7 @@ const FormRenderer = {
                   <!-- Computed (auto-calculated, readonly) -->
                   <input v-else-if="f.type==='computed'"
                          :id="'fld-'+f.key" :value="computedValue(f)" readonly
-                         :class="['w-full h-11 rounded-md border border-slate-200 bg-slate-50 px-3 text-base text-slate-700 focus-ring', f.tabular ? 'tabular-nums' : '']"/>
+                         :class="['w-full h-11 rounded-md border px-3 text-base text-slate-700 focus-ring', (submitAttempted && errors[f.key]) ? 'border-red-400 bg-red-50/40' : 'border-slate-200 bg-slate-50', f.tabular ? 'tabular-nums' : '']"/>
 
                   <!-- File upload (multi) -->
                   <div v-else-if="f.type==='file-multi'" :id="'fld-'+f.key" class="space-y-2">
@@ -4766,9 +4819,9 @@ const FormRenderer = {
                                   </select>
                                 </div>
                                 <!-- Rollups -->
-                                <div v-for="r in sec.palletRepeater.rollups" :key="r.key" class="text-right">
-                                  <div class="text-[10px] uppercase tracking-wider text-slate-500">{{ r.label }}</div>
-                                  <div class="text-sm font-semibold text-navy-900 tabular-nums">{{ palletRollup(ps, r.formula.split(':')[1]) }}</div>
+                                <div v-for="r in sec.palletRepeater.rollups.filter(r => !(r.excludeKinds || []).includes(ps.kind))" :key="r.key" class="w-32">
+                                  <div class="text-[12px] text-slate-500 mb-1">{{ r.label }}</div>
+                                  <div class="w-full rounded border border-slate-300 bg-white px-2 py-1.5 text-sm font-semibold text-navy-900 tabular-nums">{{ palletRollup(ps, r.formula.split(':')[1]) }}</div>
                                 </div>
                               </div>
                               <!-- Remove pallet space -->
@@ -4786,8 +4839,8 @@ const FormRenderer = {
                                 <thead class="bg-slate-50 border-b border-slate-200 text-[13px] text-slate-600">
                                   <tr>
                                     <th class="pl-4 pr-2 py-2 text-left font-medium w-8">#</th>
-                                    <th class="px-3 py-2 text-left font-medium" v-for="cf in sec.palletRepeater.commodityFields" :key="cf.key" :class="cf.w">
-                                      {{ cf.label }}<span v-if="cf.required" class="text-red-600" aria-hidden="true">*</span>
+                                    <th class="px-3 py-2 text-left font-medium" v-for="cf in sec.palletRepeater.commodityFields.filter(c => !(c.excludeKinds || []).includes(ps.kind))" :key="cf.key" :class="cf.w">
+                                      {{ cf.label }}<span v-if="cf.required && !(cf.optionalKinds || []).includes(ps.kind)" class="text-red-600" aria-hidden="true">*</span>
                                     </th>
                                     <th class="w-10 sticky right-0 bg-slate-50"></th>
                                   </tr>
@@ -4795,7 +4848,7 @@ const FormRenderer = {
                                 <tbody class="divide-y divide-slate-100">
                                   <tr v-for="(com, cIdx) in ps.commodities" :key="cIdx">
                                     <td class="pl-4 pr-2 py-2 align-top text-xs text-slate-400 tabular-nums pt-3">{{ cIdx + 1 }}</td>
-                                    <td v-for="cf in sec.palletRepeater.commodityFields" :key="cf.key" class="px-3 py-2 align-top" :class="cf.w">
+                                    <td v-for="cf in sec.palletRepeater.commodityFields.filter(c => !(c.excludeKinds || []).includes(ps.kind))" :key="cf.key" class="px-3 py-2 align-top" :class="cf.w">
                                       <input v-if="cf.type==='text'" v-model="com[cf.key]" :maxlength="cf.maxLength" :placeholder="cf.placeholder"
                                              :class="['w-full rounded border px-2 py-1.5 text-sm focus-ring',
                                                       submitAttempted && rowErrors['ps.'+psIdx+'.com.'+cIdx+'.'+cf.key] ? 'border-red-400 bg-red-50/40' : 'border-slate-300']"/>
@@ -4848,7 +4901,7 @@ const FormRenderer = {
                   <button type="button" @click="addPalletSpace('non_irradiated')"
                           class="inline-flex items-center gap-2 px-3 py-2 rounded-md border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 text-sm font-medium">
                     <span class="inline-block h-2 w-2 rounded-full bg-amber-500" aria-hidden="true"></span>
-                    <Icon name="plus" :size="14"/> {{ sec.palletRepeater.addNonIrradiatedLabel || 'Add non-irradiated pallet space' }}
+                    <Icon name="plus" :size="14"/> {{ data[sec.palletRepeater.key].some(p => p.kind === 'non_irradiated') ? (sec.palletRepeater.addNonIrradiatedAnotherLabel || 'Add Another Non Irradiated Pallet Space') : (sec.palletRepeater.addNonIrradiatedLabel || 'Add non-irradiated pallet space') }}
                   </button>
                 </div>
               </template>
@@ -6813,6 +6866,20 @@ const OnboardCustomerPage = {
       TREATMENT_SERVICES.forEach(s => { row[s] = false; });
       access[f.code] = row;
     });
+    // Per-form access, keyed by [facility code][form key]. Stays in sync with
+    // the matrix above: ticking a treatment defaults its forms ON, unticking
+    // defaults them OFF. Forms with shared_with appear under each facility
+    // they're shared with, and each (facility,form) selection is independent.
+    const formAccess = {};
+    FACILITIES.forEach(fac => {
+      const row = {};
+      FORM_CATALOG.forEach(form => {
+        const sharedWith = (form.shared_with && form.shared_with.length) ? form.shared_with : null;
+        const offeredHere = sharedWith ? sharedWith.includes(fac.code) : (form.facility === fac.code);
+        if (offeredHere) row[form.key] = false;
+      });
+      formAccess[fac.code] = row;
+    });
     return {
       f: {
         company:'',
@@ -6826,6 +6893,7 @@ const OnboardCustomerPage = {
         addrPostcode:'',
       },
       access,
+      formAccess,
       submitAttempted: false,
     };
   },
@@ -6847,6 +6915,48 @@ const OnboardCustomerPage = {
     grantedFacilities(){
       return FACILITIES.filter(f => TREATMENT_SERVICES.some(s => this.access[f.code][s]));
     },
+    /* Form-by-treatment groupings for every granted (facility, treatment) combo.
+       Each entry: { fac, treatments: [{ service, forms: [FORM_CATALOG row...] }] }.
+       Drives the "Form access" card. */
+    formGroups(){
+      const groups = [];
+      for (const fac of this.grantedFacilities) {
+        const treatments = [];
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = this.formsAt(fac.code, s);
+          if (forms.length) treatments.push({ service: s, forms });
+        }
+        if (treatments.length) groups.push({ fac, treatments });
+      }
+      return groups;
+    },
+    totalFormsGranted(){
+      let n = 0;
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          for (const form of this.formsAt(fac.code, s)) {
+            if (this.formAccess[fac.code][form.key]) n++;
+          }
+        }
+      }
+      return n;
+    },
+    /* For each granted (fac, service), did the admin leave it without any form ticked? */
+    treatmentsMissingForms(){
+      const missing = [];
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = this.formsAt(fac.code, s);
+          if (!forms.length) continue; // no forms configured at all → not the admin's problem
+          const anyTicked = forms.some(f => this.formAccess[fac.code][f.key]);
+          if (!anyTicked) missing.push({ fac: fac.code, service: s });
+        }
+      }
+      return missing;
+    },
     detailsValid(){
       const f = this.f;
       return f.company.trim() && f.contact.trim() && f.abn.trim() && f.phone.trim() && f.email.trim();
@@ -6858,22 +6968,52 @@ const OnboardCustomerPage = {
     accessValid(){
       return this.grantedFacilities.length > 0;
     },
+    formAccessValid(){
+      return this.treatmentsMissingForms.length === 0;
+    },
     formValid(){
-      return this.detailsValid && this.addressValid && this.accessValid;
+      return this.detailsValid && this.addressValid && this.accessValid && this.formAccessValid;
     },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     issueCount(){
       let n = 0;
       if (!this.detailsValid) n++;
       if (!this.addressValid) n++;
       if (!this.accessValid) n++;
+      if (this.accessValid && !this.formAccessValid) n++;
       return n;
     },
   },
   methods:{
     facName(code){ const f = FACILITIES.find(x => x.code===code); return f ? f.name : code; },
     facState(code){ const f = FACILITIES.find(x => x.code===code); return f ? f.state : ''; },
+    /* Forms offered at a facility for a given treatment, honouring shared_with. */
+    formsAt(facCode, service){
+      const out = [];
+      for (const form of FORM_CATALOG) {
+        if (form.treatment !== service) continue;
+        const sharedWith = (form.shared_with && form.shared_with.length) ? form.shared_with : null;
+        const offeredHere = sharedWith ? sharedWith.includes(facCode) : (form.facility === facCode);
+        if (offeredHere) out.push(form);
+      }
+      return out;
+    },
+    /* Toggle handler for the matrix checkbox: on flip ON, default every form in
+       (fac, service) to true; on flip OFF, clear them. Keeps form-access in
+       sync with the matrix without separate book-keeping. */
+    onTreatmentToggle(facCode, service){
+      const isOn = !!this.access[facCode][service];
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = isOn;
+      }
+    },
+    toggleAllForms(facCode, service, value){
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = value;
+      }
+    },
     cancel(){ this.$router.push('/admin'); },
     sendInvite(){
       this.submitAttempted = true;
@@ -7004,6 +7144,7 @@ const OnboardCustomerPage = {
                 <td v-for="s in services" :key="s" class="px-4 py-3.5 text-center">
                   <input v-if="canCheck[fac.code][s]" type="checkbox"
                          v-model="access[fac.code][s]"
+                         @change="onTreatmentToggle(fac.code, s)"
                          :aria-label="s + ' at ' + fac.name"
                          class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
                   <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
@@ -7011,6 +7152,73 @@ const OnboardCustomerPage = {
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- Form access card: per-form picker, only for ticked (facility, treatment) cells -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="file-check-2" :size="14" cls="text-slate-500"/> Form access
+          <span class="ml-auto text-sm text-slate-500 font-normal">
+            <span v-if="formGroups.length === 0">Tick a treatment above to grant forms.</span>
+            <span v-else>{{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted</span>
+          </span>
+        </header>
+        <p class="px-5 pt-4 text-sm text-slate-500">
+          The customer will only see the forms ticked here. By default every form under a ticked treatment is granted &mdash; untick to restrict access to specific forms.
+        </p>
+
+        <div v-if="formGroups.length === 0" class="px-5 pt-3 pb-6 text-sm text-slate-500">
+          No treatments ticked yet. Use the matrix above to grant a facility &amp; treatment, then come back to choose forms.
+        </div>
+
+        <div v-else class="px-5 pt-3 pb-5 space-y-5">
+          <div v-for="g in formGroups" :key="g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
+            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+              <span class="text-sm font-medium text-navy-900">{{ g.fac.name }}, {{ g.fac.state }}</span>
+              <span class="text-xs text-slate-500">{{ g.fac.code }}</span>
+            </div>
+            <div class="divide-y divide-slate-200">
+              <div v-for="t in g.treatments" :key="t.service" class="px-4 py-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[t.service] && treatmentStyles[t.service].dot]" aria-hidden="true"></span>
+                  <span class="text-sm font-medium text-slate-700">{{ treatmentLabels[t.service] || t.service }}</span>
+                  <span class="text-xs text-slate-500">{{ t.forms.length }} {{ t.forms.length === 1 ? 'form' : 'forms' }}</span>
+                  <span class="ml-auto inline-flex items-center gap-3 text-xs">
+                    <button type="button" @click="toggleAllForms(g.fac.code, t.service, true)" class="text-teal-600 hover:underline focus-ring rounded">Select all</button>
+                    <button type="button" @click="toggleAllForms(g.fac.code, t.service, false)" class="text-slate-600 hover:underline focus-ring rounded">Clear</button>
+                  </span>
+                </div>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <li v-for="form in t.forms" :key="form.key">
+                    <label :for="'fa-' + g.fac.code + '-' + form.key"
+                           class="flex items-center gap-3 p-2.5 rounded-md border border-slate-200 hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
+                      <input type="checkbox"
+                             :id="'fa-' + g.fac.code + '-' + form.key"
+                             v-model="formAccess[g.fac.code][form.key]"
+                             :aria-label="form.name + ' at ' + g.fac.name"
+                             class="w-4 h-4 rounded accent-teal-600 cursor-pointer shrink-0"/>
+                      <span class="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+                        <Icon :name="formIcons[form.key] || 'file-text'" :size="18"/>
+                      </span>
+                      <span class="flex-1 min-w-0">
+                        <span class="block text-sm font-medium text-navy-900 leading-tight">{{ form.name }}</span>
+                        <span class="block text-xs text-slate-500 mt-0.5 font-mono">{{ form.code }}</span>
+                      </span>
+                      <span v-if="form.shared_with && form.shared_with.length"
+                            class="shrink-0 text-[11px] uppercase tracking-wide text-slate-500 px-1.5 py-0.5 rounded bg-slate-100"
+                            title="This form is also offered at other facilities">Shared</span>
+                    </label>
+                  </li>
+                </ul>
+                <p v-if="submitAttempted && !t.forms.some(f => formAccess[g.fac.code][f.key])"
+                   role="alert" class="mt-2 text-xs text-red-600 inline-flex items-center gap-1.5">
+                  <Icon name="alert-circle" :size="12" aria-hidden="true"/>
+                  Pick at least one {{ treatmentLabels[t.service] || t.service }} form, or untick this treatment in the matrix above.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
