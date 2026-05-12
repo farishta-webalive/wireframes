@@ -8174,7 +8174,7 @@ app.use(router);
 app.mount('#app');
 window.__state = state;
 
-/* Re-render Lucide icons whenever the route changes */
+/* Re-render Lucide icons whenever a route changes */
 router.afterEach(() => {
   nextTick(() => window.lucide?.createIcons());
 });
