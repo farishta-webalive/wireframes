@@ -191,7 +191,7 @@ const { createRouter, createWebHashHistory, RouterView, RouterLink, useRoute, us
 const FACILITIES = [
   { code:'MER', name:'Merrifield',      state:'VIC', address:'1725 Mickleham Rd, Merrifield VIC 3064',     services:['Gamma','GMP'] },
   { code:'DAN', name:'Dandenong',       state:'VIC', address:'14 Williamson Rd, Dandenong South VIC 3175', services:['Gamma','ETO'] },
-  { code:'WPK', name:'Wetherill Park',  state:'NSW', address:'12 Cooper St, Wetherill Park NSW 2164',      services:['Gamma','ETO'] },
+  { code:'WPK', name:'Wetherill Park',  state:'NSW', address:'12 Cooper St, Wetherill Park NSW 2164',      services:['Gamma'] },
   { code:'NAR', name:'Narangba',        state:'QLD', address:'7 Potassium St, Narangba QLD 4504',          services:['Gamma','GMP'] },
 ];
 
@@ -230,8 +230,8 @@ const seedCustomers = [
     facilities:['NAR'],                  services:['Gamma'],              status:'Active',   created:'2025-06-03', orders:7  },
 ];
 
-// 13 forms across 4 facilities (FRM-0359 is shared MER + NAR -> 14 rows)
-// `shared_with`: facilities sharing the same canonical schema (Prompt 7). Empty = facility-exclusive.
+// Forms across 4 facilities. `shared_with` lets one canonical row serve multiple facilities
+// (e.g. FRM-0359 shared MER + NAR). Empty = facility-exclusive.
 const FORM_CATALOG = [
   { facility:'MER', key:'fresh-produce-dom',  code:'ICA-55',   name:'Fresh Produce Irradiation — Domestic', description:'Use this to send fresh produce for ICA-55 gamma irradiation within Australia.', treatment:'Gamma', shared_with:[] },
   { facility:'MER', key:'fresh-produce-exp',  code:'FRM-0118', name:'Fresh Produce Irradiation — Export',   description:'Use this to send fresh produce for gamma irradiation before export.', treatment:'Gamma', shared_with:[] },
@@ -243,14 +243,13 @@ const FORM_CATALOG = [
   { facility:'DAN', key:'irradiation',        code:'FRM-0091', name:'Irradiation Treatment',                description:'Use this for general goods needing gamma irradiation at Dandenong.', treatment:'Gamma' },
   { facility:'DAN', key:'eto-treatment',      code:'FRM-0092', name:'Ethylene Oxide Treatment',             description:'Use this for ethylene oxide sterilisation of medical and industrial product.', treatment:'ETO'   },
 
-  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for treatment requests at Wetherill Park — gamma or ethylene oxide.', treatment:'Gamma+ETO' },
+  { facility:'WPK', key:'treatment',          code:'FRM-0217', name:'Treatment',                            description:'Use this for gamma irradiation treatment requests at Wetherill Park.', treatment:'Gamma' },
   { facility:'WPK', key:'bee-equipment',      code:'FRM-0038', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Wetherill Park.', treatment:'Gamma' },
 
   { facility:'NAR', key:'fresh-produce',      code:'FRM-0202', name:'Fresh Produce Irradiation',            description:'Use this to send fresh produce for gamma irradiation at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'treatment',          code:'FRM-0203', name:'Treatment',                            description:'Use this for general goods needing gamma irradiation at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'bee-equipment',      code:'FRM-0240', name:'Bee Equipment',                        description:'Use this to send beekeeping equipment for gamma treatment at Narangba.', treatment:'Gamma' },
   { facility:'NAR', key:'blood-serum',        code:'FRM-0241', name:'Blood Serum',                          description:'Use this to send bovine or other animal blood serum for gamma sterilisation.', treatment:'Gamma' },
-  { facility:'NAR', key:'herbal-medicine',    code:'FRM-0359', name:'Packing and Labelling — Herbal Medicine', description:'Use this to send TGA-listed herbal medicine for GMP-certified packing and labelling.', treatment:'GMP', shared_with:['MER','NAR'] },
 ];
 
 /* Treatment chip styles — single source of truth used by TreatmentChip
@@ -271,6 +270,25 @@ const TREATMENT_LABELS = {
   'GMP':       'GMP-certified packing',
   'Gamma+ETO': 'Gamma + Ethylene Oxide',
 };
+
+/* Per-form icon, keyed by FORM_CATALOG.key. Re-uses lucide names already loaded
+   for the treatment-option tiles (radiation / flask-conical) so the form-picker
+   tile and the treatment tile share visual language. Carries forward the old
+   digital-asset-kit logic: bee-equipment → honeycomb (hexagon), fresh produce
+   → leaf. Fallback is a generic doc icon for any future form key. */
+const FORM_ICONS = {
+  'bee-equipment':     'hexagon',         // honeycomb-style — MER/DAN/WPK/NAR
+  'fresh-produce':     'leaf',            // NAR
+  'fresh-produce-dom': 'leaf',            // MER (domestic)
+  'fresh-produce-exp': 'leaf',            // MER (export)
+  'rfi-general':       'clipboard-list',  // MER — generic Request for Irradiation
+  'irradiation':       'radiation',       // DAN — matches Gamma treatment tile
+  'treatment':         'radiation',       // WPK + NAR — matches Gamma treatment tile
+  'eto-treatment':     'flask-conical',   // DAN — matches ETO treatment tile
+  'herbal-medicine':   'sprout',          // MER + NAR — herbal/TGA-listed
+  'blood-serum':       'droplet',         // NAR — animal serum
+};
+function formIconName(key){ return FORM_ICONS[key] || 'file-text'; }
 
 /* BC sync chip styles */
 const BC_SYNC_STYLES = {
@@ -596,6 +614,7 @@ function commonCustomerDetails() {
       title:'About You',
       subtitle:'Pre-filled from your profile. Update in Settings → Profile.',
       prefill:true,
+      grid:2,
       fields:[
         { key:'company', label:'Company name',   type:'text',  prefill:'company' },
         { key:'abn',     label:'ABN',            type:'text',  prefill:'abn'     },
@@ -609,8 +628,9 @@ function commonCustomerDetails() {
       id:'site-address',
       title:'Site Address',
       subtitle:'Where the goods are dispatched from.',
+      grid:2,
       fields:[
-        { key:'siteStreet',   label:'Street address', type:'text', required:true, placeholder:'e.g. 14 Industrial Dr' },
+        { key:'siteStreet',   label:'Street address', type:'text', required:true, placeholder:'e.g. 14 Industrial Dr', span:2 },
         { key:'siteSuburb',   label:'Suburb',         type:'text', required:true },
         { key:'siteState',    label:'State',          type:'select', required:true, options:['ACT','NSW','NT','QLD','SA','TAS','VIC','WA'] },
         { key:'sitePostcode', label:'Postcode',       type:'text', required:true, placeholder:'e.g. 3175' },
@@ -621,13 +641,13 @@ function commonCustomerDetails() {
 
 function commonConsignment(extra = []) {
   return {
-    id:'consignment', title:'Consignment Details',
+    id:'consignment', title:'Consignment Details', grid:2,
     fields:[
       { key:'po',            label:'Purchase order #', type:'text', required:true, placeholder:'PO-XXXXX' },
       { key:'deliveryDate',  label:'Expected delivery date', type:'date', required:true },
       { key:'consignor',     label:'Consignor',  type:'select', required:true, source:'consignors' },
       { key:'consignee',     label:'Consignee',  type:'select', required:true, source:'consignees' },
-      { key:'description',   label:'Description of goods', type:'textarea', required:true, rows:3 },
+      { key:'description',   label:'Description of goods', type:'textarea', required:true, rows:3, span:2 },
       { key:'palletCount',   label:'Pallet count',   type:'number', required:true, min:1 },
       { key:'totalWeightKg', label:'Total weight (kg)', type:'number', required:true, min:0 },
       ...extra,
@@ -651,12 +671,12 @@ function commonDeclaration() {
 
 /* Specific treatment / conditional sections */
 const gammaParamsStandard = {
-  id:'params', title:'Gamma Treatment Parameters',
+  id:'params', title:'Gamma Treatment Parameters', grid:2,
   fields:[
     { key:'doseKGy',   label:'Target dose (kGy)', type:'number', step:0.1, required:true, min:0 },
-    { key:'treatType', label:'Treatment type', type:'radio', required:true, options:['Routine','Validation','Unvalidated'] },
-    { key:'rpi',       label:'RPI number(s)', type:'text', placeholder:'RPI-XXXX, RPI-YYYY' },
-    { key:'iso11137',  label:'ISO 11137 compliance required', type:'checkbox', options:['Dose mapping','Bioburden testing','Dosimetry'] },
+    { key:'treatType', label:'Treatment type', type:'radio', required:true, inline:true, options:['Routine','Validation','Unvalidated'] },
+    { key:'rpi',       label:'RPI number(s)', type:'text', placeholder:'RPI-XXXX, RPI-YYYY', span:2 },
+    { key:'iso11137',  label:'ISO 11137 compliance required', type:'checkbox', span:2, options:['Dose mapping','Bioburden testing','Dosimetry'] },
   ]
 };
 const etoParams = {
@@ -681,7 +701,7 @@ const conditionalSections = {
   ]
 };
 const uploads = (required=['MSDS']) => ({
-  id:'uploads', title:'File Uploads',
+  id:'uploads', title:'File Uploads', grid:2,
   fields:[
     { key:'msds',        label:'SDS / MSDS',        type:'file-upload', accept:'.pdf,.doc,.docx', required: required.includes('MSDS') },
     { key:'importPermit',label:'Import permit',     type:'file-upload', accept:'.pdf' },
@@ -750,7 +770,7 @@ function buildSchemas() {
   reg('MER','fresh-produce-dom','Fresh Produce Irradiation — Domestic (ICA-55)','Gamma',
     [
       // 1. Request Details
-      { id:'request', title:'Request Details', prefill:true,
+      { id:'request', title:'Request Details', prefill:true, grid:2,
         subtitle:'Pre-filled from your profile. Update in Settings → Profile.',
         fields:[
           { key:'company_name', label:'Company Name', type:'text',  required:true, prefill:'company' },
@@ -760,7 +780,7 @@ function buildSchemas() {
         ]
       },
       // 2. Order Details
-      { id:'order', title:'Order Details',
+      { id:'order', title:'Order Details', grid:2,
         subtitle:'Pallet Spaces and Cheps are calculated automatically from your Treatment Details.',
         fields:[
           { key:'po_number',             label:'P.O. (if applicable)', type:'text', placeholder:'P.O. (if applicable)' },
@@ -770,13 +790,13 @@ function buildSchemas() {
         ]
       },
       // 3. Plant Health Certificate
-      { id:'phc', title:'Plant Health Certificate',
+      { id:'phc', title:'Plant Health Certificate', grid:2,
         fields:[
           { key:'consignor_sender',  label:'Consignor/Sender',   type:'searchable-dropdown', source:'consignors', required:true, placeholder:'Consignor/Sender' },
           { key:'consignor_address', label:'Consignor Address',  type:'google-address',      required:true, placeholder:'Consignor Address' },
           { key:'consignee_receiver',label:'Consignee/Receiver', type:'searchable-dropdown', source:'consignees', required:true, placeholder:'Consignee/Receiver' },
           { key:'consignee_address', label:'Consignee Address',  type:'google-address',      required:true, placeholder:'Consignee Address' },
-          { key:'ica55_date_code',   label:'ICA-55 Date Code Label', type:'text', required:true, placeholder:'ICA-55 Date Code Label' },
+          { key:'ica55_date_code',   label:'ICA-55 Date Code Label', type:'text', required:true, placeholder:'ICA-55 Date Code Label', span:2 },
         ]
       },
       // 4. Treatment Details — Market + nested pallet-space repeater
@@ -828,22 +848,22 @@ function buildSchemas() {
         }
       },
       // 5. Collection From Steritech
-      { id:'collection', title:'Collection From Steritech',
+      { id:'collection', title:'Collection From Steritech', grid:2,
         fields:[
-          { key:'steritech_to_book_transport', label:'Steritech to book Transport?', type:'radio', required:true, options:['Yes','No'] },
+          { key:'steritech_to_book_transport', label:'Steritech to book Transport?', type:'radio', required:true, inline:true, options:['Yes','No'], default:'Yes', span:2 },
           { key:'collection_address', label:'Address', type:'google-address',
             showIf:{ key:'steritech_to_book_transport', equals:['Yes'] },
-            requiredWhenVisible:true,
+            requiredWhenVisible:true, span:2,
             placeholder:'Search' },
           { key:'expected_delivery_date', label:'Expected Delivery Date', type:'date',
             showIf:{ key:'steritech_to_book_transport', equals:['Yes'] },
-            requiredWhenVisible:true },
+            requiredWhenVisible:true, tooltip:'Date the consignment is expected to be delivered.' },
           { key:'charge', label:'Charge', type:'text',
             showIf:{ key:'steritech_to_book_transport', equals:['Yes'] },
-            placeholder:'STERITECH' },
+            placeholder:'STERITECH', tooltip:'Default charge code.' },
           { key:'dispatch_address', label:'Address', type:'google-address',
             showIf:{ key:'steritech_to_book_transport', equals:['No'] },
-            requiredWhenVisible:true,
+            requiredWhenVisible:true, span:2,
             placeholder:'Search' },
           { key:'expected_dispatch_date', label:'Expected Dispatch Date', type:'date',
             showIf:{ key:'steritech_to_book_transport', equals:['No'] },
@@ -852,7 +872,7 @@ function buildSchemas() {
             showIf:{ key:'steritech_to_book_transport', equals:['No'] },
             requiredWhenVisible:true,
             placeholder:'Third Party Truck Company Name' },
-          { key:'documents', label:'Upload Your Documents', type:'file-multi',
+          { key:'documents', label:'Upload Your Documents', type:'file-multi', span:2,
             help:'POD / Delivery Docket / Drop transfer, etc.',
             accept:'.png,.jpg,.jpeg,.pdf', acceptLabel:'PNG, JPG or PDF' },
         ]
@@ -877,29 +897,92 @@ function buildSchemas() {
       declaration: { type:'checkbox' },
     });
   reg('MER','fresh-produce-exp','Fresh Produce Irradiation — Export','Gamma',
-    [ commonCustomerDetails(),
-      commonConsignment([{ key:'commodity', label:'Commodity', type:'select', required:true, source:'commodities' }]),
-      { id:'export', title:'Export Parameters',
+    [
+      // 1. Request Details (2-col grid)
+      { id:'request', title:'Request Details', prefill:true, grid:2,
         fields:[
-          { key:'destCountry', label:'Destination country', type:'select', options:['USA','China','Japan','NZ','Singapore','UAE','UK'], required:true },
-          { key:'protocol',    label:'Phytosanitary protocol', type:'text', placeholder:'USDA T105-a-1', required:true },
-          { key:'minDose',     label:'Minimum dose (kGy)', type:'number', step:0.01, required:true },
+          { key:'company_name', label:'Company Name', type:'text',  required:true, prefill:'company' },
+          { key:'contact_name', label:'Contact Name', type:'text',  required:true, prefill:'contact' },
+          { key:'mobile',       label:'Mobile',       type:'phone', required:true, prefill:'phone'   },
+          { key:'email',        label:'Email',        type:'email', required:true, prefill:'email'   },
         ]
       },
-      gammaParamsStandard,
-      conditionalSections,
-      uploads(['MSDS']),
-      commonDeclaration(),
-    ]);
+      // 2. Order Details (2-col grid, ETA spans left col only)
+      { id:'order', title:'Order Details', grid:2,
+        fields:[
+          { key:'po_number',         label:'P.O (if applicable)',    type:'text',   placeholder:'P.O (if applicable)' },
+          { key:'rfp',               label:'RFP',                   type:'text',   placeholder:'RFP' },
+          { key:'freight_forwarder', label:'Freight Forwarder',     type:'text',   required:true },
+          { key:'number_of_pallets', label:'Number of Pallets',     type:'number', required:true, min:0, placeholder:'0' },
+          { key:'eta_to_steritech_date', label:'ETA to Steritech - Date', type:'date', required:true },
+        ]
+      },
+      // 3. Treatment Details — Market select + commodity repeater
+      { id:'treatment', title:'Treatment Details',
+        fields:[
+          { key:'market', label:'Market', type:'select', required:true, placeholder:'Select',
+            options:[
+              'Indonesia 150Gy',
+              'Lebanon 100Gy',
+              'New Zealand 150Gy',
+              'New Zealand 400Gy',
+              'Vietnam 150Gy',
+              'Vietnam 200Gy',
+              'Vietnam 400Gy',
+            ] },
+        ],
+        repeater:{
+          key:'commodities', minRows:1,
+          seed:[{ commodity:'', grower_name:'', no_of_cartons:null, no_of_spaces:null }],
+          columns:[
+            { key:'commodity',     label:'Commodity',      type:'text', required:true, placeholder:'Commodity', w:'flex-1' },
+            { key:'grower_name',   label:'Grower Name',    type:'text', required:true, w:'flex-1' },
+            { key:'no_of_cartons', label:'No. of Cartons', type:'number', required:true, w:'w-32' },
+            { key:'no_of_spaces',  label:'No. of Spaces',  type:'number', required:true, w:'w-32' },
+          ],
+          addLabel:'Add Another',
+        }
+      },
+      // 4. Collection From Steritech (2-col grid, Dispatch Date left only, Upload full width)
+      { id:'collection', title:'Collection From Steritech', grid:2,
+        fields:[
+          { key:'truck_company',  label:'Truck Company',  type:'text',   required:true },
+          { key:'freight_method', label:'Freight Method',  type:'select', required:true, placeholder:'Select',
+            options:['Air','Sea'] },
+          { key:'dispatch_date',  label:'Dispatch Date',  type:'date',   required:true },
+          { key:'documents',      label:'Upload Your Documents', type:'file-multi', span:2,
+            help:'POD / Delivery docket / Chep transfer, etc...',
+            accept:'.png,.jpg,.jpeg,.pdf', acceptLabel:'PNG, JPG or PDF' },
+        ]
+      },
+      // 5. Notes
+      { id:'notes', title:'Notes',
+        fields:[
+          { key:'notes', label:'Notes', type:'textarea', rows:4, maxLength:250, charCounter:true, placeholder:'Write text here ...' },
+        ]
+      },
+      // 6. Declaration
+      { id:'declaration', title:'Declaration',
+        legal:'By submitting this Request for Irradiation, I authorise the irradiation of this consignment and accept the responsibilities and conditions specified in Steritech\u2019s Agreement for Fresh Produce Irradiation Processing.',
+        fields:[
+          { key:'signed', label:'I agree to the declaration above.', type:'signature', required:true },
+        ]
+      },
+    ],
+    {
+      layout:      { stepper:false, single_scroll:true, wide:true },
+      errors:      { banner_mode:'inline_only' },
+      declaration: { type:'checkbox' },
+    });
   reg('MER','bee-equipment','Bee Equipment Irradiation Request','Gamma', [
-    { id:'customer', title:'Request Details', prefill:true,
+    { id:'customer', title:'Request Details', prefill:true, grid:2,
       fields:[
         { key:'company',      label:'Company Name',  type:'text',  required:true, prefill:'company' },
         { key:'contact',      label:'Contact Name',  type:'text',  required:true, prefill:'contact' },
         { key:'mobile',       label:'Mobile',        type:'phone', required:true, prefill:'phone' },
         { key:'email',        label:'Email',         type:'email', required:true, prefill:'email',
           help:'We will send an invoice to this address.' },
-        { key:'deliveryDate', label:'Delivery Date', type:'date',  required:true },
+        { key:'deliveryDate', label:'Delivery Date', type:'date',  required:true, span:2 },
       ]
     },
     { id:'pricing', title:'Pricing',
@@ -929,16 +1012,8 @@ function buildSchemas() {
         ]
       }
     },
-    { id:'terms', title:'Terms of Treatment',
-      legal:'1. Hives must not contain any Honey, Bees, Hive Beetle, Larvae, or equipment.\n2. Hives and pallets must be completely sealed, wrapped with plastic top and bottom. (see examples on opposite page)\n3. Treated Hives must be collected within 14 days of invoice.\n4. Steritech will refuse the delivery of any pallets containing live bees.',
-      fields:[]
-    },
-    { id:'fees', title:'Clean Up & Storage Fees',
-      legal:'Honey leakage in Warehouse or Irradiation chamber — $199.50 (min charge)\nBees/Hive Beetle/Lave present in the pallet or escaping from it — $172.20 (min charge)\nStorage begining on the 7th day after notification of completion — $55.65/pallet per week\nOverweight pallet (maximum weight 670kg) — $567',
-      fields:[]
-    },
     { id:'declaration', title:'Declaration',
-      legal:'I hereby authorise Steritech Pty Ltd to arrange the treatment of the above listed goods by Irradiation. I agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods. I understand and agree to the Terms of Treatment, including collection and Clean Up & Storage Fees as set out above.',
+      legal:'I hereby authorise Steritech Pty Ltd to arrange the treatment of the above listed goods by Irradiation. I agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods.',
       fields:[
         { key:'declSig',   label:'Signature', type:'signature', required:true },
         { key:'declName',  label:'Full name', type:'text',      required:true, prefill:'contact' },
@@ -947,39 +1022,39 @@ function buildSchemas() {
     },
   ]);
   reg('MER','rfi-general','Request for Irradiation (RFI)','Gamma', [
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'company',       label:'Company Name',    type:'text',  required:true, prefill:'company' },
         { key:'contact',       label:'Contact Name',    type:'text',  required:true, prefill:'contact' },
         { key:'contactNumber', label:'Contact Number',  type:'phone', required:true, prefill:'phone' },
         { key:'email',         label:'Email',           type:'email', required:true, prefill:'email' },
-        { key:'address',       label:'Address',         type:'text',  required:true },
+        { key:'address',       label:'Address',         type:'text',  required:true, span:2 },
       ]
     },
-    { id:'consignment', title:'Consignment Details',
+    { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
         { key:'poNumber',     label:'P.O Number',                         type:'text' },
         { key:'deliveryDate', label:'Delivery Date Request',              type:'date' },
-        { key:'goodsDesc',    label:'Quantity and Description of Goods',  type:'textarea', rows:5,
+        { key:'goodsDesc',    label:'Quantity and Description of Goods',  type:'textarea', rows:5, span:2,
           help:'Include dimensions and weight of each carton/pallet. Include expected delivery date.' },
       ]
     },
-    { id:'quarantine', title:'Quarantine Goods (Biosecurity Directed)',
+    { id:'quarantine', title:'Quarantine Goods (Biosecurity Directed)', grid:2,
       fields:[
-        { key:'biosecurity25',    label:'Biosecurity 25kGy',   type:'radio', options:['Yes','No'] },
-        { key:'biosecurity50',    label:'Biosecurity 50kGy',   type:'radio', options:['Yes','No'] },
+        { key:'biosecurity25',    label:'Biosecurity 25kGy',   type:'radio', options:['Yes','No'], inline:true },
+        { key:'biosecurity50',    label:'Biosecurity 50kGy',   type:'radio', options:['Yes','No'], inline:true },
         { key:'importConditions', label:'Are there conditions on the Import Permit that Steritech needs to be aware of? If yes, attach Import Permit',
-          type:'radio', options:['Yes','No'] },
+          type:'radio', options:['Yes','No'], inline:true, span:2 },
         { key:'affRef',          label:'AFF Quarantine Direction Ref', type:'text' },
         { key:'brokerBondRef',   label:'Broker\'s Client Bond Ref',    type:'text' },
-        { key:'containerNumber', label:'Container Number',             type:'text' },
+        { key:'containerNumber', label:'Container Number',             type:'text', span:2 },
       ]
     },
-    { id:'validated', title:'Validated Goods',
+    { id:'validated', title:'Validated Goods', grid:2,
       fields:[
-        { key:'validatedProcess', label:'Validated Process',          type:'radio', options:['Yes','No'] },
+        { key:'validatedProcess', label:'Validated Process',          type:'radio', options:['Yes','No'], inline:true },
         { key:'tgaLicense',       label:'TGA/APVMA License Number',   type:'text' },
-        { key:'batchNumbers',     label:'Batch Number/s',             type:'textarea', rows:3 },
+        { key:'batchNumbers',     label:'Batch Number/s',             type:'textarea', rows:3, span:2 },
         { key:'doseRange',        label:'Product Min-Max Dose Range', type:'text', placeholder:'kGy' },
         { key:'rpi',              label:'RPI',                        type:'text' },
       ]
@@ -993,12 +1068,8 @@ function buildSchemas() {
         { key:'targetDose',     label:'Target Dose Range',  type:'text' },
       ]
     },
-    { id:'requirements', title:'Steritech Requirements',
-      legal:'Pallet Dimensions — The maximum allowable dimensions of a pallet are 240cm x 120cm x 120cm (Height x Width x Length). Extra charges may apply if pallet dimensions exceed these limits. Please contact Steritech if you have unusual or large sized items.\n\nPallet Weight — The maximum allowable weight of a pallet is 1000kg. Extra charges may apply if pallets exceed this limit.\n\nProduct Identification — Pallets must be labelled clearly with identification that can connect them to the customer name listed on this form and either the purchase order number or the quarantine direction reference listed on this form.\n\nPallet Security — Products that contain any liquid, including honey, need to be completely sealed to prevent leakage.\n\nTransport — Please inform all transport/courier drivers that goods will only be released if a valid purchase order number or a Steritech Order number or invoice number can be provided on pickup.',
-      fields:[]
-    },
     { id:'authorisation', title:'Authorisation',
-      agreeText:'I authorise Steritech Pty Ltd to irradiate the goods described in this request, and agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods.',
+      legal:'I authorise Steritech Pty Ltd to irradiate the goods described in this request, and agree not to hold Steritech Pty Ltd responsible for any damage which may be caused during treatment or carriage of the goods.',
       fields:[
         { key:'authSig',  label:'Signature', type:'signature', required:true },
         { key:'authName', label:'Full name', type:'text',      required:true, prefill:'contact' },
@@ -1007,16 +1078,16 @@ function buildSchemas() {
     },
   ]);
   reg('MER','herbal-medicine','Request for Packing and Labelling Form — Non-Sterile Herbal Medicine Product','GMP', [
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'company',       label:'Company Name',   type:'text',  required:true, prefill:'company' },
         { key:'contact',       label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
         { key:'contactNumber', label:'Contact Number', type:'phone', required:true, prefill:'phone' },
         { key:'email',         label:'Email',          type:'email', required:true, prefill:'email' },
-        { key:'address',       label:'Address',        type:'text',  required:true },
+        { key:'address',       label:'Address',        type:'text',  required:true, span:2 },
       ]
     },
-    { id:'consignment', title:'Consignment Details',
+    { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
         { key:'poNumber',      label:'P.O Number',              type:'text', help:'if applicable' },
         { key:'etaDate',       label:'ETA to Steritech – Date', type:'date', help:'if not already' },
@@ -1024,18 +1095,18 @@ function buildSchemas() {
         { key:'flowerBatchNo', label:'Flower Batch Number',     type:'text' },
         { key:'strainName',    label:'Strain Name',             type:'text' },
         { key:'growerCountry', label:'Grower Country',          type:'text' },
-        { key:'totalWeight',   label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0,
+        { key:'totalWeight',   label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0, span:2,
           help:'Enter to 3 decimal places' },
         { key:'bulkTested', label:'Bulk batch (TGO 93) tested at GMP approved lab prior to Steritech?',
-          type:'checkbox', options:[
+          type:'checkbox', span:2, options:[
             'No – Steritech to send bulk sample to GMP-approved, Steritech-evaluated onshore lab for testing.',
             'Yes – Test lab COA(s) attached.',
           ] },
         { key:'irradiatedOther', label:'Has the Flower been irradiated by a party other than Steritech?',
-          type:'checkbox', options:['No', 'Yes – treatment certificate attached.'] },
+          type:'checkbox', span:2, options:['No', 'Yes – treatment certificate attached.'] },
         { key:'odcImport', label:'Has the Flower been imported under Steritech\'s ODC import license?',
-          type:'radio', options:['No','Yes'] },
-        { key:'importPermitNo', label:'Import permit number', type:'text',
+          type:'radio', inline:true, span:2, options:['No','Yes'] },
+        { key:'importPermitNo', label:'Import permit number', type:'text', span:2,
           showIf:{ key:'odcImport', equals:['Yes'] } },
       ]
     },
@@ -1090,17 +1161,17 @@ function buildSchemas() {
         { key:'secondaryPkgReq', label:'Secondary packaging required', type:'radio', options:['No','Yes'] },
       ]
     },
-    { id:'weightLabel', title:'Weight and Label Details',
+    { id:'weightLabel', title:'Weight and Label Details', grid:2,
       fields:[
         { key:'targetWeight',  label:'Primary packed unit net target weight (g)', type:'text', required:true },
         { key:'productLabel',  label:'Product name as per label',                 type:'text', required:true },
-        { key:'labelPotency',  label:'Label claim potency', type:'radio',
+        { key:'labelPotency',  label:'Label claim potency', type:'radio', span:2,
           options:['THC active only (specify percentage)','CBD active only (specify percentage)','Balanced (specify percentage)','Other (please specify active)'] },
         { key:'thcPct',  label:'THC %', type:'number', step:0.01, min:0,
           showIf:{ key:'labelPotency', equals:['THC active only (specify percentage)','Balanced (specify percentage)'] } },
         { key:'cbdPct',  label:'CBD %', type:'number', step:0.01, min:0,
           showIf:{ key:'labelPotency', equals:['CBD active only (specify percentage)','Balanced (specify percentage)'] } },
-        { key:'otherPct', label:'Specify active (%)', type:'text',
+        { key:'otherPct', label:'Specify active (%)', type:'text', span:2,
           showIf:{ key:'labelPotency', equals:['Other (please specify active)'] } },
       ],
       note:'NOTE: Steritech will send bulk samples for cannabinoid testing prior to packing commencement.'
@@ -1141,14 +1212,14 @@ function buildSchemas() {
 
   // DAN — Bee Equipment (Dandenong: "Request for Irradiation of Bee Equipment", 15 kGy)
   reg('DAN','bee-equipment','Request for Irradiation of Bee Equipment','Gamma', [
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'date',            label:'Date',            type:'date',  required:true, prefillToday:true },
         { key:'contact',         label:'Contact',         type:'text',  required:true, prefill:'name' },
         { key:'phone',           label:'Phone no',        type:'phone', required:true, prefill:'phone' },
         { key:'business_name',   label:'Business Name',   type:'text',  required:true, prefill:'company' },
-        { key:'address_line_1',  label:'Address',         type:'text',  required:true },
-        { key:'email',           label:'Email',           type:'email', required:true, prefill:'email' },
+        { key:'address_line_1',  label:'Address',         type:'text',  required:true, span:2 },
+        { key:'email',           label:'Email',           type:'email', required:true, prefill:'email', span:2 },
       ]
     },
     { id:'checklist', title:'Pre-treatment Checklist',
@@ -1192,24 +1263,24 @@ function buildSchemas() {
 
   // DAN — Irradiation Treatment (registered under both 'irradiation' and 'irradiation-treatment' aliases)
   const danIrradSections = [
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'date',             label:'Date',                 type:'date',  required:true, prefillToday:true },
         { key:'business_name',    label:'Business (User) Name', type:'text',  required:true, prefill:'company' },
         { key:'contact_name',     label:'Contact Name',         type:'text',  required:true, prefill:'name' },
-        { key:'business_address', label:'Business Address',     type:'text',  required:true },
+        { key:'business_address', label:'Business Address',     type:'text',  required:true, span:2 },
         { key:'phone',            label:'Phone Number',         type:'phone', required:true, prefill:'phone' },
         { key:'email',            label:'Email Address',        type:'email', required:true, prefill:'email' },
       ]
     },
-    { id:'consignment', title:'Consignment Details',
+    { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
-        { key:'description_of_goods', label:'Description of Goods', type:'textarea', required:true,
+        { key:'description_of_goods', label:'Description of Goods', type:'textarea', required:true, span:2,
           help:'Please provide a description of the product/s, e.g. medical devices, pharmaceutical, packaging, imported goods for Quarantine treatment, polymers for cross-linking, etc.' },
-        { key:'qty_heading',      label:'Quantity:',         type:'heading' },
+        { key:'qty_heading',      label:'Quantity:',         type:'heading', span:2 },
         { key:'quantity_cartons', label:'Carton',            type:'number', min:0 },
         { key:'quantity_pallets', label:'Pallets',           type:'number', min:0 },
-        { key:'purchase_order',   label:'Purchase Order No (if applicable)', type:'text' },
+        { key:'purchase_order',   label:'Purchase Order No (if applicable)', type:'text', span:2 },
       ]
     },
     { id:'treatment', title:'Treatment',
@@ -1233,22 +1304,22 @@ function buildSchemas() {
 
   // DAN — ETO Treatment (Dandenong: "Request for Ethylene Oxide Treatment")
   reg('DAN','eto-treatment','Request for Ethylene Oxide Treatment','ETO', [
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'date',             label:'Date',                 type:'date',  required:true, prefillToday:true },
         { key:'business_name',    label:'Business (User) Name', type:'text',  required:true, prefill:'company' },
         { key:'contact_name',     label:'Contact Name',         type:'text',  required:true, prefill:'contact' },
-        { key:'business_address', label:'Business Address',     type:'text',  required:true },
+        { key:'business_address', label:'Business Address',     type:'text',  required:true, span:2 },
         { key:'phone',            label:'Phone Number',         type:'phone', required:true, prefill:'phone' },
         { key:'email',            label:'Email Address',        type:'email', required:true, prefill:'email' },
       ]
     },
-    { id:'goods', title:'Description of Goods',
+    { id:'goods', title:'Description of Goods', grid:2,
       fields:[
         { key:'product_codes',   label:'Product code/s',       type:'text' },
         { key:'batch_numbers',   label:'Batch number/s',       type:'text' },
-        { key:'product_names',   label:'Product name/s',       type:'text' },
-        { key:'additional_desc', label:'Additional description', type:'textarea',
+        { key:'product_names',   label:'Product name/s',       type:'text', span:2 },
+        { key:'additional_desc', label:'Additional description', type:'textarea', span:2,
           help:'e.g. medical devices, pharmaceutical, packaging, imported goods for Quarantine treatment, etc.' },
       ]
     },
@@ -1260,12 +1331,12 @@ function buildSchemas() {
           showIf:{ key:'storage_customer', equals:['Yes'] } },
       ]
     },
-    { id:'consignment', title:'Consignment Details',
+    { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
-        { key:'qty_heading',  label:'Quantity:',                    type:'heading' },
+        { key:'qty_heading',  label:'Quantity:',                    type:'heading', span:2 },
         { key:'qty_cartons',  label:'cartons',                      type:'number', min:0 },
         { key:'qty_pallets',  label:'pallets',                      type:'number', min:0 },
-        { key:'purchase_order', label:'Purchase Order No (if applicable)', type:'text' },
+        { key:'purchase_order', label:'Purchase Order No (if applicable)', type:'text', span:2 },
       ]
     },
     { id:'us_market', title:'US Market',
@@ -1297,9 +1368,9 @@ function buildSchemas() {
   ]);
 
   // WPK
-  reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma+ETO', [
+  const wpkTreatmentSections = [
     // 1. Customer Details
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'business_name', label:'Business Name', type:'text',  required:true, prefill:'company' },
         { key:'contact_name',  label:'Contact Name',  type:'text',  required:true, prefill:'contact' },
@@ -1324,9 +1395,9 @@ function buildSchemas() {
     },
 
     // 3. Goods Information
-    { id:'goods_info', title:'Goods Information',
+    { id:'goods_info', title:'Goods Information', grid:2,
       fields:[
-        { key:'hazardous_material', label:'Does your goods contain hazardous material?', type:'radio', required:true,
+        { key:'hazardous_material', label:'Does your goods contain hazardous material?', type:'radio', required:true, inline:true, span:2,
           options:['No','Yes – Please supply SDS'] },
         { key:'total_outers',           label:'Total Quantity of Outers',            type:'number', min:0 },
         { key:'total_pallets_delivered',label:'Total Quantity of Pallets Delivered', type:'number', min:0 },
@@ -1423,14 +1494,15 @@ function buildSchemas() {
         { key:'auth_signature', label:'Signature', type:'signature', required:true },
       ]
     },
-  ]);
+  ];
+  reg('WPK','treatment','Request for Treatment (FRM-0217)','Gamma', wpkTreatmentSections);
   reg('WPK','bee-equipment','Request for Irradiation of Bee Equipment (FRM-0038)','Gamma', [
     // 3. Customer Details
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'business_name',  label:'Business Name',  type:'text',  required:true, prefill:'company' },
         { key:'contact_person', label:'Contact Person', type:'text',  required:true, prefill:'contact' },
-        { key:'address',        label:'Address',        type:'text',  required:true },
+        { key:'address',        label:'Address',        type:'text',  required:true, span:2 },
         { key:'suburb',         label:'Suburb',         type:'text',  required:true },
         { key:'state',          label:'State',          type:'text',  required:true },
         { key:'postcode',       label:'Postcode',       type:'text',  required:true },
@@ -1497,42 +1569,42 @@ function buildSchemas() {
       gammaParamsStandard, conditionalSections, uploads(['MSDS']), commonDeclaration() ]);
   reg('NAR','treatment','QLD Request for Treatment (FRM-0203)','Gamma', [
     // 1. Customer Details
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'company_name',        label:'Company Name',                 type:'text',  required:true, prefill:'company' },
         { key:'contact_name',        label:'Contact Name',                 type:'text',  required:true, prefill:'contact' },
-        { key:'qld_customer_number', label:'Steritech QLD Customer Number',type:'text',
-          help:'6 Digit Number found on previous Invoice, COI, or Customer Agreement' },
         { key:'business_phone',      label:'Business Phone',               type:'phone', required:true, prefill:'phone' },
         { key:'mobile_phone',        label:'Mobile Phone',                 type:'phone' },
-        { key:'address',             label:'Address',                      type:'text',  required:true },
+        { key:'qld_customer_number', label:'Steritech QLD Customer Number',type:'text',
+          help:'6 Digit Number found on previous Invoice, COI, or Customer Agreement' },
         { key:'email',               label:'Email',                        type:'email', required:true, prefill:'email' },
+        { key:'address',             label:'Address',                      type:'text',  required:true, span:2 },
       ]
     },
     // 2. Consignment Details
-    { id:'consignment', title:'Consignment Details',
+    { id:'consignment', title:'Consignment Details', grid:3,
       fields:[
         { key:'po_reference',         label:'Purchase Order/Reference Number',     type:'text' },
         { key:'batch_number',         label:'Batch Number',                        type:'text' },
         { key:'reference_dose_range', label:'Reference Dosimeter Dose Range (3kGy)', type:'text', required:true,
           help:'Provided range must be >3kGy' },
-        { key:'quantity_description', label:'Quantity and Description of Goods',   type:'textarea', required:true, rows:4 },
+        { key:'quantity_description', label:'Quantity and Description of Goods',   type:'textarea', required:true, rows:4, span:3 },
       ]
     },
     // 3. Additional Information — Yes/No questions
-    { id:'additional_info', title:'Additional Information',
+    { id:'additional_info', title:'Additional Information', grid:2,
       subtitle:'Does this consignment:',
       fields:[
-        { key:'dangerous_goods',  label:'Contain dangerous goods?',  type:'radio', options:['Yes','No'], required:true,
+        { key:'dangerous_goods',  label:'Contain dangerous goods?',  type:'radio', options:['Yes','No'], required:true, inline:true, span:2,
           help:'If yes, please attach an MSDS' },
-        { key:'kept_frozen',      label:'Need to be kept frozen?',   type:'radio', options:['Yes','No'], required:true },
-        { key:'refrigerated',     label:'Need to be refrigerated?',  type:'radio', options:['Yes','No'], required:true },
-        { key:'fragile_goods',    label:'Contain fragile goods?',    type:'radio', options:['Yes','No'], required:true },
-        { key:'require_dry_ice',  label:'Require dry ice?',          type:'radio', options:['Yes','No'], required:true },
-        { key:'dry_ice_kg',       label:'If yes, quantity to be manufactured (KG)', type:'number', min:0,
+        { key:'kept_frozen',      label:'Need to be kept frozen?',   type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
+        { key:'refrigerated',     label:'Need to be refrigerated?',  type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
+        { key:'fragile_goods',    label:'Contain fragile goods?',    type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
+        { key:'require_dry_ice',  label:'Require dry ice?',          type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
+        { key:'dry_ice_kg',       label:'If yes, quantity to be manufactured (KG)', type:'number', min:0, span:2,
           showIf:{ key:'require_dry_ice', equals:['Yes'] } },
-        { key:'tga_apvma',        label:'Contain goods regulated by the TGA or APVMA?', type:'radio', options:['Yes','No'], required:true },
-        { key:'iso11137',         label:'Require processing compliant to ISO 11137',    type:'radio', options:['Yes','No'], required:true,
+        { key:'tga_apvma',        label:'Contain goods regulated by the TGA or APVMA?', type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
+        { key:'iso11137',         label:'Require processing compliant to ISO 11137',    type:'radio', options:['Yes','No'], required:true, inline:true, span:2,
           help:'If yes, please provide the below — ISO11137 TREATMENTS ONLY' },
         { key:'rpi_number',       label:'RPI Number', type:'text', required:true,
           showIf:{ key:'iso11137', equals:['Yes'] } },
@@ -1541,7 +1613,7 @@ function buildSchemas() {
       ]
     },
     // 4. Quarantine Goods
-    { id:'quarantine', title:'Quarantine Goods',
+    { id:'quarantine', title:'Quarantine Goods', grid:2,
       fields:[
         { key:'quarantine_reference', label:'Quarantine Reference Number', type:'text', required:true },
         { key:'container_number',     label:'Container Number',            type:'text' },
@@ -1558,24 +1630,24 @@ function buildSchemas() {
     },
   ]);
   reg('NAR','bee-equipment','Request for Treatment of Bee Equipment (FRM-0240)','Gamma', [
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'contact_name',   label:'Contact name',   type:'text',  required:true, prefill:'name' },
         { key:'company_name',   label:'Company name',   type:'text',  required:true, prefill:'company' },
         { key:'business_phone', label:'Business phone', type:'phone', required:true, prefill:'phone' },
         { key:'mobile_phone',   label:'Mobile phone',   type:'phone' },
         { key:'email',          label:'Email',          type:'email', required:true, prefill:'email' },
-        { key:'address',        label:'Address',        type:'text',  required:true },
+        { key:'address',        label:'Address',        type:'text',  required:true, span:2 },
       ]
     },
-    { id:'consignment', title:'Consignment Details',
+    { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
         { key:'pallet_supplied_by_steritech', label:'Pallet supplied by Steritech?',
-          type:'radio', options:['Yes','No'], required:true },
-        { key:'pallet_quantity', label:'Quantity of pallets required', type:'number', min:1,
+          type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
+        { key:'pallet_quantity', label:'Quantity of pallets required', type:'number', min:1, span:2,
           showIf:{ key:'pallet_supplied_by_steritech', equals:['Yes'] } },
-        { key:'delivery_date', label:'Delivery date', type:'date', required:true },
-        { key:'dose',          label:'Dose',          type:'radio', options:['10 kGy','15 kGy'], required:true },
+        { key:'dose',          label:'Dose',          type:'radio', options:['10 kGy','15 kGy'], required:true, inline:true, span:2 },
+        { key:'delivery_date', label:'Delivery date', type:'date', required:true, span:2 },
       ]
     },
     { id:'lineItems', title:'Line Items & Pricing',
@@ -1625,17 +1697,17 @@ function buildSchemas() {
   ]);
   reg('NAR','blood-serum','QLD Request for Treatment of Blood Serum (FRM-0241)','Gamma', [
     // 1. Customer Details
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'company_name',   label:'Company Name',   type:'text',  required:true, prefill:'company' },
         { key:'business_phone', label:'Business Phone', type:'phone', required:true, prefill:'phone' },
         { key:'mobile_phone',   label:'Mobile Phone',   type:'phone' },
         { key:'contact_name',   label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
-        { key:'email',          label:'Email',          type:'email', required:true, prefill:'email' },
+        { key:'email',          label:'Email',          type:'email', required:true, prefill:'email', span:2 },
       ]
     },
     // 2. Consignment Details (header fields + 6-line table)
-    { id:'consignment', title:'Consignment Details',
+    { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
         { key:'customer_po',          label:'Customer PO/Reference',                type:'text' },
         { key:'product_dose_range',   label:'Product DMin–DMax Dose Range (kGy)',   type:'text', required:true },
@@ -1671,18 +1743,18 @@ function buildSchemas() {
   ]);
   reg('NAR','herbal-medicine','Request for Packing and Labelling — Non-Sterile Herbal Medicine Product (FRM-0359)','GMP', [
     // 1. Customer Details
-    { id:'customer', title:'Customer Details', prefill:true,
+    { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'company_name',   label:'Company Name',   type:'text',  required:true, prefill:'company' },
         { key:'contact_name',   label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
         { key:'contact_number', label:'Contact Number', type:'phone', required:true, prefill:'phone' },
         { key:'email',          label:'Email',          type:'email', required:true, prefill:'email' },
-        { key:'address',        label:'Address',        type:'text',  required:true },
+        { key:'address',        label:'Address',        type:'text',  required:true, span:2 },
       ]
     },
 
     // 2. Consignment Details
-    { id:'consignment', title:'Consignment Details',
+    { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
         { key:'po_number',           label:'P.O Number',                 type:'text', help:'If applicable' },
         { key:'eta_date',            label:'ETA to Steritech – Date',    type:'date', help:'If not already' },
@@ -1690,21 +1762,21 @@ function buildSchemas() {
         { key:'flower_batch_number', label:'Flower Batch Number',        type:'text', required:true },
         { key:'strain_name',         label:'Strain Name',                type:'text', required:true },
         { key:'grower_country',      label:'Grower Country',             type:'text', required:true },
-        { key:'total_weight_kg',     label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0, required:true,
+        { key:'total_weight_kg',     label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0, required:true, span:2,
           help:'Enter to 3 decimal places' },
         { key:'tgo93_tested',        label:'Bulk batch (TGO 93) tested at GMP approved lab prior to Steritech?',
-          type:'radio', required:true,
+          type:'radio', required:true, span:2,
           options:[
             'No – Steritech to send bulk sample to GMP-approved, Steritech-evaluated onshore lab for testing',
             'Yes – Test lab COA(s) attached',
           ]
         },
         { key:'flower_irradiated',   label:'Has the Flower been irradiated by a party other than Steritech?',
-          type:'radio', required:true,
+          type:'radio', required:true, span:2,
           options:['No','Yes – treatment certificate attached'] },
         { key:'odc_imported',        label:"Has the Flower been imported under Steritech's ODC import license?",
-          type:'radio', required:true, options:['No','Yes'] },
-        { key:'import_permit_number',label:'Import permit number', type:'text', required:true,
+          type:'radio', required:true, inline:true, span:2, options:['No','Yes'] },
+        { key:'import_permit_number',label:'Import permit number', type:'text', required:true, span:2,
           showIf:{ key:'odc_imported', equals:['Yes'] } },
       ]
     },
@@ -1790,11 +1862,11 @@ function buildSchemas() {
     },
 
     // 6. Weight and Label Details
-    { id:'weight_label', title:'Weight and Label Details',
+    { id:'weight_label', title:'Weight and Label Details', grid:2,
       fields:[
         { key:'primary_unit_net_weight_g', label:'Primary packed unit net target weight (g)', type:'number', step:0.001, min:0, required:true },
         { key:'product_name_per_label',    label:'Product name as per label', type:'text', required:true },
-        { key:'label_claim_potency',       label:'Label claim potency', type:'radio', required:true,
+        { key:'label_claim_potency',       label:'Label claim potency', type:'radio', required:true, span:2,
           options:['THC active only','CBD active only','Balanced','Other (please specify active)'] },
         { key:'thc_percentage',     label:'THC active only — %', type:'number', step:0.01, min:0, max:100,
           showIf:{ key:'label_claim_potency', equals:['THC active only'] } },
@@ -3092,16 +3164,20 @@ const DashboardPage = {
     fac(){ return currentFacility(); },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
+    facilityOrders(){
+      return state.orders.filter(o => o.facility === state.profile.currentFacility);
+    },
     activeOrders(){
       // Active = anything not in a terminal state (Cancelled / Completed).
       const terminal = ['Cancelled','Completed'];
-      return state.orders.filter(o => !terminal.includes(o.status));
+      return this.facilityOrders.filter(o => !terminal.includes(o.status));
     },
     completedOrders(){
-      return state.orders.filter(o => o.status === 'Completed');
+      return this.facilityOrders.filter(o => o.status === 'Completed');
     },
     recentOrders(){
-      return [...state.orders].slice(0, 8);
+      return [...this.facilityOrders].slice(0, 8);
     },
     availableForms(){
       return FORM_CATALOG.filter(f => f.facility === state.profile.currentFacility);
@@ -3112,7 +3188,7 @@ const DashboardPage = {
     },
     stats(){
       return [
-        { label:'Total orders',     value: state.orders.length,           sub:'lifetime' },
+        { label:'Total orders',     value: this.facilityOrders.length,    sub:'lifetime' },
         { label:'Active right now', value: this.activeOrders.length,      sub:'in progress or awaiting collection' },
         { label:'Completed',        value: this.completedOrders.length,   sub:'lifetime' },
       ];
@@ -3238,6 +3314,9 @@ const DashboardPage = {
         <li v-if="!availableForms.length" class="px-5 sm:px-6 py-6 text-sm text-slate-500 text-center">No forms configured for this facility.</li>
         <li v-for="f in availableForms" :key="f.facility+f.key">
           <router-link :to="'/forms/'+f.facility+'/'+f.key" class="px-5 sm:px-6 py-4 flex items-center gap-4 hover:bg-slate-50 group">
+            <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+              <Icon :name="formIcons[f.key] || 'file-text'" :size="20"/>
+            </span>
             <div class="min-w-0 flex-1">
               <div class="text-base font-medium text-navy-900 leading-snug">{{ f.name }}</div>
               <div class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-600">
@@ -3284,12 +3363,12 @@ const StartRequestPage = {
     activeFacility(){ return FACILITIES.find(f => f.code === this.facility) || null; },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     treatmentOptions(){
       if (!this.activeFacility) return [];
       const set = new Set(this.activeFacility.services);
-      const order = ['Gamma','ETO','GMP','Gamma+ETO'];
-      const hasCombined = set.has('Gamma') && set.has('ETO');
-      return order.filter(t => set.has(t) || (t === 'Gamma+ETO' && hasCombined));
+      const order = ['Gamma','ETO','GMP'];
+      return order.filter(t => set.has(t));
     },
     matchingForms(){
       if (!this.facility || !this.treatment) return [];
@@ -3318,13 +3397,7 @@ const StartRequestPage = {
   watch:{
     facility(code){
       if (!code) return;
-      const opts = this.treatmentOptions;
-      if (opts.length === 1) {
-        this.treatment = opts[0];
-        this.advanceFromTreatment();
-      } else {
-        this.step = 2;
-      }
+      this.step = 2;
     },
   },
   mounted(){
@@ -3494,6 +3567,9 @@ const StartRequestPage = {
           <button @click="go(r)"
                   type="button"
                   class="w-full bg-white border border-slate-200 rounded-md p-4 text-left hover:border-slate-400 hover:bg-slate-50/40 transition-colors flex items-center gap-4 focus-ring">
+            <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+              <Icon :name="formIcons[r.key] || 'file-text'" :size="20"/>
+            </span>
             <span class="flex-1 min-w-0">
               <span class="block text-base font-semibold text-navy-900 leading-snug">{{ r.name }}</span>
               <span class="mt-1 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-sm text-slate-600">
@@ -3538,6 +3614,7 @@ const FormPickerPage = {
     isSingle(){ return this.myFacilities.length <= 1; },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     activeFacilityCode(){
       if (this.isSingle && this.myFacilities[0]) return this.myFacilities[0].code;
       return this.filter === 'ALL' ? null : this.filter;
@@ -3635,7 +3712,11 @@ const FormPickerPage = {
           <router-link :to="'/forms/'+g.code+'/'+r.key"
                        class="block bg-white border border-slate-200 rounded-md px-5 py-4 hover:border-slate-300 hover:bg-slate-50 focus-ring">
             <div class="flex items-start justify-between gap-4 flex-wrap">
-              <div class="min-w-0 flex-1">
+              <div class="min-w-0 flex-1 flex items-start gap-4">
+                <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md bg-slate-100 text-slate-700 mt-0.5" aria-hidden="true">
+                  <Icon :name="formIcons[r.key] || 'file-text'" :size="20"/>
+                </span>
+                <div class="min-w-0 flex-1">
                 <p class="text-base font-medium text-slate-900 leading-snug">{{ r.name }}</p>
                 <p v-if="r.description" class="mt-1 text-sm text-slate-600 leading-snug">{{ r.description }}</p>
                 <div class="mt-2 inline-flex items-center gap-2 text-xs text-slate-500 flex-wrap">
@@ -3649,6 +3730,7 @@ const FormPickerPage = {
                     <span aria-hidden="true">&middot;</span>
                     <span>Shared form</span>
                   </template>
+                </div>
                 </div>
               </div>
               <span class="text-sm text-slate-700 whitespace-nowrap shrink-0 mt-0.5">Start</span>
@@ -3881,6 +3963,7 @@ const FormRenderer = {
           if (f.type==='checkbox' && d[f.key]===undefined) d[f.key] = [];
           if (f.type==='file-multi' && d[f.key]===undefined) d[f.key] = [];
           if (f.prefill && d[f.key]===undefined) d[f.key] = pf(f.prefill);
+          if (f.default !== undefined && d[f.key]===undefined) d[f.key] = f.default;
         }
         if (sec.repeater) d[sec.repeater.key] = JSON.parse(JSON.stringify(sec.repeater.seed));
         if (sec.market) d[sec.market.key] = '';
@@ -4429,13 +4512,16 @@ const FormRenderer = {
               {{ sec.legal }}
             </div>
 
-            <div class="p-6 space-y-5">
+            <div :class="sec.grid === 3 ? 'p-6 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5' : sec.grid === 2 ? 'p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5' : 'p-6 space-y-5'">
               <!-- Regular fields -->
-              <div v-for="f in sec.fields || []" :key="f.key">
+              <div v-for="f in sec.fields || []" :key="f.key" :class="[sec.grid && f.span === 3 ? 'sm:col-span-3' : '', sec.grid && f.span === 2 ? 'sm:col-span-2' : '']">
                 <div v-if="visibleField(f) && !hiddenInDeclaration(sec, f)">
-                  <label v-if="f.label" :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
+                  <label v-if="f.label && !(f.type==='signature' && declarationOpts.type==='checkbox')" :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
                     {{ f.label }}
                     <span v-if="isFieldRequired(f)" class="text-red-600" aria-hidden="true">*</span>
+                    <span v-if="f.tooltip" :title="f.tooltip" :aria-label="f.tooltip" class="inline-flex items-center align-text-bottom ml-1 text-slate-400 cursor-help">
+                      <Icon name="info" :size="13"/>
+                    </span>
                     <span v-if="sec.prefill && f.prefill" class="ml-2 text-xs text-slate-500 font-normal">filled from your profile</span>
                   </label>
 
@@ -4499,7 +4585,7 @@ const FormRenderer = {
                   </div>
 
                   <!-- Radio -->
-                  <div v-else-if="f.type==='radio'" class="space-y-2" :id="'fld-'+f.key" role="radiogroup">
+                  <div v-else-if="f.type==='radio'" :class="f.inline ? 'flex flex-wrap items-center gap-x-6 gap-y-2' : 'space-y-2'" :id="'fld-'+f.key" role="radiogroup">
                     <label v-for="opt in f.options" :key="opt"
                            class="flex items-center gap-3 py-1 cursor-pointer text-base text-slate-800">
                       <input type="radio" :value="opt" v-model="data[f.key]" class="h-4 w-4 accent-teal-600"/>
@@ -4582,12 +4668,12 @@ const FormRenderer = {
               </div>
 
               <!-- Repeater -->
-              <div v-if="sec.repeater" class="-mx-6">
+              <div v-if="sec.repeater" :class="['-mx-6', sec.grid===3 ? 'sm:col-span-3' : sec.grid===2 ? 'sm:col-span-2' : '']">
                 <div class="overflow-x-auto scroll-thin">
                   <table class="w-full text-sm">
                     <thead class="bg-slate-50 border-y border-slate-200 text-[13px] text-slate-600">
                       <tr>
-                        <th class="px-6 py-2.5 text-left font-medium" v-for="c in sec.repeater.columns" :key="c.key" :class="c.w">{{ c.label }}</th>
+                        <th class="px-6 py-2.5 text-left font-medium" v-for="c in sec.repeater.columns" :key="c.key" :class="c.w">{{ c.label }}<span v-if="c.required" class="text-red-600"> *</span></th>
                         <th class="w-10 sticky right-0 bg-slate-50"></th>
                       </tr>
                     </thead>
@@ -6768,6 +6854,20 @@ const OnboardCustomerPage = {
       TREATMENT_SERVICES.forEach(s => { row[s] = false; });
       access[f.code] = row;
     });
+    // Per-form access, keyed by [facility code][form key]. Stays in sync with
+    // the matrix above: ticking a treatment defaults its forms ON, unticking
+    // defaults them OFF. Forms with shared_with appear under each facility
+    // they're shared with, and each (facility,form) selection is independent.
+    const formAccess = {};
+    FACILITIES.forEach(fac => {
+      const row = {};
+      FORM_CATALOG.forEach(form => {
+        const sharedWith = (form.shared_with && form.shared_with.length) ? form.shared_with : null;
+        const offeredHere = sharedWith ? sharedWith.includes(fac.code) : (form.facility === fac.code);
+        if (offeredHere) row[form.key] = false;
+      });
+      formAccess[fac.code] = row;
+    });
     return {
       f: {
         company:'',
@@ -6781,6 +6881,7 @@ const OnboardCustomerPage = {
         addrPostcode:'',
       },
       access,
+      formAccess,
       submitAttempted: false,
     };
   },
@@ -6802,6 +6903,48 @@ const OnboardCustomerPage = {
     grantedFacilities(){
       return FACILITIES.filter(f => TREATMENT_SERVICES.some(s => this.access[f.code][s]));
     },
+    /* Form-by-treatment groupings for every granted (facility, treatment) combo.
+       Each entry: { fac, treatments: [{ service, forms: [FORM_CATALOG row...] }] }.
+       Drives the "Form access" card. */
+    formGroups(){
+      const groups = [];
+      for (const fac of this.grantedFacilities) {
+        const treatments = [];
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = this.formsAt(fac.code, s);
+          if (forms.length) treatments.push({ service: s, forms });
+        }
+        if (treatments.length) groups.push({ fac, treatments });
+      }
+      return groups;
+    },
+    totalFormsGranted(){
+      let n = 0;
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          for (const form of this.formsAt(fac.code, s)) {
+            if (this.formAccess[fac.code][form.key]) n++;
+          }
+        }
+      }
+      return n;
+    },
+    /* For each granted (fac, service), did the admin leave it without any form ticked? */
+    treatmentsMissingForms(){
+      const missing = [];
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = this.formsAt(fac.code, s);
+          if (!forms.length) continue; // no forms configured at all → not the admin's problem
+          const anyTicked = forms.some(f => this.formAccess[fac.code][f.key]);
+          if (!anyTicked) missing.push({ fac: fac.code, service: s });
+        }
+      }
+      return missing;
+    },
     detailsValid(){
       const f = this.f;
       return f.company.trim() && f.contact.trim() && f.abn.trim() && f.phone.trim() && f.email.trim();
@@ -6813,22 +6956,52 @@ const OnboardCustomerPage = {
     accessValid(){
       return this.grantedFacilities.length > 0;
     },
+    formAccessValid(){
+      return this.treatmentsMissingForms.length === 0;
+    },
     formValid(){
-      return this.detailsValid && this.addressValid && this.accessValid;
+      return this.detailsValid && this.addressValid && this.accessValid && this.formAccessValid;
     },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
     issueCount(){
       let n = 0;
       if (!this.detailsValid) n++;
       if (!this.addressValid) n++;
       if (!this.accessValid) n++;
+      if (this.accessValid && !this.formAccessValid) n++;
       return n;
     },
   },
   methods:{
     facName(code){ const f = FACILITIES.find(x => x.code===code); return f ? f.name : code; },
     facState(code){ const f = FACILITIES.find(x => x.code===code); return f ? f.state : ''; },
+    /* Forms offered at a facility for a given treatment, honouring shared_with. */
+    formsAt(facCode, service){
+      const out = [];
+      for (const form of FORM_CATALOG) {
+        if (form.treatment !== service) continue;
+        const sharedWith = (form.shared_with && form.shared_with.length) ? form.shared_with : null;
+        const offeredHere = sharedWith ? sharedWith.includes(facCode) : (form.facility === facCode);
+        if (offeredHere) out.push(form);
+      }
+      return out;
+    },
+    /* Toggle handler for the matrix checkbox: on flip ON, default every form in
+       (fac, service) to true; on flip OFF, clear them. Keeps form-access in
+       sync with the matrix without separate book-keeping. */
+    onTreatmentToggle(facCode, service){
+      const isOn = !!this.access[facCode][service];
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = isOn;
+      }
+    },
+    toggleAllForms(facCode, service, value){
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = value;
+      }
+    },
     cancel(){ this.$router.push('/admin'); },
     sendInvite(){
       this.submitAttempted = true;
@@ -6959,6 +7132,7 @@ const OnboardCustomerPage = {
                 <td v-for="s in services" :key="s" class="px-4 py-3.5 text-center">
                   <input v-if="canCheck[fac.code][s]" type="checkbox"
                          v-model="access[fac.code][s]"
+                         @change="onTreatmentToggle(fac.code, s)"
                          :aria-label="s + ' at ' + fac.name"
                          class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
                   <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
@@ -6966,6 +7140,73 @@ const OnboardCustomerPage = {
               </tr>
             </tbody>
           </table>
+        </div>
+      </section>
+
+      <!-- Form access card: per-form picker, only for ticked (facility, treatment) cells -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="file-check-2" :size="14" cls="text-slate-500"/> Form access
+          <span class="ml-auto text-sm text-slate-500 font-normal">
+            <span v-if="formGroups.length === 0">Tick a treatment above to grant forms.</span>
+            <span v-else>{{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted</span>
+          </span>
+        </header>
+        <p class="px-5 pt-4 text-sm text-slate-500">
+          The customer will only see the forms ticked here. By default every form under a ticked treatment is granted &mdash; untick to restrict access to specific forms.
+        </p>
+
+        <div v-if="formGroups.length === 0" class="px-5 pt-3 pb-6 text-sm text-slate-500">
+          No treatments ticked yet. Use the matrix above to grant a facility &amp; treatment, then come back to choose forms.
+        </div>
+
+        <div v-else class="px-5 pt-3 pb-5 space-y-5">
+          <div v-for="g in formGroups" :key="g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
+            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+              <span class="text-sm font-medium text-navy-900">{{ g.fac.name }}, {{ g.fac.state }}</span>
+              <span class="text-xs text-slate-500">{{ g.fac.code }}</span>
+            </div>
+            <div class="divide-y divide-slate-200">
+              <div v-for="t in g.treatments" :key="t.service" class="px-4 py-3">
+                <div class="flex items-center gap-2 mb-2">
+                  <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[t.service] && treatmentStyles[t.service].dot]" aria-hidden="true"></span>
+                  <span class="text-sm font-medium text-slate-700">{{ treatmentLabels[t.service] || t.service }}</span>
+                  <span class="text-xs text-slate-500">{{ t.forms.length }} {{ t.forms.length === 1 ? 'form' : 'forms' }}</span>
+                  <span class="ml-auto inline-flex items-center gap-3 text-xs">
+                    <button type="button" @click="toggleAllForms(g.fac.code, t.service, true)" class="text-teal-600 hover:underline focus-ring rounded">Select all</button>
+                    <button type="button" @click="toggleAllForms(g.fac.code, t.service, false)" class="text-slate-600 hover:underline focus-ring rounded">Clear</button>
+                  </span>
+                </div>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                  <li v-for="form in t.forms" :key="form.key">
+                    <label :for="'fa-' + g.fac.code + '-' + form.key"
+                           class="flex items-center gap-3 p-2.5 rounded-md border border-slate-200 hover:border-slate-300 hover:bg-slate-50 cursor-pointer">
+                      <input type="checkbox"
+                             :id="'fa-' + g.fac.code + '-' + form.key"
+                             v-model="formAccess[g.fac.code][form.key]"
+                             :aria-label="form.name + ' at ' + g.fac.name"
+                             class="w-4 h-4 rounded accent-teal-600 cursor-pointer shrink-0"/>
+                      <span class="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-md bg-slate-100 text-slate-700" aria-hidden="true">
+                        <Icon :name="formIcons[form.key] || 'file-text'" :size="18"/>
+                      </span>
+                      <span class="flex-1 min-w-0">
+                        <span class="block text-sm font-medium text-navy-900 leading-tight">{{ form.name }}</span>
+                        <span class="block text-xs text-slate-500 mt-0.5 font-mono">{{ form.code }}</span>
+                      </span>
+                      <span v-if="form.shared_with && form.shared_with.length"
+                            class="shrink-0 text-[11px] uppercase tracking-wide text-slate-500 px-1.5 py-0.5 rounded bg-slate-100"
+                            title="This form is also offered at other facilities">Shared</span>
+                    </label>
+                  </li>
+                </ul>
+                <p v-if="submitAttempted && !t.forms.some(f => formAccess[g.fac.code][f.key])"
+                   role="alert" class="mt-2 text-xs text-red-600 inline-flex items-center gap-1.5">
+                  <Icon name="alert-circle" :size="12" aria-hidden="true"/>
+                  Pick at least one {{ treatmentLabels[t.service] || t.service }} form, or untick this treatment in the matrix above.
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
