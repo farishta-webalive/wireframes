@@ -230,6 +230,51 @@ const seedCustomers = [
     facilities:['NAR'],                  services:['Gamma'],              status:'Active',   created:'2025-06-03', orders:7  },
 ];
 
+/* ---------- Seed companies (admin · onboarded company directory) ------------ */
+/* The new Companies entity replaces the legacy "Customers" entity in the admin
+   sidebar. A Company has business-level details (name, ABN, business phone,
+   primary login email) and a single primary contact. Per-person logins are
+   modelled as Company Contacts (see seedCompanyContacts). Facility/service
+   access is granted at the Company level. */
+const seedCompanies = [
+  { id:'COMP-1001', name:'Sunraysia Organic Pty Ltd',   abn:'31 052 471 029', phone:'+61 3 9123 4567', email:'accounts@sunraysia-organic.com.au',
+    primaryContact:{ name:'Alex Nguyen',       phone:'+61 3 9123 4567', email:'alex.nguyen@sunraysia-organic.com.au' },
+    facilities:['DAN','MER','WPK','NAR'], services:['Gamma','ETO','GMP'], status:'Active',  created:'2024-08-12' },
+  { id:'COMP-1002', name:'Top End Apiaries',            abn:'84 116 728 305', phone:'+61 8 8999 2233', email:'accounts@topendapiaries.com.au',
+    primaryContact:{ name:'Jake Marsh',        phone:'+61 8 8999 2233', email:'jake@topendapiaries.com.au' },
+    facilities:['NAR','DAN'],             services:['Gamma'],             status:'Active',  created:'2025-02-04' },
+  { id:'COMP-1003', name:'Bellarine Botanics',          abn:'62 094 532 877', phone:'+61 3 5258 9900', email:'accounts@bellarinebotanics.com.au',
+    primaryContact:{ name:'Sarah Kwok',        phone:'+61 3 5258 9900', email:'sarah@bellarinebotanics.com.au' },
+    facilities:['MER','NAR'],             services:['Gamma','GMP'],       status:'Active',  created:'2025-01-22' },
+  { id:'COMP-1004', name:'Perfection Fresh Australia',  abn:'45 089 421 110', phone:'+61 2 9741 8080', email:'accounts@perfectionfresh.com.au',
+    primaryContact:{ name:'Daniel Ho',         phone:'+61 2 9741 8080', email:'daniel.ho@perfectionfresh.com.au' },
+    facilities:['WPK'],                   services:['Gamma'],             status:'Active',  created:'2024-11-30' },
+  { id:'COMP-1005', name:'Kingsgrove Medical',          abn:'17 612 308 994', phone:'+61 2 9132 7700', email:'accounts@kingsgrovemed.com.au',
+    primaryContact:{ name:'Priya Subramaniam', phone:'+61 2 9132 7700', email:'priya@kingsgrovemed.com.au' },
+    facilities:['WPK','DAN'],             services:['Gamma','ETO'],       status:'Active',  created:'2024-06-15' },
+  { id:'COMP-1006', name:'Auspharm Wholesalers',        abn:'29 137 558 016', phone:'+61 3 8741 5500', email:'accounts@auspharm.com.au',
+    primaryContact:{ name:'Marcus Chen',       phone:'+61 3 8741 5500', email:'m.chen@auspharm.com.au' },
+    facilities:['MER'],                   services:['GMP'],               status:'Pending', created:'2026-04-19' },
+  { id:'COMP-1007', name:'Queensland Biolab',           abn:'73 158 942 220', phone:'+61 7 3899 4422', email:'accounts@qldbiolab.com.au',
+    primaryContact:{ name:'Emily Walker',      phone:'+61 7 3899 4422', email:'emily.walker@qldbiolab.com.au' },
+    facilities:['NAR'],                   services:['Gamma'],             status:'Active',  created:'2024-09-08' },
+  { id:'COMP-1008', name:'Sunshine Coast Apiary',       abn:'58 091 762 014', phone:'+61 7 5491 3066', email:'accounts@sunshineapiary.com.au',
+    primaryContact:{ name:'Brett Hollings',    phone:'+61 7 5491 3066', email:'brett@sunshineapiary.com.au' },
+    facilities:['NAR'],                   services:['Gamma'],             status:'Active',  created:'2025-03-11' },
+  { id:'COMP-1009', name:'Chemist Warehouse DC',        abn:'94 121 309 887', phone:'+61 3 9213 7600', email:'accounts@chemistwarehouse.com.au',
+    primaryContact:{ name:'Mei Tan',           phone:'+61 3 9213 7600', email:'mei.tan@chemistwarehouse.com.au' },
+    facilities:['DAN','MER'],             services:['Gamma','GMP'],       status:'Active',  created:'2024-10-17' },
+  { id:'COMP-1010', name:'NSW Health Logistics',        abn:'12 304 998 712', phone:'+61 2 9391 9000', email:'logistics@health.nsw.gov.au',
+    primaryContact:{ name:'David Robinson',    phone:'+61 2 9391 9000', email:'d.robinson@health.nsw.gov.au' },
+    facilities:['WPK'],                   services:['Gamma','ETO'],       status:'Active',  created:'2024-04-25' },
+  { id:'COMP-1011', name:'Golden Hive Co-op',           abn:'66 087 553 904', phone:'+61 3 5781 2210', email:'accounts@goldenhive.coop',
+    primaryContact:{ name:'Anika Sorensen',    phone:'+61 3 5781 2210', email:'anika@goldenhive.coop' },
+    facilities:['DAN','NAR'],             services:['Gamma'],             status:'Pending', created:'2026-04-22' },
+  { id:'COMP-1012', name:'BioSeq Pty Ltd',              abn:'08 211 064 715', phone:'+61 7 3211 8800', email:'accounts@bioseq.com.au',
+    primaryContact:{ name:'Tom Patel',         phone:'+61 7 3211 8800', email:'tpatel@bioseq.com.au' },
+    facilities:['NAR'],                   services:['Gamma'],             status:'Active',  created:'2025-06-03' },
+];
+
 // Forms across 4 facilities. `shared_with` lets one canonical row serve multiple facilities
 // (e.g. FRM-0359 shared MER + NAR). Empty = facility-exclusive.
 const FORM_CATALOG = [
@@ -574,8 +619,12 @@ const state = reactive({
   mobileDrawerOpen: false,
   lastSubmissionId: null,
   toast: null,                      // {message, kind}
-  // Admin: customer management
+  // Admin: customer management (legacy entity, kept for customer-detail links)
   customers: [...seedCustomers],
+  // Admin: companies directory (replaces legacy "customers" in the admin sidebar)
+  companies: [...seedCompanies],
+  // Admin: company contacts (per-person logins under a company)
+  companyContacts: [],
   // Admin: maintenance banner (visible to everyone when enabled)
   maintenanceBanner: {
     enabled: false,
@@ -2464,9 +2513,10 @@ const Sidebar = {
     },
     adminItems(){
       return [
-        { to:'/admin/customers',         label:'Customers',         icon:'users' },
-        { to:'/admin/onboard-customer',  label:'Onboard Customer',  icon:'user-plus' },
-        { to:'/settings',                label:'Settings',          icon:'settings-2' },
+        { to:'/admin/companies',         label:'Companies',                 icon:'building-2' },
+        { to:'/admin/companies/new',     label:'Onboard a New Company',     icon:'building' },
+        { to:'/admin/contacts/new',      label:'Onboard a Company Contact', icon:'user-plus' },
+        { to:'/settings',                label:'Settings',                  icon:'settings-2' },
       ];
     }
   }
@@ -6734,16 +6784,16 @@ const AdminConsolePage = {
   components:{ Icon, Btn, RouterLink },
   computed:{
     state(){ return state; },
-    activeCount(){ return state.customers.filter(c => c.status === 'Active').length; },
-    pendingCount(){ return state.customers.filter(c => c.status === 'Pending').length; },
-    disabledCount(){ return state.customers.filter(c => c.status === 'Disabled').length; },
+    activeCount(){ return state.companies.filter(c => c.status === 'Active').length; },
+    pendingCount(){ return state.companies.filter(c => c.status === 'Pending').length; },
+    disabledCount(){ return state.companies.filter(c => c.status === 'Disabled').length; },
     pendingOnboards(){
-      return state.customers
+      return state.companies
         .filter(c => c.status === 'Pending')
         .sort((a,b) => new Date(b.created) - new Date(a.created));
     },
     recentlyOnboarded(){
-      return [...state.customers]
+      return [...state.companies]
         .sort((a,b) => new Date(b.created) - new Date(a.created))
         .slice(0, 5);
     },
@@ -6765,7 +6815,7 @@ const AdminConsolePage = {
   <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
     <div>
       <h1 class="text-xl font-semibold text-navy-900 leading-tight">Steritech management</h1>
-      <p class="text-sm text-slate-500 mt-1">Customer onboarding, feature matrix, and form-schema administration.</p>
+      <p class="text-sm text-slate-500 mt-1">Company onboarding, feature matrix, and form-schema administration.</p>
     </div>
 
     <!-- Triage row: Needs attention (left) + Quick actions (right) -->
@@ -6777,7 +6827,7 @@ const AdminConsolePage = {
             <Icon name="clipboard-check" :size="14" cls="text-slate-500"/> Needs attention
             <span v-if="pendingOnboards.length" class="text-xs text-slate-500 font-normal">({{ pendingOnboards.length }})</span>
           </span>
-          <router-link v-if="pendingOnboards.length" to="/admin/customers?status=Pending"
+          <router-link v-if="pendingOnboards.length" to="/admin/companies?status=Pending"
                        class="text-sm text-teal-600 hover:underline focus-ring rounded">View all pending &rarr;</router-link>
         </header>
         <div v-if="pendingOnboards.length === 0" class="px-5 py-10 text-center">
@@ -6789,10 +6839,10 @@ const AdminConsolePage = {
           <li v-for="c in pendingOnboards" :key="c.id" class="border-b border-slate-100 last:border-b-0">
             <div class="px-5 py-3.5 flex items-center gap-4 flex-wrap">
               <div class="min-w-0 flex-1">
-                <router-link :to="'/admin/customers/'+c.id" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.company }}</router-link>
-                <div class="text-sm text-slate-500 mt-0.5">{{ c.contact }} &middot; Requested {{ fmtDate(c.created) }}</div>
+                <router-link to="/admin/companies" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.name }}</router-link>
+                <div class="text-sm text-slate-500 mt-0.5">{{ c.primaryContact.name }} &middot; Requested {{ fmtDate(c.created) }}</div>
               </div>
-              <router-link :to="'/admin/customers/'+c.id"
+              <router-link to="/admin/companies"
                            class="text-sm text-slate-700 hover:text-teal-600 focus-ring rounded inline-flex items-center gap-1">Open <Icon name="arrow-right" :size="14"/></router-link>
             </div>
           </li>
@@ -6804,19 +6854,27 @@ const AdminConsolePage = {
         <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Quick actions</header>
         <ul class="py-1">
           <li>
-            <router-link to="/admin/onboard-customer"
+            <router-link to="/admin/companies/new"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
-              <Icon name="user-plus" :size="16" cls="text-slate-500 shrink-0"/>
-              <span class="flex-1 text-base text-navy-900">Onboard customer</span>
+              <Icon name="building" :size="16" cls="text-slate-500 shrink-0"/>
+              <span class="flex-1 text-base text-navy-900">Onboard a new company</span>
               <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
             </router-link>
           </li>
           <li class="border-t border-slate-100">
-            <router-link to="/admin/customers"
+            <router-link to="/admin/contacts/new"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
-              <Icon name="users" :size="16" cls="text-slate-500 shrink-0"/>
+              <Icon name="user-plus" :size="16" cls="text-slate-500 shrink-0"/>
+              <span class="flex-1 text-base text-navy-900">Onboard a company contact</span>
+              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+            </router-link>
+          </li>
+          <li class="border-t border-slate-100">
+            <router-link to="/admin/companies"
+                         class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
+              <Icon name="building-2" :size="16" cls="text-slate-500 shrink-0"/>
               <span class="flex-1 min-w-0">
-                <span class="block text-base text-navy-900">Customers</span>
+                <span class="block text-base text-navy-900">Companies</span>
                 <span class="block text-xs text-slate-500">{{ activeCount }} active &middot; {{ disabledCount }} disabled</span>
               </span>
               <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
@@ -6846,17 +6904,17 @@ const AdminConsolePage = {
         <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
           <Icon name="history" :size="14" cls="text-slate-500"/> Recently onboarded
         </span>
-        <router-link to="/admin/customers" class="text-sm text-teal-600 hover:underline focus-ring rounded">View all customers &rarr;</router-link>
+        <router-link to="/admin/companies" class="text-sm text-teal-600 hover:underline focus-ring rounded">View all companies &rarr;</router-link>
       </header>
       <ul>
         <li v-for="c in recentlyOnboarded" :key="c.id" class="border-b border-slate-100 last:border-b-0">
           <div class="px-5 py-3.5 flex items-center gap-4 flex-wrap">
             <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-semibold shrink-0">
-              {{ c.contact.split(' ').map(s=>s[0]).slice(0,2).join('') }}
+              {{ c.primaryContact.name.split(' ').map(s=>s[0]).slice(0,2).join('') }}
             </div>
             <div class="min-w-0 flex-1">
-              <router-link :to="'/admin/customers/'+c.id" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.company }}</router-link>
-              <div class="text-sm text-slate-500 mt-0.5 truncate">{{ c.contact }} &middot; {{ c.facilities.length }} {{ c.facilities.length === 1 ? 'site' : 'sites' }} &middot; Created {{ fmtDate(c.created) }}</div>
+              <router-link to="/admin/companies" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.name }}</router-link>
+              <div class="text-sm text-slate-500 mt-0.5 truncate">{{ c.primaryContact.name }} &middot; {{ c.facilities.length }} {{ c.facilities.length === 1 ? 'site' : 'sites' }} &middot; Created {{ fmtDate(c.created) }}</div>
             </div>
             <span class="inline-flex items-center gap-2 text-sm text-slate-700 whitespace-nowrap">
               <span :class="['inline-block h-2 w-2 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
@@ -7252,6 +7310,1264 @@ const OnboardCustomerPage = {
         <button type="button" @click="cancel" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
         <Btn icon="send" @click="sendInvite">Send invitation</Btn>
       </div>
+    </div>
+  `
+};
+
+/* ---------- Helpers: empty access matrix builders (reused by Company pages) - */
+/* Build empty { facCode: { service: false } } matrix and an empty per-form
+   access map keyed by [facCode][formKey]. Both are kept in sync with the
+   facility/treatment matrix in the page-level toggle handler. */
+function buildEmptyAccess() {
+  const access = {};
+  FACILITIES.forEach(f => {
+    const row = {};
+    TREATMENT_SERVICES.forEach(s => { row[s] = false; });
+    access[f.code] = row;
+  });
+  return access;
+}
+function buildEmptyFormAccess() {
+  const formAccess = {};
+  FACILITIES.forEach(fac => {
+    const row = {};
+    FORM_CATALOG.forEach(form => {
+      const sharedWith = (form.shared_with && form.shared_with.length) ? form.shared_with : null;
+      const offeredHere = sharedWith ? sharedWith.includes(fac.code) : (form.facility === fac.code);
+      if (offeredHere) row[form.key] = false;
+    });
+    formAccess[fac.code] = row;
+  });
+  return formAccess;
+}
+function formsAtForCatalog(facCode, service) {
+  const out = [];
+  for (const form of FORM_CATALOG) {
+    if (form.treatment !== service) continue;
+    const sharedWith = (form.shared_with && form.shared_with.length) ? form.shared_with : null;
+    const offeredHere = sharedWith ? sharedWith.includes(facCode) : (form.facility === facCode);
+    if (offeredHere) out.push(form);
+  }
+  return out;
+}
+
+/* ---------- Page: Admin · Onboard a New Company ---------------------------- */
+/* Three sections, in order:
+     A. Company Details — name, ABN, business phone, login email
+     B. Company Primary Contact — name, phone, optional secondary email
+     C. Facility & Service Access — same matrix + form-access pattern as the
+        legacy Onboard Customer page (architect-locked chrome). */
+
+/* Page-local form metadata for the Onboard Company form-access cards.
+   Kept here (not on FORM_CATALOG) so customer-facing screens that read the
+   shared catalog are unaffected. Keyed by FORM_CATALOG.key. */
+const ONBOARD_COMPANY_FORM_META = {
+  'fresh-produce-dom': { shortDesc:'ICA-55 gamma irradiation for fresh produce shipped within Australia.', sections:5, fields:28 },
+  'fresh-produce-exp': { shortDesc:'Gamma irradiation for fresh produce destined for export.',            sections:6, fields:34 },
+  'fresh-produce':     { shortDesc:'Gamma irradiation for fresh produce.',                                sections:5, fields:26 },
+  'bee-equipment':     { shortDesc:'Sterilise hive boxes, frames, and beekeeping gear.',                  sections:4, fields:18 },
+  'rfi-general':       { shortDesc:'General gamma request when no specific form fits.',                   sections:3, fields:14 },
+  'herbal-medicine':   { shortDesc:'GMP packing and labelling for TGA-listed herbal medicine.',           sections:5, fields:32 },
+  'irradiation':       { shortDesc:'General gamma irradiation for goods at this facility.',              sections:5, fields:24 },
+  'eto-treatment':     { shortDesc:'ETO sterilisation for medical and industrial product.',               sections:6, fields:30 },
+  'treatment':         { shortDesc:'General gamma irradiation requests at this facility.',                sections:5, fields:22 },
+  'blood-serum':       { shortDesc:'Gamma sterilisation for bovine or other animal serum.',               sections:4, fields:20 },
+};
+function onboardCompanyFormMeta(key) {
+  return ONBOARD_COMPANY_FORM_META[key] || { shortDesc:'Standard treatment request form.', sections:4, fields:18 };
+}
+
+const OnboardCompanyPage = {
+  components:{ Icon, Btn },
+  data(){
+    return {
+      f: {
+        // A. Company details
+        name:'',
+        abn:'',
+        phone:'',
+        email:'',
+        // B. Primary contact
+        contactName:'',
+        contactPhone:'',
+        contactEmail:'',
+      },
+      access: buildEmptyAccess(),
+      formAccess: buildEmptyFormAccess(),
+      submitAttempted: false,
+    };
+  },
+  computed:{
+    state(){ return state; },
+    facilities(){ return FACILITIES; },
+    services(){ return TREATMENT_SERVICES; },
+    canCheck(){
+      const m = {};
+      FACILITIES.forEach(f => {
+        const row = {};
+        TREATMENT_SERVICES.forEach(s => { row[s] = f.services.includes(s); });
+        m[f.code] = row;
+      });
+      return m;
+    },
+    grantedFacilities(){
+      return FACILITIES.filter(f => TREATMENT_SERVICES.some(s => this.access[f.code][s]));
+    },
+    formGroups(){
+      const groups = [];
+      for (const fac of this.grantedFacilities) {
+        const treatments = [];
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = formsAtForCatalog(fac.code, s);
+          if (forms.length) treatments.push({ service: s, forms });
+        }
+        if (treatments.length) groups.push({ fac, treatments });
+      }
+      return groups;
+    },
+    totalFormsGranted(){
+      let n = 0;
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          for (const form of formsAtForCatalog(fac.code, s)) {
+            if (this.formAccess[fac.code][form.key]) n++;
+          }
+        }
+      }
+      return n;
+    },
+    treatmentsMissingForms(){
+      const missing = [];
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = formsAtForCatalog(fac.code, s);
+          if (!forms.length) continue;
+          const anyTicked = forms.some(f => this.formAccess[fac.code][f.key]);
+          if (!anyTicked) missing.push({ fac: fac.code, service: s });
+        }
+      }
+      return missing;
+    },
+    companyDetailsValid(){
+      const f = this.f;
+      return f.name.trim() && f.abn.trim() && f.phone.trim() && f.email.trim();
+    },
+    contactDetailsValid(){
+      // Contact name is required; phone is required; email is optional.
+      const f = this.f;
+      return f.contactName.trim() && f.contactPhone.trim();
+    },
+    accessValid(){ return this.grantedFacilities.length > 0; },
+    formAccessValid(){ return this.treatmentsMissingForms.length === 0; },
+    formValid(){
+      return this.companyDetailsValid && this.contactDetailsValid && this.accessValid && this.formAccessValid;
+    },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
+    issueCount(){
+      let n = 0;
+      if (!this.companyDetailsValid) n++;
+      if (!this.contactDetailsValid) n++;
+      if (!this.accessValid) n++;
+      if (this.accessValid && !this.formAccessValid) n++;
+      return n;
+    },
+  },
+  methods:{
+    formsAt(facCode, service){ return formsAtForCatalog(facCode, service); },
+    formMeta(key){ return onboardCompanyFormMeta(key); },
+    onTreatmentToggle(facCode, service){
+      const isOn = !!this.access[facCode][service];
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = isOn;
+      }
+    },
+    toggleAllForms(facCode, service, value){
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = value;
+      }
+    },
+    cancel(){ this.$router.push('/admin/companies'); },
+    sendInvite(){
+      this.submitAttempted = true;
+      if (!this.formValid) {
+        showToast('Fix the issues highlighted before sending the invitation.', 'error');
+        return;
+      }
+      // Persist into state.companies so the new entry shows up in the list.
+      const nextNum = state.companies.reduce((m,c) => {
+        const n = parseInt((c.id || '').replace(/[^0-9]/g,''), 10);
+        return isNaN(n) ? m : Math.max(m, n);
+      }, 1000) + 1;
+      const facs = this.grantedFacilities.map(f => f.code);
+      const svcSet = new Set();
+      facs.forEach(fc => TREATMENT_SERVICES.forEach(s => { if (this.access[fc][s]) svcSet.add(s); }));
+      const today = new Date().toISOString().slice(0,10);
+      state.companies.unshift({
+        id: 'COMP-' + nextNum,
+        name: this.f.name.trim(),
+        abn: this.f.abn.trim(),
+        phone: this.f.phone.trim(),
+        email: this.f.email.trim(),
+        primaryContact: {
+          name: this.f.contactName.trim(),
+          phone: this.f.contactPhone.trim(),
+          email: (this.f.contactEmail || '').trim() || this.f.email.trim(),
+        },
+        facilities: facs,
+        services: Array.from(svcSet),
+        status: 'Pending',
+        created: today,
+      });
+      showToast(`Invitation sent to ${this.f.email}. Company record created.`, 'success');
+      this.$router.push('/admin/companies');
+    },
+  },
+  template:`
+    <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <button type="button" @click="cancel" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-navy-900 focus-ring rounded">
+        <Icon name="arrow-left" :size="14"/> Back to companies
+      </button>
+
+      <div>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Onboard a new company</h1>
+        <p class="text-sm text-slate-500 mt-1">Create a company record, register a primary contact, and grant facility access. The invitation sends after submit.</p>
+      </div>
+
+      <!-- A. Company Details -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="building-2" :size="14" cls="text-slate-500"/> Company details
+        </header>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div class="md:col-span-2">
+            <label for="co-name" class="block text-sm font-medium text-slate-700 mb-1.5">Company name <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="co-name" v-model="f.name" type="text" placeholder="e.g. Acme Foods Pty Ltd" autocomplete="organization"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+          </div>
+          <div>
+            <label for="co-abn" class="block text-sm font-medium text-slate-700 mb-1.5">ABN <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="co-abn" v-model="f.abn" type="text" placeholder="11 digits" inputmode="numeric"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <p class="mt-1 text-xs text-slate-500">Verified against the Australian Business Register on submit.</p>
+          </div>
+          <div>
+            <label for="co-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Business phone <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="co-phone" v-model="f.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+          </div>
+          <div class="md:col-span-2">
+            <label for="co-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="co-email" v-model="f.email" type="email" placeholder="accounts@company.com.au" autocomplete="email"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <p class="mt-1 text-xs text-slate-500">Becomes the primary login for the company. The invitation goes to this address.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- B. Company Primary Contact -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="user-round" :size="14" cls="text-slate-500"/> Company primary contact
+        </header>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div class="md:col-span-2">
+            <label for="co-contact" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="co-contact" v-model="f.contactName" type="text" placeholder="Full name" autocomplete="name"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+          </div>
+          <div>
+            <label for="co-cphone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
+            <input id="co-cphone" v-model="f.contactPhone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <p class="mt-1 text-xs text-slate-500">Direct line for the primary contact. May differ from the business phone above.</p>
+          </div>
+          <div>
+            <label for="co-cemail" class="block text-sm font-medium text-slate-700 mb-1.5">Contact email <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
+            <input id="co-cemail" v-model="f.contactEmail" type="email" placeholder="Only if different from company email" autocomplete="email"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <p class="mt-1 text-xs text-slate-500">Leave blank to reuse the company email above.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- C. Facility and Service Access (unchanged matrix + form-access pattern) -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility and service access
+          <span class="ml-auto text-sm text-slate-500 font-normal">
+            <span v-if="grantedFacilities.length === 0">No facilities selected.</span>
+            <span v-else>{{ grantedFacilities.length }} {{ grantedFacilities.length === 1 ? 'facility' : 'facilities' }} granted</span>
+          </span>
+        </header>
+        <p class="px-5 pt-4 text-sm text-slate-500">Tick the services this company can submit at each facility. A facility is granted access automatically when at least one of its services is ticked.</p>
+        <div class="px-5 pt-3 pb-5 overflow-x-auto">
+          <table class="w-full text-base">
+            <caption class="sr-only">Facility and service access matrix</caption>
+            <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-y border-slate-300">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-medium">Facility</th>
+                <th v-for="s in services" :key="s" scope="col" class="px-4 py-3 font-medium text-center w-32">
+                  <span class="inline-flex items-center gap-1.5">
+                    <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                    <span>{{ treatmentLabels[s] || s }}</span>
+                  </span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="fac in facilities" :key="fac.code" class="even:bg-slate-50/60">
+                <td class="px-4 py-3.5">
+                  <div class="text-base text-navy-900">{{ fac.name }}, {{ fac.state }}</div>
+                  <div class="text-xs text-slate-500">{{ fac.code }}</div>
+                </td>
+                <td v-for="s in services" :key="s" class="px-4 py-3.5 text-center">
+                  <input v-if="canCheck[fac.code][s]" type="checkbox"
+                         v-model="access[fac.code][s]"
+                         @change="onTreatmentToggle(fac.code, s)"
+                         :aria-label="s + ' at ' + fac.name"
+                         class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                  <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Form access -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="file-check-2" :size="14" cls="text-slate-500"/> Form access
+          <span class="ml-auto text-sm text-slate-500 font-normal">
+            <span v-if="formGroups.length === 0">Tick a treatment above to grant forms.</span>
+            <span v-else>{{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted</span>
+          </span>
+        </header>
+        <p class="px-5 pt-4 text-sm text-slate-500">
+          The company will only see the forms ticked here. By default every form under a ticked treatment is granted &mdash; untick to restrict access to specific forms.
+        </p>
+
+        <div v-if="formGroups.length === 0" class="px-5 pt-3 pb-6 text-sm text-slate-500">
+          No treatments ticked yet. Use the matrix above to grant a facility &amp; treatment, then come back to choose forms.
+        </div>
+
+        <div v-else class="px-5 pt-3 pb-5 space-y-5">
+          <div v-for="g in formGroups" :key="g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
+            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+              <span class="text-sm font-medium text-navy-900">{{ g.fac.name }}, {{ g.fac.state }}</span>
+              <span class="text-xs text-slate-500">{{ g.fac.code }}</span>
+            </div>
+            <div class="divide-y divide-slate-200">
+              <div v-for="t in g.treatments" :key="t.service" class="px-4 py-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span :class="['inline-block h-2.5 w-2.5 rounded-full', treatmentStyles[t.service] && treatmentStyles[t.service].dot]" aria-hidden="true"></span>
+                  <span class="text-sm font-semibold text-navy-900">{{ treatmentLabels[t.service] || t.service }}</span>
+                  <span class="text-xs text-slate-500">{{ t.forms.length }} {{ t.forms.length === 1 ? 'form' : 'forms' }}</span>
+                </div>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <li v-for="form in t.forms" :key="form.key">
+                    <label :for="'cfa-' + g.fac.code + '-' + form.key"
+                           :class="['relative block rounded-md border p-4 transition-colors cursor-pointer',
+                                    formAccess[g.fac.code][form.key]
+                                      ? 'border-teal-600 bg-teal-50/40 ring-1 ring-teal-600'
+                                      : 'border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50/40']">
+                      <input type="checkbox"
+                             :id="'cfa-' + g.fac.code + '-' + form.key"
+                             v-model="formAccess[g.fac.code][form.key]"
+                             :aria-label="form.name + ' at ' + g.fac.name"
+                             class="absolute top-3 right-3 w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                      <div class="flex items-start gap-3 pr-7">
+                        <span :class="['shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md',
+                                       formAccess[g.fac.code][form.key] ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700']"
+                              aria-hidden="true">
+                          <Icon :name="formIcons[form.key] || 'file-text'" :size="20"/>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-base font-semibold text-navy-900 leading-snug">{{ form.name }}</span>
+                            <span v-if="form.shared_with && form.shared_with.length"
+                                  class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Shared</span>
+                          </div>
+                          <p class="text-sm text-slate-600 mt-0.5 leading-snug">{{ formMeta(form.key).shortDesc }}</p>
+                          <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500">
+                            <span class="font-mono">{{ form.code }}</span>
+                            <span aria-hidden="true" class="text-slate-300">&middot;</span>
+                            <span class="inline-flex items-center gap-1"><Icon name="list-checks" :size="12"/>{{ formMeta(form.key).sections }} sections</span>
+                            <span aria-hidden="true" class="text-slate-300">&middot;</span>
+                            <span class="inline-flex items-center gap-1"><Icon name="layout-list" :size="12"/>{{ formMeta(form.key).fields }} fields</span>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  </li>
+                </ul>
+                <p v-if="submitAttempted && !t.forms.some(f => formAccess[g.fac.code][f.key])"
+                   role="alert" class="mt-3 text-xs text-red-600 inline-flex items-center gap-1.5">
+                  <Icon name="alert-circle" :size="12" aria-hidden="true"/>
+                  Pick at least one {{ treatmentLabels[t.service] || t.service }} form, or untick this treatment in the matrix above.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="border-t border-slate-200 pt-4 flex items-center gap-4 flex-wrap">
+        <p v-if="submitAttempted && !formValid" role="alert" class="text-sm text-red-600 inline-flex items-center gap-2">
+          <Icon name="alert-circle" :size="16" aria-hidden="true"/>
+          Fix {{ issueCount }} {{ issueCount === 1 ? 'issue' : 'issues' }} above before sending the invitation.
+        </p>
+        <div class="flex-1"></div>
+        <button type="button" @click="cancel" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+        <Btn icon="send" @click="sendInvite">Send invitation</Btn>
+      </div>
+    </div>
+  `
+};
+
+/* ---------- Page: Admin · Onboard a Company Contact ------------------------ */
+/* Per-person login under a company. Admin picks the company first; the form
+   then collects contact details and an independent facility/service access
+   grant. We restrict the matrix to the company's own granted facilities so
+   admins can't accidentally grant a contact more than the company itself has. */
+
+const OnboardCompanyContactPage = {
+  components:{ Icon, Btn },
+  data(){
+    return {
+      companyId: '',
+      f: { name:'', phone:'', email:'' },
+      access: buildEmptyAccess(),
+      formAccess: buildEmptyFormAccess(),
+      submitAttempted: false,
+    };
+  },
+  computed:{
+    state(){ return state; },
+    companies(){ return state.companies; },
+    selectedCompany(){ return state.companies.find(c => c.id === this.companyId) || null; },
+    facilities(){
+      // Only facilities the chosen company already has access to (so a contact
+      // cannot exceed company-level grants). Falls back to all facilities when
+      // no company is selected yet (purely visual — checkboxes are disabled).
+      if (!this.selectedCompany) return FACILITIES;
+      return FACILITIES.filter(f => this.selectedCompany.facilities.includes(f.code));
+    },
+    services(){ return TREATMENT_SERVICES; },
+    canCheck(){
+      const m = {};
+      const company = this.selectedCompany;
+      FACILITIES.forEach(f => {
+        const row = {};
+        TREATMENT_SERVICES.forEach(s => {
+          const offered = f.services.includes(s);
+          const companyHas = company ? (company.services.includes(s) && company.facilities.includes(f.code)) : false;
+          row[s] = offered && companyHas;
+        });
+        m[f.code] = row;
+      });
+      return m;
+    },
+    grantedFacilities(){
+      return this.facilities.filter(f => TREATMENT_SERVICES.some(s => this.access[f.code][s]));
+    },
+    formGroups(){
+      const groups = [];
+      for (const fac of this.grantedFacilities) {
+        const treatments = [];
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = formsAtForCatalog(fac.code, s);
+          if (forms.length) treatments.push({ service: s, forms });
+        }
+        if (treatments.length) groups.push({ fac, treatments });
+      }
+      return groups;
+    },
+    totalFormsGranted(){
+      let n = 0;
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          for (const form of formsAtForCatalog(fac.code, s)) {
+            if (this.formAccess[fac.code][form.key]) n++;
+          }
+        }
+      }
+      return n;
+    },
+    treatmentsMissingForms(){
+      const missing = [];
+      for (const fac of this.grantedFacilities) {
+        for (const s of TREATMENT_SERVICES) {
+          if (!this.access[fac.code][s]) continue;
+          const forms = formsAtForCatalog(fac.code, s);
+          if (!forms.length) continue;
+          const anyTicked = forms.some(f => this.formAccess[fac.code][f.key]);
+          if (!anyTicked) missing.push({ fac: fac.code, service: s });
+        }
+      }
+      return missing;
+    },
+    companyValid(){ return !!this.selectedCompany; },
+    contactDetailsValid(){
+      const f = this.f;
+      return f.name.trim() && f.phone.trim() && f.email.trim();
+    },
+    accessValid(){ return this.grantedFacilities.length > 0; },
+    formAccessValid(){ return this.treatmentsMissingForms.length === 0; },
+    formValid(){ return this.companyValid && this.contactDetailsValid && this.accessValid && this.formAccessValid; },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    formIcons(){ return FORM_ICONS; },
+    issueCount(){
+      let n = 0;
+      if (!this.companyValid) n++;
+      if (!this.contactDetailsValid) n++;
+      if (!this.accessValid) n++;
+      if (this.accessValid && !this.formAccessValid) n++;
+      return n;
+    },
+  },
+  watch:{
+    companyId(){
+      // Reset the matrix whenever the company changes so stale ticks from the
+      // previous company can't be carried over (their facilities may differ).
+      this.access = buildEmptyAccess();
+      this.formAccess = buildEmptyFormAccess();
+    },
+  },
+  methods:{
+    formsAt(facCode, service){ return formsAtForCatalog(facCode, service); },
+    formMeta(key){ return onboardCompanyFormMeta(key); },
+    onTreatmentToggle(facCode, service){
+      const isOn = !!this.access[facCode][service];
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = isOn;
+      }
+    },
+    toggleAllForms(facCode, service, value){
+      for (const form of this.formsAt(facCode, service)) {
+        this.formAccess[facCode][form.key] = value;
+      }
+    },
+    cancel(){ this.$router.push('/admin/companies'); },
+    sendInvite(){
+      this.submitAttempted = true;
+      if (!this.formValid) {
+        showToast('Fix the issues highlighted before sending the invitation.', 'error');
+        return;
+      }
+      const company = this.selectedCompany;
+      const facs = this.grantedFacilities.map(f => f.code);
+      const svcSet = new Set();
+      facs.forEach(fc => TREATMENT_SERVICES.forEach(s => { if (this.access[fc][s]) svcSet.add(s); }));
+      const nextNum = state.companyContacts.reduce((m,c) => {
+        const n = parseInt((c.id || '').replace(/[^0-9]/g,''), 10);
+        return isNaN(n) ? m : Math.max(m, n);
+      }, 2000) + 1;
+      const today = new Date().toISOString().slice(0,10);
+      state.companyContacts.unshift({
+        id: 'CONT-' + nextNum,
+        companyId: company.id,
+        companyName: company.name,
+        name: this.f.name.trim(),
+        phone: this.f.phone.trim(),
+        email: this.f.email.trim(),
+        facilities: facs,
+        services: Array.from(svcSet),
+        status: 'Pending',
+        created: today,
+      });
+      showToast(`Invitation sent to ${this.f.email}. Contact added to ${company.name}.`, 'success');
+      this.$router.push('/admin/companies');
+    },
+  },
+  template:`
+    <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <button type="button" @click="cancel" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-navy-900 focus-ring rounded">
+        <Icon name="arrow-left" :size="14"/> Back to companies
+      </button>
+
+      <div>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Onboard a company contact</h1>
+        <p class="text-sm text-slate-500 mt-1">Add a person under an existing company. The contact will receive their own login and access scoped to the facilities you tick below.</p>
+      </div>
+
+      <!-- A. Select company -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="building-2" :size="14" cls="text-slate-500"/> Select company
+        </header>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div class="md:col-span-2">
+            <label for="cc-company" class="block text-sm font-medium text-slate-700 mb-1.5">Company <span class="text-red-500" aria-hidden="true">*</span></label>
+            <select id="cc-company" v-model="companyId"
+                    class="w-full h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option value="">Choose a company&hellip;</option>
+              <option v-for="c in companies" :key="c.id" :value="c.id">
+                {{ c.name }} &middot; ABN {{ c.abn }}
+              </option>
+            </select>
+            <p class="mt-1 text-xs text-slate-500">
+              <span v-if="!selectedCompany">The contact's available facilities and services are inherited from the chosen company.</span>
+              <span v-else>
+                {{ selectedCompany.name }} &middot; ABN {{ selectedCompany.abn }} &middot;
+                {{ selectedCompany.facilities.length }} {{ selectedCompany.facilities.length === 1 ? 'facility' : 'facilities' }} &middot;
+                Login {{ selectedCompany.email }}
+              </span>
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <!-- B. Contact details -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="user-round" :size="14" cls="text-slate-500"/> Contact details
+        </header>
+        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div class="md:col-span-2">
+            <label for="cc-name" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="cc-name" v-model="f.name" type="text" placeholder="Full name" autocomplete="name"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+          </div>
+          <div>
+            <label for="cc-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="cc-phone" v-model="f.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+          </div>
+          <div>
+            <label for="cc-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
+            <input id="cc-email" v-model="f.email" type="email" placeholder="contact@company.com.au" autocomplete="email"
+                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <p class="mt-1 text-xs text-slate-500">Becomes the contact's personal login. The invitation goes to this address.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- C. Facility and service access -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility and service access
+          <span class="ml-auto text-sm text-slate-500 font-normal">
+            <span v-if="!selectedCompany">Pick a company first.</span>
+            <span v-else-if="grantedFacilities.length === 0">No facilities selected.</span>
+            <span v-else>{{ grantedFacilities.length }} {{ grantedFacilities.length === 1 ? 'facility' : 'facilities' }} granted</span>
+          </span>
+        </header>
+
+        <div v-if="!selectedCompany" class="px-5 pt-4 pb-6 text-sm text-slate-500">
+          Choose a company above to see which facilities and services can be granted to this contact.
+        </div>
+
+        <template v-else>
+          <p class="px-5 pt-4 text-sm text-slate-500">Tick the services this contact can submit at each facility. Greyed cells are not granted at the company level &mdash; widen access on the company record first if needed.</p>
+          <div class="px-5 pt-3 pb-5 overflow-x-auto">
+            <table class="w-full text-base">
+              <caption class="sr-only">Facility and service access matrix</caption>
+              <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-y border-slate-300">
+                <tr>
+                  <th scope="col" class="px-4 py-3 font-medium">Facility</th>
+                  <th v-for="s in services" :key="s" scope="col" class="px-4 py-3 font-medium text-center w-32">
+                    <span class="inline-flex items-center gap-1.5">
+                      <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                      <span>{{ treatmentLabels[s] || s }}</span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="fac in facilities" :key="fac.code" class="even:bg-slate-50/60">
+                  <td class="px-4 py-3.5">
+                    <div class="text-base text-navy-900">{{ fac.name }}, {{ fac.state }}</div>
+                    <div class="text-xs text-slate-500">{{ fac.code }}</div>
+                  </td>
+                  <td v-for="s in services" :key="s" class="px-4 py-3.5 text-center">
+                    <input v-if="canCheck[fac.code][s]" type="checkbox"
+                           v-model="access[fac.code][s]"
+                           @change="onTreatmentToggle(fac.code, s)"
+                           :aria-label="s + ' at ' + fac.name"
+                           class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                    <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not granted at company level"></span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </template>
+      </section>
+
+      <!-- Form access -->
+      <section v-if="selectedCompany" class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="file-check-2" :size="14" cls="text-slate-500"/> Form access
+          <span class="ml-auto text-sm text-slate-500 font-normal">
+            <span v-if="formGroups.length === 0">Tick a treatment above to grant forms.</span>
+            <span v-else>{{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted</span>
+          </span>
+        </header>
+        <p class="px-5 pt-4 text-sm text-slate-500">
+          The contact will only see the forms ticked here. By default every form under a ticked treatment is granted &mdash; untick to restrict access to specific forms.
+        </p>
+
+        <div v-if="formGroups.length === 0" class="px-5 pt-3 pb-6 text-sm text-slate-500">
+          No treatments ticked yet. Use the matrix above to grant a facility &amp; treatment, then come back to choose forms.
+        </div>
+
+        <div v-else class="px-5 pt-3 pb-5 space-y-5">
+          <div v-for="g in formGroups" :key="g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
+            <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+              <span class="text-sm font-medium text-navy-900">{{ g.fac.name }}, {{ g.fac.state }}</span>
+              <span class="text-xs text-slate-500">{{ g.fac.code }}</span>
+            </div>
+            <div class="divide-y divide-slate-200">
+              <div v-for="t in g.treatments" :key="t.service" class="px-4 py-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span :class="['inline-block h-2.5 w-2.5 rounded-full', treatmentStyles[t.service] && treatmentStyles[t.service].dot]" aria-hidden="true"></span>
+                  <span class="text-sm font-semibold text-navy-900">{{ treatmentLabels[t.service] || t.service }}</span>
+                  <span class="text-xs text-slate-500">{{ t.forms.length }} {{ t.forms.length === 1 ? 'form' : 'forms' }}</span>
+                </div>
+                <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <li v-for="form in t.forms" :key="form.key">
+                    <label :for="'ccfa-' + g.fac.code + '-' + form.key"
+                           :class="['relative block rounded-md border p-4 transition-colors cursor-pointer',
+                                    formAccess[g.fac.code][form.key]
+                                      ? 'border-teal-600 bg-teal-50/40 ring-1 ring-teal-600'
+                                      : 'border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50/40']">
+                      <input type="checkbox"
+                             :id="'ccfa-' + g.fac.code + '-' + form.key"
+                             v-model="formAccess[g.fac.code][form.key]"
+                             :aria-label="form.name + ' at ' + g.fac.name"
+                             class="absolute top-3 right-3 w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                      <div class="flex items-start gap-3 pr-7">
+                        <span :class="['shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md',
+                                       formAccess[g.fac.code][form.key] ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700']"
+                              aria-hidden="true">
+                          <Icon :name="formIcons[form.key] || 'file-text'" :size="20"/>
+                        </span>
+                        <div class="flex-1 min-w-0">
+                          <div class="flex items-center gap-2 flex-wrap">
+                            <span class="text-base font-semibold text-navy-900 leading-snug">{{ form.name }}</span>
+                            <span v-if="form.shared_with && form.shared_with.length"
+                                  class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Shared</span>
+                          </div>
+                          <p class="text-sm text-slate-600 mt-0.5 leading-snug">{{ formMeta(form.key).shortDesc }}</p>
+                          <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500">
+                            <span class="font-mono">{{ form.code }}</span>
+                            <span aria-hidden="true" class="text-slate-300">&middot;</span>
+                            <span class="inline-flex items-center gap-1"><Icon name="list-checks" :size="12"/>{{ formMeta(form.key).sections }} sections</span>
+                            <span aria-hidden="true" class="text-slate-300">&middot;</span>
+                            <span class="inline-flex items-center gap-1"><Icon name="layout-list" :size="12"/>{{ formMeta(form.key).fields }} fields</span>
+                          </div>
+                        </div>
+                      </div>
+                    </label>
+                  </li>
+                </ul>
+                <p v-if="submitAttempted && !t.forms.some(f => formAccess[g.fac.code][f.key])"
+                   role="alert" class="mt-3 text-xs text-red-600 inline-flex items-center gap-1.5">
+                  <Icon name="alert-circle" :size="12" aria-hidden="true"/>
+                  Pick at least one {{ treatmentLabels[t.service] || t.service }} form, or untick this treatment in the matrix above.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <div class="border-t border-slate-200 pt-4 flex items-center gap-4 flex-wrap">
+        <p v-if="submitAttempted && !formValid" role="alert" class="text-sm text-red-600 inline-flex items-center gap-2">
+          <Icon name="alert-circle" :size="16" aria-hidden="true"/>
+          Fix {{ issueCount }} {{ issueCount === 1 ? 'issue' : 'issues' }} above before sending the invitation.
+        </p>
+        <div class="flex-1"></div>
+        <button type="button" @click="cancel" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+        <Btn icon="send" @click="sendInvite">Send invitation</Btn>
+      </div>
+    </div>
+  `
+};
+
+/* ---------- Page: Admin · Companies List ----------------------------------- */
+/* Mirrors the Customers list visual chrome (zebra rows, dot+text status,
+   sentence-case headers, action menu). Columns: Company / ABN / Primary
+   contact / Status / Created. Row actions: View · Edit · Manage Access. */
+
+const CompanyListPage = {
+  components:{ Icon, Btn },
+  data(){ return {
+    facilityFilter:'All', statusFilter:'All', q:'',
+    menuFor:null,
+    viewing:null,
+    editing:null,
+    accessing:null,
+    sort:{ by:'created', dir:'desc' },
+    page: 1,
+    pageSize: 25,
+  }; },
+  created(){
+    // Honour ?status=Pending deep-links from the admin console.
+    const s = this.$route.query.status;
+    if (s) this.statusFilter = s;
+  },
+  mounted(){ document.addEventListener('click', this.closeMenu); },
+  beforeUnmount(){ document.removeEventListener('click', this.closeMenu); },
+  computed:{
+    state(){ return state; },
+    facilities(){ return FACILITIES; },
+    rows(){
+      const q = this.q.trim().toLowerCase();
+      return state.companies.filter(c => {
+        if (this.facilityFilter !== 'All' && !c.facilities.includes(this.facilityFilter)) return false;
+        if (this.statusFilter !== 'All' && c.status !== this.statusFilter) return false;
+        if (q) {
+          const blob = (c.name + ' ' + (c.primaryContact?.name || '') + ' ' + c.email + ' ' + c.abn).toLowerCase();
+          if (!blob.includes(q)) return false;
+        }
+        return true;
+      });
+    },
+    activeCount(){ return state.companies.filter(c => c.status === 'Active').length; },
+    pendingCount(){ return state.companies.filter(c => c.status === 'Pending').length; },
+    disabledCount(){ return state.companies.filter(c => c.status === 'Disabled').length; },
+    totalCount(){ return state.companies.length; },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    sortedRows(){
+      const list = this.rows.slice();
+      const k = this.sort.by;
+      const m = this.sort.dir === 'asc' ? 1 : -1;
+      list.sort((a,b) => (a[k] > b[k] ? m : a[k] < b[k] ? -m : 0));
+      return list;
+    },
+    totalPages(){ return Math.max(1, Math.ceil(this.sortedRows.length / this.pageSize)); },
+    effectivePage(){ return Math.min(this.page, this.totalPages); },
+    pagedRows(){
+      if (this.sortedRows.length <= this.pageSize) return this.sortedRows;
+      const start = (this.effectivePage - 1) * this.pageSize;
+      return this.sortedRows.slice(start, start + this.pageSize);
+    },
+    rangeStart(){ return this.sortedRows.length === 0 ? 0 : (this.effectivePage - 1) * this.pageSize + 1; },
+    rangeEnd(){ return Math.min(this.effectivePage * this.pageSize, this.sortedRows.length); },
+  },
+  watch:{
+    q(){ this.page = 1; },
+    facilityFilter(){ this.page = 1; },
+    statusFilter(){ this.page = 1; },
+    pageSize(){ this.page = 1; },
+  },
+  methods:{
+    fmtDate,
+    statusDot(s){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
+    },
+    setSort(by){
+      if (this.sort.by === by) this.sort.dir = this.sort.dir === 'asc' ? 'desc' : 'asc';
+      else { this.sort.by = by; this.sort.dir = by === 'created' ? 'desc' : 'asc'; }
+    },
+    sortIcon(by){
+      return this.sort.by === by ? (this.sort.dir === 'asc' ? 'chevron-up' : 'chevron-down') : 'chevrons-up-down';
+    },
+    prevPage(){ if (this.effectivePage > 1) this.page = this.effectivePage - 1; },
+    nextPage(){ if (this.effectivePage < this.totalPages) this.page = this.effectivePage + 1; },
+    closeMenu(){ this.menuFor = null; },
+    toggleMenu(c, ev){
+      ev.stopPropagation();
+      this.menuFor = (this.menuFor === c.id) ? null : c.id;
+    },
+    canCheckAt(facCode, service){
+      const f = FACILITIES.find(x => x.code === facCode);
+      return !!(f && f.services.includes(service));
+    },
+    /* ---- View ---- */
+    openView(c, ev){
+      if (ev) ev.stopPropagation();
+      this.menuFor = null;
+      this.viewing = c;
+    },
+    closeView(){ this.viewing = null; },
+    /* ---- Edit details ---- */
+    openEdit(c, ev){
+      if (ev) ev.stopPropagation();
+      this.menuFor = null;
+      this.editing = {
+        id: c.id,
+        name: c.name,
+        abn: c.abn,
+        phone: c.phone || '',
+        email: c.email,
+        contactName: c.primaryContact?.name || '',
+        contactPhone: c.primaryContact?.phone || '',
+        contactEmail: c.primaryContact?.email || '',
+      };
+    },
+    closeEdit(){ this.editing = null; },
+    saveEdit(){
+      const e = this.editing;
+      if (!e.name.trim() || !e.abn.trim() || !e.phone.trim() || !e.email.trim() || !e.contactName.trim()) {
+        showToast('Company name, ABN, phone, email and contact name are required.', 'error');
+        return;
+      }
+      const c = state.companies.find(x => x.id === e.id);
+      if (!c) { this.editing = null; return; }
+      c.name = e.name.trim();
+      c.abn = e.abn.trim();
+      c.phone = e.phone.trim();
+      c.email = e.email.trim();
+      c.primaryContact = {
+        name: e.contactName.trim(),
+        phone: e.contactPhone.trim(),
+        email: (e.contactEmail || '').trim() || c.email,
+      };
+      this.editing = null;
+      showToast('Company details updated.', 'success');
+    },
+    /* ---- Manage access ---- */
+    openAccess(c, ev){
+      if (ev) ev.stopPropagation();
+      this.menuFor = null;
+      const access = {};
+      FACILITIES.forEach(f => {
+        const row = {};
+        TREATMENT_SERVICES.forEach(s => {
+          row[s] = c.facilities.includes(f.code) && c.services.includes(s) && f.services.includes(s);
+        });
+        access[f.code] = row;
+      });
+      this.accessing = { id: c.id, name: c.name, access };
+    },
+    closeAccess(){ this.accessing = null; },
+    saveAccess(){
+      const e = this.accessing;
+      const c = state.companies.find(x => x.id === e.id);
+      if (!c) { this.accessing = null; return; }
+      const facilities = [];
+      const servicesSet = new Set();
+      FACILITIES.forEach(f => {
+        const row = e.access[f.code];
+        const any = TREATMENT_SERVICES.some(s => row[s]);
+        if (any) {
+          facilities.push(f.code);
+          TREATMENT_SERVICES.forEach(s => { if (row[s]) servicesSet.add(s); });
+        }
+      });
+      c.facilities = facilities;
+      c.services = Array.from(servicesSet);
+      this.accessing = null;
+      showToast(`Access updated for ${c.name}.`, 'success');
+    },
+  },
+  template:`
+    <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-semibold text-navy-900 leading-tight">Companies</h1>
+          <p class="text-sm text-slate-500 mt-1">{{ activeCount }} active companies across {{ facilities.length }} facilities</p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <Btn as="router-link" :to="{ path:'/admin/contacts/new' }" kind="secondary" icon="user-plus">Onboard contact</Btn>
+          <Btn as="router-link" :to="{ path:'/admin/companies/new' }" icon="building">Onboard company</Btn>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded-md p-4">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div class="md:col-span-6">
+            <label for="co-search" class="block text-sm font-medium text-slate-700 mb-1.5">Search companies</label>
+            <div class="relative">
+              <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+              <input id="co-search" v-model="q" type="text" placeholder="Type a company, ABN, contact, or email&hellip;"
+                     class="w-full h-11 pl-9 pr-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+          </div>
+          <div class="md:col-span-3">
+            <label for="co-facility" class="block text-sm font-medium text-slate-700 mb-1.5">Facility</label>
+            <select id="co-facility" v-model="facilityFilter" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option value="All">All facilities</option>
+              <option v-for="f in facilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
+            </select>
+          </div>
+          <div class="md:col-span-3">
+            <label for="co-status" class="block text-sm font-medium text-slate-700 mb-1.5">Status</label>
+            <select id="co-status" v-model="statusFilter" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option>All</option>
+              <option>Active</option>
+              <option>Pending</option>
+              <option>Disabled</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <section class="bg-white border-t border-b border-slate-200">
+        <div class="overflow-x-auto">
+          <table class="w-full text-base min-w-[1100px]">
+            <caption class="sr-only">Companies</caption>
+            <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
+              <tr>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  <button type="button" @click="setSort('name')" class="inline-flex items-center gap-1 font-medium">Company name <Icon :name="sortIcon('name')" :size="12" cls="text-slate-400"/></button>
+                </th>
+                <th scope="col" class="px-4 py-3 font-medium">ABN</th>
+                <th scope="col" class="px-4 py-3 font-medium">Primary contact</th>
+                <th scope="col" class="px-4 py-3 font-medium">Status</th>
+                <th scope="col" class="px-4 py-3 font-medium">
+                  <button type="button" @click="setSort('created')" class="inline-flex items-center gap-1 font-medium">Created <Icon :name="sortIcon('created')" :size="12" cls="text-slate-400"/></button>
+                </th>
+                <th scope="col" class="px-4 py-3 text-right font-medium"><span class="sr-only">Actions</span></th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-if="pagedRows.length === 0">
+                <td colspan="6" class="px-4 py-12 text-center text-sm text-slate-500">
+                  <Icon name="search-x" :size="28" cls="mx-auto mb-2 text-slate-300"/>
+                  <div>No companies match these filters.</div>
+                  <div class="text-slate-400 mt-0.5">Try a different search or clear your filters.</div>
+                </td>
+              </tr>
+              <tr v-else v-for="c in pagedRows" :key="c.id" class="even:bg-slate-50/60">
+                <td class="px-4 py-3.5">
+                  <a href="#" @click.prevent="openView(c)"
+                     :class="['text-base font-medium hover:underline focus-ring rounded',
+                              c.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ c.name }}</a>
+                  <div class="text-sm text-slate-500 mt-0.5">{{ c.facilities.join(', ') }}</div>
+                </td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums whitespace-nowrap">{{ c.abn }}</td>
+                <td class="px-4 py-3.5 text-sm text-slate-700">
+                  <div class="text-base text-navy-900">{{ c.primaryContact?.name }}</div>
+                  <div class="text-xs text-slate-500 mt-0.5 truncate max-w-[18rem]">{{ c.primaryContact?.email }}</div>
+                </td>
+                <td class="px-4 py-3.5 whitespace-nowrap">
+                  <span class="inline-flex items-center gap-2 text-sm text-slate-700">
+                    <span :class="['inline-block h-2 w-2 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
+                    <span>{{ c.status }}</span>
+                  </span>
+                </td>
+                <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(c.created) }}</td>
+                <td class="px-4 py-3.5 text-right whitespace-nowrap relative" @click.stop>
+                  <button type="button" @click="toggleMenu(c, $event)"
+                          :aria-expanded="menuFor === c.id"
+                          aria-haspopup="menu"
+                          aria-label="Company actions"
+                          class="p-1.5 rounded-md text-slate-500 hover:text-navy-900 hover:bg-slate-100 focus-ring">
+                    <Icon name="more-vertical" :size="16"/>
+                  </button>
+                  <div v-if="menuFor === c.id" role="menu"
+                       class="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20 text-left">
+                    <a href="#" role="menuitem" @click.stop.prevent="openView(c, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="eye" :size="14" cls="text-slate-500"/> View
+                    </a>
+                    <a href="#" role="menuitem" @click.stop.prevent="openEdit(c, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="pencil" :size="14" cls="text-slate-500"/> Edit
+                    </a>
+                    <a href="#" role="menuitem" @click.stop.prevent="openAccess(c, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="shield-check" :size="14" cls="text-slate-500"/> Manage access
+                    </a>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <nav v-if="sortedRows.length > pageSize" aria-label="Companies pagination" class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
+        <div class="text-slate-600">Showing {{ rangeStart }}&ndash;{{ rangeEnd }} of {{ sortedRows.length }}</div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
+            Rows per page
+            <select v-model.number="pageSize" class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option :value="25">25</option>
+              <option :value="50">50</option>
+              <option :value="100">100</option>
+            </select>
+          </label>
+          <div class="flex items-center gap-2">
+            <button type="button" @click="prevPage" :disabled="effectivePage <= 1" :aria-disabled="effectivePage <= 1" aria-label="Previous page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Prev</button>
+            <span class="text-slate-700 px-2 tabular-nums">Page {{ effectivePage }} of {{ totalPages }}</span>
+            <button type="button" @click="nextPage" :disabled="effectivePage >= totalPages" :aria-disabled="effectivePage >= totalPages" aria-label="Next page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Next</button>
+          </div>
+        </div>
+      </nav>
+
+      <!-- View modal (read-only profile) -->
+      <transition name="fade">
+        <div v-if="viewing" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="closeView">
+          <div class="bg-white border border-slate-200 rounded-md w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl" role="dialog" aria-modal="true" aria-label="View company">
+            <header class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+              <div>
+                <h2 class="text-lg font-semibold text-navy-900">{{ viewing.name }}</h2>
+                <p class="text-xs text-slate-500 mt-0.5 inline-flex items-center gap-2">
+                  <span class="font-mono">{{ viewing.id }}</span>
+                  <span aria-hidden="true">&middot;</span>
+                  <span class="inline-flex items-center gap-1.5">
+                    <span :class="['inline-block h-2 w-2 rounded-full', statusDot(viewing.status)]" aria-hidden="true"></span>
+                    <span>{{ viewing.status }}</span>
+                  </span>
+                </p>
+              </div>
+              <button type="button" @click="closeView" aria-label="Close" class="p-1.5 rounded hover:bg-slate-100 text-slate-500 focus-ring">
+                <Icon name="x" :size="18"/>
+              </button>
+            </header>
+            <div class="overflow-y-auto px-6 py-6 space-y-6">
+              <div>
+                <h3 class="text-sm font-medium text-navy-900 mb-3 inline-flex items-center gap-2"><Icon name="building-2" :size="14" cls="text-slate-500"/> Company details</h3>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                  <div><dt class="text-slate-500">Company name</dt><dd class="mt-0.5 text-base text-navy-900">{{ viewing.name }}</dd></div>
+                  <div><dt class="text-slate-500">ABN</dt><dd class="mt-0.5 text-base text-navy-900 tabular-nums">{{ viewing.abn }}</dd></div>
+                  <div><dt class="text-slate-500">Business phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ viewing.phone }}</dd></div>
+                  <div><dt class="text-slate-500">Login email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ viewing.email }}</dd></div>
+                  <div><dt class="text-slate-500">Created</dt><dd class="mt-0.5 text-base text-navy-900">{{ fmtDate(viewing.created) }}</dd></div>
+                </dl>
+              </div>
+              <div>
+                <h3 class="text-sm font-medium text-navy-900 mb-3 inline-flex items-center gap-2"><Icon name="user-round" :size="14" cls="text-slate-500"/> Primary contact</h3>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+                  <div><dt class="text-slate-500">Name</dt><dd class="mt-0.5 text-base text-navy-900">{{ viewing.primaryContact?.name }}</dd></div>
+                  <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ viewing.primaryContact?.phone }}</dd></div>
+                  <div class="sm:col-span-2"><dt class="text-slate-500">Email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ viewing.primaryContact?.email }}</dd></div>
+                </dl>
+              </div>
+              <div>
+                <h3 class="text-sm font-medium text-navy-900 mb-3 inline-flex items-center gap-2"><Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility &amp; service access</h3>
+                <ul class="space-y-3">
+                  <li v-for="code in viewing.facilities" :key="code" class="flex items-start justify-between gap-3 text-sm">
+                    <div class="min-w-0">
+                      <div class="text-base text-navy-900">{{ facilities.find(f => f.code === code)?.name }}, {{ facilities.find(f => f.code === code)?.state }}</div>
+                      <div class="text-xs text-slate-500">{{ code }}</div>
+                    </div>
+                    <div class="text-sm text-slate-700 inline-flex items-center gap-1.5 flex-wrap shrink-0 max-w-[60%] justify-end">
+                      <template v-for="(s, idx) in viewing.services.filter(svc => facilities.find(f => f.code === code)?.services.includes(svc))" :key="s">
+                        <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                        <span>{{ treatmentLabels[s] || s }}</span>
+                        <span v-if="idx < viewing.services.filter(svc => facilities.find(f => f.code === code)?.services.includes(svc)).length - 1" aria-hidden="true" class="text-slate-300">&middot;</span>
+                      </template>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <footer class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+              <button type="button" @click="closeView" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Close</button>
+              <Btn icon="pencil" kind="secondary" @click="openEdit(viewing)">Edit</Btn>
+              <Btn icon="shield-check" @click="openAccess(viewing)">Manage access</Btn>
+            </footer>
+          </div>
+        </div>
+      </transition>
+
+      <!-- Edit modal -->
+      <transition name="fade">
+        <div v-if="editing" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="closeEdit">
+          <div class="bg-white border border-slate-200 rounded-md w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl" role="dialog" aria-modal="true" aria-label="Edit company">
+            <header class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+              <h2 class="text-lg font-semibold text-navy-900">Edit company</h2>
+              <button type="button" @click="closeEdit" aria-label="Close" class="p-1.5 rounded hover:bg-slate-100 text-slate-500 focus-ring">
+                <Icon name="x" :size="18"/>
+              </button>
+            </header>
+            <div class="overflow-y-auto px-6 py-6 space-y-8">
+              <div>
+                <h3 class="text-base font-medium text-navy-900 mb-4">Company details</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                  <div class="md:col-span-2">
+                    <label for="ec-name" class="block text-sm font-medium text-slate-700 mb-1.5">Company name <span class="text-red-500" aria-hidden="true">*</span></label>
+                    <input id="ec-name" v-model="editing.name" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                  </div>
+                  <div>
+                    <label for="ec-abn" class="block text-sm font-medium text-slate-700 mb-1.5">ABN <span class="text-red-500" aria-hidden="true">*</span></label>
+                    <input id="ec-abn" v-model="editing.abn" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                  </div>
+                  <div>
+                    <label for="ec-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Business phone <span class="text-red-500" aria-hidden="true">*</span></label>
+                    <input id="ec-phone" v-model="editing.phone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                  </div>
+                  <div class="md:col-span-2">
+                    <label for="ec-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
+                    <input id="ec-email" v-model="editing.email" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                  </div>
+                </div>
+              </div>
+              <div>
+                <h3 class="text-base font-medium text-navy-900 mb-4">Primary contact</h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+                  <div class="md:col-span-2">
+                    <label for="ec-cn" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
+                    <input id="ec-cn" v-model="editing.contactName" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                  </div>
+                  <div>
+                    <label for="ec-cp" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
+                    <input id="ec-cp" v-model="editing.contactPhone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                  </div>
+                  <div>
+                    <label for="ec-ce" class="block text-sm font-medium text-slate-700 mb-1.5">Contact email <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
+                    <input id="ec-ce" v-model="editing.contactEmail" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <footer class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+              <button type="button" @click="closeEdit" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+              <Btn icon="save" @click="saveEdit">Save changes</Btn>
+            </footer>
+          </div>
+        </div>
+      </transition>
+
+      <!-- Manage access modal -->
+      <transition name="fade">
+        <div v-if="accessing" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="closeAccess">
+          <div class="bg-white border border-slate-200 rounded-md w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl" role="dialog" aria-modal="true" aria-label="Manage company access">
+            <header class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+              <div>
+                <h2 class="text-lg font-semibold text-navy-900">Manage access</h2>
+                <p class="text-xs text-slate-500 mt-0.5">{{ accessing.name }}</p>
+              </div>
+              <button type="button" @click="closeAccess" aria-label="Close" class="p-1.5 rounded hover:bg-slate-100 text-slate-500 focus-ring">
+                <Icon name="x" :size="18"/>
+              </button>
+            </header>
+            <div class="overflow-y-auto px-6 py-6">
+              <p class="text-sm text-slate-500 mb-4">Tick services per facility. Greyed cells are not offered at that facility.</p>
+              <div class="overflow-x-auto bg-white border-t border-b border-slate-200">
+                <table class="w-full text-base">
+                  <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
+                    <tr>
+                      <th scope="col" class="px-4 py-3 font-medium">Facility</th>
+                      <th v-for="s in ['Gamma','ETO','GMP']" :key="s" scope="col" class="px-4 py-3 font-medium text-center w-24">{{ s }}</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="f in facilities" :key="f.code" class="even:bg-slate-50/60">
+                      <td class="px-4 py-3">
+                        <div class="text-base text-navy-900">{{ f.name }}, {{ f.state }}</div>
+                        <div class="text-xs text-slate-500">{{ f.code }}</div>
+                      </td>
+                      <td v-for="s in ['Gamma','ETO','GMP']" :key="s" class="px-4 py-3 text-center">
+                        <input v-if="canCheckAt(f.code, s)" type="checkbox"
+                               v-model="accessing.access[f.code][s]"
+                               class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                        <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            <footer class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
+              <button type="button" @click="closeAccess" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+              <Btn icon="save" @click="saveAccess">Save access</Btn>
+            </footer>
+          </div>
+        </div>
+      </transition>
     </div>
   `
 };
@@ -8141,9 +9457,13 @@ const router = createRouter({
         { path:'/submitted/:id',                    component: SubmittedPage },
         { path:'/settings',                         component: SettingsPage },
         { path:'/admin',                            component: AdminConsolePage,    beforeEnter: requireAdmin },
+        { path:'/admin/companies',                  component: CompanyListPage,             beforeEnter: requireAdmin },
+        { path:'/admin/companies/new',              component: OnboardCompanyPage,          beforeEnter: requireAdmin },
+        { path:'/admin/contacts/new',               component: OnboardCompanyContactPage,   beforeEnter: requireAdmin },
+        // Legacy customer routes — kept for any links still referencing them, but not in nav.
         { path:'/admin/customers',                  component: CustomerListPage,    beforeEnter: requireAdmin },
         { path:'/admin/customers/:id',              component: CustomerDetailPage,  beforeEnter: requireAdmin },
-        { path:'/admin/onboard-customer',           component: OnboardCustomerPage, beforeEnter: requireAdmin },
+        { path:'/admin/onboard-customer',           redirect:'/admin/companies/new' },
         { path:'/admin/site-settings',              redirect: { path:'/settings', query:{ tab:'site' } } },
         { path:'/_dev/fields',                      component: DevFieldsPage },
       ]
