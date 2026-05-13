@@ -620,8 +620,8 @@ function commonCustomerDetails() {
         { key:'company', label:'Company name',   type:'text',  prefill:'company' },
         { key:'abn',     label:'ABN',            type:'text',  prefill:'abn'     },
         { key:'contact', label:'Contact name',   type:'text',  prefill:'contact' },
-        { key:'phone',   label:'Phone',          type:'phone', prefill:'phone'   },
         { key:'email',   label:'Email',          type:'email', prefill:'email'   },
+        { key:'phone',   label:'Phone',          type:'phone', prefill:'phone'   },
         { key:'bcCustomerNumber', label:'BC Customer #', type:'text', prefill:'bcCustomerNumber', readonly:true },
       ]
     },
@@ -1029,7 +1029,7 @@ function buildSchemas() {
         { key:'contact',       label:'Contact Name',    type:'text',  required:true, prefill:'contact' },
         { key:'contactNumber', label:'Contact Number',  type:'phone', required:true, prefill:'phone' },
         { key:'email',         label:'Email',           type:'email', required:true, prefill:'email' },
-        { key:'address',       label:'Address',         type:'text',  required:true, span:2 },
+        { key:'address',       label:'Address',         type:'text',  required:true },
       ]
     },
     { id:'consignment', title:'Consignment Details', grid:2,
@@ -1042,30 +1042,30 @@ function buildSchemas() {
     },
     { id:'quarantine', title:'Quarantine Goods (Biosecurity Directed)', grid:2,
       fields:[
-        { key:'biosecurity25',    label:'Biosecurity 25kGy',   type:'radio', options:['Yes','No'], inline:true },
-        { key:'biosecurity50',    label:'Biosecurity 50kGy',   type:'radio', options:['Yes','No'], inline:true },
+        { key:'biosecurity25',    label:'Biosecurity 25kGy',   type:'radio', options:['Yes','No'], inline:true, span:2 },
+        { key:'biosecurity50',    label:'Biosecurity 50kGy',   type:'radio', options:['Yes','No'], inline:true, span:2 },
         { key:'importConditions', label:'Are there conditions on the Import Permit that Steritech needs to be aware of? If yes, attach Import Permit',
           type:'radio', options:['Yes','No'], inline:true, span:2 },
         { key:'affRef',          label:'AFF Quarantine Direction Ref', type:'text' },
         { key:'brokerBondRef',   label:'Broker\'s Client Bond Ref',    type:'text' },
-        { key:'containerNumber', label:'Container Number',             type:'text', span:2 },
+        { key:'containerNumber', label:'Container Number',             type:'text' },
       ]
     },
     { id:'validated', title:'Validated Goods', grid:2,
       fields:[
-        { key:'validatedProcess', label:'Validated Process',          type:'radio', options:['Yes','No'], inline:true },
+        { key:'validatedProcess', label:'Validated Process',          type:'radio', options:['Yes','No'], inline:true, span:2 },
         { key:'tgaLicense',       label:'TGA/APVMA License Number',   type:'text' },
-        { key:'batchNumbers',     label:'Batch Number/s',             type:'textarea', rows:3, span:2 },
+        { key:'batchNumbers',     label:'Batch Number/s',             type:'textarea', rows:3 },
         { key:'doseRange',        label:'Product Min-Max Dose Range', type:'text', placeholder:'kGy' },
         { key:'rpi',              label:'RPI',                        type:'text' },
       ]
     },
-    { id:'conditions', title:'Consignment Conditions',
+    { id:'conditions', title:'Consignment Conditions', grid:2,
       fields:[
-        { key:'dangerousGoods', label:'Does this consignment contain dangerous goods? If yes, please attach an MSDS.', type:'radio', options:['Yes','No'] },
-        { key:'frozen',         label:'Does this consignment need to be kept frozen?',       type:'radio', options:['Yes','No'] },
-        { key:'refrigerated',   label:'Does this consignment need to be refrigerated?',      type:'radio', options:['Yes','No'] },
-        { key:'fragile',        label:'Does this consignment contain fragile goods?',        type:'radio', options:['Yes','No'] },
+        { key:'dangerousGoods', label:'Does this consignment contain dangerous goods? If yes, please attach an MSDS.', type:'radio', options:['Yes','No'], inline:true, span:2 },
+        { key:'frozen',         label:'Does this consignment need to be kept frozen?',       type:'radio', options:['Yes','No'], inline:true, span:2 },
+        { key:'refrigerated',   label:'Does this consignment need to be refrigerated?',      type:'radio', options:['Yes','No'], inline:true, span:2 },
+        { key:'fragile',        label:'Does this consignment contain fragile goods?',        type:'radio', options:['Yes','No'], inline:true, span:2 },
         { key:'targetDose',     label:'Target Dose Range',  type:'text' },
       ]
     },
@@ -1085,7 +1085,7 @@ function buildSchemas() {
         { key:'contact',       label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
         { key:'contactNumber', label:'Contact Number', type:'phone', required:true, prefill:'phone' },
         { key:'email',         label:'Email',          type:'email', required:true, prefill:'email' },
-        { key:'address',       label:'Address',        type:'text',  required:true, span:2 },
+        { key:'address',       label:'Address',        type:'text',  required:true },
       ]
     },
     { id:'consignment', title:'Consignment Details', grid:2,
@@ -1096,7 +1096,7 @@ function buildSchemas() {
         { key:'flowerBatchNo', label:'Flower Batch Number',     type:'text' },
         { key:'strainName',    label:'Strain Name',             type:'text' },
         { key:'growerCountry', label:'Grower Country',          type:'text' },
-        { key:'totalWeight',   label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0, span:2,
+        { key:'totalWeight',   label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0,
           help:'Enter to 3 decimal places' },
         { key:'bulkTested', label:'Bulk batch (TGO 93) tested at GMP approved lab prior to Steritech?',
           type:'checkbox', span:2, options:[
@@ -1107,25 +1107,25 @@ function buildSchemas() {
           type:'checkbox', span:2, options:['No', 'Yes – treatment certificate attached.'] },
         { key:'odcImport', label:'Has the Flower been imported under Steritech\'s ODC import license?',
           type:'radio', inline:true, span:2, options:['No','Yes'] },
-        { key:'importPermitNo', label:'Import permit number', type:'text', span:2,
+        { key:'importPermitNo', label:'Import permit number', type:'text',
           showIf:{ key:'odcImport', equals:['Yes'] } },
       ]
     },
-    { id:'primaryPkg', title:'Manufacturing Requirements for Finished Product', subtitle:'Primary Packaging',
+    { id:'primaryPkg', title:'Manufacturing Requirements for Finished Product', subtitle:'Primary Packaging', grid:2,
       fields:[
-        { key:'packagingSuppliedBy', label:'Packaging supplied by', type:'radio', required:true,
+        { key:'packagingSuppliedBy', label:'Packaging supplied by', type:'radio', required:true, inline:true, span:2,
           options:['Steritech supplied','Customer supplied'] },
 
-        { key:'steriSupplied', label:'If Steritech supplied (tick one only)', type:'radio',
+        { key:'steriSupplied', label:'If Steritech supplied (tick one only)', type:'radio', span:2,
           showIf:{ key:'packagingSuppliedBy', equals:['Steritech supplied'] },
           options:['Black 250ml HDPE Jar','White 250ml HDPE Jar','Glass (amber) 250ml Jar','PE Pouch','Other (please specify)'] },
-        { key:'steriOtherSpec', label:'Please specify', type:'text',
+        { key:'steriOtherSpec', label:'Please specify', type:'text', span:2,
           showIf:{ allOf:[
             { key:'packagingSuppliedBy', equals:['Steritech supplied'] },
             { key:'steriSupplied',       equals:['Other (please specify)'] },
           ]}},
 
-        { key:'custSupplied', label:'If Customer supplied (tick one only)', type:'radio',
+        { key:'custSupplied', label:'If Customer supplied (tick one only)', type:'radio', inline:true, span:2,
           showIf:{ key:'packagingSuppliedBy', equals:['Customer supplied'] },
           options:['Jar and Lid','Pouch'] },
         { key:'jarMaterial',  label:'Jar — Material',      type:'text',
@@ -1172,31 +1172,31 @@ function buildSchemas() {
           showIf:{ key:'labelPotency', equals:['THC active only (specify percentage)','Balanced (specify percentage)'] } },
         { key:'cbdPct',  label:'CBD %', type:'number', step:0.01, min:0,
           showIf:{ key:'labelPotency', equals:['CBD active only (specify percentage)','Balanced (specify percentage)'] } },
-        { key:'otherPct', label:'Specify active (%)', type:'text', span:2,
+        { key:'otherPct', label:'Specify active (%)', type:'text',
           showIf:{ key:'labelPotency', equals:['Other (please specify active)'] } },
       ],
       note:'NOTE: Steritech will send bulk samples for cannabinoid testing prior to packing commencement.'
     },
-    { id:'releaseSupply', title:'Release for Supply',
+    { id:'releaseSupply', title:'Release for Supply', grid:2,
       fields:[
-        { key:'releaseForSupply', label:'Steritech to perform Release for Supply?', type:'radio', options:['Yes','No'] },
+        { key:'releaseForSupply', label:'Steritech to perform Release for Supply?', type:'radio', options:['Yes','No'], inline:true, span:2 },
         { key:'stabilityData',    label:'Is the release to occur against client-owned stability data?',
-          type:'radio', options:['No','Yes'], showIf:{ key:'releaseForSupply', equals:['Yes'] } },
+          type:'radio', options:['Yes','No'], inline:true, span:2, showIf:{ key:'releaseForSupply', equals:['Yes'] } },
         { key:'stabilityRef',     label:'Yes – Report Reference (and copy provided to Steritech)', type:'text',
           showIf:{ allOf:[{ key:'releaseForSupply', equals:['Yes'] }, { key:'stabilityData', equals:['Yes'] }] } },
         { key:'marketingAuth',    label:'Are there any marketing authorisations that the product requires?',
-          type:'radio', options:['No','Yes'], showIf:{ key:'releaseForSupply', equals:['Yes'] } },
+          type:'radio', options:['Yes','No'], inline:true, span:2, showIf:{ key:'releaseForSupply', equals:['Yes'] } },
         { key:'marketingAuthSpec', label:'Yes (please specify)', type:'text',
           showIf:{ allOf:[{ key:'releaseForSupply', equals:['Yes'] }, { key:'marketingAuth', equals:['Yes'] }] } },
         { key:'mraCert',          label:'Does the sponsor require a copy of Steritech\'s MRA certificate?',
-          type:'radio', options:['No','Yes'], showIf:{ key:'releaseForSupply', equals:['Yes'] } },
+          type:'radio', options:['Yes','No'], inline:true, span:2, showIf:{ key:'releaseForSupply', equals:['Yes'] } },
         { key:'mraMarket',        label:'Yes (specify market)', type:'text',
           showIf:{ allOf:[{ key:'releaseForSupply', equals:['Yes'] }, { key:'mraCert', equals:['Yes'] }] } },
         { key:'odcExport',        label:'Is the finished product to be exported under Steritech\'s ODC export license?',
-          type:'radio', options:['Not applicable','No','Yes'] },
+          type:'radio', options:['Yes','No','Not applicable'], inline:true, span:2 },
         { key:'exportPermitNo',   label:'Yes – Export permit number', type:'text',
           showIf:{ key:'odcExport', equals:['Yes'] } },
-        { key:'additionalComments',     label:'Additional Comments', type:'radio', options:['No','Yes'] },
+        { key:'additionalComments',     label:'Additional Comments', type:'radio', options:['Yes','No'], inline:true, span:2 },
         { key:'additionalCommentsText', label:'Please specify', type:'textarea',
           showIf:{ key:'additionalComments', equals:['Yes'] } },
       ]
@@ -1215,12 +1215,12 @@ function buildSchemas() {
   reg('DAN','bee-equipment','Request for Irradiation of Bee Equipment','Gamma', [
     { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
-        { key:'date',            label:'Date',            type:'date',  required:true, prefillToday:true },
-        { key:'contact',         label:'Contact',         type:'text',  required:true, prefill:'name' },
-        { key:'phone',           label:'Phone no',        type:'phone', required:true, prefill:'phone' },
         { key:'business_name',   label:'Business Name',   type:'text',  required:true, prefill:'company' },
-        { key:'address_line_1',  label:'Address',         type:'text',  required:true, span:2 },
-        { key:'email',           label:'Email',           type:'email', required:true, prefill:'email', span:2 },
+        { key:'contact',         label:'Contact Name',    type:'text',  required:true, prefill:'name' },
+        { key:'phone',           label:'Phone no',        type:'phone', required:true, prefill:'phone' },
+        { key:'email',           label:'Email',           type:'email', required:true, prefill:'email' },
+        { key:'date',            label:'Date',            type:'date',  required:true, prefillToday:true },
+        { key:'address_line_1',  label:'Address',         type:'text',  required:true },
       ]
     },
     { id:'checklist', title:'Pre-treatment Checklist',
@@ -1266,22 +1266,21 @@ function buildSchemas() {
   const danIrradSections = [
     { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
-        { key:'date',             label:'Date',                 type:'date',  required:true, prefillToday:true },
         { key:'business_name',    label:'Business (User) Name', type:'text',  required:true, prefill:'company' },
         { key:'contact_name',     label:'Contact Name',         type:'text',  required:true, prefill:'name' },
-        { key:'business_address', label:'Business Address',     type:'text',  required:true, span:2 },
         { key:'phone',            label:'Phone Number',         type:'phone', required:true, prefill:'phone' },
         { key:'email',            label:'Email Address',        type:'email', required:true, prefill:'email' },
+        { key:'date',             label:'Date',                 type:'date',  required:true, prefillToday:true },
+        { key:'business_address', label:'Business Address',     type:'text',  required:true },
       ]
     },
     { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
         { key:'description_of_goods', label:'Description of Goods', type:'textarea', required:true, span:2,
           help:'Please provide a description of the product/s, e.g. medical devices, pharmaceutical, packaging, imported goods for Quarantine treatment, polymers for cross-linking, etc.' },
-        { key:'qty_heading',      label:'Quantity:',         type:'heading', span:2 },
         { key:'quantity_cartons', label:'Carton',            type:'number', min:0 },
         { key:'quantity_pallets', label:'Pallets',           type:'number', min:0 },
-        { key:'purchase_order',   label:'Purchase Order No (if applicable)', type:'text', span:2 },
+        { key:'purchase_order',   label:'Purchase Order No (if applicable)', type:'text' },
       ]
     },
     { id:'treatment', title:'Treatment',
@@ -1307,20 +1306,20 @@ function buildSchemas() {
   reg('DAN','eto-treatment','Request for Ethylene Oxide Treatment','ETO', [
     { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
-        { key:'date',             label:'Date',                 type:'date',  required:true, prefillToday:true },
         { key:'business_name',    label:'Business (User) Name', type:'text',  required:true, prefill:'company' },
         { key:'contact_name',     label:'Contact Name',         type:'text',  required:true, prefill:'contact' },
-        { key:'business_address', label:'Business Address',     type:'text',  required:true, span:2 },
         { key:'phone',            label:'Phone Number',         type:'phone', required:true, prefill:'phone' },
         { key:'email',            label:'Email Address',        type:'email', required:true, prefill:'email' },
+        { key:'business_address', label:'Business Address',     type:'text',  required:true },
+        { key:'date',             label:'Date',                 type:'date',  required:true, prefillToday:true },
       ]
     },
     { id:'goods', title:'Description of Goods', grid:2,
       fields:[
         { key:'product_codes',   label:'Product code/s',       type:'text' },
         { key:'batch_numbers',   label:'Batch number/s',       type:'text' },
-        { key:'product_names',   label:'Product name/s',       type:'text', span:2 },
-        { key:'additional_desc', label:'Additional description', type:'textarea', span:2,
+        { key:'product_names',   label:'Product name/s',       type:'text' },
+        { key:'additional_desc', label:'Additional description', type:'textarea',
           help:'e.g. medical devices, pharmaceutical, packaging, imported goods for Quarantine treatment, etc.' },
       ]
     },
@@ -1334,10 +1333,9 @@ function buildSchemas() {
     },
     { id:'consignment', title:'Consignment Details', grid:2,
       fields:[
-        { key:'qty_heading',  label:'Quantity:',                    type:'heading', span:2 },
         { key:'qty_cartons',  label:'cartons',                      type:'number', min:0 },
         { key:'qty_pallets',  label:'pallets',                      type:'number', min:0 },
-        { key:'purchase_order', label:'Purchase Order No (if applicable)', type:'text', span:2 },
+        { key:'purchase_order', label:'Purchase Order No (if applicable)', type:'text' },
       ]
     },
     { id:'us_market', title:'US Market',
@@ -1349,9 +1347,9 @@ function buildSchemas() {
           showIf:{ key:'us_market_import', equals:['Yes (Supply NDC/510(k) details as attachments)'] } },
       ]
     },
-    { id:'eo_treatment', title:'EO Fumigation Treatment',
+    { id:'eo_treatment', title:'EO Fumigation Treatment', grid:2,
       fields:[
-        { key:'eo_type', label:'Ethylene Oxide (EO) Fumigation Treatment Requested (tick one)', type:'radio', required:true,
+        { key:'eo_type', label:'Ethylene Oxide (EO) Fumigation Treatment Requested (tick one)', type:'radio', required:true, span:2,
           options:['Unvalidated (Biosecurity EO Cycle - AQIS 1200mg)','Routine','Validation'] },
         { key:'routine_rpi',    label:'Routine - RPI No',    type:'text',
           showIf:{ key:'eo_type', equals:['Routine'] } },
@@ -1409,13 +1407,13 @@ function buildSchemas() {
     },
 
     // 4. Treatment Requested
-    { id:'treatment_requested', title:'Treatment Requested',
+    { id:'treatment_requested', title:'Treatment Requested', grid:2,
       fields:[
-        { key:'treatment_modalities', label:'Treatment Requested', type:'checkbox',
+        { key:'treatment_modalities', label:'Treatment Requested', type:'checkbox', span:2,
           options:['Gamma Irradiation','Ethylene Oxide'] },
 
         // ---------- Gamma Irradiation ----------
-        { key:'gamma_pathway', label:'Gamma Irradiation — Regulatory pathway', type:'radio',
+        { key:'gamma_pathway', label:'Gamma Irradiation — Regulatory pathway', type:'radio', span:2,
           showIf:{ key:'treatment_modalities', equals:['Gamma Irradiation'] },
           options:[
             'Biosecurity Import/Export, Non-Medical, Non-Regulated purposes (Unvalidated)',
@@ -1431,7 +1429,7 @@ function buildSchemas() {
           ]}},
 
         // Gamma — ISO branch
-        { key:'gamma_iso_validation', label:'Gamma ISO/TGA/APVMA — Validation type', type:'radio',
+        { key:'gamma_iso_validation', label:'Gamma ISO/TGA/APVMA — Validation type', type:'radio', span:2,
           showIf:{ allOf:[
             { key:'treatment_modalities', equals:['Gamma Irradiation'] },
             { key:'gamma_pathway',        equals:['ISO11135, ISO11137, TGA, or APVMA purposes'] },
@@ -1455,7 +1453,7 @@ function buildSchemas() {
           ]}},
 
         // ---------- Ethylene Oxide ----------
-        { key:'eto_pathway', label:'Ethylene Oxide — Regulatory pathway', type:'radio',
+        { key:'eto_pathway', label:'Ethylene Oxide — Regulatory pathway', type:'radio', span:2,
           showIf:{ key:'treatment_modalities', equals:['Ethylene Oxide'] },
           options:[
             'Biosecurity Import/Export, Non-Medical, Non-Regulated purposes (Unvalidated)',
@@ -1464,7 +1462,7 @@ function buildSchemas() {
           help:'Biosecurity EO Cycle: 1200 g/m³ for five (5) hours at a minimum of 50 °C.' },
 
         // ETO — ISO branch
-        { key:'eto_iso_type', label:'Ethylene Oxide ISO/TGA/APVMA — Type', type:'radio',
+        { key:'eto_iso_type', label:'Ethylene Oxide ISO/TGA/APVMA — Type', type:'radio', span:2,
           showIf:{ allOf:[
             { key:'treatment_modalities', equals:['Ethylene Oxide'] },
             { key:'eto_pathway',          equals:['ISO11135, ISO11137, TGA, or APVMA purposes'] },
@@ -1482,7 +1480,7 @@ function buildSchemas() {
     // 5. Goods Storage Conditions
     { id:'storage', title:'Goods Storage Conditions',
       fields:[
-        { key:'storage_conditions', label:'Goods Storage Conditions', type:'radio',
+        { key:'storage_conditions', type:'radio', inline:true,
           options:['Uncontrolled','Customer-Specific (state below)'] },
         { key:'special_storage_requirements', label:'Special Processing/Storage Requirements', type:'textarea', rows:4 },
       ]
@@ -1502,14 +1500,14 @@ function buildSchemas() {
     { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'business_name',  label:'Business Name',  type:'text',  required:true, prefill:'company' },
-        { key:'contact_person', label:'Contact Person', type:'text',  required:true, prefill:'contact' },
-        { key:'address',        label:'Address',        type:'text',  required:true, span:2 },
-        { key:'suburb',         label:'Suburb',         type:'text',  required:true },
-        { key:'state',          label:'State',          type:'text',  required:true },
-        { key:'postcode',       label:'Postcode',       type:'text',  required:true },
+        { key:'contact_person', label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
         { key:'phone',          label:'Phone',          type:'phone', required:true, prefill:'phone' },
-        { key:'fax',            label:'Fax',            type:'text' },
         { key:'email',          label:'E-Mail',         type:'email', required:true, prefill:'email' },
+        { key:'state',          label:'State',          type:'text',  required:true },
+        { key:'suburb',         label:'Suburb',         type:'text',  required:true },
+        { key:'postcode',       label:'Postcode',       type:'text',  required:true },
+        { key:'fax',            label:'Fax',            type:'text' },
+        { key:'address',        label:'Address',        type:'text',  required:true },
       ]
     },
 
@@ -1579,7 +1577,7 @@ function buildSchemas() {
         { key:'qld_customer_number', label:'Steritech QLD Customer Number',type:'text',
           help:'6 Digit Number found on previous Invoice, COI, or Customer Agreement' },
         { key:'email',               label:'Email',                        type:'email', required:true, prefill:'email' },
-        { key:'address',             label:'Address',                      type:'text',  required:true, span:2 },
+        { key:'address',             label:'Address',                      type:'text',  required:true },
       ]
     },
     // 2. Consignment Details
@@ -1602,14 +1600,14 @@ function buildSchemas() {
         { key:'refrigerated',     label:'Need to be refrigerated?',  type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
         { key:'fragile_goods',    label:'Contain fragile goods?',    type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
         { key:'require_dry_ice',  label:'Require dry ice?',          type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
-        { key:'dry_ice_kg',       label:'If yes, quantity to be manufactured (KG)', type:'number', min:0, span:2,
+        { key:'dry_ice_kg',       label:'If yes, quantity to be manufactured (KG)', type:'number', min:0,
           showIf:{ key:'require_dry_ice', equals:['Yes'] } },
         { key:'tga_apvma',        label:'Contain goods regulated by the TGA or APVMA?', type:'radio', options:['Yes','No'], required:true, inline:true, span:2 },
         { key:'iso11137',         label:'Require processing compliant to ISO 11137',    type:'radio', options:['Yes','No'], required:true, inline:true, span:2,
           help:'If yes, please provide the below — ISO11137 TREATMENTS ONLY' },
-        { key:'rpi_number',       label:'RPI Number', type:'text', required:true,
-          showIf:{ key:'iso11137', equals:['Yes'] } },
         { key:'product_dose_range', label:'Product Dose Range (kGy)', type:'text', required:true,
+          showIf:{ key:'iso11137', equals:['Yes'] } },
+        { key:'rpi_number',       label:'RPI Number', type:'text', required:true,
           showIf:{ key:'iso11137', equals:['Yes'] } },
       ]
     },
@@ -1633,12 +1631,12 @@ function buildSchemas() {
   reg('NAR','bee-equipment','Request for Treatment of Bee Equipment (FRM-0240)','Gamma', [
     { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
-        { key:'contact_name',   label:'Contact name',   type:'text',  required:true, prefill:'name' },
         { key:'company_name',   label:'Company name',   type:'text',  required:true, prefill:'company' },
+        { key:'contact_name',   label:'Contact name',   type:'text',  required:true, prefill:'name' },
         { key:'business_phone', label:'Business phone', type:'phone', required:true, prefill:'phone' },
         { key:'mobile_phone',   label:'Mobile phone',   type:'phone' },
         { key:'email',          label:'Email',          type:'email', required:true, prefill:'email' },
-        { key:'address',        label:'Address',        type:'text',  required:true, span:2 },
+        { key:'address',        label:'Address',        type:'text',  required:true },
       ]
     },
     { id:'consignment', title:'Consignment Details', grid:2,
@@ -1648,7 +1646,7 @@ function buildSchemas() {
         { key:'pallet_quantity', label:'Quantity of pallets required', type:'number', min:1, span:2,
           showIf:{ key:'pallet_supplied_by_steritech', equals:['Yes'] } },
         { key:'dose',          label:'Dose',          type:'radio', options:['10 kGy','15 kGy'], required:true, inline:true, span:2 },
-        { key:'delivery_date', label:'Delivery date', type:'date', required:true, span:2 },
+        { key:'delivery_date', label:'Delivery date', type:'date', required:true },
       ]
     },
     { id:'lineItems', title:'Line Items & Pricing',
@@ -1701,10 +1699,10 @@ function buildSchemas() {
     { id:'customer', title:'Customer Details', prefill:true, grid:2,
       fields:[
         { key:'company_name',   label:'Company Name',   type:'text',  required:true, prefill:'company' },
+        { key:'contact_name',   label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
         { key:'business_phone', label:'Business Phone', type:'phone', required:true, prefill:'phone' },
         { key:'mobile_phone',   label:'Mobile Phone',   type:'phone' },
-        { key:'contact_name',   label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
-        { key:'email',          label:'Email',          type:'email', required:true, prefill:'email', span:2 },
+        { key:'email',          label:'Email',          type:'email', required:true, prefill:'email' },
       ]
     },
     // 2. Consignment Details (header fields + 6-line table)
@@ -1750,7 +1748,7 @@ function buildSchemas() {
         { key:'contact_name',   label:'Contact Name',   type:'text',  required:true, prefill:'contact' },
         { key:'contact_number', label:'Contact Number', type:'phone', required:true, prefill:'phone' },
         { key:'email',          label:'Email',          type:'email', required:true, prefill:'email' },
-        { key:'address',        label:'Address',        type:'text',  required:true, span:2 },
+        { key:'address',        label:'Address',        type:'text',  required:true },
       ]
     },
 
@@ -1763,7 +1761,7 @@ function buildSchemas() {
         { key:'flower_batch_number', label:'Flower Batch Number',        type:'text', required:true },
         { key:'strain_name',         label:'Strain Name',                type:'text', required:true },
         { key:'grower_country',      label:'Grower Country',             type:'text', required:true },
-        { key:'total_weight_kg',     label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0, required:true, span:2,
+        { key:'total_weight_kg',     label:'Total Weight of Flower (kgs)', type:'number', step:0.001, min:0, required:true,
           help:'Enter to 3 decimal places' },
         { key:'tgo93_tested',        label:'Bulk batch (TGO 93) tested at GMP approved lab prior to Steritech?',
           type:'radio', required:true, span:2,
@@ -1777,7 +1775,7 @@ function buildSchemas() {
           options:['No','Yes – treatment certificate attached'] },
         { key:'odc_imported',        label:"Has the Flower been imported under Steritech's ODC import license?",
           type:'radio', required:true, inline:true, span:2, options:['No','Yes'] },
-        { key:'import_permit_number',label:'Import permit number', type:'text', required:true, span:2,
+        { key:'import_permit_number',label:'Import permit number', type:'text', required:true,
           showIf:{ key:'odc_imported', equals:['Yes'] } },
       ]
     },
@@ -4534,8 +4532,10 @@ const FormRenderer = {
 
             <div :class="sec.grid === 3 ? 'p-6 grid grid-cols-1 sm:grid-cols-3 gap-x-6 gap-y-5' : sec.grid === 2 ? 'p-6 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5' : 'p-6 space-y-5'">
               <!-- Regular fields -->
-              <div v-for="f in sec.fields || []" :key="f.key" :class="[sec.grid && f.span === 3 ? 'sm:col-span-3' : '', sec.grid && f.span === 2 ? 'sm:col-span-2' : '']">
-                <div v-if="visibleField(f) && !hiddenInDeclaration(sec, f)">
+              <template v-for="f in sec.fields || []" :key="f.key">
+              <div v-if="visibleField(f) && !hiddenInDeclaration(sec, f)"
+                   :class="[sec.grid && f.span === 3 ? 'sm:col-span-3' : '', sec.grid && f.span === 2 ? 'sm:col-span-2' : '']">
+                <div>
                   <label v-if="f.label && !(f.type==='signature' && declarationOpts.type==='checkbox')" :for="'fld-'+f.key" class="block text-sm font-medium text-slate-800 mb-1.5">
                     {{ f.label }}
                     <span v-if="isFieldRequired(f)" class="text-red-600" aria-hidden="true">*</span>
@@ -4686,6 +4686,7 @@ const FormRenderer = {
                   </div>
                 </div>
               </div>
+              </template>
 
               <!-- Repeater -->
               <div v-if="sec.repeater" :class="['-mx-6', sec.grid===3 ? 'sm:col-span-3' : sec.grid===2 ? 'sm:col-span-2' : '']">
