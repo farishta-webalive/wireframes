@@ -562,6 +562,7 @@ const state = reactive({
   authed: false,
   role: 'customer',                 // 'customer' | 'admin' (mock role toggle)
   profile: { ...seedProfile },
+  adminProfile: { contact: 'Ben Heard', email: 'ben.heard@steritech.com.au' },
   commodities: [...seedCommodities],
   consignors:  [...seedConsignors],
   consignees:  [...seedConsignees],
@@ -2309,8 +2310,13 @@ const UserChip = {
   },
   computed:{
     state(){ return state; },
-    initials(){ return (state.profile.contact || '').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase(); },
-    facilityCount(){ return (state.profile.facilities || []).length; }
+    initials(){
+      const name = state.role === 'admin' ? state.adminProfile.contact : state.profile.contact;
+      return (name || '').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+    },
+    facilityCount(){ return (state.profile.facilities || []).length; },
+    displayName(){ return state.role === 'admin' ? state.adminProfile.contact : state.profile.contact; },
+    displayEmail(){ return state.role === 'admin' ? state.adminProfile.email : state.profile.email; }
   },
   methods:{
     toggle(e){ if (e) e.stopPropagation(); this.open = !this.open; },
@@ -2335,13 +2341,13 @@ const UserChip = {
         <span class="w-10 h-10 shrink-0 rounded-full bg-teal-600 text-white flex items-center justify-center text-sm font-semibold">{{ initials }}</span>
         <div class="min-w-0 flex-1">
           <div class="flex items-center gap-2">
-            <span class="text-sm font-semibold text-navy-900 truncate">{{ state.profile.contact }}</span>
+            <span class="text-sm font-semibold text-navy-900 truncate">{{ displayName }}</span>
             <span :class="['shrink-0 text-[10px] uppercase tracking-wide font-semibold px-1.5 py-0.5 rounded-sm', state.role === 'admin' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-700']">{{ state.role === 'admin' ? 'Admin' : 'Customer' }}</span>
           </div>
-          <div class="text-xs text-slate-500 truncate mt-0.5">{{ state.profile.email }}</div>
+          <div class="text-xs text-slate-500 truncate mt-0.5">{{ displayEmail }}</div>
         </div>
       </div>
-      <div class="px-4 py-3 border-b border-slate-100 space-y-1.5 text-sm">
+      <div v-if="state.role !== 'admin'" class="px-4 py-3 border-b border-slate-100 space-y-1.5 text-sm">
         <div class="flex items-start gap-2 text-slate-700">
           <Icon name="building-2" :size="14" cls="text-slate-400 shrink-0 mt-0.5"/>
           <span class="truncate">{{ state.profile.company }}</span>
@@ -2377,8 +2383,19 @@ const Sidebar = {
           <div :class="['text-[10px] font-semibold uppercase tracking-wider mb-1', state.role==='admin' ? 'text-amber-600' : 'text-slate-500']">
             {{ state.role==='admin' ? 'Steritech Admin' : 'Customer Portal' }}
           </div>
-          <div class="text-sm font-semibold text-navy-900 truncate">{{ state.profile.company }}</div>
-          <div class="text-xs text-slate-500">{{ state.profile.bcCustomerNumber }}</div>
+          <template v-if="state.role==='admin'">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="w-8 h-8 shrink-0 rounded-full bg-teal-500 text-white flex items-center justify-center text-xs font-semibold">{{ adminInitials }}</span>
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-navy-900 truncate leading-tight">{{ state.adminProfile.contact }}</div>
+                <div class="text-[11px] text-slate-500 truncate leading-tight">Platform admin</div>
+              </div>
+            </div>
+          </template>
+          <template v-else>
+            <div class="text-sm font-semibold text-navy-900 truncate">{{ state.profile.company }}</div>
+            <div class="text-xs text-slate-500">{{ state.profile.bcCustomerNumber }}</div>
+          </template>
         </div>
         <button v-if="asDrawer" @click="closeDrawer" class="p-1 rounded hover:bg-slate-100 focus-ring text-slate-500">
           <Icon name="x" :size="18"/>
@@ -2418,6 +2435,9 @@ const Sidebar = {
   },
   computed:{
     state(){ return state; },
+    adminInitials(){
+      return (state.adminProfile.contact || '').split(' ').map(s => s[0]).slice(0, 2).join('').toUpperCase();
+    },
     customerItems(){
       // Admin role doesn't see customer-side workflows.
       if (state.role === 'admin') {
