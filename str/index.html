@@ -275,6 +275,68 @@ const seedCompanies = [
     facilities:['NAR'],                   services:['Gamma'],             status:'Active',  created:'2025-06-03' },
 ];
 
+/* ---------- Seed company contacts (admin · per-person logins) ---------------- */
+/* Additional contacts under existing companies. The Primary Contact lives on the
+   company record itself; these are extra users (operations, finance, dispatch,
+   etc.) who can log in and submit on the company's behalf. Used by the "Add
+   Company" popup contact list and the company-view modal. */
+const seedCompanyContacts = [
+  { id:'CONT-2001', companyId:'COMP-1001', companyName:'Sunraysia Organic Pty Ltd', name:'Maya Patel',     phone:'+61 3 5021 1122', email:'maya.patel@sunraysia-organic.com.au',
+    facilities:['DAN','MER'],        services:['Gamma','GMP'],     status:'Active',  created:'2024-09-02' },
+  { id:'CONT-2002', companyId:'COMP-1001', companyName:'Sunraysia Organic Pty Ltd', name:'Lewis Carter',   phone:'+61 3 5021 1188', email:'lewis.carter@sunraysia-organic.com.au',
+    facilities:['WPK','NAR'],        services:['Gamma'],           status:'Active',  created:'2024-10-15' },
+  { id:'CONT-2003', companyId:'COMP-1001', companyName:'Sunraysia Organic Pty Ltd', name:'Hannah O’Connell', phone:'+61 3 5021 1190', email:'hannah.oconnell@sunraysia-organic.com.au',
+    facilities:['DAN'],              services:['ETO'],             status:'Pending', created:'2026-04-30' },
+  { id:'CONT-2004', companyId:'COMP-1003', companyName:'Bellarine Botanics',         name:'Mark Thompson',  phone:'+61 3 5258 9911', email:'mark.thompson@bellarinebotanics.com.au',
+    facilities:['MER'],              services:['Gamma','GMP'],     status:'Active',  created:'2025-02-18' },
+  { id:'CONT-2005', companyId:'COMP-1003', companyName:'Bellarine Botanics',         name:'Olivia Webb',    phone:'+61 3 5258 9912', email:'olivia.webb@bellarinebotanics.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-05-04' },
+  { id:'CONT-2006', companyId:'COMP-1004', companyName:'Perfection Fresh Australia', name:'Priya Singh',    phone:'+61 2 9741 8090', email:'priya.singh@perfectionfresh.com.au',
+    facilities:['WPK'],              services:['Gamma'],           status:'Active',  created:'2025-01-12' },
+  { id:'CONT-2007', companyId:'COMP-1005', companyName:'Kingsgrove Medical',         name:'James O’Reilly', phone:'+61 2 9132 7711', email:'james.oreilly@kingsgrovemed.com.au',
+    facilities:['WPK','DAN'],        services:['Gamma','ETO'],     status:'Active',  created:'2024-07-21' },
+  { id:'CONT-2008', companyId:'COMP-1005', companyName:'Kingsgrove Medical',         name:'Sophie Lin',     phone:'+61 2 9132 7715', email:'sophie.lin@kingsgrovemed.com.au',
+    facilities:['DAN'],              services:['ETO'],             status:'Active',  created:'2025-03-30' },
+  { id:'CONT-2009', companyId:'COMP-1007', companyName:'Queensland Biolab',          name:'Daniel Cho',     phone:'+61 7 3899 4433', email:'daniel.cho@qldbiolab.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-04-08' },
+  { id:'CONT-2010', companyId:'COMP-1009', companyName:'Chemist Warehouse DC',       name:'Aisha Khan',     phone:'+61 3 9213 7611', email:'aisha.khan@chemistwarehouse.com.au',
+    facilities:['DAN','MER'],        services:['Gamma','GMP'],     status:'Active',  created:'2024-11-20' },
+  { id:'CONT-2011', companyId:'COMP-1009', companyName:'Chemist Warehouse DC',       name:'Brendan Fisher', phone:'+61 3 9213 7622', email:'brendan.fisher@chemistwarehouse.com.au',
+    facilities:['MER'],              services:['GMP'],             status:'Active',  created:'2025-08-14' },
+  { id:'CONT-2012', companyId:'COMP-1010', companyName:'NSW Health Logistics',       name:'Karen Liu',      phone:'+61 2 9391 9011', email:'karen.liu@health.nsw.gov.au',
+    facilities:['WPK'],              services:['Gamma','ETO'],     status:'Active',  created:'2024-05-14' },
+  // Top End Apiaries — operations + logistics contacts under Jake Marsh.
+  { id:'CONT-2013', companyId:'COMP-1002', companyName:'Top End Apiaries',           name:'Tom Walters',    phone:'+61 8 8999 2244', email:'tom.walters@topendapiaries.com.au',
+    facilities:['DAN'],              services:['Gamma'],           status:'Active',  created:'2025-03-18' },
+  { id:'CONT-2014', companyId:'COMP-1002', companyName:'Top End Apiaries',           name:'Rachel Beard',   phone:'+61 8 8999 2266', email:'rachel.beard@topendapiaries.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-07-02' },
+  // Auspharm Wholesalers — onboarding still Pending, so both contacts inherit Pending status.
+  { id:'CONT-2015', companyId:'COMP-1006', companyName:'Auspharm Wholesalers',       name:'Caleb Watson',   phone:'+61 3 8741 5511', email:'caleb.watson@auspharm.com.au',
+    facilities:['MER'],              services:['GMP'],             status:'Pending', created:'2026-04-22' },
+  { id:'CONT-2016', companyId:'COMP-1006', companyName:'Auspharm Wholesalers',       name:'Jana Kowalski',  phone:'+61 3 8741 5519', email:'jana.kowalski@auspharm.com.au',
+    facilities:['MER'],              services:['GMP'],             status:'Pending', created:'2026-04-29' },
+  // Sunshine Coast Apiary — small NAR-only operation, two field staff.
+  { id:'CONT-2017', companyId:'COMP-1008', companyName:'Sunshine Coast Apiary',      name:'David Lyle',     phone:'+61 7 5491 3077', email:'david.lyle@sunshineapiary.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-04-14' },
+  { id:'CONT-2018', companyId:'COMP-1008', companyName:'Sunshine Coast Apiary',      name:'Tina Mohammed',  phone:'+61 7 5491 3088', email:'tina.mohammed@sunshineapiary.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-06-09' },
+  // Golden Hive Co-op — still Pending; only the primary is fully Active.
+  { id:'CONT-2019', companyId:'COMP-1011', companyName:'Golden Hive Co-op',          name:'Greg Pellegrini',phone:'+61 3 5781 2233', email:'greg.pellegrini@goldenhive.coop',
+    facilities:['DAN'],              services:['Gamma'],           status:'Pending', created:'2026-04-25' },
+  { id:'CONT-2020', companyId:'COMP-1011', companyName:'Golden Hive Co-op',          name:'Yuki Tanaka',    phone:'+61 3 5781 2244', email:'yuki.tanaka@goldenhive.coop',
+    facilities:['NAR'],              services:['Gamma'],           status:'Pending', created:'2026-04-26' },
+  { id:'CONT-2021', companyId:'COMP-1011', companyName:'Golden Hive Co-op',          name:'Olivia Zhou',    phone:'+61 3 5781 2255', email:'olivia.zhou@goldenhive.coop',
+    facilities:['DAN','NAR'],        services:['Gamma'],           status:'Active',  created:'2026-05-02' },
+  // BioSeq Pty Ltd — small Narangba lab, two scientists with portal access.
+  { id:'CONT-2022', companyId:'COMP-1012', companyName:'BioSeq Pty Ltd',             name:'Anita Reddy',    phone:'+61 7 3211 8822', email:'anita.reddy@bioseq.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-07-18' },
+  { id:'CONT-2023', companyId:'COMP-1012', companyName:'BioSeq Pty Ltd',             name:'Stuart Foley',   phone:'+61 7 3211 8833', email:'stuart.foley@bioseq.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-10-04' },
+  // Bellarine Botanics — additional QA contact on top of the existing two.
+  { id:'CONT-2024', companyId:'COMP-1003', companyName:'Bellarine Botanics',         name:'Ling Chen',      phone:'+61 3 5258 9920', email:'ling.chen@bellarinebotanics.com.au',
+    facilities:['MER'],              services:['GMP'],             status:'Active',  created:'2025-09-22' },
+];
+
 // Forms across 4 facilities. `shared_with` lets one canonical row serve multiple facilities
 // (e.g. FRM-0359 shared MER + NAR). Empty = facility-exclusive.
 const FORM_CATALOG = [
@@ -624,7 +686,7 @@ const state = reactive({
   // Admin: companies directory (replaces legacy "customers" in the admin sidebar)
   companies: [...seedCompanies],
   // Admin: company contacts (per-person logins under a company)
-  companyContacts: [],
+  companyContacts: [...seedCompanyContacts],
   // Admin: maintenance banner (visible to everyone when enabled)
   maintenanceBanner: {
     enabled: false,
@@ -2513,10 +2575,9 @@ const Sidebar = {
     },
     adminItems(){
       return [
-        { to:'/admin/companies',         label:'Companies',                 icon:'building-2' },
-        { to:'/admin/companies/new',     label:'Onboard a New Company',     icon:'building' },
-        { to:'/admin/contacts/new',      label:'Onboard a Company Contact', icon:'user-plus' },
-        { to:'/settings',                label:'Settings',                  icon:'settings-2' },
+        { to:'/admin/companies',         label:'Companies',           icon:'building-2' },
+        { to:'/admin/contacts/new',      label:'Add New Contact',     icon:'user-plus' },
+        { to:'/settings',                label:'Settings',            icon:'settings-2' },
       ];
     }
   }
@@ -5406,7 +5467,12 @@ const OrderDetailPage = {
       return this.order ? FACILITIES.find(f => f.code === this.order.facility) : null;
     },
     inScope(){
-      return !!this.order && this.order.facility === state.profile.currentFacility;
+      if (!this.order) return false;
+      // Admins are not scoped to a single facility — they can open any order
+      // (e.g. via the Company detail Messages tab) without being asked to
+      // "switch site" first.
+      if (state.role === 'admin') return true;
+      return this.order.facility === state.profile.currentFacility;
     },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
@@ -6857,7 +6923,7 @@ const AdminConsolePage = {
             <router-link to="/admin/companies/new"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
               <Icon name="building" :size="16" cls="text-slate-500 shrink-0"/>
-              <span class="flex-1 text-base text-navy-900">Onboard a new company</span>
+              <span class="flex-1 text-base text-navy-900">Add Company</span>
               <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
             </router-link>
           </li>
@@ -6865,7 +6931,7 @@ const AdminConsolePage = {
             <router-link to="/admin/contacts/new"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
               <Icon name="user-plus" :size="16" cls="text-slate-500 shrink-0"/>
-              <span class="flex-1 text-base text-navy-900">Onboard a company contact</span>
+              <span class="flex-1 text-base text-navy-900">Add New Contact</span>
               <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
             </router-link>
           </li>
@@ -7395,6 +7461,21 @@ const OnboardCompanyPage = {
       access: buildEmptyAccess(),
       formAccess: buildEmptyFormAccess(),
       submitAttempted: false,
+      // Inline "additional contacts" — extra people who'll be created alongside
+      // the primary contact when the admin clicks Send invitation. Each row
+      // collects name (required), phone, and email (required). Blank rows are
+      // ignored on submit; partially-filled rows surface a validation error.
+      additionalContacts: [],
+      // Auto-detect existing company on the Company name input.
+      // matchPrompt holds the matched company while we wait for the admin to
+      // confirm via the "load existing details" popup. loadedCompanyId is set
+      // after the admin says Yes — it switches the page into "edit existing
+      // company" mode and reveals the contacts list. dismissedMatchIds remembers
+      // companies the admin already said No to, so the popup doesn't re-fire on
+      // every keystroke.
+      matchPrompt: null,
+      loadedCompanyId: null,
+      dismissedMatchIds: [],
     };
   },
   computed:{
@@ -7462,8 +7543,21 @@ const OnboardCompanyPage = {
     },
     accessValid(){ return this.grantedFacilities.length > 0; },
     formAccessValid(){ return this.treatmentsMissingForms.length === 0; },
+    additionalContactsValid(){
+      // Each row must be either fully blank (will be discarded) or have both
+      // name and email filled. Half-filled rows are an error.
+      return this.additionalContacts.every(c => {
+        const blank = !c.name.trim() && !c.phone.trim() && !c.email.trim();
+        const complete = c.name.trim() && c.email.trim();
+        return blank || complete;
+      });
+    },
     formValid(){
-      return this.companyDetailsValid && this.contactDetailsValid && this.accessValid && this.formAccessValid;
+      return this.companyDetailsValid
+        && this.contactDetailsValid
+        && this.accessValid
+        && this.formAccessValid
+        && this.additionalContactsValid;
     },
     treatmentLabels(){ return TREATMENT_LABELS; },
     treatmentStyles(){ return TREATMENT_STYLES; },
@@ -7474,12 +7568,44 @@ const OnboardCompanyPage = {
       if (!this.contactDetailsValid) n++;
       if (!this.accessValid) n++;
       if (this.accessValid && !this.formAccessValid) n++;
+      if (!this.additionalContactsValid) n++;
       return n;
+    },
+    loadedCompany(){
+      return this.loadedCompanyId ? state.companies.find(c => c.id === this.loadedCompanyId) : null;
+    },
+    loadedContacts(){
+      if (!this.loadedCompany) return [];
+      return state.companyContacts.filter(ct => ct.companyId === this.loadedCompany.id);
+    },
+  },
+  watch:{
+    'f.name'(value){
+      // Auto-detect an existing company by name (case-insensitive, trimmed).
+      // Surfaces a popup so the admin can choose whether to load the record.
+      const q = (value || '').trim().toLowerCase();
+      if (!q) { this.matchPrompt = null; return; }
+      // If we already loaded a company and the admin is still typing its name,
+      // do nothing — the form is already populated with that record.
+      if (this.loadedCompany && this.loadedCompany.name.toLowerCase() === q) return;
+      // Find a case-insensitive exact name match, or a prefix match of >= 3 chars.
+      const exact = state.companies.find(c => c.name.toLowerCase() === q);
+      const prefix = exact ? null : (q.length >= 3
+        ? state.companies.find(c => c.name.toLowerCase().startsWith(q))
+        : null);
+      const match = exact || prefix;
+      if (!match) { this.matchPrompt = null; return; }
+      // Respect a previous "No" for this match so we don't badger the admin.
+      if (this.dismissedMatchIds.includes(match.id)) return;
+      this.matchPrompt = match;
     },
   },
   methods:{
     formsAt(facCode, service){ return formsAtForCatalog(facCode, service); },
     formMeta(key){ return onboardCompanyFormMeta(key); },
+    statusDot(s){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
+    },
     onTreatmentToggle(facCode, service){
       const isOn = !!this.access[facCode][service];
       for (const form of this.formsAt(facCode, service)) {
@@ -7491,25 +7617,246 @@ const OnboardCompanyPage = {
         this.formAccess[facCode][form.key] = value;
       }
     },
+    confirmLoadMatch(){
+      const c = this.matchPrompt;
+      if (!c) return;
+      this.f.name = c.name;
+      this.f.abn = c.abn;
+      this.f.phone = c.phone || '';
+      this.f.email = c.email;
+      this.f.contactName = c.primaryContact?.name || '';
+      this.f.contactPhone = c.primaryContact?.phone || '';
+      this.f.contactEmail = c.primaryContact?.email && c.primaryContact.email !== c.email ? c.primaryContact.email : '';
+      // Rebuild the matrix from the company's existing facility/service grants.
+      const a = buildEmptyAccess();
+      const fa = buildEmptyFormAccess();
+      FACILITIES.forEach(fac => {
+        if (!c.facilities.includes(fac.code)) return;
+        TREATMENT_SERVICES.forEach(s => {
+          if (!c.services.includes(s) || !fac.services.includes(s)) return;
+          a[fac.code][s] = true;
+          formsAtForCatalog(fac.code, s).forEach(form => { fa[fac.code][form.key] = true; });
+        });
+      });
+      this.access = a;
+      this.formAccess = fa;
+      this.loadedCompanyId = c.id;
+      this.matchPrompt = null;
+      showToast(`Loaded ${c.name}. You can edit details or add a new contact below.`, 'success');
+    },
+    dismissMatch(){
+      if (this.matchPrompt) this.dismissedMatchIds.push(this.matchPrompt.id);
+      this.matchPrompt = null;
+    },
+    clearLoadedCompany(){
+      // Reset to a blank form so the admin can register a different company.
+      this.f = { name:'', abn:'', phone:'', email:'', contactName:'', contactPhone:'', contactEmail:'' };
+      this.access = buildEmptyAccess();
+      this.formAccess = buildEmptyFormAccess();
+      this.additionalContacts = [];
+      this.loadedCompanyId = null;
+      this.dismissedMatchIds = [];
+      this.matchPrompt = null;
+      this.submitAttempted = false;
+    },
+    addAdditionalContact(){
+      // customize=false means inherit the company's facility + service grants.
+      // When the admin clicks "Customize access", we seed customAccess from
+      // the company's current grants (so they're un-ticking, not starting blank).
+      // customizeForms=false means inherit the company's form access.
+      this.additionalContacts.push({
+        name:'', phone:'', email:'',
+        customize:false, customAccess:null,
+        customizeForms:false, customFormAccess:null,
+      });
+    },
+    removeAdditionalContact(i){
+      this.additionalContacts.splice(i, 1);
+    },
+    enableContactCustomAccess(i){
+      const contact = this.additionalContacts[i];
+      // Seed the contact's custom matrix from the company's current grants
+      // — admins narrow from there rather than starting blank.
+      const ca = {};
+      FACILITIES.forEach(f => {
+        const row = {};
+        TREATMENT_SERVICES.forEach(s => { row[s] = !!this.access[f.code][s]; });
+        ca[f.code] = row;
+      });
+      contact.customAccess = ca;
+      contact.customize = true;
+    },
+    disableContactCustomAccess(i){
+      const contact = this.additionalContacts[i];
+      contact.customize = false;
+      contact.customAccess = null;
+      // If forms were customized off a now-removed facility/service, those
+      // ticks will be silently ignored on save (the persist step filters by
+      // the contact's effective access). Keep customizeForms intact so the
+      // admin doesn't lose unrelated picks.
+    },
+    enableContactCustomForms(i){
+      const contact = this.additionalContacts[i];
+      // Seed from the company's current form grants.
+      contact.customFormAccess = JSON.parse(JSON.stringify(this.formAccess));
+      contact.customizeForms = true;
+    },
+    disableContactCustomForms(i){
+      const contact = this.additionalContacts[i];
+      contact.customizeForms = false;
+      contact.customFormAccess = null;
+    },
+    contactGrantedFacilities(i){
+      // Facilities ticked on the company-level matrix (the cap on contact access).
+      return this.grantedFacilities.map(f => f.code);
+    },
+    contactCustomFacilities(i){
+      // Facilities the contact will have access to under their custom matrix.
+      const ca = this.additionalContacts[i].customAccess;
+      if (!ca) return [];
+      return FACILITIES.filter(f => TREATMENT_SERVICES.some(s => ca[f.code][s])).map(f => f.code);
+    },
+    /* Build the per-contact list of {fac, treatments:[{service, forms:[]}]} —
+       same shape as the page-level formGroups but driven by the contact's
+       effective access (custom matrix if set, else the company-level matrix). */
+    contactFormGroups(i){
+      const contact = this.additionalContacts[i];
+      const useCustom = contact.customize && contact.customAccess;
+      const groups = [];
+      for (const fac of FACILITIES) {
+        const facHasAny = TREATMENT_SERVICES.some(s =>
+          useCustom ? contact.customAccess[fac.code][s] : this.access[fac.code][s]
+        );
+        if (!facHasAny) continue;
+        const treatments = [];
+        for (const s of TREATMENT_SERVICES) {
+          const granted = useCustom ? contact.customAccess[fac.code][s] : this.access[fac.code][s];
+          if (!granted) continue;
+          const forms = formsAtForCatalog(fac.code, s);
+          if (forms.length) treatments.push({ service: s, forms });
+        }
+        if (treatments.length) groups.push({ fac, treatments });
+      }
+      return groups;
+    },
+    contactGrantedFormCount(i){
+      const contact = this.additionalContacts[i];
+      if (!contact.customizeForms || !contact.customFormAccess) {
+        // Inherited: count company's granted forms within the contact's effective access.
+        let n = 0;
+        for (const g of this.contactFormGroups(i)) {
+          for (const t of g.treatments) {
+            for (const form of t.forms) {
+              if (this.formAccess[g.fac.code][form.key]) n++;
+            }
+          }
+        }
+        return n;
+      }
+      let n = 0;
+      for (const g of this.contactFormGroups(i)) {
+        for (const t of g.treatments) {
+          for (const form of t.forms) {
+            if (contact.customFormAccess[g.fac.code][form.key]) n++;
+          }
+        }
+      }
+      return n;
+    },
     cancel(){ this.$router.push('/admin/companies'); },
+    persistAdditionalContacts(companyId, companyName, facs, svcArr, status, today){
+      // Drop blank rows; validation already guaranteed remaining rows have name + email.
+      const rows = this.additionalContacts.filter(c => c.name.trim() && c.email.trim());
+      if (!rows.length) return 0;
+      let nextNum = state.companyContacts.reduce((m,c) => {
+        const n = parseInt((c.id || '').replace(/[^0-9]/g,''), 10);
+        return isNaN(n) ? m : Math.max(m, n);
+      }, 2000);
+      for (const r of rows) {
+        nextNum++;
+        // Resolve effective access: custom (when the admin toggled "Customize"
+        // and ticked at least one cell) falls back to the company's grants.
+        let cFacs = facs.slice(), cSvcs = svcArr.slice();
+        if (r.customize && r.customAccess) {
+          const fset = [], sset = new Set();
+          FACILITIES.forEach(f => {
+            const any = TREATMENT_SERVICES.some(s => r.customAccess[f.code][s]);
+            if (any) {
+              fset.push(f.code);
+              TREATMENT_SERVICES.forEach(s => { if (r.customAccess[f.code][s]) sset.add(s); });
+            }
+          });
+          if (fset.length) { cFacs = fset; cSvcs = Array.from(sset); }
+        }
+        // Resolve effective form access: custom per-contact forms when toggled,
+        // else inherit the company's formAccess (filtered to the contact's facilities).
+        const formAccessOut = {};
+        const sourceFA = (r.customizeForms && r.customFormAccess) ? r.customFormAccess : this.formAccess;
+        for (const fc of cFacs) {
+          formAccessOut[fc] = {};
+          for (const form of FORM_CATALOG.filter(fm => fm.facility === fc)) {
+            formAccessOut[fc][form.key] = !!(sourceFA[fc] && sourceFA[fc][form.key]);
+          }
+        }
+        state.companyContacts.unshift({
+          id: 'CONT-' + nextNum,
+          companyId,
+          companyName,
+          name: r.name.trim(),
+          phone: r.phone.trim(),
+          email: r.email.trim(),
+          facilities: cFacs,
+          services: cSvcs,
+          formAccess: formAccessOut,
+          status,
+          created: today,
+        });
+      }
+      return rows.length;
+    },
     sendInvite(){
       this.submitAttempted = true;
       if (!this.formValid) {
         showToast('Fix the issues highlighted before sending the invitation.', 'error');
         return;
       }
-      // Persist into state.companies so the new entry shows up in the list.
+      const facs = this.grantedFacilities.map(f => f.code);
+      const svcSet = new Set();
+      facs.forEach(fc => TREATMENT_SERVICES.forEach(s => { if (this.access[fc][s]) svcSet.add(s); }));
+      const svcArr = Array.from(svcSet);
+      const today = new Date().toISOString().slice(0,10);
+      // If a company is loaded, treat this as an update rather than a new record.
+      if (this.loadedCompany) {
+        const c = this.loadedCompany;
+        c.name = this.f.name.trim();
+        c.abn = this.f.abn.trim();
+        c.phone = this.f.phone.trim();
+        c.email = this.f.email.trim();
+        c.primaryContact = {
+          name: this.f.contactName.trim(),
+          phone: this.f.contactPhone.trim(),
+          email: (this.f.contactEmail || '').trim() || this.f.email.trim(),
+        };
+        c.facilities = facs;
+        c.services = svcArr;
+        const added = this.persistAdditionalContacts(c.id, c.name, facs, svcArr, c.status === 'Pending' ? 'Pending' : 'Active', today);
+        showToast(added
+          ? `Updated ${c.name}. Added ${added} ${added === 1 ? 'contact' : 'contacts'}.`
+          : `Updated ${c.name}.`,
+          'success');
+        this.$router.push('/admin/companies');
+        return;
+      }
+      // Otherwise persist into state.companies so the new entry shows up in the list.
       const nextNum = state.companies.reduce((m,c) => {
         const n = parseInt((c.id || '').replace(/[^0-9]/g,''), 10);
         return isNaN(n) ? m : Math.max(m, n);
       }, 1000) + 1;
-      const facs = this.grantedFacilities.map(f => f.code);
-      const svcSet = new Set();
-      facs.forEach(fc => TREATMENT_SERVICES.forEach(s => { if (this.access[fc][s]) svcSet.add(s); }));
-      const today = new Date().toISOString().slice(0,10);
+      const newId = 'COMP-' + nextNum;
+      const newName = this.f.name.trim();
       state.companies.unshift({
-        id: 'COMP-' + nextNum,
-        name: this.f.name.trim(),
+        id: newId,
+        name: newName,
         abn: this.f.abn.trim(),
         phone: this.f.phone.trim(),
         email: this.f.email.trim(),
@@ -7519,11 +7866,15 @@ const OnboardCompanyPage = {
           email: (this.f.contactEmail || '').trim() || this.f.email.trim(),
         },
         facilities: facs,
-        services: Array.from(svcSet),
+        services: svcArr,
         status: 'Pending',
         created: today,
       });
-      showToast(`Invitation sent to ${this.f.email}. Company record created.`, 'success');
+      const added = this.persistAdditionalContacts(newId, newName, facs, svcArr, 'Pending', today);
+      showToast(added
+        ? `Invitation sent to ${this.f.email}. Company + ${added} ${added === 1 ? 'contact' : 'contacts'} created.`
+        : `Invitation sent to ${this.f.email}. Company record created.`,
+        'success');
       this.$router.push('/admin/companies');
     },
   },
@@ -7534,9 +7885,21 @@ const OnboardCompanyPage = {
       </button>
 
       <div>
-        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Onboard a new company</h1>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Add Company</h1>
         <p class="text-sm text-slate-500 mt-1">Create a company record, register a primary contact, and grant facility access. The invitation sends after submit.</p>
       </div>
+
+      <!-- Existing-company banner: visible after the admin says "Yes" on the auto-detect popup -->
+      <section v-if="loadedCompany" class="bg-teal-50 border border-teal-200 rounded-md p-4 flex flex-col sm:flex-row sm:items-center gap-3">
+        <div class="flex items-start gap-3 min-w-0 flex-1">
+          <Icon name="info" :size="18" cls="text-teal-700 mt-0.5 shrink-0"/>
+          <div class="min-w-0 text-sm">
+            <div class="text-navy-900"><span class="font-medium">{{ loadedCompany.name }}</span> is already onboarded.</div>
+            <div class="text-slate-600 mt-0.5">You can edit any detail below, or use <span class="font-medium text-navy-900">Add another contact</span> to onboard more people in the same flow.</div>
+          </div>
+        </div>
+        <button type="button" @click="clearLoadedCompany" class="text-sm text-slate-700 hover:text-navy-900 underline shrink-0">Start fresh</button>
+      </section>
 
       <!-- A. Company Details -->
       <section class="bg-white border border-slate-200 rounded-md">
@@ -7546,8 +7909,12 @@ const OnboardCompanyPage = {
         <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <div class="md:col-span-2">
             <label for="co-name" class="block text-sm font-medium text-slate-700 mb-1.5">Company name <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="co-name" v-model="f.name" type="text" placeholder="e.g. Acme Foods Pty Ltd" autocomplete="organization"
+            <input id="co-name" v-model="f.name" type="text" placeholder="Start typing a company name…" autocomplete="organization"
                    class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <p class="mt-1 text-xs text-slate-500">
+              <span v-if="loadedCompany" class="text-teal-700 inline-flex items-center gap-1"><Icon name="check-circle-2" :size="12"/> Loaded from existing record.</span>
+              <span v-else>We’ll check this name against existing companies as you type.</span>
+            </p>
           </div>
           <div>
             <label for="co-abn" class="block text-sm font-medium text-slate-700 mb-1.5">ABN <span class="text-red-500" aria-hidden="true">*</span></label>
@@ -7592,6 +7959,194 @@ const OnboardCompanyPage = {
                    class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
             <p class="mt-1 text-xs text-slate-500">Leave blank to reuse the company email above.</p>
           </div>
+        </div>
+      </section>
+
+      <!-- B2. Additional contacts (inline) -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="users" :size="14" cls="text-slate-500"/> Additional contacts
+          <span v-if="additionalContacts.length" class="text-xs text-slate-500 font-normal">({{ additionalContacts.length }})</span>
+        </header>
+        <div class="p-5 space-y-4">
+          <p class="text-sm text-slate-500">
+            Other people who need their own login under this company. They'll be created when you {{ loadedCompany ? 'save changes' : 'send the invitation' }}.
+          </p>
+
+          <div v-if="loadedCompany && loadedContacts.length" class="rounded-md border border-slate-200">
+            <div class="px-4 py-2 bg-slate-50 text-xs text-slate-500">Already onboarded ({{ loadedContacts.length }})</div>
+            <ul class="divide-y divide-slate-200">
+              <li v-for="ct in loadedContacts" :key="ct.id" class="px-4 py-2.5 flex items-center justify-between gap-3 text-sm">
+                <div class="min-w-0 flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center h-7 w-7 rounded-full bg-slate-100 text-slate-700 text-xs font-medium shrink-0">{{ (ct.name || '?').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase() }}</span>
+                  <span class="text-navy-900 truncate">{{ ct.name }}</span>
+                </div>
+                <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
+                  <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
+                  <span>{{ ct.status }}</span>
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <div v-for="(c, i) in additionalContacts" :key="'ac-' + i" class="rounded-md border border-slate-200 p-4">
+            <div class="flex items-center justify-between gap-3 mb-3">
+              <span class="text-sm font-medium text-navy-900">New contact #{{ i + 1 }}</span>
+              <button type="button" @click="removeAdditionalContact(i)" class="text-xs text-slate-500 hover:text-red-600 focus-ring rounded inline-flex items-center gap-1">
+                <Icon name="x" :size="12" aria-hidden="true"/> Remove
+              </button>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div class="md:col-span-2">
+                <label :for="'ac-name-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
+                <input :id="'ac-name-' + i" v-model="c.name" type="text" placeholder="Full name" autocomplete="name"
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
+              <div>
+                <label :for="'ac-phone-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
+                <input :id="'ac-phone-' + i" v-model="c.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
+              <div>
+                <label :for="'ac-email-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
+                <input :id="'ac-email-' + i" v-model="c.email" type="email" placeholder="contact@company.com.au" autocomplete="email"
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                <p class="mt-1 text-xs text-slate-500">Becomes this contact's personal login.</p>
+              </div>
+            </div>
+
+            <!-- Access row: inherit by default, with a Customize toggle. -->
+            <div class="mt-4 pt-3 border-t border-slate-200">
+              <div v-if="!c.customize" class="flex flex-wrap items-center gap-2 text-sm">
+                <span class="text-slate-500">Access:</span>
+                <span v-if="grantedFacilities.length === 0" class="text-slate-400 italic">none yet — set facility access below</span>
+                <span v-else class="inline-flex items-center gap-1.5 text-navy-900">
+                  <Icon name="link" :size="12" cls="text-slate-400" aria-hidden="true"/>
+                  <span>Same as company</span>
+                  <span class="text-slate-500">({{ grantedFacilities.map(f => f.code).join(', ') }})</span>
+                </span>
+                <button type="button" @click="enableContactCustomAccess(i)"
+                        :disabled="grantedFacilities.length === 0"
+                        class="ml-auto text-xs font-medium text-teal-700 hover:text-teal-800 focus-ring rounded disabled:text-slate-300 disabled:cursor-not-allowed">
+                  Customize access
+                </button>
+              </div>
+
+              <div v-else>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="text-sm text-slate-700 inline-flex items-center gap-1.5">
+                    <Icon name="shield-check" :size="12" cls="text-slate-500" aria-hidden="true"/>
+                    Custom access (limited to company's grants)
+                  </span>
+                  <button type="button" @click="disableContactCustomAccess(i)" class="text-xs text-slate-500 hover:text-navy-900 focus-ring rounded">
+                    Reset to company access
+                  </button>
+                </div>
+                <div class="overflow-x-auto rounded-md border border-slate-200">
+                  <table class="w-full text-sm">
+                    <thead class="bg-slate-50 text-left text-[12px] text-slate-600 border-b border-slate-200">
+                      <tr>
+                        <th scope="col" class="px-3 py-2 font-medium">Facility</th>
+                        <th v-for="s in services" :key="s" scope="col" class="px-3 py-2 font-medium text-center w-24">
+                          <span class="inline-flex items-center gap-1">
+                            <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                            <span>{{ s }}</span>
+                          </span>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="fac in grantedFacilities" :key="fac.code" class="even:bg-slate-50/60">
+                        <td class="px-3 py-2.5">
+                          <div class="text-sm text-navy-900">{{ fac.name }}</div>
+                          <div class="text-[11px] text-slate-500">{{ fac.code }}</div>
+                        </td>
+                        <td v-for="s in services" :key="s" class="px-3 py-2.5 text-center">
+                          <input v-if="access[fac.code][s] && fac.services.includes(s)" type="checkbox"
+                                 v-model="c.customAccess[fac.code][s]"
+                                 :aria-label="s + ' at ' + fac.name + ' for new contact ' + (i + 1)"
+                                 class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                          <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not granted at company level"></span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <p v-if="contactCustomFacilities(i).length === 0" class="mt-2 text-xs text-amber-700 inline-flex items-center gap-1.5">
+                  <Icon name="alert-circle" :size="12" aria-hidden="true"/>
+                  No services ticked — this contact will fall back to company access on save.
+                </p>
+              </div>
+            </div>
+
+            <!-- Forms row: independent of access toggle, opt-in. -->
+            <div class="mt-3 pt-3 border-t border-slate-200">
+              <div v-if="!c.customizeForms" class="flex flex-wrap items-center gap-2 text-sm">
+                <span class="text-slate-500">Forms:</span>
+                <span v-if="contactFormGroups(i).length === 0" class="text-slate-400 italic">none yet — tick a treatment first</span>
+                <span v-else class="inline-flex items-center gap-1.5 text-navy-900">
+                  <Icon name="link" :size="12" cls="text-slate-400" aria-hidden="true"/>
+                  <span>Same as company</span>
+                  <span class="text-slate-500">({{ contactGrantedFormCount(i) }} {{ contactGrantedFormCount(i) === 1 ? 'form' : 'forms' }})</span>
+                </span>
+                <button type="button" @click="enableContactCustomForms(i)"
+                        :disabled="contactFormGroups(i).length === 0"
+                        class="ml-auto text-xs font-medium text-teal-700 hover:text-teal-800 focus-ring rounded disabled:text-slate-300 disabled:cursor-not-allowed">
+                  Customize specific forms
+                </button>
+              </div>
+              <div v-else>
+                <div class="flex items-center justify-between gap-2 mb-2">
+                  <span class="text-sm text-slate-700 inline-flex items-center gap-1.5">
+                    <Icon name="file-check-2" :size="12" cls="text-slate-500" aria-hidden="true"/>
+                    Custom forms ({{ contactGrantedFormCount(i) }} ticked)
+                  </span>
+                  <button type="button" @click="disableContactCustomForms(i)" class="text-xs text-slate-500 hover:text-navy-900 focus-ring rounded">
+                    Reset to company forms
+                  </button>
+                </div>
+                <div class="space-y-3">
+                  <div v-for="g in contactFormGroups(i)" :key="'cfg-' + i + '-' + g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
+                    <div class="px-3 py-1.5 bg-slate-50 border-b border-slate-200 text-xs">
+                      <span class="font-medium text-navy-900">{{ g.fac.name }}</span>
+                      <span class="text-slate-500 ml-1">{{ g.fac.code }}</span>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                      <div v-for="t in g.treatments" :key="'cft-' + i + '-' + g.fac.code + '-' + t.service" class="px-3 py-2">
+                        <div class="flex items-center gap-2 mb-1.5">
+                          <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[t.service] && treatmentStyles[t.service].dot]" aria-hidden="true"></span>
+                          <span class="text-xs font-medium text-navy-900">{{ treatmentLabels[t.service] || t.service }}</span>
+                        </div>
+                        <ul class="space-y-1">
+                          <li v-for="form in t.forms" :key="form.key" class="flex items-center gap-2 text-sm">
+                            <input type="checkbox"
+                                   :id="'cfa-' + i + '-' + g.fac.code + '-' + form.key"
+                                   v-model="c.customFormAccess[g.fac.code][form.key]"
+                                   :aria-label="form.name + ' at ' + g.fac.name + ' for new contact ' + (i + 1)"
+                                   class="w-4 h-4 rounded accent-teal-600 cursor-pointer shrink-0"/>
+                            <label :for="'cfa-' + i + '-' + g.fac.code + '-' + form.key" class="text-navy-900 cursor-pointer">
+                              {{ form.name }}
+                              <span class="font-mono text-[11px] text-slate-500 ml-1">{{ form.code }}</span>
+                            </label>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p v-if="submitAttempted && !additionalContactsValid" role="alert" class="text-sm text-red-600 inline-flex items-center gap-1.5">
+            <Icon name="alert-circle" :size="12" aria-hidden="true"/>
+            Each additional contact needs a name and email, or remove the row.
+          </p>
+
+          <button type="button" @click="addAdditionalContact"
+                  class="inline-flex items-center gap-2 text-sm font-medium text-teal-700 hover:text-teal-800 focus-ring rounded px-1 py-1">
+            <Icon name="plus" :size="14" aria-hidden="true"/> Add another contact
+          </button>
         </div>
       </section>
 
@@ -7720,12 +8275,39 @@ const OnboardCompanyPage = {
       <div class="border-t border-slate-200 pt-4 flex items-center gap-4 flex-wrap">
         <p v-if="submitAttempted && !formValid" role="alert" class="text-sm text-red-600 inline-flex items-center gap-2">
           <Icon name="alert-circle" :size="16" aria-hidden="true"/>
-          Fix {{ issueCount }} {{ issueCount === 1 ? 'issue' : 'issues' }} above before sending the invitation.
+          Fix {{ issueCount }} {{ issueCount === 1 ? 'issue' : 'issues' }} above before {{ loadedCompany ? 'saving' : 'sending the invitation' }}.
         </p>
         <div class="flex-1"></div>
         <button type="button" @click="cancel" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
-        <Btn icon="send" @click="sendInvite">Send invitation</Btn>
+        <Btn :icon="loadedCompany ? 'save' : 'send'" @click="sendInvite">{{ loadedCompany ? 'Save changes' : 'Send invitation' }}</Btn>
       </div>
+
+      <!-- Auto-detect popup: triggered by the watcher on f.name when an existing company is matched. -->
+      <transition name="fade">
+        <div v-if="matchPrompt" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="dismissMatch">
+          <div class="bg-white border border-slate-200 rounded-md w-full max-w-md overflow-hidden shadow-xl" role="dialog" aria-modal="true" aria-label="Existing company match">
+            <header class="px-5 py-4 border-b border-slate-200 flex items-start gap-3">
+              <span class="inline-flex items-center justify-center h-9 w-9 rounded-full bg-teal-100 text-teal-700 shrink-0"><Icon name="info" :size="18"/></span>
+              <div class="min-w-0">
+                <h2 class="text-base font-semibold text-navy-900 leading-snug">This company already exists</h2>
+                <p class="text-sm text-slate-600 mt-0.5"><span class="font-medium text-navy-900">{{ matchPrompt.name }}</span> is already onboarded. Do you want to load its details so you can edit them or add a new contact?</p>
+              </div>
+            </header>
+            <div class="px-5 py-4 text-sm">
+              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-slate-700">
+                <div><dt class="text-slate-500 text-xs">ABN</dt><dd class="tabular-nums">{{ matchPrompt.abn }}</dd></div>
+                <div><dt class="text-slate-500 text-xs">Phone</dt><dd>{{ matchPrompt.phone }}</dd></div>
+                <div class="sm:col-span-2"><dt class="text-slate-500 text-xs">Primary contact</dt><dd>{{ matchPrompt.primaryContact?.name }} &middot; <span class="text-slate-500">{{ matchPrompt.primaryContact?.email }}</span></dd></div>
+                <div class="sm:col-span-2"><dt class="text-slate-500 text-xs">Facilities</dt><dd>{{ matchPrompt.facilities.join(', ') }}</dd></div>
+              </dl>
+            </div>
+            <footer class="px-5 py-4 border-t border-slate-200 flex items-center justify-end gap-3">
+              <button type="button" @click="dismissMatch" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">No, keep typing</button>
+              <Btn icon="download" @click="confirmLoadMatch">Yes, load details</Btn>
+            </footer>
+          </div>
+        </div>
+      </transition>
     </div>
   `
 };
@@ -7746,6 +8328,12 @@ const OnboardCompanyContactPage = {
       formAccess: buildEmptyFormAccess(),
       submitAttempted: false,
     };
+  },
+  created(){
+    // Pre-select company when navigated from a company-details popup
+    // (router-link target: /admin/contacts/new?companyId=COMP-XXXX).
+    const q = this.$route.query.companyId;
+    if (q && state.companies.some(c => c.id === q)) this.companyId = q;
   },
   computed:{
     state(){ return state; },
@@ -7895,7 +8483,7 @@ const OnboardCompanyContactPage = {
       </button>
 
       <div>
-        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Onboard a company contact</h1>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Add Company Contact</h1>
         <p class="text-sm text-slate-500 mt-1">Add a person under an existing company. The contact will receive their own login and access scoped to the facilities you tick below.</p>
       </div>
 
@@ -8099,14 +8687,428 @@ const OnboardCompanyContactPage = {
    sentence-case headers, action menu). Columns: Company / ABN / Primary
    contact / Status / Created. Row actions: View · Edit · Manage Access. */
 
+/* ---------- Page: Admin · Company Detail (view + edit) --------------------- */
+/* Dedicated detail page for a single company. Replaces the View / Edit /
+   Manage-access modals that previously lived on CompanyListPage. Two edit
+   modes are toggled in place: "details" (company + primary contact) and
+   "access" (facility/service matrix). Triggered automatically when the
+   admin arrives with ?edit=details or ?edit=access in the URL. */
+
+const CompanyDetailPage = {
+  components:{ Icon, Btn, StatusBadge },
+  data(){
+    return {
+      tab: 'profile',
+      editingDetails: false,
+      editingAccess: false,
+      draft: null,
+      draftAccess: null,
+    };
+  },
+  computed:{
+    state(){ return state; },
+    company(){ return state.companies.find(c => c.id === this.$route.params.id) || null; },
+    contacts(){
+      if (!this.company) return [];
+      return state.companyContacts.filter(ct => ct.companyId === this.company.id);
+    },
+    facilities(){ return FACILITIES; },
+    services(){ return TREATMENT_SERVICES; },
+    facObjs(){ return (this.company?.facilities || []).map(code => FACILITIES.find(f => f.code === code)).filter(Boolean); },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+    /* Orders associated with this company — matched by consignor or consignee
+       name. Demo-only: real data would link via a foreign key. */
+    companyOrders(){
+      if (!this.company) return [];
+      const name = this.company.name.toLowerCase();
+      return state.orders.filter(o =>
+        (o.consignor || '').toLowerCase() === name ||
+        (o.consignee || '').toLowerCase() === name
+      );
+    },
+    messageThreads(){
+      return this.companyOrders.map(o => ({
+        order: o,
+        msgs: state.messages[o.id] || [],
+      })).sort((a,b) => {
+        const aHas = a.msgs.length > 0, bHas = b.msgs.length > 0;
+        if (aHas !== bHas) return bHas - aHas;
+        const aLast = a.msgs.length ? a.msgs[a.msgs.length-1].ts : a.order.submitted;
+        const bLast = b.msgs.length ? b.msgs[b.msgs.length-1].ts : b.order.submitted;
+        return bLast.localeCompare(aLast);
+      });
+    },
+    totalMessageCount(){
+      return this.messageThreads.reduce((n,t) => n + t.msgs.length, 0);
+    },
+    activeThreadCount(){
+      return this.messageThreads.filter(t => t.msgs.length > 0).length;
+    },
+  },
+  created(){
+    const m = this.$route.query.edit;
+    if (m === 'details') this.startEdit();
+    else if (m === 'access') this.startEditAccess();
+  },
+  methods:{
+    fmtDate,
+    fmtTs(ts){
+      if (!ts) return '';
+      const dt = new Date(ts);
+      return dt.toLocaleString('en-AU', { day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit' });
+    },
+    statusDot(s){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
+    },
+    canCheckAt(facCode, service){
+      const f = FACILITIES.find(x => x.code === facCode);
+      return !!(f && f.services.includes(service));
+    },
+    initials(name){
+      return (name || '?').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+    },
+    startEdit(){
+      const c = this.company;
+      if (!c) return;
+      this.draft = {
+        name: c.name,
+        abn: c.abn,
+        phone: c.phone || '',
+        email: c.email,
+        contactName: c.primaryContact?.name || '',
+        contactPhone: c.primaryContact?.phone || '',
+        contactEmail: c.primaryContact?.email || '',
+      };
+      this.editingDetails = true;
+    },
+    cancelEdit(){
+      this.editingDetails = false;
+      this.draft = null;
+    },
+    saveEdit(){
+      const d = this.draft;
+      if (!d.name.trim() || !d.abn.trim() || !d.phone.trim() || !d.email.trim() || !d.contactName.trim()) {
+        showToast('Company name, ABN, phone, email and contact name are required.', 'error');
+        return;
+      }
+      const c = this.company;
+      c.name = d.name.trim();
+      c.abn = d.abn.trim();
+      c.phone = d.phone.trim();
+      c.email = d.email.trim();
+      c.primaryContact = {
+        name: d.contactName.trim(),
+        phone: d.contactPhone.trim(),
+        email: (d.contactEmail || '').trim() || c.email,
+      };
+      this.editingDetails = false;
+      this.draft = null;
+      showToast('Company details updated.', 'success');
+    },
+    startEditAccess(){
+      const c = this.company;
+      if (!c) return;
+      const access = {};
+      FACILITIES.forEach(f => {
+        const row = {};
+        TREATMENT_SERVICES.forEach(s => {
+          row[s] = c.facilities.includes(f.code) && c.services.includes(s) && f.services.includes(s);
+        });
+        access[f.code] = row;
+      });
+      this.draftAccess = access;
+      this.editingAccess = true;
+    },
+    cancelEditAccess(){
+      this.editingAccess = false;
+      this.draftAccess = null;
+    },
+    saveAccess(){
+      const c = this.company;
+      const facilities = [];
+      const servicesSet = new Set();
+      FACILITIES.forEach(f => {
+        const row = this.draftAccess[f.code];
+        const any = TREATMENT_SERVICES.some(s => row[s]);
+        if (any) {
+          facilities.push(f.code);
+          TREATMENT_SERVICES.forEach(s => { if (row[s]) servicesSet.add(s); });
+        }
+      });
+      c.facilities = facilities;
+      c.services = Array.from(servicesSet);
+      this.editingAccess = false;
+      this.draftAccess = null;
+      showToast(`Access updated for ${c.name}.`, 'success');
+    },
+  },
+  template:`
+    <div v-if="!company" class="p-12 text-sm text-slate-500">Company not found. <router-link to="/admin/companies" class="text-teal-600 hover:underline">&larr; All companies</router-link></div>
+    <div v-else class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <router-link to="/admin/companies" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-navy-900 focus-ring rounded">
+        <Icon name="arrow-left" :size="14"/> Back to companies
+      </router-link>
+
+      <div class="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 :class="['text-xl font-semibold leading-tight', company.status === 'Disabled' ? 'text-slate-400' : 'text-navy-900']">{{ company.name }}</h1>
+          <p class="text-sm text-slate-500 mt-1 inline-flex items-center gap-2 flex-wrap">
+            <span>{{ company.primaryContact?.name }}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span>Created {{ fmtDate(company.created) }}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span class="font-mono text-xs text-slate-400">{{ company.id }}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span class="inline-flex items-center gap-1.5 text-slate-700">
+              <span :class="['inline-block h-2 w-2 rounded-full', statusDot(company.status)]" aria-hidden="true"></span>
+              <span>{{ company.status }}</span>
+            </span>
+          </p>
+        </div>
+        <div v-if="tab === 'profile'" class="flex items-center gap-2 flex-wrap">
+          <Btn v-if="!editingDetails && !editingAccess" icon="pencil" kind="secondary" @click="startEdit">Edit details</Btn>
+          <Btn v-if="!editingDetails && !editingAccess" icon="shield-check" kind="secondary" @click="startEditAccess">Manage access</Btn>
+        </div>
+      </div>
+
+      <div role="tablist" aria-label="Company detail sections" class="border-b border-slate-200">
+        <div class="flex flex-wrap gap-1">
+          <button type="button" role="tab"
+                  id="cd-tab-profile"
+                  :aria-selected="tab === 'profile'"
+                  aria-controls="cd-panel-profile"
+                  :tabindex="tab === 'profile' ? 0 : -1"
+                  @click="tab='profile'"
+                  :class="['inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px focus-ring transition-colors',
+                           tab === 'profile' ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+            Profile
+          </button>
+          <button type="button" role="tab"
+                  id="cd-tab-messages"
+                  :aria-selected="tab === 'messages'"
+                  aria-controls="cd-panel-messages"
+                  :tabindex="tab === 'messages' ? 0 : -1"
+                  @click="tab='messages'"
+                  :class="['inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px focus-ring transition-colors',
+                           tab === 'messages' ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+            Messages<span v-if="totalMessageCount" class="text-slate-500"> ({{ totalMessageCount }})</span>
+          </button>
+        </div>
+      </div>
+
+      <div v-if="tab === 'profile'" role="tabpanel" id="cd-panel-profile" aria-labelledby="cd-tab-profile" class="space-y-6">
+
+      <!-- Company details + Primary contact (two columns) -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <section class="bg-white border border-slate-200 rounded-md">
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+            <Icon name="building-2" :size="14" cls="text-slate-500"/> Company details
+          </header>
+          <dl v-if="!editingDetails" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+            <div><dt class="text-slate-500">Company name</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.name }}</dd></div>
+            <div><dt class="text-slate-500">ABN</dt><dd class="mt-0.5 text-base text-navy-900 tabular-nums">{{ company.abn }}</dd></div>
+            <div><dt class="text-slate-500">Business phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.phone }}</dd></div>
+            <div class="sm:col-span-2"><dt class="text-slate-500">Login email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ company.email }}</dd></div>
+          </dl>
+          <div v-else class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">Company name <span class="text-red-500" aria-hidden="true">*</span></label>
+              <input v-model="draft.name" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">ABN <span class="text-red-500" aria-hidden="true">*</span></label>
+              <input v-model="draft.abn" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">Business phone <span class="text-red-500" aria-hidden="true">*</span></label>
+              <input v-model="draft.phone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">Login email <span class="text-red-500" aria-hidden="true">*</span></label>
+              <input v-model="draft.email" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+          </div>
+        </section>
+
+        <section class="bg-white border border-slate-200 rounded-md">
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+            <Icon name="user-round" :size="14" cls="text-slate-500"/> Primary contact
+          </header>
+          <dl v-if="!editingDetails" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+            <div><dt class="text-slate-500">Name</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.primaryContact?.name }}</dd></div>
+            <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.primaryContact?.phone }}</dd></div>
+            <div class="sm:col-span-2"><dt class="text-slate-500">Email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ company.primaryContact?.email }}</dd></div>
+          </dl>
+          <div v-else class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            <div class="md:col-span-2">
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
+              <input v-model="draft.contactName" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
+              <input v-model="draft.contactPhone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">Contact email <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
+              <input v-model="draft.contactEmail" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+          </div>
+        </section>
+      </div>
+
+      <!-- Edit-details footer actions -->
+      <div v-if="editingDetails" class="flex items-center justify-end gap-3 flex-wrap">
+        <button type="button" @click="cancelEdit" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+        <Btn icon="save" @click="saveEdit">Save changes</Btn>
+      </div>
+
+      <!-- Facility & service access -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility &amp; service access
+        </header>
+        <ul v-if="!editingAccess" class="p-5 space-y-4">
+          <li v-for="f in facObjs" :key="f.code" class="flex items-start justify-between gap-4 pb-4 border-b border-slate-100 last:border-b-0 last:pb-0">
+            <div class="min-w-0">
+              <div class="text-base text-navy-900">{{ f.name }}, {{ f.state }}</div>
+              <div class="text-xs text-slate-500 mt-0.5">{{ f.code }}</div>
+            </div>
+            <div class="text-sm text-slate-700 inline-flex items-center gap-1.5 flex-wrap shrink-0 max-w-[60%] justify-end">
+              <template v-for="(s, idx) in company.services.filter(svc => f.services.includes(svc))" :key="s">
+                <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                <span>{{ treatmentLabels[s] || s }}</span>
+                <span v-if="idx < company.services.filter(svc => f.services.includes(svc)).length - 1" aria-hidden="true" class="text-slate-300">&middot;</span>
+              </template>
+            </div>
+          </li>
+          <li v-if="!facObjs.length" class="text-sm text-slate-500">No facility access granted yet.</li>
+        </ul>
+        <div v-else>
+          <p class="px-5 pt-4 text-sm text-slate-500">Tick services per facility. Greyed cells are not offered at that facility.</p>
+          <div class="px-5 pt-3 pb-5 overflow-x-auto">
+            <table class="w-full text-base">
+              <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-y border-slate-300">
+                <tr>
+                  <th scope="col" class="px-4 py-3 font-medium">Facility</th>
+                  <th v-for="s in services" :key="s" scope="col" class="px-4 py-3 font-medium text-center w-32">
+                    <span class="inline-flex items-center gap-1.5">
+                      <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                      <span>{{ treatmentLabels[s] || s }}</span>
+                    </span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-for="f in facilities" :key="f.code" class="even:bg-slate-50/60">
+                  <td class="px-4 py-3.5">
+                    <div class="text-base text-navy-900">{{ f.name }}, {{ f.state }}</div>
+                    <div class="text-xs text-slate-500">{{ f.code }}</div>
+                  </td>
+                  <td v-for="s in services" :key="s" class="px-4 py-3.5 text-center">
+                    <input v-if="canCheckAt(f.code, s)" type="checkbox"
+                           v-model="draftAccess[f.code][s]"
+                           :aria-label="s + ' at ' + f.name"
+                           class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                    <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="px-5 pb-5 flex items-center justify-end gap-3">
+            <button type="button" @click="cancelEditAccess" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+            <Btn icon="save" @click="saveAccess">Save access</Btn>
+          </div>
+        </div>
+      </section>
+
+      <!-- Contacts -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
+          <Icon name="users" :size="14" cls="text-slate-500"/> Contacts
+          <span class="text-xs text-slate-500 font-normal">({{ contacts.length }})</span>
+          <span class="ml-auto">
+            <Btn as="router-link" :to="{ path:'/admin/contacts/new', query:{ companyId: company.id } }" kind="secondary" icon="user-plus">Add New Contact</Btn>
+          </span>
+        </header>
+        <ul class="divide-y divide-slate-200">
+          <li class="px-5 py-2 bg-slate-50 text-xs text-slate-500">Primary contact</li>
+          <li class="px-5 py-3 flex items-center justify-between gap-3 text-sm">
+            <div class="min-w-0 flex items-center gap-2">
+              <span class="inline-flex items-center justify-center h-7 w-7 rounded-full bg-teal-100 text-teal-800 text-xs font-medium shrink-0">{{ initials(company.primaryContact?.name) }}</span>
+              <span class="text-navy-900 truncate">{{ company.primaryContact?.name }}</span>
+            </div>
+            <span class="text-xs text-slate-500 shrink-0">Primary</span>
+          </li>
+          <li v-if="contacts.length" class="px-5 py-2 bg-slate-50 text-xs text-slate-500">Additional contacts</li>
+          <li v-for="ct in contacts" :key="ct.id" class="px-5 py-3 flex items-center justify-between gap-3 text-sm">
+            <div class="min-w-0 flex items-center gap-2">
+              <span class="inline-flex items-center justify-center h-7 w-7 rounded-full bg-slate-100 text-slate-700 text-xs font-medium shrink-0">{{ initials(ct.name) }}</span>
+              <span class="text-navy-900 truncate">{{ ct.name }}</span>
+            </div>
+            <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
+              <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
+              <span>{{ ct.status }}</span>
+            </span>
+          </li>
+          <li v-if="!contacts.length" class="px-5 py-4 text-sm text-slate-500">No additional contacts yet. Use <span class="font-medium text-navy-900">Add New Contact</span> above to onboard one.</li>
+        </ul>
+      </section>
+
+      </div><!-- /profile tabpanel -->
+
+      <div v-else-if="tab === 'messages'" role="tabpanel" id="cd-panel-messages" aria-labelledby="cd-tab-messages" class="space-y-4">
+        <p class="text-sm text-slate-600">
+          {{ activeThreadCount }} active {{ activeThreadCount === 1 ? 'thread' : 'threads' }}
+          <span v-if="totalMessageCount" class="text-slate-400">&middot; {{ totalMessageCount }} {{ totalMessageCount === 1 ? 'message' : 'messages' }} total</span>
+        </p>
+
+        <section class="bg-white border-t border-b border-slate-200">
+          <div class="overflow-x-auto">
+            <table class="w-full text-base min-w-[900px]">
+              <caption class="sr-only">Order messages</caption>
+              <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
+                <tr>
+                  <th scope="col" class="px-4 py-3 font-medium">Order</th>
+                  <th scope="col" class="px-4 py-3 font-medium">Status</th>
+                  <th scope="col" class="px-4 py-3 font-medium">Form</th>
+                  <th scope="col" class="px-4 py-3 font-medium">Last message</th>
+                  <th scope="col" class="px-4 py-3 font-medium text-right">Updated</th>
+                  <th scope="col" class="px-4 py-3 font-medium text-right">Messages</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr v-if="messageThreads.length === 0">
+                  <td colspan="6" class="px-4 py-12 text-center text-sm text-slate-500">No message threads yet for this company.</td>
+                </tr>
+                <tr v-else v-for="t in messageThreads" :key="t.order.id" class="even:bg-slate-50/60">
+                  <td class="px-4 py-3.5 whitespace-nowrap">
+                    <router-link :to="'/orders/'+t.order.id+'?tab=messages'" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ t.order.id }}</router-link>
+                  </td>
+                  <td class="px-4 py-3.5 whitespace-nowrap"><StatusBadge :status="t.order.status"/></td>
+                  <td class="px-4 py-3.5 text-sm text-slate-700 truncate max-w-[16rem]" :title="t.order.formName">{{ t.order.formName }}</td>
+                  <td class="px-4 py-3.5 text-sm text-slate-500 truncate max-w-[24rem]">
+                    <template v-if="t.msgs.length">{{ t.msgs[t.msgs.length-1].body }}</template>
+                    <span v-else class="text-slate-400">No messages yet</span>
+                  </td>
+                  <td class="px-4 py-3.5 text-sm text-slate-500 tabular-nums text-right whitespace-nowrap">{{ t.msgs.length ? fmtTs(t.msgs[t.msgs.length-1].ts) : fmtDate(t.order.submitted) }}</td>
+                  <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums text-right whitespace-nowrap">{{ t.msgs.length || 0 }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  `
+};
+
 const CompanyListPage = {
   components:{ Icon, Btn },
   data(){ return {
     facilityFilter:'All', statusFilter:'All', q:'',
     menuFor:null,
-    viewing:null,
-    editing:null,
-    accessing:null,
     sort:{ by:'created', dir:'desc' },
     page: 1,
     pageSize: 25,
@@ -8181,87 +9183,7 @@ const CompanyListPage = {
       ev.stopPropagation();
       this.menuFor = (this.menuFor === c.id) ? null : c.id;
     },
-    canCheckAt(facCode, service){
-      const f = FACILITIES.find(x => x.code === facCode);
-      return !!(f && f.services.includes(service));
-    },
-    /* ---- View ---- */
-    openView(c, ev){
-      if (ev) ev.stopPropagation();
-      this.menuFor = null;
-      this.viewing = c;
-    },
-    closeView(){ this.viewing = null; },
-    /* ---- Edit details ---- */
-    openEdit(c, ev){
-      if (ev) ev.stopPropagation();
-      this.menuFor = null;
-      this.editing = {
-        id: c.id,
-        name: c.name,
-        abn: c.abn,
-        phone: c.phone || '',
-        email: c.email,
-        contactName: c.primaryContact?.name || '',
-        contactPhone: c.primaryContact?.phone || '',
-        contactEmail: c.primaryContact?.email || '',
-      };
-    },
-    closeEdit(){ this.editing = null; },
-    saveEdit(){
-      const e = this.editing;
-      if (!e.name.trim() || !e.abn.trim() || !e.phone.trim() || !e.email.trim() || !e.contactName.trim()) {
-        showToast('Company name, ABN, phone, email and contact name are required.', 'error');
-        return;
-      }
-      const c = state.companies.find(x => x.id === e.id);
-      if (!c) { this.editing = null; return; }
-      c.name = e.name.trim();
-      c.abn = e.abn.trim();
-      c.phone = e.phone.trim();
-      c.email = e.email.trim();
-      c.primaryContact = {
-        name: e.contactName.trim(),
-        phone: e.contactPhone.trim(),
-        email: (e.contactEmail || '').trim() || c.email,
-      };
-      this.editing = null;
-      showToast('Company details updated.', 'success');
-    },
-    /* ---- Manage access ---- */
-    openAccess(c, ev){
-      if (ev) ev.stopPropagation();
-      this.menuFor = null;
-      const access = {};
-      FACILITIES.forEach(f => {
-        const row = {};
-        TREATMENT_SERVICES.forEach(s => {
-          row[s] = c.facilities.includes(f.code) && c.services.includes(s) && f.services.includes(s);
-        });
-        access[f.code] = row;
-      });
-      this.accessing = { id: c.id, name: c.name, access };
-    },
-    closeAccess(){ this.accessing = null; },
-    saveAccess(){
-      const e = this.accessing;
-      const c = state.companies.find(x => x.id === e.id);
-      if (!c) { this.accessing = null; return; }
-      const facilities = [];
-      const servicesSet = new Set();
-      FACILITIES.forEach(f => {
-        const row = e.access[f.code];
-        const any = TREATMENT_SERVICES.some(s => row[s]);
-        if (any) {
-          facilities.push(f.code);
-          TREATMENT_SERVICES.forEach(s => { if (row[s]) servicesSet.add(s); });
-        }
-      });
-      c.facilities = facilities;
-      c.services = Array.from(servicesSet);
-      this.accessing = null;
-      showToast(`Access updated for ${c.name}.`, 'success');
-    },
+    closeRowMenu(){ this.menuFor = null; },
   },
   template:`
     <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
@@ -8271,8 +9193,7 @@ const CompanyListPage = {
           <p class="text-sm text-slate-500 mt-1">{{ activeCount }} active companies across {{ facilities.length }} facilities</p>
         </div>
         <div class="flex items-center gap-2 flex-wrap">
-          <Btn as="router-link" :to="{ path:'/admin/contacts/new' }" kind="secondary" icon="user-plus">Onboard contact</Btn>
-          <Btn as="router-link" :to="{ path:'/admin/companies/new' }" icon="building">Onboard company</Btn>
+          <Btn as="router-link" :to="{ path:'/admin/companies/new' }" icon="building">Add Company</Btn>
         </div>
       </div>
 
@@ -8333,9 +9254,9 @@ const CompanyListPage = {
               </tr>
               <tr v-else v-for="c in pagedRows" :key="c.id" class="even:bg-slate-50/60">
                 <td class="px-4 py-3.5">
-                  <a href="#" @click.prevent="openView(c)"
+                  <router-link :to="'/admin/companies/'+c.id"
                      :class="['text-base font-medium hover:underline focus-ring rounded',
-                              c.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ c.name }}</a>
+                              c.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ c.name }}</router-link>
                   <div class="text-sm text-slate-500 mt-0.5">{{ c.facilities.join(', ') }}</div>
                 </td>
                 <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums whitespace-nowrap">{{ c.abn }}</td>
@@ -8360,15 +9281,15 @@ const CompanyListPage = {
                   </button>
                   <div v-if="menuFor === c.id" role="menu"
                        class="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20 text-left">
-                    <a href="#" role="menuitem" @click.stop.prevent="openView(c, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                    <router-link :to="'/admin/companies/'+c.id" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
                       <Icon name="eye" :size="14" cls="text-slate-500"/> View
-                    </a>
-                    <a href="#" role="menuitem" @click.stop.prevent="openEdit(c, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                    </router-link>
+                    <router-link :to="{ path:'/admin/companies/'+c.id, query:{ edit:'details' } }" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
                       <Icon name="pencil" :size="14" cls="text-slate-500"/> Edit
-                    </a>
-                    <a href="#" role="menuitem" @click.stop.prevent="openAccess(c, $event)" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                    </router-link>
+                    <router-link :to="{ path:'/admin/companies/'+c.id, query:{ edit:'access' } }" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
                       <Icon name="shield-check" :size="14" cls="text-slate-500"/> Manage access
-                    </a>
+                    </router-link>
                   </div>
                 </td>
               </tr>
@@ -8396,178 +9317,6 @@ const CompanyListPage = {
         </div>
       </nav>
 
-      <!-- View modal (read-only profile) -->
-      <transition name="fade">
-        <div v-if="viewing" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="closeView">
-          <div class="bg-white border border-slate-200 rounded-md w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl" role="dialog" aria-modal="true" aria-label="View company">
-            <header class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-              <div>
-                <h2 class="text-lg font-semibold text-navy-900">{{ viewing.name }}</h2>
-                <p class="text-xs text-slate-500 mt-0.5 inline-flex items-center gap-2">
-                  <span class="font-mono">{{ viewing.id }}</span>
-                  <span aria-hidden="true">&middot;</span>
-                  <span class="inline-flex items-center gap-1.5">
-                    <span :class="['inline-block h-2 w-2 rounded-full', statusDot(viewing.status)]" aria-hidden="true"></span>
-                    <span>{{ viewing.status }}</span>
-                  </span>
-                </p>
-              </div>
-              <button type="button" @click="closeView" aria-label="Close" class="p-1.5 rounded hover:bg-slate-100 text-slate-500 focus-ring">
-                <Icon name="x" :size="18"/>
-              </button>
-            </header>
-            <div class="overflow-y-auto px-6 py-6 space-y-6">
-              <div>
-                <h3 class="text-sm font-medium text-navy-900 mb-3 inline-flex items-center gap-2"><Icon name="building-2" :size="14" cls="text-slate-500"/> Company details</h3>
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                  <div><dt class="text-slate-500">Company name</dt><dd class="mt-0.5 text-base text-navy-900">{{ viewing.name }}</dd></div>
-                  <div><dt class="text-slate-500">ABN</dt><dd class="mt-0.5 text-base text-navy-900 tabular-nums">{{ viewing.abn }}</dd></div>
-                  <div><dt class="text-slate-500">Business phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ viewing.phone }}</dd></div>
-                  <div><dt class="text-slate-500">Login email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ viewing.email }}</dd></div>
-                  <div><dt class="text-slate-500">Created</dt><dd class="mt-0.5 text-base text-navy-900">{{ fmtDate(viewing.created) }}</dd></div>
-                </dl>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-navy-900 mb-3 inline-flex items-center gap-2"><Icon name="user-round" :size="14" cls="text-slate-500"/> Primary contact</h3>
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                  <div><dt class="text-slate-500">Name</dt><dd class="mt-0.5 text-base text-navy-900">{{ viewing.primaryContact?.name }}</dd></div>
-                  <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ viewing.primaryContact?.phone }}</dd></div>
-                  <div class="sm:col-span-2"><dt class="text-slate-500">Email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ viewing.primaryContact?.email }}</dd></div>
-                </dl>
-              </div>
-              <div>
-                <h3 class="text-sm font-medium text-navy-900 mb-3 inline-flex items-center gap-2"><Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility &amp; service access</h3>
-                <ul class="space-y-3">
-                  <li v-for="code in viewing.facilities" :key="code" class="flex items-start justify-between gap-3 text-sm">
-                    <div class="min-w-0">
-                      <div class="text-base text-navy-900">{{ facilities.find(f => f.code === code)?.name }}, {{ facilities.find(f => f.code === code)?.state }}</div>
-                      <div class="text-xs text-slate-500">{{ code }}</div>
-                    </div>
-                    <div class="text-sm text-slate-700 inline-flex items-center gap-1.5 flex-wrap shrink-0 max-w-[60%] justify-end">
-                      <template v-for="(s, idx) in viewing.services.filter(svc => facilities.find(f => f.code === code)?.services.includes(svc))" :key="s">
-                        <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
-                        <span>{{ treatmentLabels[s] || s }}</span>
-                        <span v-if="idx < viewing.services.filter(svc => facilities.find(f => f.code === code)?.services.includes(svc)).length - 1" aria-hidden="true" class="text-slate-300">&middot;</span>
-                      </template>
-                    </div>
-                  </li>
-                </ul>
-              </div>
-            </div>
-            <footer class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
-              <button type="button" @click="closeView" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Close</button>
-              <Btn icon="pencil" kind="secondary" @click="openEdit(viewing)">Edit</Btn>
-              <Btn icon="shield-check" @click="openAccess(viewing)">Manage access</Btn>
-            </footer>
-          </div>
-        </div>
-      </transition>
-
-      <!-- Edit modal -->
-      <transition name="fade">
-        <div v-if="editing" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="closeEdit">
-          <div class="bg-white border border-slate-200 rounded-md w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl" role="dialog" aria-modal="true" aria-label="Edit company">
-            <header class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-              <h2 class="text-lg font-semibold text-navy-900">Edit company</h2>
-              <button type="button" @click="closeEdit" aria-label="Close" class="p-1.5 rounded hover:bg-slate-100 text-slate-500 focus-ring">
-                <Icon name="x" :size="18"/>
-              </button>
-            </header>
-            <div class="overflow-y-auto px-6 py-6 space-y-8">
-              <div>
-                <h3 class="text-base font-medium text-navy-900 mb-4">Company details</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                  <div class="md:col-span-2">
-                    <label for="ec-name" class="block text-sm font-medium text-slate-700 mb-1.5">Company name <span class="text-red-500" aria-hidden="true">*</span></label>
-                    <input id="ec-name" v-model="editing.name" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-                  </div>
-                  <div>
-                    <label for="ec-abn" class="block text-sm font-medium text-slate-700 mb-1.5">ABN <span class="text-red-500" aria-hidden="true">*</span></label>
-                    <input id="ec-abn" v-model="editing.abn" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-                  </div>
-                  <div>
-                    <label for="ec-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Business phone <span class="text-red-500" aria-hidden="true">*</span></label>
-                    <input id="ec-phone" v-model="editing.phone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-                  </div>
-                  <div class="md:col-span-2">
-                    <label for="ec-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
-                    <input id="ec-email" v-model="editing.email" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-                  </div>
-                </div>
-              </div>
-              <div>
-                <h3 class="text-base font-medium text-navy-900 mb-4">Primary contact</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-                  <div class="md:col-span-2">
-                    <label for="ec-cn" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
-                    <input id="ec-cn" v-model="editing.contactName" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-                  </div>
-                  <div>
-                    <label for="ec-cp" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
-                    <input id="ec-cp" v-model="editing.contactPhone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-                  </div>
-                  <div>
-                    <label for="ec-ce" class="block text-sm font-medium text-slate-700 mb-1.5">Contact email <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
-                    <input id="ec-ce" v-model="editing.contactEmail" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <footer class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
-              <button type="button" @click="closeEdit" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
-              <Btn icon="save" @click="saveEdit">Save changes</Btn>
-            </footer>
-          </div>
-        </div>
-      </transition>
-
-      <!-- Manage access modal -->
-      <transition name="fade">
-        <div v-if="accessing" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="closeAccess">
-          <div class="bg-white border border-slate-200 rounded-md w-full max-w-3xl max-h-[90vh] flex flex-col overflow-hidden shadow-xl" role="dialog" aria-modal="true" aria-label="Manage company access">
-            <header class="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
-              <div>
-                <h2 class="text-lg font-semibold text-navy-900">Manage access</h2>
-                <p class="text-xs text-slate-500 mt-0.5">{{ accessing.name }}</p>
-              </div>
-              <button type="button" @click="closeAccess" aria-label="Close" class="p-1.5 rounded hover:bg-slate-100 text-slate-500 focus-ring">
-                <Icon name="x" :size="18"/>
-              </button>
-            </header>
-            <div class="overflow-y-auto px-6 py-6">
-              <p class="text-sm text-slate-500 mb-4">Tick services per facility. Greyed cells are not offered at that facility.</p>
-              <div class="overflow-x-auto bg-white border-t border-b border-slate-200">
-                <table class="w-full text-base">
-                  <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
-                    <tr>
-                      <th scope="col" class="px-4 py-3 font-medium">Facility</th>
-                      <th v-for="s in ['Gamma','ETO','GMP']" :key="s" scope="col" class="px-4 py-3 font-medium text-center w-24">{{ s }}</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr v-for="f in facilities" :key="f.code" class="even:bg-slate-50/60">
-                      <td class="px-4 py-3">
-                        <div class="text-base text-navy-900">{{ f.name }}, {{ f.state }}</div>
-                        <div class="text-xs text-slate-500">{{ f.code }}</div>
-                      </td>
-                      <td v-for="s in ['Gamma','ETO','GMP']" :key="s" class="px-4 py-3 text-center">
-                        <input v-if="canCheckAt(f.code, s)" type="checkbox"
-                               v-model="accessing.access[f.code][s]"
-                               class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
-                        <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not offered at this facility"></span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            <footer class="px-6 py-4 border-t border-slate-200 flex items-center justify-end gap-3 shrink-0">
-              <button type="button" @click="closeAccess" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
-              <Btn icon="save" @click="saveAccess">Save access</Btn>
-            </footer>
-          </div>
-        </div>
-      </transition>
     </div>
   `
 };
@@ -9459,6 +10208,7 @@ const router = createRouter({
         { path:'/admin',                            component: AdminConsolePage,    beforeEnter: requireAdmin },
         { path:'/admin/companies',                  component: CompanyListPage,             beforeEnter: requireAdmin },
         { path:'/admin/companies/new',              component: OnboardCompanyPage,          beforeEnter: requireAdmin },
+        { path:'/admin/companies/:id',              component: CompanyDetailPage,           beforeEnter: requireAdmin },
         { path:'/admin/contacts/new',               component: OnboardCompanyContactPage,   beforeEnter: requireAdmin },
         // Legacy customer routes — kept for any links still referencing them, but not in nav.
         { path:'/admin/customers',                  component: CustomerListPage,    beforeEnter: requireAdmin },
