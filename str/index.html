@@ -2576,7 +2576,7 @@ const Sidebar = {
     adminItems(){
       return [
         { to:'/admin/companies',         label:'Companies',           icon:'building-2' },
-        { to:'/admin/contacts/new',      label:'Add New Contact',     icon:'user-plus' },
+        { to:'/admin/contacts',          label:'Contacts',            icon:'users' },
         { to:'/settings',                label:'Settings',            icon:'settings-2' },
       ];
     }
@@ -5130,7 +5130,7 @@ const SubmittedPage = {
       <dl class="px-6 sm:px-8 py-6 border-t border-slate-200 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-5 text-sm">
         <div>
           <dt class="text-slate-500">Form</dt>
-          <dd class="mt-1 text-base text-navy-900">{{ order.formName }}</dd>
+          <dd class="mt-0.5 text-base text-navy-900">{{ order.formName }}</dd>
           <div class="mt-1 inline-flex items-center gap-2 text-sm text-slate-600">
             <span :class="['inline-block h-2 w-2 rounded-full', treatmentStyles[order.treatment] && treatmentStyles[order.treatment].dot]" aria-hidden="true"></span>
             <span>{{ treatmentLabels[order.treatment] || order.treatment }}</span>
@@ -5140,7 +5140,7 @@ const SubmittedPage = {
         </div>
         <div>
           <dt class="text-slate-500">Expected delivery</dt>
-          <dd class="mt-1 text-base text-navy-900">{{ fmtDate(order.collection) }}</dd>
+          <dd class="mt-0.5 text-base text-navy-900">{{ fmtDate(order.collection) }}</dd>
           <div class="mt-1 text-sm text-slate-600">PO <span class="font-mono">{{ order.po }}</span></div>
         </div>
       </dl>
@@ -6079,7 +6079,15 @@ const SettingsPage = {
     }
   },
   watch:{
-    tab(v){ this.$router.replace({ query:{ tab:v } }); }
+    tab(v){ this.$router.replace({ query:{ tab:v } }); },
+    isAdmin(){
+      // When the role flips (e.g., via the demo panel) the component instance
+      // is reused, so the previous role's tab can leak through. Snap to the
+      // first tab valid for the new role, otherwise the wrong panel renders.
+      if (!this.tabs.some(t => t.id === this.tab)) {
+        this.tab = this.tabs[0].id;
+      }
+    },
   },
   created(){
     const valid = this.tabs.some(t => t.id === this.tab);
@@ -6138,14 +6146,14 @@ const SettingsPage = {
                 :tabindex="tab === t.id ? 0 : -1"
                 @click="tab=t.id"
                 :class="['inline-flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 -mb-px focus-ring transition-colors',
-                         tab === t.id ? 'border-teal-600 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+                         tab === t.id ? 'border-teal-600 text-teal-700' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
           <Icon :name="t.icon" :size="14" aria-hidden="true"/> {{ t.label }}
         </button>
       </div>
     </div>
 
     <!-- Profile -->
-    <div v-if="tab==='profile'" role="tabpanel" id="settings-panel-profile" aria-labelledby="settings-tab-profile"
+    <div v-if="tab==='profile' && !isAdmin" role="tabpanel" id="settings-panel-profile" aria-labelledby="settings-tab-profile"
          class="bg-white border border-slate-200 rounded-md p-6 max-w-3xl">
       <div class="flex items-center gap-4 pb-5 border-b border-slate-200 mb-5">
         <div class="w-12 h-12 rounded-full bg-teal-500 text-white flex items-center justify-center text-base font-semibold">{{ state.profile.contact.split(' ').map(s=>s[0]).slice(0,2).join('') }}</div>
@@ -6203,7 +6211,7 @@ const SettingsPage = {
     </div>
 
     <!-- Commodities -->
-    <div v-if="tab==='commodities'" role="tabpanel" id="settings-panel-commodities" aria-labelledby="settings-tab-commodities" class="space-y-4">
+    <div v-if="tab==='commodities' && !isAdmin" role="tabpanel" id="settings-panel-commodities" aria-labelledby="settings-tab-commodities" class="space-y-4">
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 class="text-lg font-medium text-navy-900">Commodities</h2>
@@ -6268,7 +6276,7 @@ const SettingsPage = {
     </div>
 
     <!-- Consignors -->
-    <div v-if="tab==='consignors'" role="tabpanel" id="settings-panel-consignors" aria-labelledby="settings-tab-consignors" class="space-y-4">
+    <div v-if="tab==='consignors' && !isAdmin" role="tabpanel" id="settings-panel-consignors" aria-labelledby="settings-tab-consignors" class="space-y-4">
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 class="text-lg font-medium text-navy-900">Consignors</h2>
@@ -6326,7 +6334,7 @@ const SettingsPage = {
     </div>
 
     <!-- Consignees -->
-    <div v-if="tab==='consignees'" role="tabpanel" id="settings-panel-consignees" aria-labelledby="settings-tab-consignees" class="space-y-4">
+    <div v-if="tab==='consignees' && !isAdmin" role="tabpanel" id="settings-panel-consignees" aria-labelledby="settings-tab-consignees" class="space-y-4">
       <div class="flex items-center justify-between gap-3 flex-wrap">
         <div>
           <h2 class="text-lg font-medium text-navy-900">Consignees</h2>
@@ -6869,6 +6877,46 @@ const AdminConsolePage = {
       const dt = new Date(d);
       return dt.toLocaleDateString('en-AU', { day:'numeric', month:'short', year:'numeric' });
     },
+    statusPill(s){
+      return ({
+        'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
+      })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
+    },
+    companyInitials(name){
+      return (name || '?').trim().split(/\s+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
+    },
+    companyGradient(name){
+      const palette = [
+        // Eye-soothing enterprise palette: only cool / neutral tones — navy,
+        // slate, blue, teal, sky, emerald, indigo, stone. No reds, no warm
+        // pinks, no bright candy. Inspired by the site-selector avatars,
+        // which read as "calm industrial dashboard" rather than personality
+        // colors. Single-hue 600→800 gradients keep each tile feeling solid.
+        // 12 vibrant-but-mature solid tones — matching the manager's earlier
+        // reference (emerald, violet, clear blue, teal, navy). Mid-saturated
+        // 500-level hues feel alive without looking AI-generated. No reds,
+        // no candy pinks/oranges, no gradient stacks.
+        'bg-[#10B981]',   // 0  Emerald          — vibrant green
+        'bg-[#8B5CF6]',   // 1  Violet           — soft purple
+        'bg-[#3B82F6]',   // 2  Blue             — clear blue
+        'bg-[#14B8A6]',   // 3  Teal             — vibrant teal
+        'bg-[#1E293B]',   // 4  Navy             — dark charcoal-navy
+        'bg-[#0EA5E9]',   // 5  Sky              — bright sky
+        'bg-[#059669]',   // 6  Forest           — deeper green
+        'bg-[#6366F1]',   // 7  Indigo           — clear indigo
+        'bg-[#0891B2]',   // 8  Cyan             — deep cyan
+        'bg-[#64748B]',   // 9  Slate            — medium grey
+        'bg-[#7C3AED]',   // 10 Royal Purple     — vibrant purple
+        'bg-[#475569]',   // 11 Steel            — deep grey
+      ];
+      const s = (name || '?').toLowerCase();
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = (((h << 5) + h) ^ s.charCodeAt(i)) >>> 0;
+      for (let i = s.length - 1; i >= 0; i--) h = (((h << 5) + h) ^ (s.charCodeAt(i) * 7)) >>> 0;
+      return palette[h % palette.length];
+    },
     statusDot(status){
       return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[status] || 'bg-slate-400';
     },
@@ -6889,8 +6937,11 @@ const AdminConsolePage = {
       <!-- Needs attention: Pending onboards as actual rows -->
       <section class="lg:col-span-2 bg-white border border-slate-200 rounded-md">
         <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
-          <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
-            <Icon name="clipboard-check" :size="14" cls="text-slate-500"/> Needs attention
+          <span class="inline-flex items-center gap-2.5 text-sm font-medium text-navy-900">
+            <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-100">
+              <Icon name="clipboard-check" :size="15"/>
+            </span>
+            Needs attention
             <span v-if="pendingOnboards.length" class="text-xs text-slate-500 font-normal">({{ pendingOnboards.length }})</span>
           </span>
           <router-link v-if="pendingOnboards.length" to="/admin/companies?status=Pending"
@@ -6904,6 +6955,9 @@ const AdminConsolePage = {
         <ul v-else>
           <li v-for="c in pendingOnboards" :key="c.id" class="border-b border-slate-100 last:border-b-0">
             <div class="px-5 py-3.5 flex items-center gap-4 flex-wrap">
+              <span :class="['shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg text-white text-xs font-bold tracking-wide', companyGradient(c.name)]">
+                {{ companyInitials(c.name) }}
+              </span>
               <div class="min-w-0 flex-1">
                 <router-link to="/admin/companies" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.name }}</router-link>
                 <div class="text-sm text-slate-500 mt-0.5">{{ c.primaryContact.name }} &middot; Requested {{ fmtDate(c.created) }}</div>
@@ -6917,7 +6971,12 @@ const AdminConsolePage = {
 
       <!-- Quick actions: text-row list, no colored icon containers -->
       <section class="lg:col-span-1 bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900">Quick actions</header>
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100">
+            <Icon name="zap" :size="15"/>
+          </span>
+          Quick actions
+        </header>
         <ul class="py-1">
           <li>
             <router-link to="/admin/companies/new"
@@ -6947,6 +7006,17 @@ const AdminConsolePage = {
             </router-link>
           </li>
           <li class="border-t border-slate-100">
+            <router-link to="/admin/contacts"
+                         class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
+              <Icon name="users" :size="16" cls="text-slate-500 shrink-0"/>
+              <span class="flex-1 min-w-0">
+                <span class="block text-base text-navy-900">Contacts</span>
+                <span class="block text-xs text-slate-500">{{ state.companyContacts.length }} {{ state.companyContacts.length === 1 ? 'person' : 'people' }} with portal access</span>
+              </span>
+              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+            </router-link>
+          </li>
+          <li class="border-t border-slate-100">
             <router-link :to="{ path:'/settings', query:{ tab:'site' } }"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
               <Icon name="sliders-horizontal" :size="16" cls="text-slate-500 shrink-0"/>
@@ -6967,19 +7037,24 @@ const AdminConsolePage = {
     <!-- Recently onboarded (secondary, full width) -->
     <section class="bg-white border border-slate-200 rounded-md">
       <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
-        <span class="inline-flex items-center gap-2 text-sm font-medium text-navy-900">
-          <Icon name="history" :size="14" cls="text-slate-500"/> Recently onboarded
+        <span class="inline-flex items-center gap-2.5 text-sm font-medium text-navy-900">
+          <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100">
+            <Icon name="history" :size="15"/>
+          </span>
+          Recently onboarded
         </span>
         <router-link to="/admin/companies" class="text-sm text-teal-600 hover:underline focus-ring rounded">View all companies &rarr;</router-link>
       </header>
       <ul>
         <li v-for="c in recentlyOnboarded" :key="c.id" class="border-b border-slate-100 last:border-b-0">
           <div class="px-5 py-3.5 flex items-center gap-4 flex-wrap">
-            <div class="w-9 h-9 rounded-full bg-slate-100 text-slate-700 flex items-center justify-center text-xs font-semibold shrink-0">
-              {{ c.primaryContact.name.split(' ').map(s=>s[0]).slice(0,2).join('') }}
-            </div>
+            <span :class="['shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg text-white text-xs font-bold tracking-wide',
+                           c.status === 'Disabled' ? 'bg-slate-400' : companyGradient(c.name)]">
+              {{ companyInitials(c.name) }}
+            </span>
             <div class="min-w-0 flex-1">
-              <router-link to="/admin/companies" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.name }}</router-link>
+              <router-link :to="'/admin/companies/' + c.id" :class="['text-base font-medium hover:underline focus-ring rounded',
+                                                                    c.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ c.name }}</router-link>
               <div class="text-sm text-slate-500 mt-0.5 truncate">{{ c.primaryContact.name }} &middot; {{ c.facilities.length }} {{ c.facilities.length === 1 ? 'site' : 'sites' }} &middot; Created {{ fmtDate(c.created) }}</div>
             </div>
             <span class="inline-flex items-center gap-2 text-sm text-slate-700 whitespace-nowrap">
@@ -7182,8 +7257,8 @@ const OnboardCustomerPage = {
       </div>
 
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="building-2" :size="14" cls="text-slate-500"/> Customer details
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="building-2" :size="15"/></span>Customer details
         </header>
         <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <div class="md:col-span-2">
@@ -7257,8 +7332,8 @@ const OnboardCustomerPage = {
 
       <!-- Access matrix card (locked Customer list Edit modal pattern) -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility and service access
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="shield-check" :size="15"/></span>Facility and service access
           <span class="ml-auto text-sm text-slate-500 font-normal">
             <span v-if="grantedFacilities.length === 0">No facilities selected.</span>
             <span v-else>{{ grantedFacilities.length }} {{ grantedFacilities.length === 1 ? 'facility' : 'facilities' }} granted</span>
@@ -7301,8 +7376,8 @@ const OnboardCustomerPage = {
 
       <!-- Form access card: per-form picker, only for ticked (facility, treatment) cells -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="file-check-2" :size="14" cls="text-slate-500"/> Form access
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="file-check-2" :size="15"/></span>Form access
           <span class="ml-auto text-sm text-slate-500 font-normal">
             <span v-if="formGroups.length === 0">Tick a treatment above to grant forms.</span>
             <span v-else>{{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted</span>
@@ -7606,15 +7681,95 @@ const OnboardCompanyPage = {
     statusDot(s){
       return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
     },
+    statusPill(s){
+      return ({
+        'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
+      })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
+    },
+    contactInitials(name){
+      return (name || '?').trim().split(/\s+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
+    },
+    contactGradient(name){
+      // Eye-soothing enterprise palette: only cool / neutral tones — navy,
+      // slate, blue, teal, sky, emerald, indigo, stone. No reds, no warm
+      // pinks, no bright candy. Single-hue 600→800 gradients feel solid and
+      // mature, fitting for a sterilization industry dashboard.
+      const palette = [
+        // 12 vibrant-but-mature solid tones — matching the manager's earlier
+        // reference (emerald, violet, clear blue, teal, navy). Mid-saturated
+        // 500-level hues feel alive without looking AI-generated. No reds,
+        // no candy pinks/oranges, no gradient stacks.
+        'bg-[#10B981]',   // 0  Emerald          — vibrant green
+        'bg-[#8B5CF6]',   // 1  Violet           — soft purple
+        'bg-[#3B82F6]',   // 2  Blue             — clear blue
+        'bg-[#14B8A6]',   // 3  Teal             — vibrant teal
+        'bg-[#1E293B]',   // 4  Navy             — dark charcoal-navy
+        'bg-[#0EA5E9]',   // 5  Sky              — bright sky
+        'bg-[#059669]',   // 6  Forest           — deeper green
+        'bg-[#6366F1]',   // 7  Indigo           — clear indigo
+        'bg-[#0891B2]',   // 8  Cyan             — deep cyan
+        'bg-[#64748B]',   // 9  Slate            — medium grey
+        'bg-[#7C3AED]',   // 10 Royal Purple     — vibrant purple
+        'bg-[#475569]',   // 11 Steel            — deep grey
+      ];
+      // Mix a second pass (case-flipped) into the djb2 hash so short, similar
+      // names like Greg/Yuki/Olivia don't cluster on adjacent buckets.
+      const s = (name || '?').toLowerCase();
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = (((h << 5) + h) ^ s.charCodeAt(i)) >>> 0;
+      for (let i = s.length - 1; i >= 0; i--) h = (((h << 5) + h) ^ (s.charCodeAt(i) * 7)) >>> 0;
+      return palette[h % palette.length];
+    },
     onTreatmentToggle(facCode, service){
       const isOn = !!this.access[facCode][service];
-      for (const form of this.formsAt(facCode, service)) {
+      const forms = this.formsAt(facCode, service);
+      for (const form of forms) {
         this.formAccess[facCode][form.key] = isOn;
+      }
+      // A contact can never have access to a treatment or form the company
+      // doesn't grant. When the company unticks a treatment, cascade-untick
+      // the treatment AND its forms on every additional contact, otherwise
+      // their stale ticks would keep rendering the per-contact Form access
+      // section after the source treatment is revoked.
+      if (!isOn) {
+        for (const c of this.additionalContacts) {
+          if (c.customAccess && c.customAccess[facCode]) {
+            c.customAccess[facCode][service] = false;
+          }
+          if (c.customFormAccess && c.customFormAccess[facCode]) {
+            for (const form of forms) {
+              c.customFormAccess[facCode][form.key] = false;
+            }
+          }
+        }
       }
     },
     toggleAllForms(facCode, service, value){
-      for (const form of this.formsAt(facCode, service)) {
+      const forms = this.formsAt(facCode, service);
+      for (const form of forms) {
         this.formAccess[facCode][form.key] = value;
+      }
+      if (!value) {
+        for (const c of this.additionalContacts) {
+          if (!c.customFormAccess || !c.customFormAccess[facCode]) continue;
+          for (const form of forms) {
+            c.customFormAccess[facCode][form.key] = false;
+          }
+        }
+      }
+    },
+    onCompanyFormToggle(facCode, formKey){
+      // Called when the admin ticks/unticks an individual form card at the
+      // company level. If the company just revoked the form, revoke it on
+      // every additional contact too — a contact can't have a form the
+      // company doesn't.
+      if (this.formAccess[facCode][formKey]) return;
+      for (const c of this.additionalContacts) {
+        if (c.customFormAccess && c.customFormAccess[facCode]) {
+          c.customFormAccess[facCode][formKey] = false;
+        }
       }
     },
     confirmLoadMatch(){
@@ -7660,18 +7815,26 @@ const OnboardCompanyPage = {
       this.submitAttempted = false;
     },
     addAdditionalContact(){
-      // customize=false means inherit the company's facility + service grants.
-      // When the admin clicks "Customize access", we seed customAccess from
-      // the company's current grants (so they're un-ticking, not starting blank).
-      // customizeForms=false means inherit the company's form access.
+      // Each new contact owns an explicit per-contact access matrix from the
+      // start (customize=true), so the admin picks what THIS contact gets
+      // rather than implicitly inheriting the company's grants.
       this.additionalContacts.push({
         name:'', phone:'', email:'',
-        customize:false, customAccess:null,
-        customizeForms:false, customFormAccess:null,
+        customize:true, customAccess:buildEmptyAccess(),
+        customizeForms:true, customFormAccess:buildEmptyFormAccess(),
       });
     },
     removeAdditionalContact(i){
       this.additionalContacts.splice(i, 1);
+    },
+    onContactTreatmentToggle(i, facCode, service){
+      // Mirror the company-level pattern: when a treatment is ticked for this
+      // contact, auto-tick every form under it; when untoggled, untick them.
+      const c = this.additionalContacts[i];
+      const isOn = !!c.customAccess[facCode][service];
+      for (const form of this.formsAt(facCode, service)) {
+        c.customFormAccess[facCode][form.key] = isOn;
+      }
     },
     enableContactCustomAccess(i){
       const contact = this.additionalContacts[i];
@@ -7903,264 +8066,89 @@ const OnboardCompanyPage = {
 
       <!-- A. Company Details -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="building-2" :size="14" cls="text-slate-500"/> Company details
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="building-2" :size="15"/></span>Company details
         </header>
         <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <div class="md:col-span-2">
             <label for="co-name" class="block text-sm font-medium text-slate-700 mb-1.5">Company name <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="co-name" v-model="f.name" type="text" placeholder="Start typing a company name…" autocomplete="organization"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-            <p class="mt-1 text-xs text-slate-500">
+            <div class="relative">
+              <input id="co-name" v-model="f.name" type="text" placeholder="Start typing a company name…" autocomplete="organization"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <p class="mt-1.5 text-xs text-slate-500">
               <span v-if="loadedCompany" class="text-teal-700 inline-flex items-center gap-1"><Icon name="check-circle-2" :size="12"/> Loaded from existing record.</span>
               <span v-else>We’ll check this name against existing companies as you type.</span>
             </p>
           </div>
           <div>
             <label for="co-abn" class="block text-sm font-medium text-slate-700 mb-1.5">ABN <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="co-abn" v-model="f.abn" type="text" placeholder="11 digits" inputmode="numeric"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-            <p class="mt-1 text-xs text-slate-500">Verified against the Australian Business Register on submit.</p>
+            <div class="relative">
+              <input id="co-abn" v-model="f.abn" type="text" placeholder="11 digits" inputmode="numeric"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <p class="mt-1.5 text-xs text-slate-500">Verified against the Australian Business Register on submit.</p>
           </div>
           <div>
             <label for="co-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Business phone <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="co-phone" v-model="f.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <div class="relative">
+              <input id="co-phone" v-model="f.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
           </div>
           <div class="md:col-span-2">
             <label for="co-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="co-email" v-model="f.email" type="email" placeholder="accounts@company.com.au" autocomplete="email"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-            <p class="mt-1 text-xs text-slate-500">Becomes the primary login for the company. The invitation goes to this address.</p>
+            <div class="relative">
+              <input id="co-email" v-model="f.email" type="email" placeholder="accounts@company.com.au" autocomplete="email"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <p class="mt-1.5 text-xs text-slate-500">Becomes the primary login for the company. The invitation goes to this address.</p>
           </div>
         </div>
       </section>
 
       <!-- B. Company Primary Contact -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="user-round" :size="14" cls="text-slate-500"/> Company primary contact
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="user-round" :size="15"/></span>Company primary contact
         </header>
         <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <div class="md:col-span-2">
             <label for="co-contact" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="co-contact" v-model="f.contactName" type="text" placeholder="Full name" autocomplete="name"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <div class="relative">
+              <input id="co-contact" v-model="f.contactName" type="text" placeholder="Full name" autocomplete="name"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
           </div>
           <div>
             <label for="co-cphone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
-            <input id="co-cphone" v-model="f.contactPhone" type="tel" placeholder="+61 ..." autocomplete="tel"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-            <p class="mt-1 text-xs text-slate-500">Direct line for the primary contact. May differ from the business phone above.</p>
+            <div class="relative">
+              <input id="co-cphone" v-model="f.contactPhone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <p class="mt-1.5 text-xs text-slate-500">Direct line for the primary contact. May differ from the business phone above.</p>
           </div>
           <div>
-            <label for="co-cemail" class="block text-sm font-medium text-slate-700 mb-1.5">Contact email <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
-            <input id="co-cemail" v-model="f.contactEmail" type="email" placeholder="Only if different from company email" autocomplete="email"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-            <p class="mt-1 text-xs text-slate-500">Leave blank to reuse the company email above.</p>
+            <label for="co-cemail" class="block text-sm font-medium text-slate-700 mb-1.5">Contact email <span class="normal-case tracking-normal text-slate-400 text-[10px] font-normal">(optional)</span></label>
+            <div class="relative">
+              <input id="co-cemail" v-model="f.contactEmail" type="email" placeholder="Only if different from company email" autocomplete="email"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <p class="mt-1.5 text-xs text-slate-500">Leave blank to reuse the company email above.</p>
           </div>
         </div>
       </section>
 
-      <!-- B2. Additional contacts (inline) -->
+      <!-- C. Facility and Service Access -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="users" :size="14" cls="text-slate-500"/> Additional contacts
-          <span v-if="additionalContacts.length" class="text-xs text-slate-500 font-normal">({{ additionalContacts.length }})</span>
-        </header>
-        <div class="p-5 space-y-4">
-          <p class="text-sm text-slate-500">
-            Other people who need their own login under this company. They'll be created when you {{ loadedCompany ? 'save changes' : 'send the invitation' }}.
-          </p>
-
-          <div v-if="loadedCompany && loadedContacts.length" class="rounded-md border border-slate-200">
-            <div class="px-4 py-2 bg-slate-50 text-xs text-slate-500">Already onboarded ({{ loadedContacts.length }})</div>
-            <ul class="divide-y divide-slate-200">
-              <li v-for="ct in loadedContacts" :key="ct.id" class="px-4 py-2.5 flex items-center justify-between gap-3 text-sm">
-                <div class="min-w-0 flex items-center gap-2">
-                  <span class="inline-flex items-center justify-center h-7 w-7 rounded-full bg-slate-100 text-slate-700 text-xs font-medium shrink-0">{{ (ct.name || '?').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase() }}</span>
-                  <span class="text-navy-900 truncate">{{ ct.name }}</span>
-                </div>
-                <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
-                  <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
-                  <span>{{ ct.status }}</span>
-                </span>
-              </li>
-            </ul>
-          </div>
-
-          <div v-for="(c, i) in additionalContacts" :key="'ac-' + i" class="rounded-md border border-slate-200 p-4">
-            <div class="flex items-center justify-between gap-3 mb-3">
-              <span class="text-sm font-medium text-navy-900">New contact #{{ i + 1 }}</span>
-              <button type="button" @click="removeAdditionalContact(i)" class="text-xs text-slate-500 hover:text-red-600 focus-ring rounded inline-flex items-center gap-1">
-                <Icon name="x" :size="12" aria-hidden="true"/> Remove
-              </button>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
-              <div class="md:col-span-2">
-                <label :for="'ac-name-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
-                <input :id="'ac-name-' + i" v-model="c.name" type="text" placeholder="Full name" autocomplete="name"
-                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-              </div>
-              <div>
-                <label :for="'ac-phone-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
-                <input :id="'ac-phone-' + i" v-model="c.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
-                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-              </div>
-              <div>
-                <label :for="'ac-email-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
-                <input :id="'ac-email-' + i" v-model="c.email" type="email" placeholder="contact@company.com.au" autocomplete="email"
-                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-                <p class="mt-1 text-xs text-slate-500">Becomes this contact's personal login.</p>
-              </div>
-            </div>
-
-            <!-- Access row: inherit by default, with a Customize toggle. -->
-            <div class="mt-4 pt-3 border-t border-slate-200">
-              <div v-if="!c.customize" class="flex flex-wrap items-center gap-2 text-sm">
-                <span class="text-slate-500">Access:</span>
-                <span v-if="grantedFacilities.length === 0" class="text-slate-400 italic">none yet — set facility access below</span>
-                <span v-else class="inline-flex items-center gap-1.5 text-navy-900">
-                  <Icon name="link" :size="12" cls="text-slate-400" aria-hidden="true"/>
-                  <span>Same as company</span>
-                  <span class="text-slate-500">({{ grantedFacilities.map(f => f.code).join(', ') }})</span>
-                </span>
-                <button type="button" @click="enableContactCustomAccess(i)"
-                        :disabled="grantedFacilities.length === 0"
-                        class="ml-auto text-xs font-medium text-teal-700 hover:text-teal-800 focus-ring rounded disabled:text-slate-300 disabled:cursor-not-allowed">
-                  Customize access
-                </button>
-              </div>
-
-              <div v-else>
-                <div class="flex items-center justify-between gap-2 mb-2">
-                  <span class="text-sm text-slate-700 inline-flex items-center gap-1.5">
-                    <Icon name="shield-check" :size="12" cls="text-slate-500" aria-hidden="true"/>
-                    Custom access (limited to company's grants)
-                  </span>
-                  <button type="button" @click="disableContactCustomAccess(i)" class="text-xs text-slate-500 hover:text-navy-900 focus-ring rounded">
-                    Reset to company access
-                  </button>
-                </div>
-                <div class="overflow-x-auto rounded-md border border-slate-200">
-                  <table class="w-full text-sm">
-                    <thead class="bg-slate-50 text-left text-[12px] text-slate-600 border-b border-slate-200">
-                      <tr>
-                        <th scope="col" class="px-3 py-2 font-medium">Facility</th>
-                        <th v-for="s in services" :key="s" scope="col" class="px-3 py-2 font-medium text-center w-24">
-                          <span class="inline-flex items-center gap-1">
-                            <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
-                            <span>{{ s }}</span>
-                          </span>
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      <tr v-for="fac in grantedFacilities" :key="fac.code" class="even:bg-slate-50/60">
-                        <td class="px-3 py-2.5">
-                          <div class="text-sm text-navy-900">{{ fac.name }}</div>
-                          <div class="text-[11px] text-slate-500">{{ fac.code }}</div>
-                        </td>
-                        <td v-for="s in services" :key="s" class="px-3 py-2.5 text-center">
-                          <input v-if="access[fac.code][s] && fac.services.includes(s)" type="checkbox"
-                                 v-model="c.customAccess[fac.code][s]"
-                                 :aria-label="s + ' at ' + fac.name + ' for new contact ' + (i + 1)"
-                                 class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
-                          <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not granted at company level"></span>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <p v-if="contactCustomFacilities(i).length === 0" class="mt-2 text-xs text-amber-700 inline-flex items-center gap-1.5">
-                  <Icon name="alert-circle" :size="12" aria-hidden="true"/>
-                  No services ticked — this contact will fall back to company access on save.
-                </p>
-              </div>
-            </div>
-
-            <!-- Forms row: independent of access toggle, opt-in. -->
-            <div class="mt-3 pt-3 border-t border-slate-200">
-              <div v-if="!c.customizeForms" class="flex flex-wrap items-center gap-2 text-sm">
-                <span class="text-slate-500">Forms:</span>
-                <span v-if="contactFormGroups(i).length === 0" class="text-slate-400 italic">none yet — tick a treatment first</span>
-                <span v-else class="inline-flex items-center gap-1.5 text-navy-900">
-                  <Icon name="link" :size="12" cls="text-slate-400" aria-hidden="true"/>
-                  <span>Same as company</span>
-                  <span class="text-slate-500">({{ contactGrantedFormCount(i) }} {{ contactGrantedFormCount(i) === 1 ? 'form' : 'forms' }})</span>
-                </span>
-                <button type="button" @click="enableContactCustomForms(i)"
-                        :disabled="contactFormGroups(i).length === 0"
-                        class="ml-auto text-xs font-medium text-teal-700 hover:text-teal-800 focus-ring rounded disabled:text-slate-300 disabled:cursor-not-allowed">
-                  Customize specific forms
-                </button>
-              </div>
-              <div v-else>
-                <div class="flex items-center justify-between gap-2 mb-2">
-                  <span class="text-sm text-slate-700 inline-flex items-center gap-1.5">
-                    <Icon name="file-check-2" :size="12" cls="text-slate-500" aria-hidden="true"/>
-                    Custom forms ({{ contactGrantedFormCount(i) }} ticked)
-                  </span>
-                  <button type="button" @click="disableContactCustomForms(i)" class="text-xs text-slate-500 hover:text-navy-900 focus-ring rounded">
-                    Reset to company forms
-                  </button>
-                </div>
-                <div class="space-y-3">
-                  <div v-for="g in contactFormGroups(i)" :key="'cfg-' + i + '-' + g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
-                    <div class="px-3 py-1.5 bg-slate-50 border-b border-slate-200 text-xs">
-                      <span class="font-medium text-navy-900">{{ g.fac.name }}</span>
-                      <span class="text-slate-500 ml-1">{{ g.fac.code }}</span>
-                    </div>
-                    <div class="divide-y divide-slate-100">
-                      <div v-for="t in g.treatments" :key="'cft-' + i + '-' + g.fac.code + '-' + t.service" class="px-3 py-2">
-                        <div class="flex items-center gap-2 mb-1.5">
-                          <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[t.service] && treatmentStyles[t.service].dot]" aria-hidden="true"></span>
-                          <span class="text-xs font-medium text-navy-900">{{ treatmentLabels[t.service] || t.service }}</span>
-                        </div>
-                        <ul class="space-y-1">
-                          <li v-for="form in t.forms" :key="form.key" class="flex items-center gap-2 text-sm">
-                            <input type="checkbox"
-                                   :id="'cfa-' + i + '-' + g.fac.code + '-' + form.key"
-                                   v-model="c.customFormAccess[g.fac.code][form.key]"
-                                   :aria-label="form.name + ' at ' + g.fac.name + ' for new contact ' + (i + 1)"
-                                   class="w-4 h-4 rounded accent-teal-600 cursor-pointer shrink-0"/>
-                            <label :for="'cfa-' + i + '-' + g.fac.code + '-' + form.key" class="text-navy-900 cursor-pointer">
-                              {{ form.name }}
-                              <span class="font-mono text-[11px] text-slate-500 ml-1">{{ form.code }}</span>
-                            </label>
-                          </li>
-                        </ul>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <p v-if="submitAttempted && !additionalContactsValid" role="alert" class="text-sm text-red-600 inline-flex items-center gap-1.5">
-            <Icon name="alert-circle" :size="12" aria-hidden="true"/>
-            Each additional contact needs a name and email, or remove the row.
-          </p>
-
-          <button type="button" @click="addAdditionalContact"
-                  class="inline-flex items-center gap-2 text-sm font-medium text-teal-700 hover:text-teal-800 focus-ring rounded px-1 py-1">
-            <Icon name="plus" :size="14" aria-hidden="true"/> Add another contact
-          </button>
-        </div>
-      </section>
-
-      <!-- C. Facility and Service Access (unchanged matrix + form-access pattern) -->
-      <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility and service access
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="shield-check" :size="15"/></span>Facility and service access
           <span class="ml-auto text-sm text-slate-500 font-normal">
             <span v-if="grantedFacilities.length === 0">No facilities selected.</span>
             <span v-else>{{ grantedFacilities.length }} {{ grantedFacilities.length === 1 ? 'facility' : 'facilities' }} granted</span>
           </span>
         </header>
-        <p class="px-5 pt-4 text-sm text-slate-500">Tick the services this company can submit at each facility. A facility is granted access automatically when at least one of its services is ticked.</p>
-        <div class="px-5 pt-3 pb-5 overflow-x-auto">
+        <div class="px-5 pt-5 pb-5 overflow-x-auto">
           <table class="w-full text-base">
             <caption class="sr-only">Facility and service access matrix</caption>
             <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-y border-slate-300">
@@ -8194,24 +8182,16 @@ const OnboardCompanyPage = {
         </div>
       </section>
 
-      <!-- Form access -->
-      <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="file-check-2" :size="14" cls="text-slate-500"/> Form access
+      <!-- Form access — hidden until at least one (facility, treatment) is selected above. -->
+      <section v-if="formGroups.length" class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="file-check-2" :size="15"/></span>Form access
           <span class="ml-auto text-sm text-slate-500 font-normal">
-            <span v-if="formGroups.length === 0">Tick a treatment above to grant forms.</span>
-            <span v-else>{{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted</span>
+            {{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted
           </span>
         </header>
-        <p class="px-5 pt-4 text-sm text-slate-500">
-          The company will only see the forms ticked here. By default every form under a ticked treatment is granted &mdash; untick to restrict access to specific forms.
-        </p>
 
-        <div v-if="formGroups.length === 0" class="px-5 pt-3 pb-6 text-sm text-slate-500">
-          No treatments ticked yet. Use the matrix above to grant a facility &amp; treatment, then come back to choose forms.
-        </div>
-
-        <div v-else class="px-5 pt-3 pb-5 space-y-5">
+        <div class="px-5 pt-5 pb-5 space-y-5">
           <div v-for="g in formGroups" :key="g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
             <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
               <span class="text-sm font-medium text-navy-900">{{ g.fac.name }}, {{ g.fac.state }}</span>
@@ -8234,6 +8214,7 @@ const OnboardCompanyPage = {
                       <input type="checkbox"
                              :id="'cfa-' + g.fac.code + '-' + form.key"
                              v-model="formAccess[g.fac.code][form.key]"
+                             @change="onCompanyFormToggle(g.fac.code, form.key)"
                              :aria-label="form.name + ' at ' + g.fac.name"
                              class="absolute top-3 right-3 w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
                       <div class="flex items-start gap-3 pr-7">
@@ -8272,6 +8253,229 @@ const OnboardCompanyPage = {
         </div>
       </section>
 
+      <!-- E. Additional contacts (premium design per request). -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 pt-5 pb-4 flex items-start gap-3">
+          <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-full bg-teal-50 text-teal-600 ring-1 ring-teal-100">
+            <Icon name="users" :size="18"/>
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base font-semibold text-navy-900 leading-tight">Additional contacts</h3>
+              <span class="text-[10px] uppercase tracking-wider font-semibold px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Optional</span>
+              <span v-if="additionalContacts.length" class="text-xs text-slate-500">&middot; {{ additionalContacts.length }} {{ additionalContacts.length === 1 ? 'new contact' : 'new contacts' }}</span>
+            </div>
+            <p class="text-sm text-slate-500 mt-0.5">Other people from this company who need their own login.</p>
+          </div>
+        </header>
+        <div class="px-5 pb-5 space-y-5">
+          <!-- Already-onboarded panel -->
+          <div v-if="loadedCompany && loadedContacts.length" class="rounded-2xl bg-gradient-to-b from-slate-50 to-white ring-1 ring-slate-200/80 p-3.5">
+            <div class="px-2 py-1.5 mb-1.5 flex items-center justify-between">
+              <span class="text-[11px] uppercase tracking-wider text-slate-500 font-semibold inline-flex items-center gap-1.5">
+                <Icon name="check-circle-2" :size="12" cls="text-emerald-500"/> Already onboarded
+              </span>
+              <span class="text-[11px] text-slate-400 font-medium">{{ loadedContacts.length }} {{ loadedContacts.length === 1 ? 'contact' : 'contacts' }}</span>
+            </div>
+            <ul class="space-y-2">
+              <li v-for="ct in loadedContacts" :key="ct.id"
+                  class="flex items-center justify-between gap-3 bg-white rounded-xl px-4 py-3 shadow-sm ring-1 ring-slate-100">
+                <div class="min-w-0 flex items-center gap-3">
+                  <span :class="['shrink-0 inline-flex items-center justify-center h-11 w-11 rounded-full text-white text-sm font-extrabold tracking-wide shadow-md ring-2 ring-white', contactGradient(ct.name)]">{{ contactInitials(ct.name) }}</span>
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold text-navy-900 truncate leading-tight">{{ ct.name }}</div>
+                    <div class="text-xs text-slate-500 mt-0.5 inline-flex items-center gap-1"><Icon name="mail" :size="11" cls="text-slate-400"/> Has login access</div>
+                  </div>
+                </div>
+                <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(ct.status)]">
+                  <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
+                  {{ ct.status }}
+                </span>
+              </li>
+            </ul>
+          </div>
+
+          <!-- New contact cards -->
+          <div v-for="(c, i) in additionalContacts" :key="'ac-' + i"
+               class="bg-white border border-slate-200 rounded-md p-5 space-y-5">
+            <div class="flex items-center justify-between gap-3 pb-4 border-b border-slate-100">
+              <div class="flex items-center gap-3 min-w-0">
+                <span v-if="c.name"
+                      :class="['shrink-0 inline-flex items-center justify-center h-11 w-11 rounded-full text-white text-sm font-extrabold tracking-wide shadow-md ring-2 ring-white', contactGradient(c.name)]">{{ contactInitials(c.name) }}</span>
+                <span v-else
+                      class="shrink-0 inline-flex items-center justify-center h-11 w-11 rounded-full bg-gradient-to-br from-teal-50 to-cyan-100 text-teal-500 ring-2 ring-white shadow-sm">
+                  <Icon name="user-round" :size="20"/>
+                </span>
+                <div class="min-w-0">
+                  <div class="text-base font-semibold text-navy-900 leading-tight truncate">{{ c.name || 'New contact' }}</div>
+                  <div class="text-xs text-slate-500 mt-1 inline-flex items-center gap-1.5">
+                    <span class="inline-flex items-center justify-center h-4 px-1.5 rounded bg-slate-100 text-[10px] font-semibold text-slate-600 tracking-wide">#{{ i + 1 }}</span>
+                    <span v-if="!c.name">Awaiting details</span>
+                    <span v-else-if="!c.email" class="text-amber-600">Email required</span>
+                    <span v-else class="text-emerald-600 inline-flex items-center gap-1"><Icon name="check-circle-2" :size="11"/> Ready</span>
+                  </div>
+                </div>
+              </div>
+              <button type="button" @click="removeAdditionalContact(i)"
+                      class="text-xs font-medium text-slate-500 hover:text-red-600 hover:bg-red-50 focus-ring rounded-lg inline-flex items-center gap-1.5 px-2.5 py-1.5 transition-colors">
+                <Icon name="trash-2" :size="14" aria-hidden="true"/> Remove
+              </button>
+            </div>
+
+            <!-- Contact details sub-header -->
+            <div>
+              <div class="flex items-center gap-2.5 mb-3">
+                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100 shrink-0"><Icon name="id-card" :size="15"/></span>
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-navy-900 leading-tight">Contact details</div>
+                  <div class="text-xs text-slate-500">Name and login email.</div>
+                </div>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4">
+              <div class="md:col-span-2">
+                <label :for="'ac-name-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
+                <input :id="'ac-name-' + i" v-model="c.name" type="text" placeholder="Full name" autocomplete="name"
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
+              <div>
+                <label :for="'ac-phone-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
+                <input :id="'ac-phone-' + i" v-model="c.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
+              <div>
+                <label :for="'ac-email-' + i" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
+                <input :id="'ac-email-' + i" v-model="c.email" type="email" placeholder="contact@company.com.au" autocomplete="email"
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+                <p class="mt-1 text-xs text-slate-500">Becomes this contact's personal login.</p>
+              </div>
+              </div>
+            </div>
+
+            <!-- Per-contact Facility and service access matrix. -->
+            <div v-if="grantedFacilities.length">
+              <div class="flex items-center gap-2.5 mb-3">
+                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100 shrink-0"><Icon name="shield-check" :size="15"/></span>
+                <div class="min-w-0">
+                  <div class="text-sm font-semibold text-navy-900 leading-tight">Facility and service access</div>
+                  <div class="text-xs text-slate-500">Pick what this contact can submit.</div>
+                </div>
+              </div>
+              <div class="overflow-x-auto rounded-md border border-slate-200">
+                <table class="w-full text-sm">
+                  <thead class="bg-slate-50 text-left text-[12px] text-slate-600 border-b border-slate-200">
+                    <tr>
+                      <th scope="col" class="px-3 py-2 font-medium">Facility</th>
+                      <th v-for="s in services" :key="s" scope="col" class="px-3 py-2 font-medium text-center w-28">
+                        <span class="inline-flex items-center gap-1.5">
+                          <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                          <span>{{ treatmentLabels[s] || s }}</span>
+                        </span>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr v-for="fac in grantedFacilities" :key="fac.code" class="even:bg-slate-50/60">
+                      <td class="px-3 py-2.5">
+                        <div class="text-sm text-navy-900">{{ fac.name }}</div>
+                        <div class="text-[11px] text-slate-500">{{ fac.code }}</div>
+                      </td>
+                      <td v-for="s in services" :key="s" class="px-3 py-2.5 text-center">
+                        <input v-if="access[fac.code][s] && fac.services.includes(s)" type="checkbox"
+                               v-model="c.customAccess[fac.code][s]"
+                               @change="onContactTreatmentToggle(i, fac.code, s)"
+                               :aria-label="s + ' at ' + fac.name + ' for new contact ' + (i + 1)"
+                               class="w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                        <span v-else class="inline-block w-4 h-4 rounded border border-dashed border-slate-300 align-middle" title="Not granted at company level"></span>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Per-contact Form access — only shown once the contact has at
+                 least one treatment ticked. -->
+            <div v-if="contactFormGroups(i).length">
+              <div class="flex items-center gap-2.5 mb-3">
+                <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100 shrink-0"><Icon name="file-check-2" :size="15"/></span>
+                <div class="min-w-0 flex-1">
+                  <div class="text-sm font-semibold text-navy-900 leading-tight">Form access</div>
+                  <div class="text-xs text-slate-500">Forms this contact can submit.</div>
+                </div>
+                <span class="text-xs text-slate-500 font-medium shrink-0">{{ contactGrantedFormCount(i) }} {{ contactGrantedFormCount(i) === 1 ? 'form' : 'forms' }}</span>
+              </div>
+              <div class="space-y-5">
+                <div v-for="g in contactFormGroups(i)" :key="'cfg-' + i + '-' + g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
+                  <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
+                    <span class="text-sm font-medium text-navy-900">{{ g.fac.name }}, {{ g.fac.state }}</span>
+                    <span class="text-xs text-slate-500">{{ g.fac.code }}</span>
+                  </div>
+                  <div class="divide-y divide-slate-200">
+                    <div v-for="t in g.treatments" :key="'cft-' + i + '-' + g.fac.code + '-' + t.service" class="px-4 py-4">
+                      <div class="flex items-center gap-2 mb-3">
+                        <span :class="['inline-block h-2.5 w-2.5 rounded-full', treatmentStyles[t.service] && treatmentStyles[t.service].dot]" aria-hidden="true"></span>
+                        <span class="text-sm font-semibold text-navy-900">{{ treatmentLabels[t.service] || t.service }}</span>
+                        <span class="text-xs text-slate-500">{{ t.forms.length }} {{ t.forms.length === 1 ? 'form' : 'forms' }}</span>
+                      </div>
+                      <ul class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <li v-for="form in t.forms" :key="form.key">
+                          <label :for="'cfa-' + i + '-' + g.fac.code + '-' + form.key"
+                                 :class="['relative block rounded-md border p-4 transition-colors cursor-pointer',
+                                          c.customFormAccess[g.fac.code][form.key]
+                                            ? 'border-teal-600 bg-teal-50/40 ring-1 ring-teal-600'
+                                            : 'border-slate-200 bg-white hover:border-slate-400 hover:bg-slate-50/40']">
+                            <input type="checkbox"
+                                   :id="'cfa-' + i + '-' + g.fac.code + '-' + form.key"
+                                   v-model="c.customFormAccess[g.fac.code][form.key]"
+                                   :aria-label="form.name + ' at ' + g.fac.name + ' for new contact ' + (i + 1)"
+                                   class="absolute top-3 right-3 w-4 h-4 rounded accent-teal-600 cursor-pointer"/>
+                            <div class="flex items-start gap-3 pr-7">
+                              <span :class="['shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-md',
+                                             c.customFormAccess[g.fac.code][form.key] ? 'bg-teal-600 text-white' : 'bg-slate-100 text-slate-700']"
+                                    aria-hidden="true">
+                                <Icon :name="formIcons[form.key] || 'file-text'" :size="20"/>
+                              </span>
+                              <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                  <span class="text-base font-semibold text-navy-900 leading-snug">{{ form.name }}</span>
+                                  <span v-if="form.shared_with && form.shared_with.length"
+                                        class="text-[10px] uppercase tracking-wide px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">Shared</span>
+                                </div>
+                                <p class="text-sm text-slate-600 mt-0.5 leading-snug">{{ formMeta(form.key).shortDesc }}</p>
+                                <div class="mt-2 flex flex-wrap items-center gap-x-3 gap-y-0.5 text-xs text-slate-500">
+                                  <span class="font-mono">{{ form.code }}</span>
+                                  <span aria-hidden="true" class="text-slate-300">&middot;</span>
+                                  <span class="inline-flex items-center gap-1"><Icon name="list-checks" :size="12"/>{{ formMeta(form.key).sections }} sections</span>
+                                  <span aria-hidden="true" class="text-slate-300">&middot;</span>
+                                  <span class="inline-flex items-center gap-1"><Icon name="layout-list" :size="12"/>{{ formMeta(form.key).fields }} fields</span>
+                                </div>
+                              </div>
+                            </div>
+                          </label>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <p v-if="submitAttempted && !additionalContactsValid" role="alert" class="text-sm text-red-600 inline-flex items-center gap-1.5">
+            <Icon name="alert-circle" :size="12" aria-hidden="true"/>
+            Each additional contact needs a name and email, or remove the row.
+          </p>
+
+          <div class="flex items-center">
+            <button type="button" @click="addAdditionalContact"
+                    class="inline-flex items-center gap-2 rounded-lg bg-teal-600 text-white hover:bg-teal-700 active:bg-teal-800 px-4 py-2.5 text-sm font-semibold shadow-sm hover:shadow-md hover:shadow-teal-600/20 transition-all focus-ring">
+              <Icon name="plus" :size="16" aria-hidden="true"/>
+              Add New Contact
+            </button>
+          </div>
+        </div>
+      </section>
+
       <div class="border-t border-slate-200 pt-4 flex items-center gap-4 flex-wrap">
         <p v-if="submitAttempted && !formValid" role="alert" class="text-sm text-red-600 inline-flex items-center gap-2">
           <Icon name="alert-circle" :size="16" aria-hidden="true"/>
@@ -8284,27 +8488,53 @@ const OnboardCompanyPage = {
 
       <!-- Auto-detect popup: triggered by the watcher on f.name when an existing company is matched. -->
       <transition name="fade">
-        <div v-if="matchPrompt" class="fixed inset-0 z-50 bg-slate-900/40 flex items-center justify-center p-4" @click.self="dismissMatch">
-          <div class="bg-white border border-slate-200 rounded-md w-full max-w-md overflow-hidden shadow-xl" role="dialog" aria-modal="true" aria-label="Existing company match">
-            <header class="px-5 py-4 border-b border-slate-200 flex items-start gap-3">
-              <span class="inline-flex items-center justify-center h-9 w-9 rounded-full bg-teal-100 text-teal-700 shrink-0"><Icon name="info" :size="18"/></span>
-              <div class="min-w-0">
-                <h2 class="text-base font-semibold text-navy-900 leading-snug">This company already exists</h2>
-                <p class="text-sm text-slate-600 mt-0.5"><span class="font-medium text-navy-900">{{ matchPrompt.name }}</span> is already onboarded. Do you want to load its details so you can edit them or add a new contact?</p>
+        <div v-if="matchPrompt" class="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4" @click.self="dismissMatch">
+          <div class="bg-white rounded-md w-full max-w-sm overflow-hidden shadow-2xl ring-1 ring-slate-200/70" role="dialog" aria-modal="true" aria-label="Existing company match">
+            <div class="px-7 pt-7 pb-5">
+              <div class="flex items-start gap-3.5">
+                <span class="shrink-0 inline-flex items-center justify-center h-11 w-11 rounded-full bg-teal-50 text-teal-600 ring-1 ring-teal-100" aria-hidden="true">
+                  <Icon name="building" :size="20"/>
+                </span>
+                <div class="min-w-0 pt-0.5">
+                  <h2 class="text-lg font-semibold text-navy-900 leading-tight tracking-tight">This company already exists</h2>
+                  <p class="text-sm text-slate-500 mt-1 leading-snug">We found an existing record. Would you like to load its details?</p>
+                </div>
               </div>
-            </header>
-            <div class="px-5 py-4 text-sm">
-              <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-4 gap-y-2 text-slate-700">
-                <div><dt class="text-slate-500 text-xs">ABN</dt><dd class="tabular-nums">{{ matchPrompt.abn }}</dd></div>
-                <div><dt class="text-slate-500 text-xs">Phone</dt><dd>{{ matchPrompt.phone }}</dd></div>
-                <div class="sm:col-span-2"><dt class="text-slate-500 text-xs">Primary contact</dt><dd>{{ matchPrompt.primaryContact?.name }} &middot; <span class="text-slate-500">{{ matchPrompt.primaryContact?.email }}</span></dd></div>
-                <div class="sm:col-span-2"><dt class="text-slate-500 text-xs">Facilities</dt><dd>{{ matchPrompt.facilities.join(', ') }}</dd></div>
-              </dl>
+
+              <div class="mt-5 rounded-xl bg-slate-50/70 ring-1 ring-slate-200/70 divide-y divide-slate-200/70">
+                <div class="px-4 py-3">
+                  <div class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Company</div>
+                  <div class="text-sm font-semibold text-navy-900 mt-0.5 truncate">{{ matchPrompt.name }}</div>
+                </div>
+                <div class="px-4 py-3 grid grid-cols-2 gap-3">
+                  <div class="min-w-0">
+                    <div class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">ABN</div>
+                    <div class="text-sm text-slate-800 tabular-nums mt-0.5 truncate">{{ matchPrompt.abn }}</div>
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Phone</div>
+                    <div class="text-sm text-slate-800 mt-0.5 truncate">{{ matchPrompt.phone }}</div>
+                  </div>
+                </div>
+                <div class="px-4 py-3">
+                  <div class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Primary contact</div>
+                  <div class="text-sm text-navy-900 mt-0.5 truncate">{{ matchPrompt.primaryContact?.name }}</div>
+                  <div class="text-xs text-slate-500 truncate">{{ matchPrompt.primaryContact?.email }}</div>
+                </div>
+                <div class="px-4 py-3">
+                  <div class="text-[10px] uppercase tracking-wider text-slate-500 font-medium">Facilities</div>
+                  <div class="mt-1 flex flex-wrap gap-1">
+                    <span v-for="fac in matchPrompt.facilities" :key="fac"
+                          class="inline-flex items-center text-[11px] font-medium px-2 py-0.5 rounded-md bg-white text-slate-700 ring-1 ring-slate-200">{{ fac }}</span>
+                  </div>
+                </div>
+              </div>
             </div>
-            <footer class="px-5 py-4 border-t border-slate-200 flex items-center justify-end gap-3">
-              <button type="button" @click="dismissMatch" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">No, keep typing</button>
-              <Btn icon="download" @click="confirmLoadMatch">Yes, load details</Btn>
-            </footer>
+            <div class="px-7 pb-6 pt-1 flex items-center justify-end gap-1">
+              <button type="button" @click="dismissMatch"
+                      class="text-sm font-medium text-slate-500 hover:text-navy-900 focus-ring rounded-lg px-3 py-2 transition-colors">Keep typing</button>
+              <Btn size="lg" @click="confirmLoadMatch">Load company details</Btn>
+            </div>
           </div>
         </div>
       </transition>
@@ -8402,6 +8632,12 @@ const OnboardCompanyContactPage = {
       }
       return missing;
     },
+    existingContacts(){
+      // Contacts already onboarded under the selected company — surfaced to the
+      // admin so they can see who's already there before adding a new one.
+      if (!this.companyId) return [];
+      return state.companyContacts.filter(ct => ct.companyId === this.companyId);
+    },
     companyValid(){ return !!this.selectedCompany; },
     contactDetailsValid(){
       const f = this.f;
@@ -8433,6 +8669,42 @@ const OnboardCompanyContactPage = {
   methods:{
     formsAt(facCode, service){ return formsAtForCatalog(facCode, service); },
     formMeta(key){ return onboardCompanyFormMeta(key); },
+    statusDot(s){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
+    },
+    statusPill(s){
+      return ({
+        'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
+      })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
+    },
+    contactInitials(name){
+      return (name || '?').trim().split(/\s+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
+    },
+    contactGradient(name){
+      // 12 mature-industry tones — synced with every other contactGradient
+      // across the app so a contact's colour is consistent everywhere.
+      const palette = [
+        'bg-[#10B981]',   // 0  Emerald
+        'bg-[#8B5CF6]',   // 1  Violet
+        'bg-[#3B82F6]',   // 2  Blue
+        'bg-[#14B8A6]',   // 3  Teal
+        'bg-[#1E293B]',   // 4  Navy
+        'bg-[#0EA5E9]',   // 5  Sky
+        'bg-[#059669]',   // 6  Forest
+        'bg-[#6366F1]',   // 7  Indigo
+        'bg-[#0891B2]',   // 8  Cyan
+        'bg-[#64748B]',   // 9  Slate
+        'bg-[#7C3AED]',   // 10 Royal Purple
+        'bg-[#475569]',   // 11 Steel
+      ];
+      const s = (name || '?').toLowerCase();
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = (((h << 5) + h) ^ s.charCodeAt(i)) >>> 0;
+      for (let i = s.length - 1; i >= 0; i--) h = (((h << 5) + h) ^ (s.charCodeAt(i) * 7)) >>> 0;
+      return palette[h % palette.length];
+    },
     onTreatmentToggle(facCode, service){
       const isOn = !!this.access[facCode][service];
       for (const form of this.formsAt(facCode, service)) {
@@ -8483,66 +8755,104 @@ const OnboardCompanyContactPage = {
       </button>
 
       <div>
-        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Add Company Contact</h1>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Add New Contact</h1>
         <p class="text-sm text-slate-500 mt-1">Add a person under an existing company. The contact will receive their own login and access scoped to the facilities you tick below.</p>
       </div>
 
       <!-- A. Select company -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="building-2" :size="14" cls="text-slate-500"/> Select company
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="building-2" :size="15"/></span>Select company
         </header>
-        <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-          <div class="md:col-span-2">
-            <label for="cc-company" class="block text-sm font-medium text-slate-700 mb-1.5">Company <span class="text-red-500" aria-hidden="true">*</span></label>
-            <select id="cc-company" v-model="companyId"
-                    class="w-full h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
-              <option value="">Choose a company&hellip;</option>
-              <option v-for="c in companies" :key="c.id" :value="c.id">
-                {{ c.name }} &middot; ABN {{ c.abn }}
-              </option>
-            </select>
-            <p class="mt-1 text-xs text-slate-500">
-              <span v-if="!selectedCompany">The contact's available facilities and services are inherited from the chosen company.</span>
-              <span v-else>
-                {{ selectedCompany.name }} &middot; ABN {{ selectedCompany.abn }} &middot;
-                {{ selectedCompany.facilities.length }} {{ selectedCompany.facilities.length === 1 ? 'facility' : 'facilities' }} &middot;
-                Login {{ selectedCompany.email }}
-              </span>
-            </p>
-          </div>
+        <div class="p-5">
+          <label for="cc-company" class="block text-sm font-medium text-slate-700 mb-1.5">Company <span class="text-red-500" aria-hidden="true">*</span></label>
+          <select id="cc-company" v-model="companyId"
+                  class="w-full h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+            <option value="">Choose a company&hellip;</option>
+            <option v-for="c in companies" :key="c.id" :value="c.id">
+              {{ c.name }} &middot; ABN {{ c.abn }}
+            </option>
+          </select>
+          <p v-if="selectedCompany" class="mt-2 text-xs text-slate-500 inline-flex items-center gap-1.5 flex-wrap">
+            <Icon name="check-circle-2" :size="12" cls="text-teal-600"/>
+            <span class="font-medium text-navy-900">{{ selectedCompany.name }}</span>
+            <span aria-hidden="true" class="text-slate-300">&middot;</span>
+            <span>ABN {{ selectedCompany.abn }}</span>
+            <span aria-hidden="true" class="text-slate-300">&middot;</span>
+            <span>{{ selectedCompany.facilities.length }} {{ selectedCompany.facilities.length === 1 ? 'facility' : 'facilities' }}</span>
+            <span aria-hidden="true" class="text-slate-300">&middot;</span>
+            <span>Login {{ selectedCompany.email }}</span>
+          </p>
+        </div>
+      </section>
+
+      <!-- A2. Existing contacts under the selected company.
+           Surfaced so the admin can see who already has a login before adding
+           a duplicate. Only shown once a company is picked AND it has at
+           least one contact. -->
+      <section v-if="selectedCompany && existingContacts.length"
+               class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="users" :size="15"/></span>Already onboarded
+          <span class="text-xs text-slate-500 font-normal">({{ existingContacts.length }})</span>
+        </header>
+        <div class="p-5">
+          <ul class="space-y-2">
+            <li v-for="ct in existingContacts" :key="ct.id">
+              <router-link :to="'/admin/contacts/' + ct.id"
+                           class="flex items-center justify-between gap-3 bg-white rounded-xl px-4 py-3 ring-1 ring-slate-100 hover:ring-slate-200 hover:shadow-sm hover:-translate-y-px transition-all">
+                <div class="min-w-0 flex items-center gap-3">
+                  <span :class="['shrink-0 inline-flex items-center justify-center h-11 w-11 rounded-full text-white text-sm font-extrabold tracking-wide shadow-md ring-2 ring-white ', contactGradient(ct.name)]">{{ contactInitials(ct.name) }}</span>
+                  <div class="min-w-0">
+                    <div class="text-sm font-semibold text-navy-900 truncate leading-tight">{{ ct.name }}</div>
+                    <div class="text-xs text-slate-500 mt-0.5 inline-flex items-center gap-1 truncate"><Icon name="mail" :size="11" cls="text-slate-400"/>{{ ct.email }}</div>
+                  </div>
+                </div>
+                <span :class="['shrink-0 inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(ct.status)]">
+                  <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
+                  {{ ct.status }}
+                </span>
+              </router-link>
+            </li>
+          </ul>
         </div>
       </section>
 
       <!-- B. Contact details -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="user-round" :size="14" cls="text-slate-500"/> Contact details
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="user-round" :size="15"/></span>Contact details
         </header>
         <div class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
           <div class="md:col-span-2">
             <label for="cc-name" class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="cc-name" v-model="f.name" type="text" placeholder="Full name" autocomplete="name"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <div class="relative">
+              <input id="cc-name" v-model="f.name" type="text" placeholder="Full name" autocomplete="name"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
           </div>
           <div>
             <label for="cc-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone number <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="cc-phone" v-model="f.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            <div class="relative">
+              <input id="cc-phone" v-model="f.phone" type="tel" placeholder="+61 ..." autocomplete="tel"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
           </div>
           <div>
             <label for="cc-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email <span class="text-red-500" aria-hidden="true">*</span></label>
-            <input id="cc-email" v-model="f.email" type="email" placeholder="contact@company.com.au" autocomplete="email"
-                   class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-            <p class="mt-1 text-xs text-slate-500">Becomes the contact's personal login. The invitation goes to this address.</p>
+            <div class="relative">
+              <input id="cc-email" v-model="f.email" type="email" placeholder="contact@company.com.au" autocomplete="email"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+            <p class="mt-1.5 text-xs text-slate-500">Becomes the contact's personal login. The invitation goes to this address.</p>
           </div>
         </div>
       </section>
 
       <!-- C. Facility and service access -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility and service access
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="shield-check" :size="15"/></span>Facility and service access
           <span class="ml-auto text-sm text-slate-500 font-normal">
             <span v-if="!selectedCompany">Pick a company first.</span>
             <span v-else-if="grantedFacilities.length === 0">No facilities selected.</span>
@@ -8555,8 +8865,7 @@ const OnboardCompanyContactPage = {
         </div>
 
         <template v-else>
-          <p class="px-5 pt-4 text-sm text-slate-500">Tick the services this contact can submit at each facility. Greyed cells are not granted at the company level &mdash; widen access on the company record first if needed.</p>
-          <div class="px-5 pt-3 pb-5 overflow-x-auto">
+          <div class="px-6 pb-6 overflow-x-auto">
             <table class="w-full text-base">
               <caption class="sr-only">Facility and service access matrix</caption>
               <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-y border-slate-300">
@@ -8591,24 +8900,16 @@ const OnboardCompanyContactPage = {
         </template>
       </section>
 
-      <!-- Form access -->
-      <section v-if="selectedCompany" class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="file-check-2" :size="14" cls="text-slate-500"/> Form access
+      <!-- Form access — hidden until at least one (facility, treatment) is selected above. -->
+      <section v-if="selectedCompany && formGroups.length" class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="file-check-2" :size="15"/></span>Form access
           <span class="ml-auto text-sm text-slate-500 font-normal">
-            <span v-if="formGroups.length === 0">Tick a treatment above to grant forms.</span>
-            <span v-else>{{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted</span>
+            {{ totalFormsGranted }} {{ totalFormsGranted === 1 ? 'form' : 'forms' }} granted
           </span>
         </header>
-        <p class="px-5 pt-4 text-sm text-slate-500">
-          The contact will only see the forms ticked here. By default every form under a ticked treatment is granted &mdash; untick to restrict access to specific forms.
-        </p>
 
-        <div v-if="formGroups.length === 0" class="px-5 pt-3 pb-6 text-sm text-slate-500">
-          No treatments ticked yet. Use the matrix above to grant a facility &amp; treatment, then come back to choose forms.
-        </div>
-
-        <div v-else class="px-5 pt-3 pb-5 space-y-5">
+        <div class="px-5 pt-5 pb-5 space-y-5">
           <div v-for="g in formGroups" :key="g.fac.code" class="rounded-md border border-slate-200 overflow-hidden">
             <div class="px-4 py-2.5 bg-slate-50 border-b border-slate-200 flex items-center gap-2">
               <span class="text-sm font-medium text-navy-900">{{ g.fac.name }}, {{ g.fac.state }}</span>
@@ -8761,12 +9062,52 @@ const CompanyDetailPage = {
     statusDot(s){
       return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
     },
+    statusPill(s){
+      return ({
+        'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
+      })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
+    },
     canCheckAt(facCode, service){
       const f = FACILITIES.find(x => x.code === facCode);
       return !!(f && f.services.includes(service));
     },
     initials(name){
-      return (name || '?').split(' ').map(p => p[0]).join('').slice(0,2).toUpperCase();
+      return (name || '?').trim().split(/\s+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
+    },
+    contactGradient(name){
+      // Same curated palette as the Add Company page — 10 jewel-tone gradients
+      // ordered to alternate warm↔cool, so adjacent hashes land on visually
+      // distinct hues. djb2 + reverse-pass keeps short similar names apart.
+      const palette = [
+        // Eye-soothing enterprise palette: only cool / neutral tones — navy,
+        // slate, blue, teal, sky, emerald, indigo, stone. No reds, no warm
+        // pinks, no bright candy. Inspired by the site-selector avatars,
+        // which read as "calm industrial dashboard" rather than personality
+        // colors. Single-hue 600→800 gradients keep each tile feeling solid.
+        // 12 vibrant-but-mature solid tones — matching the manager's earlier
+        // reference (emerald, violet, clear blue, teal, navy). Mid-saturated
+        // 500-level hues feel alive without looking AI-generated. No reds,
+        // no candy pinks/oranges, no gradient stacks.
+        'bg-[#10B981]',   // 0  Emerald          — vibrant green
+        'bg-[#8B5CF6]',   // 1  Violet           — soft purple
+        'bg-[#3B82F6]',   // 2  Blue             — clear blue
+        'bg-[#14B8A6]',   // 3  Teal             — vibrant teal
+        'bg-[#1E293B]',   // 4  Navy             — dark charcoal-navy
+        'bg-[#0EA5E9]',   // 5  Sky              — bright sky
+        'bg-[#059669]',   // 6  Forest           — deeper green
+        'bg-[#6366F1]',   // 7  Indigo           — clear indigo
+        'bg-[#0891B2]',   // 8  Cyan             — deep cyan
+        'bg-[#64748B]',   // 9  Slate            — medium grey
+        'bg-[#7C3AED]',   // 10 Royal Purple     — vibrant purple
+        'bg-[#475569]',   // 11 Steel            — deep grey
+      ];
+      const s = (name || '?').toLowerCase();
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = (((h << 5) + h) ^ s.charCodeAt(i)) >>> 0;
+      for (let i = s.length - 1; i >= 0; i--) h = (((h << 5) + h) ^ (s.charCodeAt(i) * 7)) >>> 0;
+      return palette[h % palette.length];
     },
     startEdit(){
       const c = this.company;
@@ -8902,8 +9243,9 @@ const CompanyDetailPage = {
       <!-- Company details + Primary contact (two columns) -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <section class="bg-white border border-slate-200 rounded-md">
-          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-            <Icon name="building-2" :size="14" cls="text-slate-500"/> Company details
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+            <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="building-2" :size="15"/></span>
+            Company details
           </header>
           <dl v-if="!editingDetails" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <div><dt class="text-slate-500">Company name</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.name }}</dd></div>
@@ -8911,47 +9253,62 @@ const CompanyDetailPage = {
             <div><dt class="text-slate-500">Business phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.phone }}</dd></div>
             <div class="sm:col-span-2"><dt class="text-slate-500">Login email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ company.email }}</dd></div>
           </dl>
-          <div v-else class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div v-else class="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-slate-700 mb-1.5">Company name <span class="text-red-500" aria-hidden="true">*</span></label>
-              <input v-model="draft.name" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <div class="relative">
+                  <input v-model="draft.name" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1.5">ABN <span class="text-red-500" aria-hidden="true">*</span></label>
-              <input v-model="draft.abn" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <div class="relative">
+                  <input v-model="draft.abn" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1.5">Business phone <span class="text-red-500" aria-hidden="true">*</span></label>
-              <input v-model="draft.phone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <div class="relative">
+                  <input v-model="draft.phone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
             </div>
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-slate-700 mb-1.5">Login email <span class="text-red-500" aria-hidden="true">*</span></label>
-              <input v-model="draft.email" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <div class="relative">
+                  <input v-model="draft.email" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
             </div>
           </div>
         </section>
 
         <section class="bg-white border border-slate-200 rounded-md">
-          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-            <Icon name="user-round" :size="14" cls="text-slate-500"/> Primary contact
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+            <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="user-round" :size="15"/></span>
+            Primary contact
           </header>
           <dl v-if="!editingDetails" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
             <div><dt class="text-slate-500">Name</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.primaryContact?.name }}</dd></div>
             <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.primaryContact?.phone }}</dd></div>
             <div class="sm:col-span-2"><dt class="text-slate-500">Email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ company.primaryContact?.email }}</dd></div>
           </dl>
-          <div v-else class="p-5 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div v-else class="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
             <div class="md:col-span-2">
               <label class="block text-sm font-medium text-slate-700 mb-1.5">Contact name <span class="text-red-500" aria-hidden="true">*</span></label>
-              <input v-model="draft.contactName" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <div class="relative">
+                  <input v-model="draft.contactName" type="text" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
             </div>
             <div>
               <label class="block text-sm font-medium text-slate-700 mb-1.5">Phone number</label>
-              <input v-model="draft.contactPhone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <div class="relative">
+                  <input v-model="draft.contactPhone" type="tel" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
             </div>
             <div>
-              <label class="block text-sm font-medium text-slate-700 mb-1.5">Contact email <span class="text-slate-400 text-xs font-normal">(optional)</span></label>
-              <input v-model="draft.contactEmail" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              <label class="block text-sm font-medium text-slate-700 mb-1.5">Contact email <span class="normal-case tracking-normal text-slate-400 text-[10px] font-normal">(optional)</span></label>
+              <div class="relative">
+                  <input v-model="draft.contactEmail" type="email" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
             </div>
           </div>
         </section>
@@ -8965,14 +9322,20 @@ const CompanyDetailPage = {
 
       <!-- Facility & service access -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="shield-check" :size="14" cls="text-slate-500"/> Facility &amp; service access
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="shield-check" :size="15"/></span>Facility &amp; service access
         </header>
-        <ul v-if="!editingAccess" class="p-5 space-y-4">
-          <li v-for="f in facObjs" :key="f.code" class="flex items-start justify-between gap-4 pb-4 border-b border-slate-100 last:border-b-0 last:pb-0">
-            <div class="min-w-0">
-              <div class="text-base text-navy-900">{{ f.name }}, {{ f.state }}</div>
-              <div class="text-xs text-slate-500 mt-0.5">{{ f.code }}</div>
+        <ul v-if="!editingAccess" class="p-5 space-y-2">
+          <li v-for="f in facObjs" :key="f.code"
+              class="flex items-center justify-between gap-3 bg-white rounded-xl px-4 py-3 ring-1 ring-slate-100">
+            <div class="min-w-0 flex items-center gap-3">
+              <span class="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg bg-slate-100 text-slate-600">
+                <Icon name="map-pin" :size="16"/>
+              </span>
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-navy-900 truncate leading-tight">{{ f.name }}, {{ f.state }}</div>
+                <div class="text-xs text-slate-500 mt-0.5">{{ f.code }}</div>
+              </div>
             </div>
             <div class="text-sm text-slate-700 inline-flex items-center gap-1.5 flex-wrap shrink-0 max-w-[60%] justify-end">
               <template v-for="(s, idx) in company.services.filter(svc => f.services.includes(svc))" :key="s">
@@ -8982,7 +9345,7 @@ const CompanyDetailPage = {
               </template>
             </div>
           </li>
-          <li v-if="!facObjs.length" class="text-sm text-slate-500">No facility access granted yet.</li>
+          <li v-if="!facObjs.length" class="text-sm text-slate-500 px-1">No facility access granted yet.</li>
         </ul>
         <div v-else>
           <p class="px-5 pt-4 text-sm text-slate-500">Tick services per facility. Greyed cells are not offered at that facility.</p>
@@ -9025,18 +9388,19 @@ const CompanyDetailPage = {
 
       <!-- Contacts -->
       <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2">
-          <Icon name="users" :size="14" cls="text-slate-500"/> Contacts
-          <span class="text-xs text-slate-500 font-normal">({{ contacts.length }})</span>
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="users" :size="15"/></span>Contacts
+          <span class="text-xs text-slate-500 font-normal">({{ contacts.length + 1 }})</span>
           <span class="ml-auto">
             <Btn as="router-link" :to="{ path:'/admin/contacts/new', query:{ companyId: company.id } }" kind="secondary" icon="user-plus">Add New Contact</Btn>
           </span>
         </header>
+
         <ul class="divide-y divide-slate-200">
           <li class="px-5 py-2 bg-slate-50 text-xs text-slate-500">Primary contact</li>
           <li class="px-5 py-3 flex items-center justify-between gap-3 text-sm">
             <div class="min-w-0 flex items-center gap-2">
-              <span class="inline-flex items-center justify-center h-7 w-7 rounded-full bg-teal-100 text-teal-800 text-xs font-medium shrink-0">{{ initials(company.primaryContact?.name) }}</span>
+              <span :class="['inline-flex items-center justify-center h-7 w-7 rounded-full text-white text-xs font-medium shrink-0', contactGradient(company.primaryContact?.name)]">{{ initials(company.primaryContact?.name) }}</span>
               <span class="text-navy-900 truncate">{{ company.primaryContact?.name }}</span>
             </div>
             <span class="text-xs text-slate-500 shrink-0">Primary</span>
@@ -9044,7 +9408,7 @@ const CompanyDetailPage = {
           <li v-if="contacts.length" class="px-5 py-2 bg-slate-50 text-xs text-slate-500">Additional contacts</li>
           <li v-for="ct in contacts" :key="ct.id" class="px-5 py-3 flex items-center justify-between gap-3 text-sm">
             <div class="min-w-0 flex items-center gap-2">
-              <span class="inline-flex items-center justify-center h-7 w-7 rounded-full bg-slate-100 text-slate-700 text-xs font-medium shrink-0">{{ initials(ct.name) }}</span>
+              <span :class="['inline-flex items-center justify-center h-7 w-7 rounded-full text-white text-xs font-medium shrink-0', contactGradient(ct.name)]">{{ initials(ct.name) }}</span>
               <span class="text-navy-900 truncate">{{ ct.name }}</span>
             </div>
             <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
@@ -9111,7 +9475,7 @@ const CompanyListPage = {
     menuFor:null,
     sort:{ by:'created', dir:'desc' },
     page: 1,
-    pageSize: 25,
+    pageSize: 10,
   }; },
   created(){
     // Honour ?status=Pending deep-links from the admin console.
@@ -9169,6 +9533,49 @@ const CompanyListPage = {
     statusDot(s){
       return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
     },
+    statusPill(s){
+      return ({
+        'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
+      })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
+    },
+    companyInitials(name){
+      return (name || '?').trim().split(/\s+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
+    },
+    companyGradient(name){
+      // Same palette as contact avatars, applied to a rounded-square monogram
+      // tile — signals "organisation" rather than "person" while staying inside
+      // the design system.
+      const palette = [
+        // Eye-soothing enterprise palette: only cool / neutral tones — navy,
+        // slate, blue, teal, sky, emerald, indigo, stone. No reds, no warm
+        // pinks, no bright candy. Inspired by the site-selector avatars,
+        // which read as "calm industrial dashboard" rather than personality
+        // colors. Single-hue 600→800 gradients keep each tile feeling solid.
+        // 12 vibrant-but-mature solid tones — matching the manager's earlier
+        // reference (emerald, violet, clear blue, teal, navy). Mid-saturated
+        // 500-level hues feel alive without looking AI-generated. No reds,
+        // no candy pinks/oranges, no gradient stacks.
+        'bg-[#10B981]',   // 0  Emerald          — vibrant green
+        'bg-[#8B5CF6]',   // 1  Violet           — soft purple
+        'bg-[#3B82F6]',   // 2  Blue             — clear blue
+        'bg-[#14B8A6]',   // 3  Teal             — vibrant teal
+        'bg-[#1E293B]',   // 4  Navy             — dark charcoal-navy
+        'bg-[#0EA5E9]',   // 5  Sky              — bright sky
+        'bg-[#059669]',   // 6  Forest           — deeper green
+        'bg-[#6366F1]',   // 7  Indigo           — clear indigo
+        'bg-[#0891B2]',   // 8  Cyan             — deep cyan
+        'bg-[#64748B]',   // 9  Slate            — medium grey
+        'bg-[#7C3AED]',   // 10 Royal Purple     — vibrant purple
+        'bg-[#475569]',   // 11 Steel            — deep grey
+      ];
+      const s = (name || '?').toLowerCase();
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = (((h << 5) + h) ^ s.charCodeAt(i)) >>> 0;
+      for (let i = s.length - 1; i >= 0; i--) h = (((h << 5) + h) ^ (s.charCodeAt(i) * 7)) >>> 0;
+      return palette[h % palette.length];
+    },
     setSort(by){
       if (this.sort.by === by) this.sort.dir = this.sort.dir === 'asc' ? 'desc' : 'asc';
       else { this.sort.by = by; this.sort.dir = by === 'created' ? 'desc' : 'asc'; }
@@ -9184,6 +9591,17 @@ const CompanyListPage = {
       this.menuFor = (this.menuFor === c.id) ? null : c.id;
     },
     closeRowMenu(){ this.menuFor = null; },
+    deleteCompany(c){
+      this.menuFor = null;
+      if (!confirm('Delete ' + c.name + '? This removes the company record and all of its contacts. This cannot be undone.')) return;
+      const i = state.companies.findIndex(x => x.id === c.id);
+      if (i >= 0) state.companies.splice(i, 1);
+      // Drop every contact tied to this company so the Contacts list stays consistent.
+      for (let j = state.companyContacts.length - 1; j >= 0; j--) {
+        if (state.companyContacts[j].companyId === c.id) state.companyContacts.splice(j, 1);
+      }
+      showToast(c.name + ' was removed.', 'success');
+    },
   },
   template:`
     <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
@@ -9220,58 +9638,76 @@ const CompanyListPage = {
               <option>All</option>
               <option>Active</option>
               <option>Pending</option>
-              <option>Disabled</option>
             </select>
           </div>
         </div>
       </div>
 
-      <section class="bg-white border-t border-b border-slate-200">
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+          <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-xl bg-teal-50 text-teal-600 ring-1 ring-teal-100">
+            <Icon name="building-2" :size="18"/>
+          </span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base font-semibold text-navy-900 leading-tight">All companies</h3>
+              <span class="text-xs text-slate-500">&middot; {{ sortedRows.length }} {{ sortedRows.length === 1 ? 'result' : 'results' }}</span>
+            </div>
+            <p class="text-sm text-slate-500 mt-0.5">{{ activeCount }} active &middot; {{ pendingCount }} pending &middot; {{ disabledCount }} disabled.</p>
+          </div>
+        </header>
         <div class="overflow-x-auto">
           <table class="w-full text-base min-w-[1100px]">
             <caption class="sr-only">Companies</caption>
-            <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
+            <thead class="bg-slate-50/60 text-left text-[11px] uppercase tracking-wide text-slate-500 font-semibold border-y border-slate-200">
               <tr>
-                <th scope="col" class="px-4 py-3 font-medium">
-                  <button type="button" @click="setSort('name')" class="inline-flex items-center gap-1 font-medium">Company name <Icon :name="sortIcon('name')" :size="12" cls="text-slate-400"/></button>
+                <th scope="col" class="px-6 py-3 font-semibold">
+                  <button type="button" @click="setSort('name')" class="inline-flex items-center gap-1 font-semibold">Company name <Icon :name="sortIcon('name')" :size="12" cls="text-slate-400"/></button>
                 </th>
-                <th scope="col" class="px-4 py-3 font-medium">ABN</th>
-                <th scope="col" class="px-4 py-3 font-medium">Primary contact</th>
-                <th scope="col" class="px-4 py-3 font-medium">Status</th>
-                <th scope="col" class="px-4 py-3 font-medium">
-                  <button type="button" @click="setSort('created')" class="inline-flex items-center gap-1 font-medium">Created <Icon :name="sortIcon('created')" :size="12" cls="text-slate-400"/></button>
+                <th scope="col" class="px-6 py-3 font-semibold">ABN</th>
+                <th scope="col" class="px-6 py-3 font-semibold">Primary contact</th>
+                <th scope="col" class="px-6 py-3 font-semibold">Status</th>
+                <th scope="col" class="px-6 py-3 font-semibold">
+                  <button type="button" @click="setSort('created')" class="inline-flex items-center gap-1 font-semibold">Created <Icon :name="sortIcon('created')" :size="12" cls="text-slate-400"/></button>
                 </th>
-                <th scope="col" class="px-4 py-3 text-right font-medium"><span class="sr-only">Actions</span></th>
+                <th scope="col" class="px-6 py-3 text-right font-semibold"><span class="sr-only">Actions</span></th>
               </tr>
             </thead>
-            <tbody>
+            <tbody class="divide-y divide-slate-100">
               <tr v-if="pagedRows.length === 0">
-                <td colspan="6" class="px-4 py-12 text-center text-sm text-slate-500">
+                <td colspan="6" class="px-6 py-12 text-center text-sm text-slate-500">
                   <Icon name="search-x" :size="28" cls="mx-auto mb-2 text-slate-300"/>
                   <div>No companies match these filters.</div>
                   <div class="text-slate-400 mt-0.5">Try a different search or clear your filters.</div>
                 </td>
               </tr>
-              <tr v-else v-for="c in pagedRows" :key="c.id" class="even:bg-slate-50/60">
-                <td class="px-4 py-3.5">
-                  <router-link :to="'/admin/companies/'+c.id"
-                     :class="['text-base font-medium hover:underline focus-ring rounded',
-                              c.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ c.name }}</router-link>
-                  <div class="text-sm text-slate-500 mt-0.5">{{ c.facilities.join(', ') }}</div>
+              <tr v-else v-for="c in pagedRows" :key="c.id" class="hover:bg-slate-50/60 transition-colors">
+                <td class="px-6 py-3.5">
+                  <router-link :to="'/admin/companies/'+c.id" class="inline-flex items-center gap-3 group focus-ring rounded">
+                    <span :class="['shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-lg text-white text-sm font-bold tracking-wide shadow-sm ring-1 ring-white/40 ',
+                                   c.status === 'Disabled' ? 'bg-slate-400' : companyGradient(c.name)]">
+                      {{ companyInitials(c.name) }}
+                    </span>
+                    <span class="min-w-0">
+                      <span :class="['block text-base font-medium group-hover:underline',
+                                     c.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ c.name }}</span>
+                      <span class="block text-sm text-slate-500 mt-0.5">{{ c.facilities.join(', ') }}</span>
+                    </span>
+                  </router-link>
                 </td>
-                <td class="px-4 py-3.5 text-sm text-slate-700 tabular-nums whitespace-nowrap">{{ c.abn }}</td>
-                <td class="px-4 py-3.5 text-sm text-slate-700">
+                <td class="px-6 py-3.5 text-sm text-slate-700 tabular-nums whitespace-nowrap">{{ c.abn }}</td>
+                <td class="px-6 py-3.5 text-sm text-slate-700">
                   <div class="text-base text-navy-900">{{ c.primaryContact?.name }}</div>
                   <div class="text-xs text-slate-500 mt-0.5 truncate max-w-[18rem]">{{ c.primaryContact?.email }}</div>
                 </td>
-                <td class="px-4 py-3.5 whitespace-nowrap">
-                  <span class="inline-flex items-center gap-2 text-sm text-slate-700">
-                    <span :class="['inline-block h-2 w-2 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
-                    <span>{{ c.status }}</span>
+                <td class="px-6 py-3.5 whitespace-nowrap">
+                  <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(c.status)]">
+                    <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
+                    {{ c.status }}
                   </span>
                 </td>
-                <td class="px-4 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(c.created) }}</td>
-                <td class="px-4 py-3.5 text-right whitespace-nowrap relative" @click.stop>
+                <td class="px-6 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(c.created) }}</td>
+                <td class="px-6 py-3.5 text-right whitespace-nowrap relative" @click.stop>
                   <button type="button" @click="toggleMenu(c, $event)"
                           :aria-expanded="menuFor === c.id"
                           aria-haspopup="menu"
@@ -9280,16 +9716,21 @@ const CompanyListPage = {
                     <Icon name="more-vertical" :size="16"/>
                   </button>
                   <div v-if="menuFor === c.id" role="menu"
-                       class="absolute right-0 top-full mt-1 w-48 bg-white border border-slate-200 rounded-md shadow-lg py-1 z-20 text-left">
-                    <router-link :to="'/admin/companies/'+c.id" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                       class="absolute right-6 top-full mt-1 w-44 bg-white rounded-lg ring-1 ring-slate-200 shadow-lg py-1 z-20 text-left">
+                    <router-link :to="'/admin/companies/'+c.id" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-3 py-2 text-sm text-slate-800 hover:bg-slate-50">
                       <Icon name="eye" :size="14" cls="text-slate-500"/> View
                     </router-link>
-                    <router-link :to="{ path:'/admin/companies/'+c.id, query:{ edit:'details' } }" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                    <router-link :to="{ path:'/admin/companies/'+c.id, query:{ edit:'details' } }" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-3 py-2 text-sm text-slate-800 hover:bg-slate-50">
                       <Icon name="pencil" :size="14" cls="text-slate-500"/> Edit
                     </router-link>
-                    <router-link :to="{ path:'/admin/companies/'+c.id, query:{ edit:'access' } }" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-4 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                    <router-link :to="{ path:'/admin/companies/'+c.id, query:{ edit:'access' } }" role="menuitem" @click="closeRowMenu" class="flex items-center gap-2 px-3 py-2 text-sm text-slate-800 hover:bg-slate-50">
                       <Icon name="shield-check" :size="14" cls="text-slate-500"/> Manage access
                     </router-link>
+                    <div class="my-1 border-t border-slate-100"></div>
+                    <button type="button" role="menuitem" @click="deleteCompany(c)"
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                      <Icon name="trash-2" :size="14"/> Delete
+                    </button>
                   </div>
                 </td>
               </tr>
@@ -9304,6 +9745,7 @@ const CompanyListPage = {
           <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
             Rows per page
             <select v-model.number="pageSize" class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option :value="10">10</option>
               <option :value="25">25</option>
               <option :value="50">50</option>
               <option :value="100">100</option>
@@ -9317,6 +9759,547 @@ const CompanyListPage = {
         </div>
       </nav>
 
+    </div>
+  `
+};
+
+/* ---------- Page: Admin · Contacts List ------------------------------------ */
+/* All login-capable people across every company. Mirrors the design system of
+   the Companies list + Add Company flow: premium card containers, gradient
+   avatars per name, status pill badges, modern teal CTA. Search filters by
+   name / email / company. The "Add New Contact" CTA routes to the existing
+   Add Company Contact form. */
+
+const ContactsListPage = {
+  components:{ Icon, Btn },
+  data(){ return { q:'', statusFilter:'All', facilityFilter:'All', menuFor:null, page:1, pageSize:10 }; },
+  mounted(){ document.addEventListener('click', this.closeMenu); },
+  beforeUnmount(){ document.removeEventListener('click', this.closeMenu); },
+  watch:{
+    q(){ this.page = 1; },
+    statusFilter(){ this.page = 1; },
+    facilityFilter(){ this.page = 1; },
+    pageSize(){ this.page = 1; },
+  },
+  computed:{
+    state(){ return state; },
+    facilities(){ return FACILITIES; },
+    rows(){
+      const q = this.q.trim().toLowerCase();
+      return state.companyContacts.filter(ct => {
+        if (this.statusFilter !== 'All' && ct.status !== this.statusFilter) return false;
+        if (this.facilityFilter !== 'All' && !(ct.facilities || []).includes(this.facilityFilter)) return false;
+        if (q) {
+          const blob = (ct.name + ' ' + ct.email + ' ' + ct.companyName).toLowerCase();
+          if (!blob.includes(q)) return false;
+        }
+        return true;
+      });
+    },
+    activeCount(){ return state.companyContacts.filter(c => c.status === 'Active').length; },
+    pendingCount(){ return state.companyContacts.filter(c => c.status === 'Pending').length; },
+    companyCount(){ return new Set(state.companyContacts.map(c => c.companyId)).size; },
+    totalPages(){ return Math.max(1, Math.ceil(this.rows.length / this.pageSize)); },
+    effectivePage(){ return Math.min(this.page, this.totalPages); },
+    pagedRows(){
+      if (this.rows.length <= this.pageSize) return this.rows;
+      const start = (this.effectivePage - 1) * this.pageSize;
+      return this.rows.slice(start, start + this.pageSize);
+    },
+    rangeStart(){ return this.rows.length === 0 ? 0 : (this.effectivePage - 1) * this.pageSize + 1; },
+    rangeEnd(){ return Math.min(this.effectivePage * this.pageSize, this.rows.length); },
+  },
+  methods:{
+    statusDot(s){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
+    },
+    statusPill(s){
+      return ({
+        'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
+      })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
+    },
+    initials(name){
+      return (name || '?').trim().split(/\s+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
+    },
+    contactGradient(name){
+      const palette = [
+        // Eye-soothing enterprise palette: only cool / neutral tones — navy,
+        // slate, blue, teal, sky, emerald, indigo, stone. No reds, no warm
+        // pinks, no bright candy. Inspired by the site-selector avatars,
+        // which read as "calm industrial dashboard" rather than personality
+        // colors. Single-hue 600→800 gradients keep each tile feeling solid.
+        // 12 vibrant-but-mature solid tones — matching the manager's earlier
+        // reference (emerald, violet, clear blue, teal, navy). Mid-saturated
+        // 500-level hues feel alive without looking AI-generated. No reds,
+        // no candy pinks/oranges, no gradient stacks.
+        'bg-[#10B981]',   // 0  Emerald          — vibrant green
+        'bg-[#8B5CF6]',   // 1  Violet           — soft purple
+        'bg-[#3B82F6]',   // 2  Blue             — clear blue
+        'bg-[#14B8A6]',   // 3  Teal             — vibrant teal
+        'bg-[#1E293B]',   // 4  Navy             — dark charcoal-navy
+        'bg-[#0EA5E9]',   // 5  Sky              — bright sky
+        'bg-[#059669]',   // 6  Forest           — deeper green
+        'bg-[#6366F1]',   // 7  Indigo           — clear indigo
+        'bg-[#0891B2]',   // 8  Cyan             — deep cyan
+        'bg-[#64748B]',   // 9  Slate            — medium grey
+        'bg-[#7C3AED]',   // 10 Royal Purple     — vibrant purple
+        'bg-[#475569]',   // 11 Steel            — deep grey
+      ];
+      const s = (name || '?').toLowerCase();
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = (((h << 5) + h) ^ s.charCodeAt(i)) >>> 0;
+      for (let i = s.length - 1; i >= 0; i--) h = (((h << 5) + h) ^ (s.charCodeAt(i) * 7)) >>> 0;
+      return palette[h % palette.length];
+    },
+    toggleMenu(id, ev){
+      ev.stopPropagation();
+      ev.preventDefault();
+      this.menuFor = (this.menuFor === id) ? null : id;
+    },
+    closeMenu(){ this.menuFor = null; },
+    prevPage(){ if (this.effectivePage > 1) this.page = this.effectivePage - 1; },
+    nextPage(){ if (this.effectivePage < this.totalPages) this.page = this.effectivePage + 1; },
+    viewContact(ct){
+      this.menuFor = null;
+      this.$router.push('/admin/contacts/' + ct.id);
+    },
+    editContact(ct){
+      this.menuFor = null;
+      this.$router.push({ path:'/admin/contacts/' + ct.id, query:{ edit:'details' } });
+    },
+    deleteContact(ct){
+      this.menuFor = null;
+      if (!confirm('Delete ' + ct.name + '? This removes their login and cannot be undone.')) return;
+      const i = state.companyContacts.findIndex(x => x.id === ct.id);
+      if (i >= 0) {
+        state.companyContacts.splice(i, 1);
+        showToast(ct.name + ' was removed.', 'success');
+      }
+    },
+  },
+  template:`
+    <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <!-- Page header -->
+      <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-3">
+        <div>
+          <h1 class="text-xl font-semibold text-navy-900 leading-tight">Contacts</h1>
+          <p class="text-sm text-slate-500 mt-1">
+            {{ state.companyContacts.length }} {{ state.companyContacts.length === 1 ? 'person' : 'people' }} with portal access across {{ companyCount }} {{ companyCount === 1 ? 'company' : 'companies' }}
+          </p>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <Btn as="router-link" :to="{ path:'/admin/contacts/new' }" icon="user-plus">Add New Contact</Btn>
+        </div>
+      </div>
+
+      <!-- Search + filters -->
+      <div class="bg-white border border-slate-200 rounded-md p-4">
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div class="md:col-span-6">
+            <label for="ct-search" class="block text-sm font-medium text-slate-700 mb-1.5">Search contacts</label>
+            <div class="relative">
+              <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
+              <input id="ct-search" v-model="q" type="text" placeholder="Name, email, or company…"
+                     class="w-full h-11 pl-9 pr-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+          </div>
+          <div class="md:col-span-3">
+            <label for="ct-facility" class="block text-sm font-medium text-slate-700 mb-1.5">Facility</label>
+            <select id="ct-facility" v-model="facilityFilter" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option value="All">All facilities</option>
+              <option v-for="f in facilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
+            </select>
+          </div>
+          <div class="md:col-span-3">
+            <label for="ct-status" class="block text-sm font-medium text-slate-700 mb-1.5">Status</label>
+            <select id="ct-status" v-model="statusFilter" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option>All</option>
+              <option>Active</option>
+              <option>Pending</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contacts list -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-4 border-b border-slate-200 flex items-center gap-3">
+          <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-xl bg-teal-50 text-teal-600 ring-1 ring-teal-100">
+            <Icon name="users" :size="18"/>
+          </span>
+          <div class="min-w-0">
+            <div class="flex items-center gap-2 flex-wrap">
+              <h3 class="text-base font-semibold text-navy-900 leading-tight">All contacts</h3>
+              <span class="text-xs text-slate-500">&middot; {{ rows.length }} {{ rows.length === 1 ? 'result' : 'results' }}</span>
+            </div>
+            <p class="text-sm text-slate-500 mt-0.5">{{ activeCount }} active &middot; {{ pendingCount }} pending invitations.</p>
+          </div>
+        </header>
+        <div v-if="rows.length" class="overflow-x-auto">
+          <table class="w-full text-sm min-w-[900px]">
+            <caption class="sr-only">Contacts</caption>
+            <thead class="bg-slate-50/60 text-left text-[11px] uppercase tracking-wide text-slate-500 font-semibold border-y border-slate-200">
+              <tr>
+                <th scope="col" class="px-6 py-3 font-semibold">Contact</th>
+                <th scope="col" class="px-6 py-3 font-semibold">Email</th>
+                <th scope="col" class="px-6 py-3 font-semibold">Company</th>
+                <th scope="col" class="px-6 py-3 font-semibold">Status</th>
+                <th scope="col" class="px-6 py-3 font-semibold text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              <tr v-for="ct in pagedRows" :key="ct.id" class="hover:bg-slate-50/60 transition-colors">
+                <!-- Contact (avatar + name) -->
+                <td class="px-6 py-3.5 whitespace-nowrap">
+                  <router-link :to="'/admin/contacts/' + ct.id" class="inline-flex items-center gap-3 group focus-ring rounded">
+                    <span :class="['shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-full text-white text-sm font-extrabold tracking-wide shadow-md ring-2 ring-white ', contactGradient(ct.name)]">{{ initials(ct.name) }}</span>
+                    <span :class="['text-base font-medium group-hover:underline',
+                                   ct.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ ct.name }}</span>
+                  </router-link>
+                </td>
+                <!-- Email -->
+                <td class="px-6 py-3.5">
+                  <a :href="'mailto:' + ct.email" class="inline-flex items-center gap-1.5 text-sm text-slate-700 hover:text-teal-700 group" @click.stop>
+                    <Icon name="mail" :size="13" cls="text-slate-400 group-hover:text-teal-600"/>
+                    <span class="truncate">{{ ct.email }}</span>
+                  </a>
+                </td>
+                <!-- Company -->
+                <td class="px-6 py-3.5">
+                  <router-link :to="'/admin/companies/' + ct.companyId" class="inline-flex items-center gap-1.5 text-sm text-slate-700 hover:text-teal-700 group">
+                    <Icon name="building" :size="13" cls="text-slate-400 group-hover:text-teal-600"/>
+                    <span class="truncate">{{ ct.companyName }}</span>
+                  </router-link>
+                </td>
+                <!-- Status pill -->
+                <td class="px-6 py-3.5 whitespace-nowrap">
+                  <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(ct.status)]">
+                    <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
+                    {{ ct.status }}
+                  </span>
+                </td>
+                <!-- Actions (3-dot) -->
+                <td class="px-6 py-3.5 text-right whitespace-nowrap relative" @click.stop>
+                  <button type="button" @click="toggleMenu(ct.id, $event)"
+                          :aria-expanded="menuFor === ct.id"
+                          aria-haspopup="menu"
+                          aria-label="Contact actions"
+                          class="p-1.5 rounded-md text-slate-500 hover:text-navy-900 hover:bg-slate-100 focus-ring">
+                    <Icon name="more-vertical" :size="16"/>
+                  </button>
+                  <div v-if="menuFor === ct.id" role="menu" @click.stop
+                       class="absolute right-6 top-full mt-1 w-44 bg-white rounded-lg ring-1 ring-slate-200 shadow-lg py-1 z-20 text-left">
+                    <button type="button" role="menuitem" @click="viewContact(ct)"
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="eye" :size="14" cls="text-slate-500"/> View
+                    </button>
+                    <button type="button" role="menuitem" @click="editContact(ct)"
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-800 hover:bg-slate-50">
+                      <Icon name="pencil" :size="14" cls="text-slate-500"/> Edit details
+                    </button>
+                    <div class="my-1 border-t border-slate-100"></div>
+                    <button type="button" role="menuitem" @click="deleteContact(ct)"
+                            class="w-full flex items-center gap-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50">
+                      <Icon name="trash-2" :size="14"/> Delete
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div v-else class="text-center py-12 px-6">
+          <div class="inline-flex items-center justify-center h-14 w-14 rounded-full bg-slate-100 text-slate-400 mb-4">
+            <Icon name="users" :size="22"/>
+          </div>
+          <h3 class="text-base font-semibold text-navy-900">No contacts match</h3>
+          <p class="text-sm text-slate-500 mt-1">Try a different search term or status filter.</p>
+        </div>
+      </section>
+
+      <!-- Pagination -->
+      <nav v-if="rows.length > pageSize" aria-label="Contacts pagination" class="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm">
+        <div class="text-slate-600">Showing {{ rangeStart }}&ndash;{{ rangeEnd }} of {{ rows.length }}</div>
+        <div class="flex items-center gap-3 flex-wrap">
+          <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
+            Rows per page
+            <select v-model.number="pageSize" class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option :value="10">10</option>
+              <option :value="25">25</option>
+              <option :value="50">50</option>
+              <option :value="100">100</option>
+            </select>
+          </label>
+          <div class="flex items-center gap-2">
+            <button type="button" @click="prevPage" :disabled="effectivePage <= 1" :aria-disabled="effectivePage <= 1" aria-label="Previous page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Prev</button>
+            <span class="text-slate-700 px-2 tabular-nums">Page {{ effectivePage }} of {{ totalPages }}</span>
+            <button type="button" @click="nextPage" :disabled="effectivePage >= totalPages" :aria-disabled="effectivePage >= totalPages" aria-label="Next page" class="h-11 min-w-[44px] px-4 rounded-md border border-slate-300 text-navy-900 hover:bg-slate-50 focus-ring disabled:text-slate-300 disabled:border-slate-200 disabled:cursor-not-allowed disabled:hover:bg-transparent">Next</button>
+          </div>
+        </div>
+      </nav>
+    </div>
+  `
+};
+
+/* ---------- Page: Admin · Contact Detail ----------------------------------- */
+/* Focused view for a single contact. Mirrors CompanyDetailPage's edit pattern:
+   a profile view with a "Edit details" CTA that flips the relevant card into
+   form mode in place. Deep-link via ?edit=details. Access (facility/service)
+   is read-only here — admins manage per-contact access from the Add Company
+   Contact form, which is the single source of truth for those grants. */
+
+const ContactDetailPage = {
+  components:{ Icon, Btn },
+  data(){
+    return {
+      editingDetails: false,
+      draft: { name:'', phone:'', email:'' },
+    };
+  },
+  created(){
+    if (this.$route.query.edit === 'details') this.startEdit();
+  },
+  watch:{
+    '$route.query.edit'(v){
+      if (v === 'details') this.startEdit();
+      else this.cancelEdit();
+    },
+  },
+  computed:{
+    state(){ return state; },
+    contact(){ return state.companyContacts.find(c => c.id === this.$route.params.id) || null; },
+    company(){
+      const c = this.contact;
+      return c ? state.companies.find(co => co.id === c.companyId) || null : null;
+    },
+    facObjs(){
+      const c = this.contact;
+      if (!c) return [];
+      return FACILITIES.filter(f => c.facilities.includes(f.code));
+    },
+    treatmentLabels(){ return TREATMENT_LABELS; },
+    treatmentStyles(){ return TREATMENT_STYLES; },
+  },
+  methods:{
+    fmtDate,
+    statusDot(s){
+      return ({ 'Active':'bg-emerald-500', 'Pending':'bg-amber-500', 'Disabled':'bg-slate-400' })[s] || 'bg-slate-400';
+    },
+    statusPill(s){
+      return ({
+        'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
+        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
+      })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
+    },
+    initials(name){
+      return (name || '?').trim().split(/\s+/).map(p => p[0] || '').join('').slice(0, 2).toUpperCase();
+    },
+    contactGradient(name){
+      const palette = [
+        // Eye-soothing enterprise palette: only cool / neutral tones — navy,
+        // slate, blue, teal, sky, emerald, indigo, stone. No reds, no warm
+        // pinks, no bright candy. Inspired by the site-selector avatars,
+        // which read as "calm industrial dashboard" rather than personality
+        // colors. Single-hue 600→800 gradients keep each tile feeling solid.
+        // 12 vibrant-but-mature solid tones — matching the manager's earlier
+        // reference (emerald, violet, clear blue, teal, navy). Mid-saturated
+        // 500-level hues feel alive without looking AI-generated. No reds,
+        // no candy pinks/oranges, no gradient stacks.
+        'bg-[#10B981]',   // 0  Emerald          — vibrant green
+        'bg-[#8B5CF6]',   // 1  Violet           — soft purple
+        'bg-[#3B82F6]',   // 2  Blue             — clear blue
+        'bg-[#14B8A6]',   // 3  Teal             — vibrant teal
+        'bg-[#1E293B]',   // 4  Navy             — dark charcoal-navy
+        'bg-[#0EA5E9]',   // 5  Sky              — bright sky
+        'bg-[#059669]',   // 6  Forest           — deeper green
+        'bg-[#6366F1]',   // 7  Indigo           — clear indigo
+        'bg-[#0891B2]',   // 8  Cyan             — deep cyan
+        'bg-[#64748B]',   // 9  Slate            — medium grey
+        'bg-[#7C3AED]',   // 10 Royal Purple     — vibrant purple
+        'bg-[#475569]',   // 11 Steel            — deep grey
+      ];
+      const s = (name || '?').toLowerCase();
+      let h = 5381;
+      for (let i = 0; i < s.length; i++) h = (((h << 5) + h) ^ s.charCodeAt(i)) >>> 0;
+      for (let i = s.length - 1; i >= 0; i--) h = (((h << 5) + h) ^ (s.charCodeAt(i) * 7)) >>> 0;
+      return palette[h % palette.length];
+    },
+    startEdit(){
+      const c = this.contact;
+      if (!c) return;
+      this.draft = { name: c.name, phone: c.phone || '', email: c.email || '' };
+      this.editingDetails = true;
+    },
+    cancelEdit(){
+      this.editingDetails = false;
+    },
+    saveEdit(){
+      const c = this.contact;
+      if (!c) return;
+      const name = this.draft.name.trim();
+      const email = this.draft.email.trim();
+      if (!name || !email) {
+        showToast('Name and email are required.', 'error');
+        return;
+      }
+      c.name = name;
+      c.phone = this.draft.phone.trim();
+      c.email = email;
+      this.editingDetails = false;
+      showToast('Contact details updated.', 'success');
+    },
+    deleteContact(){
+      const c = this.contact;
+      if (!c) return;
+      if (!confirm('Delete ' + c.name + '? This removes their login and cannot be undone.')) return;
+      const i = state.companyContacts.findIndex(x => x.id === c.id);
+      if (i >= 0) {
+        state.companyContacts.splice(i, 1);
+        showToast(c.name + ' was removed.', 'success');
+        this.$router.push('/admin/contacts');
+      }
+    },
+  },
+  template:`
+    <div v-if="!contact" class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <router-link to="/admin/contacts" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-navy-900 focus-ring rounded">
+        <Icon name="arrow-left" :size="14"/> Back to contacts
+      </router-link>
+      <div class="bg-white rounded-2xl ring-1 ring-slate-200 shadow-sm p-8 text-center">
+        <div class="inline-flex items-center justify-center h-14 w-14 rounded-full bg-slate-100 text-slate-400 mb-4">
+          <Icon name="user-x" :size="22"/>
+        </div>
+        <h3 class="text-base font-semibold text-navy-900">Contact not found</h3>
+        <p class="text-sm text-slate-500 mt-1">This contact may have been deleted.</p>
+      </div>
+    </div>
+
+    <div v-else class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+      <router-link to="/admin/contacts" class="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-navy-900 focus-ring rounded">
+        <Icon name="arrow-left" :size="14"/> Back to contacts
+      </router-link>
+
+      <!-- Page header: avatar + name + status + company + actions -->
+      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="flex items-center gap-4 min-w-0">
+          <span :class="['shrink-0 inline-flex items-center justify-center h-16 w-16 rounded-full text-white text-xl font-extrabold tracking-wide shadow-md ring-2 ring-white ', contactGradient(contact.name)]">{{ initials(contact.name) }}</span>
+          <div class="min-w-0">
+            <h1 class="text-xl font-semibold text-navy-900 leading-tight truncate">{{ contact.name }}</h1>
+            <div class="flex items-center gap-2 flex-wrap mt-1.5">
+              <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(contact.status)]">
+                <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(contact.status)]" aria-hidden="true"></span>
+                {{ contact.status }}
+              </span>
+              <span class="text-sm text-slate-500 inline-flex items-center gap-1.5">
+                <Icon name="building" :size="13" cls="text-slate-400"/>
+                <router-link :to="'/admin/companies/' + contact.companyId" class="hover:text-navy-900 hover:underline">{{ contact.companyName }}</router-link>
+              </span>
+              <span class="text-xs text-slate-400">&middot; {{ contact.id }}</span>
+              <span class="text-xs text-slate-400">&middot; Created {{ fmtDate(contact.created) }}</span>
+            </div>
+          </div>
+        </div>
+        <div class="flex items-center gap-2 flex-wrap">
+          <Btn v-if="!editingDetails" icon="pencil" kind="secondary" @click="startEdit">Edit details</Btn>
+          <button v-if="!editingDetails" type="button" @click="deleteContact"
+                  class="inline-flex items-center gap-2 rounded-lg bg-white text-red-600 ring-1 ring-red-200 hover:bg-red-50 px-3.5 py-2 text-sm font-medium transition-colors focus-ring">
+            <Icon name="trash-2" :size="14"/> Delete
+          </button>
+        </div>
+      </div>
+
+      <!-- Contact details (view OR edit) -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="user-round" :size="15"/></span>Contact details
+        </header>
+
+        <dl v-if="!editingDetails" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          <div><dt class="text-slate-500">Name</dt><dd class="mt-0.5 text-base text-navy-900">{{ contact.name }}</dd></div>
+          <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ contact.phone || '—' }}</dd></div>
+          <div class="sm:col-span-2"><dt class="text-slate-500">Email (login)</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ contact.email }}</dd></div>
+        </dl>
+
+        <div v-else class="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+          <div class="md:col-span-2">
+            <label for="ctd-name" class="block text-sm font-medium text-slate-700 mb-1.5">Name <span class="text-red-500" aria-hidden="true">*</span></label>
+            <div class="relative">
+              <input id="ctd-name" v-model="draft.name" type="text" placeholder="Full name"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+          </div>
+          <div>
+            <label for="ctd-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
+            <div class="relative">
+              <input id="ctd-phone" v-model="draft.phone" type="tel" placeholder="+61 ..."
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+          </div>
+          <div>
+            <label for="ctd-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email (login) <span class="text-red-500" aria-hidden="true">*</span></label>
+            <div class="relative">
+              <input id="ctd-email" v-model="draft.email" type="email" placeholder="contact@company.com.au"
+                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+            </div>
+          </div>
+          <div class="md:col-span-2 flex items-center justify-end gap-3 pt-1">
+            <button type="button" @click="cancelEdit" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+            <Btn icon="save" @click="saveEdit">Save changes</Btn>
+          </div>
+        </div>
+      </section>
+
+      <!-- Company (link to the parent company) -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="building-2" :size="15"/></span>Company
+        </header>
+        <div class="p-5">
+          <router-link :to="'/admin/companies/' + contact.companyId"
+                       class="flex items-center justify-between gap-3 bg-white rounded-xl px-4 py-3 shadow-sm ring-1 ring-slate-100 hover:ring-slate-200 hover:shadow-md transition-all">
+            <div class="min-w-0 flex items-center gap-3">
+              <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-lg bg-slate-100 text-slate-600">
+                <Icon name="building" :size="18"/>
+              </span>
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-navy-900 truncate leading-tight">{{ contact.companyName }}</div>
+                <div v-if="company" class="text-xs text-slate-500 mt-0.5">ABN {{ company.abn }} &middot; {{ company.email }}</div>
+              </div>
+            </div>
+            <span class="shrink-0 text-slate-400"><Icon name="chevron-right" :size="16"/></span>
+          </router-link>
+        </div>
+      </section>
+
+      <!-- Facility & service access (read-only here) -->
+      <section class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="shield-check" :size="15"/></span>Facility &amp; service access
+        </header>
+        <div class="p-5">
+          <ul v-if="facObjs.length" class="space-y-2">
+            <li v-for="f in facObjs" :key="f.code"
+                class="flex items-center justify-between gap-3 bg-white rounded-xl px-4 py-3 ring-1 ring-slate-100">
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-navy-900 truncate leading-tight">{{ f.name }}, {{ f.state }}</div>
+                <div class="text-xs text-slate-500 mt-0.5">{{ f.code }}</div>
+              </div>
+              <div class="text-sm text-slate-700 inline-flex items-center gap-1.5 flex-wrap shrink-0 max-w-[60%] justify-end">
+                <template v-for="(s, idx) in contact.services" :key="s">
+                  <span :class="['inline-block h-1.5 w-1.5 rounded-full', treatmentStyles[s] && treatmentStyles[s].dot]" aria-hidden="true"></span>
+                  <span>{{ treatmentLabels[s] || s }}</span>
+                  <span v-if="idx < contact.services.length - 1" aria-hidden="true" class="text-slate-300">&middot;</span>
+                </template>
+              </div>
+            </li>
+          </ul>
+          <p v-else class="text-sm text-slate-500">No facility access granted yet.</p>
+        </div>
+      </section>
     </div>
   `
 };
@@ -9609,6 +10592,7 @@ const CustomerListPage = {
           <label class="hidden md:inline-flex items-center gap-2 text-slate-600">
             Rows per page
             <select v-model.number="pageSize" class="h-11 pl-3 rounded-md border border-slate-300 text-base focus-ring bg-white">
+              <option :value="10">10</option>
               <option :value="25">25</option>
               <option :value="50">50</option>
               <option :value="100">100</option>
@@ -10209,7 +11193,9 @@ const router = createRouter({
         { path:'/admin/companies',                  component: CompanyListPage,             beforeEnter: requireAdmin },
         { path:'/admin/companies/new',              component: OnboardCompanyPage,          beforeEnter: requireAdmin },
         { path:'/admin/companies/:id',              component: CompanyDetailPage,           beforeEnter: requireAdmin },
+        { path:'/admin/contacts',                   component: ContactsListPage,            beforeEnter: requireAdmin },
         { path:'/admin/contacts/new',               component: OnboardCompanyContactPage,   beforeEnter: requireAdmin },
+        { path:'/admin/contacts/:id',               component: ContactDetailPage,           beforeEnter: requireAdmin },
         // Legacy customer routes — kept for any links still referencing them, but not in nav.
         { path:'/admin/customers',                  component: CustomerListPage,    beforeEnter: requireAdmin },
         { path:'/admin/customers/:id',              component: CustomerDetailPage,  beforeEnter: requireAdmin },
