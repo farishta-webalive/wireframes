@@ -211,7 +211,7 @@ const seedCustomers = [
   { id:'CUST-1005', company:'Kingsgrove Medical',        contact:'Priya Subramaniam', email:'priya@kingsgrovemed.com.au',         phone:'+61 2 9132 7700',
     facilities:['WPK','DAN'],            services:['Gamma','ETO'],        status:'Active',   created:'2024-06-15', orders:31 },
   { id:'CUST-1006', company:'Auspharm Wholesalers',      contact:'Marcus Chen',     email:'m.chen@auspharm.com.au',               phone:'+61 3 8741 5500',
-    facilities:['MER'],                  services:['GMP'],                status:'Pending',  created:'2026-04-19', orders:0  },
+    facilities:['MER'],                  services:['GMP'],                status:'Active',   created:'2026-04-19', orders:0  },
   { id:'CUST-1007', company:'Queensland Biolab',         contact:'Emily Walker',    email:'emily.walker@qldbiolab.com.au',        phone:'+61 7 3899 4422',
     facilities:['NAR'],                  services:['Gamma'],              status:'Active',   created:'2024-09-08', orders:22 },
   { id:'CUST-1008', company:'Sunshine Coast Apiary',     contact:'Brett Hollings',  email:'brett@sunshineapiary.com.au',          phone:'+61 7 5491 3066',
@@ -225,7 +225,7 @@ const seedCustomers = [
   { id:'CUST-1012', company:'NSW Health Logistics',      contact:'David Robinson',  email:'d.robinson@health.nsw.gov.au',         phone:'+61 2 9391 9000',
     facilities:['WPK'],                  services:['Gamma','ETO'],        status:'Active',   created:'2024-04-25', orders:55 },
   { id:'CUST-1013', company:'Golden Hive Co-op',         contact:'Anika Sørensen',  email:'anika@goldenhive.coop',                phone:'+61 3 5781 2210',
-    facilities:['DAN','NAR'],            services:['Gamma'],              status:'Pending',  created:'2026-04-22', orders:0  },
+    facilities:['DAN','NAR'],            services:['Gamma'],              status:'Active',   created:'2026-04-22', orders:0  },
   { id:'CUST-1014', company:'BioSeq Pty Ltd',            contact:'Tom Patel',       email:'tpatel@bioseq.com.au',                 phone:'+61 7 3211 8800',
     facilities:['NAR'],                  services:['Gamma'],              status:'Active',   created:'2025-06-03', orders:7  },
 ];
@@ -254,7 +254,7 @@ const seedCompanies = [
     facilities:['WPK','DAN'],             services:['Gamma','ETO'],       status:'Active',  created:'2024-06-15' },
   { id:'COMP-1006', name:'Auspharm Wholesalers',        abn:'29 137 558 016', phone:'+61 3 8741 5500', email:'accounts@auspharm.com.au',
     primaryContact:{ name:'Marcus Chen',       phone:'+61 3 8741 5500', email:'m.chen@auspharm.com.au' },
-    facilities:['MER'],                   services:['GMP'],               status:'Pending', created:'2026-04-19' },
+    facilities:['MER'],                   services:['GMP'],               status:'Active',  created:'2026-04-19' },
   { id:'COMP-1007', name:'Queensland Biolab',           abn:'73 158 942 220', phone:'+61 7 3899 4422', email:'accounts@qldbiolab.com.au',
     primaryContact:{ name:'Emily Walker',      phone:'+61 7 3899 4422', email:'emily.walker@qldbiolab.com.au' },
     facilities:['NAR'],                   services:['Gamma'],             status:'Active',  created:'2024-09-08' },
@@ -269,10 +269,32 @@ const seedCompanies = [
     facilities:['WPK'],                   services:['Gamma','ETO'],       status:'Active',  created:'2024-04-25' },
   { id:'COMP-1011', name:'Golden Hive Co-op',           abn:'66 087 553 904', phone:'+61 3 5781 2210', email:'accounts@goldenhive.coop',
     primaryContact:{ name:'Anika Sorensen',    phone:'+61 3 5781 2210', email:'anika@goldenhive.coop' },
-    facilities:['DAN','NAR'],             services:['Gamma'],             status:'Pending', created:'2026-04-22' },
+    facilities:['DAN','NAR'],             services:['Gamma'],             status:'Active',  created:'2026-04-22' },
   { id:'COMP-1012', name:'BioSeq Pty Ltd',              abn:'08 211 064 715', phone:'+61 7 3211 8800', email:'accounts@bioseq.com.au',
     primaryContact:{ name:'Tom Patel',         phone:'+61 7 3211 8800', email:'tpatel@bioseq.com.au' },
     facilities:['NAR'],                   services:['Gamma'],             status:'Active',  created:'2025-06-03' },
+  // Self-signup drafts — submitted by the customer, awaiting admin verification.
+  // `origin: 'self-signup'` is what the admin console / detail page use to surface
+  // the verification verbs (Approve / Reject / Reassign / Edit). Records without
+  // an `origin` field are treated as admin-created.
+  { id:'COMP-1013', name:'Riverview Apiaries Pty Ltd',  abn:'47 308 552 119', phone:'+61 3 5871 4422', email:'admin@riverviewapiaries.com.au',
+    primaryContact:{ name:'Elena Garcia',      phone:'+61 3 5871 4422', email:'elena@riverviewapiaries.com.au', address:'48 Murray Valley Hwy, Yarrawonga VIC 3730' },
+    facilities:['DAN'],                   services:['Gamma'],             status:'Pending', created:'2026-05-17', origin:'self-signup' },
+  { id:'COMP-1014', name:'Coastal Med Supplies',         abn:'69 412 887 003', phone:'+61 2 4399 7710', email:'office@coastalmed.com.au',
+    primaryContact:{ name:'Hugo Bennett',      phone:'+61 2 4399 7710', email:'hugo.bennett@coastalmed.com.au', address:'12 Erina Plaza, Erina NSW 2250' },
+    facilities:['WPK'],                   services:['Gamma','ETO'],       status:'Pending', created:'2026-05-18', origin:'self-signup' },
+  { id:'COMP-1015', name:'Murray Goulburn Co-op',        abn:'53 218 446 091', phone:'+61 3 5829 7700', email:'admin@murraygoulburn.com.au',
+    primaryContact:{ name:'Andrew Hayward',    phone:'+61 3 5829 7700', email:'andrew@murraygoulburn.com.au', address:'212 Goulburn St, Shepparton VIC 3630' },
+    facilities:['DAN'],                   services:['Gamma'],             status:'Pending', created:'2026-05-16', origin:'self-signup' },
+  { id:'COMP-1016', name:'Tasmanian Honey Co',           abn:'78 502 116 304', phone:'+61 3 6234 5511', email:'office@tashoneyco.com.au',
+    primaryContact:{ name:'Sophie Allen',      phone:'+61 3 6234 5511', email:'sophie@tashoneyco.com.au', address:'18 Maquarie St, Hobart TAS 7000' },
+    facilities:['NAR'],                   services:['Gamma'],             status:'Pending', created:'2026-05-15', origin:'self-signup' },
+  { id:'COMP-1017', name:'Highland Pet Supplies',        abn:'34 925 178 660', phone:'+61 2 4321 1100', email:'office@highlandpet.com.au',
+    primaryContact:{ name:'David Park',        phone:'+61 2 4321 1100', email:'david.park@highlandpet.com.au', address:'42 Argyle St, Moss Vale NSW 2577' },
+    facilities:['WPK'],                   services:['Gamma'],             status:'Pending', created:'2026-05-14', origin:'self-signup' },
+  { id:'COMP-1018', name:'Adelaide Spice Traders',       abn:'21 786 304 552', phone:'+61 8 8232 9988', email:'admin@adelaidespice.com.au',
+    primaryContact:{ name:'Maya Rao',          phone:'+61 8 8232 9988', email:'maya.rao@adelaidespice.com.au', address:'9 Gilles St, Adelaide SA 5000' },
+    facilities:['MER'],                   services:['GMP'],               status:'Pending', created:'2026-05-12', origin:'self-signup' },
 ];
 
 /* ---------- Seed company contacts (admin · per-person logins) ---------------- */
@@ -286,7 +308,7 @@ const seedCompanyContacts = [
   { id:'CONT-2002', companyId:'COMP-1001', companyName:'Sunraysia Organic Pty Ltd', name:'Lewis Carter',   phone:'+61 3 5021 1188', email:'lewis.carter@sunraysia-organic.com.au',
     facilities:['WPK','NAR'],        services:['Gamma'],           status:'Active',  created:'2024-10-15' },
   { id:'CONT-2003', companyId:'COMP-1001', companyName:'Sunraysia Organic Pty Ltd', name:'Hannah O’Connell', phone:'+61 3 5021 1190', email:'hannah.oconnell@sunraysia-organic.com.au',
-    facilities:['DAN'],              services:['ETO'],             status:'Pending', created:'2026-04-30' },
+    facilities:['DAN'],              services:['ETO'],             status:'Active',  created:'2026-04-30' },
   { id:'CONT-2004', companyId:'COMP-1003', companyName:'Bellarine Botanics',         name:'Mark Thompson',  phone:'+61 3 5258 9911', email:'mark.thompson@bellarinebotanics.com.au',
     facilities:['MER'],              services:['Gamma','GMP'],     status:'Active',  created:'2025-02-18' },
   { id:'CONT-2005', companyId:'COMP-1003', companyName:'Bellarine Botanics',         name:'Olivia Webb',    phone:'+61 3 5258 9912', email:'olivia.webb@bellarinebotanics.com.au',
@@ -310,21 +332,21 @@ const seedCompanyContacts = [
     facilities:['DAN'],              services:['Gamma'],           status:'Active',  created:'2025-03-18' },
   { id:'CONT-2014', companyId:'COMP-1002', companyName:'Top End Apiaries',           name:'Rachel Beard',   phone:'+61 8 8999 2266', email:'rachel.beard@topendapiaries.com.au',
     facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-07-02' },
-  // Auspharm Wholesalers — onboarding still Pending, so both contacts inherit Pending status.
+  // Auspharm Wholesalers — admin-onboarded contacts, Active from day one.
   { id:'CONT-2015', companyId:'COMP-1006', companyName:'Auspharm Wholesalers',       name:'Caleb Watson',   phone:'+61 3 8741 5511', email:'caleb.watson@auspharm.com.au',
-    facilities:['MER'],              services:['GMP'],             status:'Pending', created:'2026-04-22' },
+    facilities:['MER'],              services:['GMP'],             status:'Active',  created:'2026-04-22' },
   { id:'CONT-2016', companyId:'COMP-1006', companyName:'Auspharm Wholesalers',       name:'Jana Kowalski',  phone:'+61 3 8741 5519', email:'jana.kowalski@auspharm.com.au',
-    facilities:['MER'],              services:['GMP'],             status:'Pending', created:'2026-04-29' },
+    facilities:['MER'],              services:['GMP'],             status:'Active',  created:'2026-04-29' },
   // Sunshine Coast Apiary — small NAR-only operation, two field staff.
   { id:'CONT-2017', companyId:'COMP-1008', companyName:'Sunshine Coast Apiary',      name:'David Lyle',     phone:'+61 7 5491 3077', email:'david.lyle@sunshineapiary.com.au',
     facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-04-14' },
   { id:'CONT-2018', companyId:'COMP-1008', companyName:'Sunshine Coast Apiary',      name:'Tina Mohammed',  phone:'+61 7 5491 3088', email:'tina.mohammed@sunshineapiary.com.au',
     facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2025-06-09' },
-  // Golden Hive Co-op — still Pending; only the primary is fully Active.
+  // Golden Hive Co-op — admin-onboarded contacts, Active from day one.
   { id:'CONT-2019', companyId:'COMP-1011', companyName:'Golden Hive Co-op',          name:'Greg Pellegrini',phone:'+61 3 5781 2233', email:'greg.pellegrini@goldenhive.coop',
-    facilities:['DAN'],              services:['Gamma'],           status:'Pending', created:'2026-04-25' },
+    facilities:['DAN'],              services:['Gamma'],           status:'Active',  created:'2026-04-25' },
   { id:'CONT-2020', companyId:'COMP-1011', companyName:'Golden Hive Co-op',          name:'Yuki Tanaka',    phone:'+61 3 5781 2244', email:'yuki.tanaka@goldenhive.coop',
-    facilities:['NAR'],              services:['Gamma'],           status:'Pending', created:'2026-04-26' },
+    facilities:['NAR'],              services:['Gamma'],           status:'Active',  created:'2026-04-26' },
   { id:'CONT-2021', companyId:'COMP-1011', companyName:'Golden Hive Co-op',          name:'Olivia Zhou',    phone:'+61 3 5781 2255', email:'olivia.zhou@goldenhive.coop',
     facilities:['DAN','NAR'],        services:['Gamma'],           status:'Active',  created:'2026-05-02' },
   // BioSeq Pty Ltd — small Narangba lab, two scientists with portal access.
@@ -335,6 +357,19 @@ const seedCompanyContacts = [
   // Bellarine Botanics — additional QA contact on top of the existing two.
   { id:'CONT-2024', companyId:'COMP-1003', companyName:'Bellarine Botanics',         name:'Ling Chen',      phone:'+61 3 5258 9920', email:'ling.chen@bellarinebotanics.com.au',
     facilities:['MER'],              services:['GMP'],             status:'Active',  created:'2025-09-22' },
+  // Self-signup drafts — joined an existing active company; awaiting admin approval.
+  { id:'CONT-2025', companyId:'COMP-1005', companyName:'Kingsgrove Medical',         name:'Rebecca Tran',   phone:'+61 2 9132 7720', email:'rebecca.tran@kingsgrovemed.com.au',
+    facilities:['WPK'],              services:['Gamma'],           status:'Pending', created:'2026-05-18', origin:'self-signup' },
+  { id:'CONT-2026', companyId:'COMP-1009', companyName:'Chemist Warehouse DC',       name:'Owen Fitzgerald',phone:'+61 3 9213 7633', email:'owen.fitzgerald@chemistwarehouse.com.au',
+    facilities:['MER'],              services:['GMP'],             status:'Pending', created:'2026-05-19', origin:'self-signup' },
+  { id:'CONT-2027', companyId:'COMP-1001', companyName:'Sunraysia Organic Pty Ltd',  name:'Thomas Howard',  phone:'+61 3 5021 1199', email:'thomas.howard@sunraysia-organic.com.au',
+    facilities:['DAN'],              services:['Gamma'],           status:'Pending', created:'2026-05-16', origin:'self-signup' },
+  { id:'CONT-2028', companyId:'COMP-1002', companyName:'Top End Apiaries',           name:'Grace Nakamura', phone:'+61 8 8999 2255', email:'grace.nakamura@topendapiaries.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Pending', created:'2026-05-15', origin:'self-signup' },
+  { id:'CONT-2029', companyId:'COMP-1004', companyName:'Perfection Fresh Australia', name:'Lachlan Brennan',phone:'+61 2 9741 8099', email:'lachlan.brennan@perfectionfresh.com.au',
+    facilities:['WPK'],              services:['Gamma'],           status:'Pending', created:'2026-05-13', origin:'self-signup' },
+  { id:'CONT-2030', companyId:'COMP-1007', companyName:'Queensland Biolab',          name:'Sienna Walsh',   phone:'+61 7 3899 4488', email:'sienna.walsh@qldbiolab.com.au',
+    facilities:['NAR'],              services:['Gamma'],           status:'Pending', created:'2026-05-12', origin:'self-signup' },
 ];
 
 // Forms across 4 facilities. `shared_with` lets one canonical row serve multiple facilities
@@ -694,6 +729,22 @@ const state = reactive({
     severity: 'info',              // 'info' | 'warning' | 'critical'
   },
 });
+
+/* ---------- Wireframe demo state behaviour -----------------------------
+   Companies + contacts are mutable during a session (self-signup creates drafts,
+   admin approves / adds / rejects). Each refresh resets to the seed so the demo
+   always starts from a known clean state. We clear any legacy localStorage on
+   load and disable writes — no cross-session persistence. */
+const STATE_KEY = 'steritech-wireframe-state-v1';
+function persistState(){ /* no-op: demo data is session-only */ }
+function rehydrateState(){
+  try { localStorage.removeItem(STATE_KEY); } catch (_) {}
+}
+function resetDemoState(){
+  state.companies = [...seedCompanies];
+  state.companyContacts = [...seedCompanyContacts];
+}
+rehydrateState();
 
 let _toastTimer = null;
 function showToast(message, kind='success'){
@@ -2106,7 +2157,7 @@ const StatusBadge = {
       // No pill chrome. Dot colour signals state at a glance; text reads
       // as a list item, calmer for older B2B ops audiences.
       return ({
-        'Draft':                    { dot:'bg-slate-400',    pulse:false },
+        'Pending':                    { dot:'bg-slate-400',    pulse:false },
         'Created':                  { dot:'bg-slate-500',    pulse:false },
         'Cancelled':                { dot:'bg-red-500',      pulse:false },
         'Accepted':                 { dot:'bg-sky-500',      pulse:false },
@@ -2712,6 +2763,8 @@ const DemoPanel = {
       state.orders.splice(0, state.orders.length, ...newOrders);
       state.messages = buildInitialMessages(newOrders, seedProfile.contact);
       state.maintenanceBanner = { enabled:false, message:'Scheduled maintenance is in progress. Some features may be temporarily unavailable.', severity:'info' };
+      // Also clear any persisted companies/contacts from localStorage and re-seed them.
+      resetDemoState();
       showToast('Demo data reset to defaults.', 'success');
     },
     signOut(){
@@ -2823,9 +2876,30 @@ const Shell = {
 
 const LoginPage = {
   components:{ Icon, Btn },
-  data(){ return { email:'', password:'', err:'' }; },
+  data(){ return { email:'', password:'', err:'', pendingReview:false }; },
   methods:{
     submit(){
+      this.err = '';
+      this.pendingReview = false;
+      // Self-signup drafts cannot sign in until an admin has verified the record.
+      // Detect by email and surface a friendly "in review" panel instead of a hard error.
+      const email = (this.email || '').trim().toLowerCase();
+      if (email){
+        const isPendingCompany = state.companies.some(c =>
+          c.status === 'Pending' && (
+            (c.primaryContact?.email || '').toLowerCase() === email ||
+            (c.email || '').toLowerCase() === email
+          )
+        );
+        const isPendingContact = state.companyContacts.some(ct =>
+          ct.status === 'Pending' &&
+          (ct.email || '').toLowerCase() === email
+        );
+        if (isPendingCompany || isPendingContact){
+          this.pendingReview = true;
+          return;
+        }
+      }
       state.authed = true;
       state.role = 'customer';
       this.$router.push('/dashboard');
@@ -2868,6 +2942,15 @@ const LoginPage = {
               <input type="checkbox" class="h-4 w-4 rounded border-slate-300"/> Remember this computer
             </label>
             <div v-if="err" role="alert" aria-live="polite" class="text-sm text-red-700 bg-red-50 border border-red-200 rounded-md px-3 py-2">{{ err }}</div>
+            <div v-if="pendingReview" role="status" aria-live="polite"
+                 class="rounded-md border border-amber-200 bg-amber-50/60 px-4 py-3 flex gap-3 items-start">
+              <Icon name="clock" :size="16" cls="mt-0.5 shrink-0 text-amber-600"/>
+              <div class="text-sm text-amber-900">
+                <div class="font-medium text-navy-900">Your account is in review</div>
+                <div class="text-slate-700 mt-1 leading-relaxed">A Steritech admin is verifying your details. You'll get an email at <span class="font-medium text-navy-900">{{ email }}</span> as soon as it's activated.</div>
+                <a href="mailto:support@steritech.com.au" class="inline-block mt-2 text-teal-700 hover:underline font-medium text-sm">Contact support</a>
+              </div>
+            </div>
             <Btn size="lg" :block="true">Sign in</Btn>
           </form>
 
@@ -2922,12 +3005,24 @@ const SignupPage = {
   components:{ Icon, Btn, TreatmentChip },
   data(){
     return {
-      step: 1,                              // 1 = form, 2 = acknowledgement (self-signup only)
+      /* Wireframe step machine:
+         - 'choose'  — pick "new company" vs "join existing company" (self-signup only)
+         - 'form'    — fill the form for the chosen mode
+         - 'review'  — acknowledge before submitting (self-signup only)
+         - 'done'    — confirmation screen (draft created, awaiting admin verification)
+         Invited customers (?invite=<token>) skip 'choose' and 'review' — they were pre-created
+         by an admin, so submitting their form activates the account immediately like before. */
+      step: 'choose',
+      mode: null,                           // 'new' | 'existing'
       acknowledged: false,
-      f: { company:'', abn:'', contact:'', phone:'', email:'', password:'', address:'', facilities:['MER'] },
-      manualPick: false,                    // true once user clicks a card
-      selected: 'MER',                      // current selection (manual or auto)
-      autoSelectedNote: false,              // shown if user submits without picking
+      f: {
+        company:'', abn:'', contact:'', phone:'', email:'', password:'', address:'',
+        existingCompanyId:'', existingCompanyQuery:'',
+      },
+      manualPick: false,
+      selected: 'MER',
+      autoSelectedNote: false,
+      submitted: null,                      // populated on 'done' — drives the confirmation screen
     };
   },
   computed:{
@@ -2965,13 +3060,59 @@ const SignupPage = {
       return /\b(VIC|NSW|QLD|WA|SA|TAS|NT|ACT)\b/.test(a) || /\b\d{4}\b/.test(a);
     },
     assignedFacility(){ return FACILITIES.find(f => f.code === this.effectiveSelected) || FACILITIES[0]; },
+    /* Companies the user can request to join — only Active records show up so customers
+       can't pile drafts onto a company that itself hasn't been approved yet. */
+    joinableCompanies(){
+      return state.companies
+        .filter(c => c.status === 'Active')
+        .sort((a,b) => a.name.localeCompare(b.name));
+    },
+    filteredJoinable(){
+      const q = (this.f.existingCompanyQuery || '').trim().toLowerCase();
+      if (!q) return this.joinableCompanies;
+      const qDigits = q.replace(/\s+/g,'');
+      return this.joinableCompanies.filter(c =>
+        c.name.toLowerCase().includes(q) || c.abn.replace(/\s+/g,'').includes(qDigits)
+      );
+    },
+    selectedExistingCompany(){
+      return state.companies.find(c => c.id === this.f.existingCompanyId) || null;
+    },
+    nextCompanyId(){
+      const nums = state.companies.map(c => parseInt(String(c.id).split('-')[1] || '0', 10)).filter(n => !isNaN(n));
+      const max = nums.length ? Math.max(...nums) : 1000;
+      return 'COMP-' + (max + 1);
+    },
+    nextContactId(){
+      const nums = state.companyContacts.map(c => parseInt(String(c.id).split('-')[1] || '0', 10)).filter(n => !isNaN(n));
+      const max = nums.length ? Math.max(...nums) : 2000;
+      return 'CONT-' + (max + 1);
+    },
+    /* Soft duplicate-email check. Returns the matching record if the email the customer
+       entered is already in the system (as a company primary contact / login OR an
+       existing contact). Used to show a non-blocking warning on the review screen. */
+    duplicateEmailMatch(){
+      const email = (this.f.email || '').trim().toLowerCase();
+      if (!email) return null;
+      const company = state.companies.find(c =>
+        (c.primaryContact?.email || '').toLowerCase() === email ||
+        (c.email || '').toLowerCase() === email
+      );
+      if (company) return { kind:'company', name: company.name, status: company.status };
+      const contact = state.companyContacts.find(ct => (ct.email || '').toLowerCase() === email);
+      if (contact) return { kind:'contact', name: contact.name, companyName: contact.companyName, status: contact.status };
+      return null;
+    },
   },
   watch:{
-    /* When the route flips into invited mode, prefill from the token and reset state. */
+    /* When the route flips into invited mode, prefill from the token. Invited customers
+       always land on the new-company form because the admin pre-created their record. */
     invited:{
       immediate: true,
       handler(v){
         if (v){
+          this.mode = 'new';
+          this.step = 'form';
           this.f.company = this.invite.company;
           this.f.contact = this.invite.contact;
           this.f.email   = this.invite.email;
@@ -2981,49 +3122,133 @@ const SignupPage = {
           this.manualPick = false;
           this.autoSelectedNote = false;
         } else {
-          // Clear prefilled fields when leaving invited mode (demo helper toggling).
           this.f.company = ''; this.f.contact = ''; this.f.email = '';
           this.f.phone = ''; this.f.address = ''; this.f.abn = '';
+          this.step = 'choose';
+          this.mode = null;
         }
       },
     },
   },
   methods:{
+    todayIso(){
+      const d = new Date();
+      const pad = n => String(n).padStart(2,'0');
+      return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+    },
+    pickMode(m){
+      this.mode = m;
+      this.step = 'form';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
     pickCard(code){
-      if (this.invited) return;          // read-only in invited mode
+      if (this.invited) return;
       this.manualPick = true;
       this.selected = code;
       this.autoSelectedNote = false;
     },
+    pickExistingCompany(c){
+      this.f.existingCompanyId = c.id;
+      this.f.existingCompanyQuery = c.name;
+    },
+    clearExistingCompany(){
+      this.f.existingCompanyId = '';
+      this.f.existingCompanyQuery = '';
+    },
     toggleDemoInvite(){
-      // Prototype-only helper: rewrite the URL to simulate arriving via an invite link.
       const q = this.invited ? {} : { invite: MOCK_INVITE.token };
       this.$router.replace({ path: '/signup', query: q });
     },
-    submit(){
-      // If user never manually picked and never typed a state hint, surface the auto-selected note.
-      if (!this.invited && !this.manualPick && !this.autoFromAddress){
+    submitForm(){
+      if (!this.invited && this.mode === 'new' && !this.manualPick && !this.autoFromAddress){
         this.autoSelectedNote = true;
       }
-      // Self-signup: pause on an acknowledgement screen so the user reviews
-      // what they're committing to (facility, BC record creation, etc).
-      // Invited users skip this — their record was already created by the admin.
-      if (!this.invited && this.step === 1){
-        this.step = 2;
-        window.scrollTo({ top: 0, behavior: 'smooth' });
+      // Invited customers skip review — admin already pre-approved them.
+      if (this.invited){
+        this.finalizeAccount();
         return;
       }
-      this.finalizeAccount();
-    },
-    finalizeAccount(){
-      const chosen = this.effectiveSelected;
-      state.profile = { ...seedProfile, ...this.f, bcCustomerNumber: 'BC-CUST-pending', currentFacility: chosen };
-      state.facilities = [chosen];
-      state.authed = true;
-      this.$router.push('/dashboard');
+      this.step = 'review';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
     },
     editFromReview(){
-      this.step = 1;
+      this.step = 'form';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    backToChoose(){
+      this.step = 'choose';
+      this.mode = null;
+      this.f.existingCompanyId = '';
+      this.f.existingCompanyQuery = '';
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
+    goToAdminDemo(){
+      // Wireframe-only shortcut: the user who just self-signed up isn't an admin,
+      // but for the demo we want them to jump straight into the Pending Approvals
+      // queue to see what an admin sees. Flip role + authed, then route to /admin.
+      state.authed = true;
+      state.role = 'admin';
+      this.$router.push('/admin');
+    },
+    finalizeAccount(){
+      // Invited customers retain the legacy behaviour: account becomes active immediately
+      // because admin already pre-created the record. Activate + sign in to /dashboard.
+      if (this.invited){
+        const chosen = this.effectiveSelected;
+        state.profile = { ...seedProfile, ...this.f, bcCustomerNumber: 'BC-CUST-pending', currentFacility: chosen };
+        state.facilities = [chosen];
+        state.authed = true;
+        this.$router.push('/dashboard');
+        return;
+      }
+      // Self-signup: write a Draft/self-signup record into state. Do NOT log the user in.
+      // They wait for an admin to verify the record from /admin → Pending Approvals.
+      const today = this.todayIso();
+      if (this.mode === 'new'){
+        const chosen = this.effectiveSelected;
+        const newCompany = {
+          id: this.nextCompanyId,
+          name: this.f.company.trim(),
+          abn: this.f.abn.trim(),
+          phone: this.f.phone.trim(),
+          email: this.f.email.trim(),
+          primaryContact: {
+            name: this.f.contact.trim(),
+            phone: this.f.phone.trim(),
+            email: this.f.email.trim(),
+            address: this.f.address.trim(),
+          },
+          facilities: [chosen],
+          services: (FACILITY_SERVICES[chosen] || []).slice(0, 1),
+          status: 'Pending',
+          created: today,
+          origin: 'self-signup',
+        };
+        state.companies.unshift(newCompany);
+        this.submitted = { kind:'new-company', companyName:newCompany.name, contactName:newCompany.primaryContact.name, email:newCompany.primaryContact.email };
+      } else {
+        const company = this.selectedExistingCompany;
+        if (!company){
+          showToast('Please select your company first.', 'error');
+          return;
+        }
+        const newContact = {
+          id: this.nextContactId,
+          companyId: company.id,
+          companyName: company.name,
+          name: this.f.contact.trim(),
+          phone: this.f.phone.trim(),
+          email: this.f.email.trim(),
+          facilities: company.facilities.slice(0, 1),
+          services: company.services.slice(0, 1),
+          status: 'Pending',
+          created: today,
+          origin: 'self-signup',
+        };
+        state.companyContacts.unshift(newContact);
+        this.submitted = { kind:'existing-company', companyName:company.name, contactName:newContact.name, email:newContact.email };
+      }
+      this.step = 'done';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
   },
@@ -3035,7 +3260,13 @@ const SignupPage = {
         <div class="flex flex-col items-center text-center pb-2">
           <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-14 w-auto mb-3" draggable="false"/>
           <div class="text-[17px] font-semibold text-navy-900 tracking-tight">Steritech Customer Portal</div>
-          <div class="text-sm text-slate-500 mt-0.5">{{ invited ? 'Confirm your account details to get started' : 'Request a new customer account' }}</div>
+          <div class="text-sm text-slate-500 mt-0.5">
+            <template v-if="invited">Confirm your account details to get started</template>
+            <template v-else-if="step === 'choose'">Request a new Steritech account</template>
+            <template v-else-if="step === 'done'">Your application is in review</template>
+            <template v-else-if="mode === 'new'">Sign up a new company</template>
+            <template v-else>Join your company on Steritech</template>
+          </div>
         </div>
 
         <button type="button" @click="toggleDemoInvite"
@@ -3047,21 +3278,54 @@ const SignupPage = {
           <Icon name="chevrons-up-down" :size="12" cls="text-slate-400"/>
         </button>
 
-        <div v-if="!invited" class="text-sm text-slate-600 flex items-baseline gap-2">
-          <span class="font-medium text-navy-900">Step {{ step }} of 2</span>
+        <div v-if="!invited && (step === 'form' || step === 'review')" class="text-sm text-slate-600 flex items-baseline gap-2">
+          <span class="font-medium text-navy-900">Step {{ step === 'form' ? 1 : 2 }} of 2</span>
           <span aria-hidden="true">&middot;</span>
-          <span>{{ step === 1 ? 'Your details and facility' : 'Review and confirm' }}</span>
+          <span>{{ step === 'form' ? (mode === 'new' ? 'Your details and facility' : 'Find your company and confirm details') : 'Review and confirm' }}</span>
         </div>
 
-        <form v-if="step === 1" @submit.prevent="submit" class="space-y-5">
-          <div class="grid lg:grid-cols-2 gap-6 items-stretch">
+        <!-- STEP: CHOOSE — fork between "new company" and "join existing company" -->
+        <section v-if="step === 'choose' && !invited" class="space-y-5">
+          <div class="bg-white border border-slate-200 rounded-md p-6 sm:p-8">
+            <h2 class="text-base font-semibold text-navy-900 mb-5">Get started</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <button type="button" @click="pickMode('new')"
+                      class="group text-left rounded-md border border-slate-200 hover:border-teal-500 hover:shadow-sm p-5 transition focus-ring">
+                <div class="flex items-start justify-between gap-3">
+                  <Icon name="building" :size="22" cls="text-slate-600 group-hover:text-teal-600 transition"/>
+                  <Icon name="arrow-right" :size="16" cls="text-slate-300 group-hover:text-teal-600 transition"/>
+                </div>
+                <div class="text-base font-medium text-navy-900 mt-5">Sign up a new company</div>
+                <p class="text-sm text-slate-500 mt-1">Your company isn't on Steritech yet.</p>
+              </button>
+              <button type="button" @click="pickMode('existing')"
+                      class="group text-left rounded-md border border-slate-200 hover:border-teal-500 hover:shadow-sm p-5 transition focus-ring">
+                <div class="flex items-start justify-between gap-3">
+                  <Icon name="users" :size="22" cls="text-slate-600 group-hover:text-teal-600 transition"/>
+                  <Icon name="arrow-right" :size="16" cls="text-slate-300 group-hover:text-teal-600 transition"/>
+                </div>
+                <div class="text-base font-medium text-navy-900 mt-5">Join an existing company</div>
+                <p class="text-sm text-slate-500 mt-1">Get access under your company's account.</p>
+              </button>
+            </div>
+            <p class="text-xs text-slate-500 mt-6 text-center">Accounts are verified by a Steritech admin before activation.</p>
+          </div>
+
+          <p class="text-center text-sm text-slate-600">
+            Already have an account? <router-link to="/login" class="text-teal-600 hover:underline font-medium focus-ring rounded">Sign in</router-link>.
+          </p>
+        </section>
+
+        <form v-if="step === 'form'" @submit.prevent="submitForm" class="space-y-5">
+          <!-- NEW-COMPANY MODE — full company + primary contact + facility selection -->
+          <div v-if="invited || mode === 'new'" class="grid lg:grid-cols-2 gap-6 items-stretch">
           <section class="bg-white border border-slate-200 rounded-md">
             <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
               <div class="flex items-center gap-2 text-navy-900">
                 <Icon name="building-2" :size="18" cls="text-slate-500"/>
-                <h2 class="text-lg font-semibold">{{ invited ? 'Confirm your details' : 'Account details' }}</h2>
+                <h2 class="text-lg font-semibold">{{ invited ? 'Confirm your details' : 'Company &amp; primary contact' }}</h2>
               </div>
-              <p class="text-sm text-slate-600 mt-1">{{ invited ? 'These were prefilled from your invitation. Set a password to finish.' : 'Tell us about your company and primary contact.' }}</p>
+              <p class="text-sm text-slate-600 mt-1">{{ invited ? 'These were prefilled from your invitation. Set a password to finish.' : 'Tell us about your company and the person who will be its primary contact.' }}</p>
             </div>
 
             <div v-if="invited" class="mx-5 sm:mx-7 mt-5 bg-slate-50 border border-slate-200 text-slate-700 rounded-md p-3 flex gap-3 items-start">
@@ -3196,81 +3460,241 @@ const SignupPage = {
           </section>
           </div>
 
+          <!-- EXISTING-COMPANY MODE — search-and-pick + personal details only -->
+          <div v-if="!invited && mode === 'existing'" class="space-y-5">
+            <section class="bg-white border border-slate-200 rounded-md">
+              <div class="px-6 sm:px-8 pt-6 pb-2">
+                <h2 class="text-base font-semibold text-navy-900">Find your company</h2>
+              </div>
+              <div class="px-6 sm:px-8 pb-6 space-y-3">
+                <div class="relative">
+                  <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none"/>
+                  <input v-model="f.existingCompanyQuery" type="text" autocomplete="off" placeholder="Search by company name or ABN"
+                         :disabled="!!f.existingCompanyId"
+                         :class="['w-full h-11 pl-10 pr-3 rounded-md border text-sm focus-ring', f.existingCompanyId ? 'bg-slate-50 border-slate-200 text-slate-700' : 'border-slate-300 text-slate-900 placeholder:text-slate-400']"/>
+                </div>
+
+                <template v-if="!f.existingCompanyId">
+                  <div v-if="filteredJoinable.length" class="text-xs text-slate-500">
+                    {{ filteredJoinable.length }} {{ filteredJoinable.length === 1 ? 'company' : 'companies' }}
+                  </div>
+                  <ul v-if="filteredJoinable.length"
+                      class="border border-slate-200 rounded-md divide-y divide-slate-100 max-h-[320px] overflow-y-auto">
+                    <li v-for="c in filteredJoinable" :key="c.id">
+                      <button type="button" @click="pickExistingCompany(c)"
+                              class="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-center gap-3 focus-ring transition-colors">
+                        <Icon name="building" :size="16" cls="shrink-0 text-slate-400"/>
+                        <div class="min-w-0 flex-1">
+                          <div class="text-sm font-medium text-navy-900 truncate">{{ c.name }}</div>
+                          <div class="text-xs text-slate-500 mt-0.5">ABN {{ c.abn }} &middot; {{ c.facilities.join(', ') }}</div>
+                        </div>
+                      </button>
+                    </li>
+                  </ul>
+                  <div v-else class="border border-slate-200 rounded-md px-4 py-6 text-sm text-slate-500 text-center">
+                    <div>No active companies match "<span class="text-navy-900">{{ f.existingCompanyQuery }}</span>".</div>
+                    <button type="button" @click="pickMode('new')" class="mt-2 text-teal-600 hover:underline font-medium text-sm">Sign up a new company instead</button>
+                  </div>
+                </template>
+
+                <div v-else class="rounded-md border border-slate-200 px-4 py-3 flex items-center gap-3">
+                  <Icon name="check-circle-2" :size="18" cls="shrink-0 text-emerald-600"/>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-semibold text-navy-900 truncate">{{ selectedExistingCompany.name }}</div>
+                    <div class="text-xs text-slate-500 mt-0.5">ABN {{ selectedExistingCompany.abn }} &middot; {{ selectedExistingCompany.facilities.join(', ') }}</div>
+                  </div>
+                  <button type="button" @click="clearExistingCompany"
+                          class="text-sm text-slate-600 hover:text-navy-900 hover:underline px-2 py-1 focus-ring rounded">Change</button>
+                </div>
+              </div>
+            </section>
+
+            <section class="bg-white border border-slate-200 rounded-md">
+              <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
+                <div class="flex items-center gap-2 text-navy-900">
+                  <Icon name="user-round" :size="18" cls="text-slate-500"/>
+                  <h2 class="text-lg font-semibold">Your details</h2>
+                </div>
+                <p class="text-sm text-slate-600 mt-1">This is the personal contact account you'll use to sign in.</p>
+              </div>
+              <div class="px-5 sm:px-7 py-6 space-y-5">
+                <div>
+                  <label for="signup-join-name" class="block text-sm font-medium text-slate-800 mb-1.5">Full name <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-join-name" v-model="f.contact" type="text" required aria-required="true" autocomplete="name" placeholder="Your full name"
+                         class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 focus-ring"/>
+                </div>
+                <div>
+                  <label for="signup-join-phone" class="block text-sm font-medium text-slate-800 mb-1.5">Phone <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-join-phone" v-model="f.phone" type="tel" required aria-required="true" autocomplete="tel" placeholder="+61 ..."
+                         class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 focus-ring"/>
+                </div>
+                <div>
+                  <label for="signup-join-email" class="block text-sm font-medium text-slate-800 mb-1.5">Work email <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-join-email" v-model="f.email" type="email" required aria-required="true" autocomplete="email" placeholder="name@company.com.au"
+                         class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 focus-ring"/>
+                  <p class="mt-1 text-sm text-slate-500">You'll use this email to sign in. Order updates go here too.</p>
+                </div>
+                <div>
+                  <label for="signup-join-password" class="block text-sm font-medium text-slate-800 mb-1.5">Choose a password <span class="text-red-600" aria-hidden="true">*</span></label>
+                  <input id="signup-join-password" v-model="f.password" type="password" required aria-required="true" autocomplete="new-password" placeholder="At least 8 characters"
+                         class="w-full h-11 rounded-md border border-slate-300 px-3 text-base text-slate-900 focus-ring"/>
+                </div>
+              </div>
+            </section>
+          </div>
+
           <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-2">
-            <router-link to="/login" class="text-sm text-slate-600 hover:text-teal-600 inline-flex items-center gap-1.5 py-2 -my-2">
+            <button v-if="!invited" type="button" @click="backToChoose"
+                    class="text-sm text-slate-600 hover:text-teal-600 inline-flex items-center gap-1.5 py-2 -my-2 focus-ring rounded">
+              <Icon name="arrow-left" :size="14"/> Back
+            </button>
+            <router-link v-else to="/login" class="text-sm text-slate-600 hover:text-teal-600 inline-flex items-center gap-1.5 py-2 -my-2">
               <Icon name="arrow-left" :size="14"/> Back to sign in
             </router-link>
-            <Btn size="lg" :block="true" iconRight="arrow-right" @click="submit" class="sm:!w-auto">{{ invited ? 'Set password and continue' : 'Review your details' }}</Btn>
+            <Btn size="lg" :block="true" iconRight="arrow-right"
+                 :disabled="!invited && mode === 'existing' && !f.existingCompanyId"
+                 @click="submitForm" class="sm:!w-auto">{{ invited ? 'Set password and continue' : 'Review your details' }}</Btn>
           </div>
         </form>
 
-        <div v-if="step === 2 && !invited" class="space-y-5">
+        <div v-if="step === 'review' && !invited" class="space-y-5">
           <section class="bg-white border border-slate-200 rounded-md">
-            <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
-              <div class="flex items-center gap-2 text-navy-900">
-                <Icon name="clipboard-check" :size="18" cls="text-slate-500"/>
-                <h2 class="text-lg font-semibold">Review and confirm</h2>
-              </div>
-              <p class="text-sm text-slate-600 mt-1">Please double-check your details before we create your account. Changes after this need a Steritech admin.</p>
+            <div class="px-6 sm:px-8 pt-6 pb-2">
+              <h2 class="text-base font-semibold text-navy-900">Review and confirm</h2>
             </div>
 
-            <div class="px-5 sm:px-7 py-6 space-y-5">
-              <div class="rounded-md border border-slate-200">
-                <div class="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50">
-                  <div class="text-sm font-medium text-navy-900">Company and contact</div>
-                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium inline-flex items-center gap-1 py-1 -my-1">
-                    <Icon name="pencil" :size="12"/> Edit
-                  </button>
+            <!-- NEW-COMPANY review — company + primary contact + home facility -->
+            <template v-if="mode === 'new'">
+              <div class="px-6 sm:px-8 py-5 border-t border-slate-100">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">Company</div>
+                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium">Edit</button>
                 </div>
-                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 px-4 py-4 text-sm">
-                  <div><dt class="text-xs text-slate-500 mb-0.5">Company</dt><dd class="text-navy-900 font-medium">{{ f.company || '&mdash;' }}</dd></div>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Name</dt><dd class="text-navy-900 font-medium">{{ f.company || '&mdash;' }}</dd></div>
                   <div><dt class="text-xs text-slate-500 mb-0.5">ABN</dt><dd class="text-navy-900 font-mono text-xs">{{ f.abn || '&mdash;' }}</dd></div>
-                  <div><dt class="text-xs text-slate-500 mb-0.5">Contact</dt><dd class="text-navy-900 font-medium">{{ f.contact || '&mdash;' }}</dd></div>
-                  <div><dt class="text-xs text-slate-500 mb-0.5">Phone</dt><dd class="text-navy-900">{{ f.phone || '&mdash;' }}</dd></div>
-                  <div class="sm:col-span-2"><dt class="text-xs text-slate-500 mb-0.5">Email (sign-in)</dt><dd class="text-navy-900">{{ f.email || '&mdash;' }}</dd></div>
-                  <div class="sm:col-span-2"><dt class="text-xs text-slate-500 mb-0.5">Business address</dt><dd class="text-navy-900">{{ f.address || '&mdash;' }}</dd></div>
+                  <div class="sm:col-span-2"><dt class="text-xs text-slate-500 mb-0.5">Address</dt><dd class="text-navy-900">{{ f.address || '&mdash;' }}</dd></div>
                 </dl>
               </div>
 
-              <div class="rounded-md border border-slate-200">
-                <div class="flex items-center justify-between px-4 py-2.5 border-b border-slate-100 bg-slate-50">
-                  <div class="text-sm font-medium text-navy-900">Home facility</div>
-                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium inline-flex items-center gap-1 py-1 -my-1">
-                    <Icon name="pencil" :size="12"/> Change
-                  </button>
+              <div class="px-6 sm:px-8 py-5 border-t border-slate-100">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">Primary contact</div>
+                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium">Edit</button>
                 </div>
-                <div class="px-4 py-4">
-                  <div class="text-base font-semibold text-navy-900">{{ assignedFacility.name }}, {{ assignedFacility.state }}</div>
-                  <div class="text-xs font-mono text-slate-500 mt-0.5">{{ assignedFacility.code }}</div>
-                  <div class="mt-2 flex flex-wrap gap-1.5">
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Name</dt><dd class="text-navy-900 font-medium">{{ f.contact || '&mdash;' }}</dd></div>
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Phone</dt><dd class="text-navy-900">{{ f.phone || '&mdash;' }}</dd></div>
+                  <div class="sm:col-span-2"><dt class="text-xs text-slate-500 mb-0.5">Email (sign-in)</dt><dd class="text-navy-900">{{ f.email || '&mdash;' }}</dd></div>
+                </dl>
+              </div>
+
+              <div class="px-6 sm:px-8 py-5 border-t border-slate-100">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">Facility</div>
+                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium">Change</button>
+                </div>
+                <div class="flex items-center gap-3 flex-wrap text-sm">
+                  <span class="text-navy-900 font-medium">{{ assignedFacility.name }}, {{ assignedFacility.state }}</span>
+                  <span class="flex flex-wrap gap-1.5">
                     <TreatmentChip v-for="s in services[assignedFacility.code]" :key="s" :treatment="s" :small="true"/>
+                  </span>
+                </div>
+              </div>
+            </template>
+
+            <!-- EXISTING-COMPANY review — selected company + personal details -->
+            <template v-else>
+              <div class="px-6 sm:px-8 py-5 border-t border-slate-100">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">Company</div>
+                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium">Change</button>
+                </div>
+                <dl v-if="selectedExistingCompany" class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                  <div class="sm:col-span-2"><dt class="text-xs text-slate-500 mb-0.5">Name</dt><dd class="text-navy-900 font-medium">{{ selectedExistingCompany.name }}</dd></div>
+                  <div><dt class="text-xs text-slate-500 mb-0.5">ABN</dt><dd class="text-navy-900 font-mono text-xs">{{ selectedExistingCompany.abn }}</dd></div>
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Facilities</dt><dd class="text-navy-900">{{ selectedExistingCompany.facilities.join(', ') }}</dd></div>
+                </dl>
+              </div>
+
+              <div class="px-6 sm:px-8 py-5 border-t border-slate-100">
+                <div class="flex items-center justify-between gap-2 mb-3">
+                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">You</div>
+                  <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium">Edit</button>
+                </div>
+                <dl class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3 text-sm">
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Name</dt><dd class="text-navy-900 font-medium">{{ f.contact || '&mdash;' }}</dd></div>
+                  <div><dt class="text-xs text-slate-500 mb-0.5">Phone</dt><dd class="text-navy-900">{{ f.phone || '&mdash;' }}</dd></div>
+                  <div class="sm:col-span-2"><dt class="text-xs text-slate-500 mb-0.5">Email (sign-in)</dt><dd class="text-navy-900">{{ f.email || '&mdash;' }}</dd></div>
+                </dl>
+              </div>
+            </template>
+
+            <!-- Single-line "what's next" + inline acknowledgement -->
+            <div class="px-6 sm:px-8 py-5 border-t border-slate-100">
+              <p class="text-sm text-slate-500 mb-4">After submitting, a Steritech admin will verify your details and email you on approval. Your sign-in stays locked until then.</p>
+              <div v-if="duplicateEmailMatch" class="rounded-md border border-amber-200 bg-amber-50/60 px-4 py-3 mb-4 flex gap-3 items-start">
+                <Icon name="info" :size="16" cls="mt-0.5 shrink-0 text-amber-600"/>
+                <div class="text-sm text-amber-900 leading-relaxed">
+                  <div class="font-medium text-navy-900">We already have an account for this email.</div>
+                  <div class="text-slate-700 mt-1">
+                    <template v-if="duplicateEmailMatch.kind === 'company'"><span class="font-medium">{{ duplicateEmailMatch.name }}</span> is already registered.</template>
+                    <template v-else><span class="font-medium">{{ duplicateEmailMatch.name }}</span> at {{ duplicateEmailMatch.companyName }} already has access.</template>
+                    Submitting again will create a duplicate request.
+                    <router-link to="/login" class="text-teal-700 hover:underline font-medium">Sign in instead</router-link>?
                   </div>
                 </div>
               </div>
-
-              <div class="rounded-md border border-slate-200">
-                <div class="px-4 py-2.5 border-b border-slate-100 bg-slate-50 text-sm font-medium text-navy-900">What happens after you confirm</div>
-                <ul class="px-4 py-4 text-sm text-slate-700 space-y-3">
-                  <li class="flex gap-2.5"><Icon name="check" :size="16" cls="mt-0.5 shrink-0 text-emerald-600"/><div><span class="font-medium text-navy-900">Account created.</span> You will be signed in and can browse forms for {{ assignedFacility.name }}.</div></li>
-                  <li class="flex gap-2.5"><Icon name="clock" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><div><span class="font-medium text-navy-900">Account activated within one business day.</span> Our team finishes setting up your account so you can start submitting orders.</div></li>
-                  <li class="flex gap-2.5"><Icon name="mail" :size="16" cls="mt-0.5 shrink-0 text-slate-500"/><div><span class="font-medium text-navy-900">Email confirmation once you are ready to go.</span> We will email you the moment your account is fully active.</div></li>
-                </ul>
-              </div>
-
-              <label for="signup-ack" class="flex items-start gap-3 p-4 rounded-md border border-slate-200 bg-slate-50 cursor-pointer">
+              <label for="signup-ack" class="flex items-start gap-3 cursor-pointer">
                 <input id="signup-ack" type="checkbox" v-model="acknowledged" class="mt-0.5 h-4 w-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"/>
-                <div class="text-sm text-slate-700">
-                  I confirm the details above are correct and I am authorised to create a Steritech account on behalf of <span class="font-medium text-navy-900">{{ f.company || 'this company' }}</span>.
-                </div>
+                <span class="text-sm text-slate-700">
+                  <template v-if="mode === 'new'">I'm authorised to create this account on behalf of <span class="font-medium text-navy-900">{{ f.company || 'this company' }}</span>.</template>
+                  <template v-else>I'm an authorised employee of <span class="font-medium text-navy-900">{{ selectedExistingCompany ? selectedExistingCompany.name : 'this company' }}</span>.</template>
+                </span>
               </label>
             </div>
           </section>
 
           <div class="flex flex-col-reverse sm:flex-row items-center justify-between gap-3 pt-2">
             <Btn kind="ghost" icon="arrow-left" @click="editFromReview">Back to edit</Btn>
-            <Btn size="lg" :block="true" iconRight="check" :disabled="!acknowledged" @click="finalizeAccount" class="sm:!w-auto">Confirm and create account</Btn>
+            <Btn size="lg" :block="true" iconRight="check" :disabled="!acknowledged" @click="finalizeAccount" class="sm:!w-auto">Submit for verification</Btn>
           </div>
         </div>
+
+        <!-- STEP: DONE — draft created, awaiting admin verification -->
+        <section v-if="step === 'done' && submitted" class="space-y-5">
+          <div class="bg-white border border-slate-200 rounded-md text-center">
+            <div class="px-6 sm:px-10 pt-12 pb-8">
+              <span class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-emerald-100 text-emerald-600 mb-5">
+                <Icon name="check" :size="22"/>
+              </span>
+              <h2 class="text-xl font-semibold text-navy-900">Application submitted</h2>
+              <p class="text-sm text-slate-600 mt-2.5 max-w-sm mx-auto leading-relaxed">
+                <template v-if="submitted.kind === 'new-company'">Your request to set up <span class="font-medium text-navy-900">{{ submitted.companyName }}</span> is in review. We'll email you at <span class="font-medium text-navy-900">{{ submitted.email }}</span> once your account is activated.</template>
+                <template v-else>Your request to join <span class="font-medium text-navy-900">{{ submitted.companyName }}</span> is in review. We'll email you at <span class="font-medium text-navy-900">{{ submitted.email }}</span> once your account is activated.</template>
+              </p>
+            </div>
+
+            <div class="border-t border-slate-100 px-6 sm:px-10 py-4">
+              <router-link to="/login" class="text-sm font-medium text-teal-600 hover:underline inline-flex items-center gap-1.5 focus-ring rounded py-2 -my-2">
+                <Icon name="arrow-left" :size="14"/> Back to sign in
+              </router-link>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-center pt-1">
+            <button type="button" @click="goToAdminDemo"
+                    class="inline-flex items-center gap-1.5 text-[11px] font-mono uppercase tracking-wider text-slate-500 hover:text-teal-600 border border-dashed border-slate-300 hover:border-teal-400 rounded-md px-2 py-1 transition focus-ring"
+                    title="Wireframe shortcut — jumps to the admin Pending Approvals view (real customers don't see this)">
+              <Icon name="eye" :size="12"/>
+              <span>Demo:</span>
+              <span class="text-slate-700 normal-case font-sans tracking-normal">Jump to admin view</span>
+              <Icon name="arrow-right" :size="12" cls="text-slate-400"/>
+            </button>
+          </div>
+
+          <p class="text-center text-xs text-slate-500">Need help? <a href="mailto:support@steritech.com.au" class="text-teal-600 hover:underline">support@steritech.com.au</a></p>
+        </section>
 
         <div class="pt-2 text-center text-xs text-slate-500 leading-relaxed">
           <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
@@ -6856,17 +7280,44 @@ const OnboardingIncompletePage = {
 
 const AdminConsolePage = {
   components:{ Icon, Btn, RouterLink },
+  data(){ return { pendingTab: 'companies' }; },
   computed:{
     state(){ return state; },
     activeCount(){ return state.companies.filter(c => c.status === 'Active').length; },
-    pendingCount(){ return state.companies.filter(c => c.status === 'Pending').length; },
     disabledCount(){ return state.companies.filter(c => c.status === 'Disabled').length; },
-    pendingOnboards(){
+    /* Companies and contacts are separate entities, so the two pending-approval
+       feeds stay in their own cards. New-company drafts live in state.companies;
+       join-existing requests live in state.companyContacts. Admin-created records
+       are Active immediately and never appear here. */
+    pendingCompanies(){
       return state.companies
         .filter(c => c.status === 'Pending')
+        .map(c => ({
+          id: c.id,
+          name: c.name,
+          contactName: c.primaryContact?.name || '—',
+          created: c.created,
+          link: '/admin/companies/' + c.id,
+        }))
         .sort((a,b) => new Date(b.created) - new Date(a.created));
     },
+    pendingContacts(){
+      return state.companyContacts
+        .filter(ct => ct.status === 'Pending')
+        .map(ct => ({
+          id: ct.id,
+          name: ct.name,
+          companyName: ct.companyName,
+          created: ct.created,
+          link: '/admin/contacts/' + ct.id,
+        }))
+        .sort((a,b) => new Date(b.created) - new Date(a.created));
+    },
+    pendingTotal(){ return this.pendingCompanies.length + this.pendingContacts.length; },
     recentlyOnboarded(){
+      // Activity feed — newest companies regardless of status. Pending entries
+      // also live in the Pending approvals card above; surfacing them here too
+      // gives admins a chronological "what just came in" view.
       return [...state.companies]
         .sort((a,b) => new Date(b.created) - new Date(a.created))
         .slice(0, 5);
@@ -6880,7 +7331,7 @@ const AdminConsolePage = {
     statusPill(s){
       return ({
         'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
-        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Pending':    'bg-amber-50 text-amber-700 ring-amber-200',
         'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
       })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
     },
@@ -6927,108 +7378,218 @@ const AdminConsolePage = {
   },
   template:`
   <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+    <!-- Page header: cleaner title row + inline KPI line -->
     <div>
-      <h1 class="text-xl font-semibold text-navy-900 leading-tight">Steritech management</h1>
-      <p class="text-sm text-slate-500 mt-1">Company onboarding, feature matrix, and form-schema administration.</p>
+      <h1 class="text-xl font-semibold text-navy-900 leading-tight">Admin console</h1>
+      <p class="text-sm text-slate-500 mt-1">
+        <span class="text-navy-900 font-medium">{{ activeCount }}</span> active companies
+        <span aria-hidden="true" class="mx-1.5">·</span>
+        <span class="text-navy-900 font-medium">{{ state.companyContacts.length }}</span> contacts
+        <span v-if="pendingTotal">
+          <span aria-hidden="true" class="mx-1.5">·</span>
+          <span class="text-amber-700 font-medium">{{ pendingTotal }}</span> pending review
+        </span>
+      </p>
     </div>
 
-    <!-- Triage row: Needs attention (left) + Quick actions (right) -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <!-- Needs attention: Pending onboards as actual rows -->
+    <!-- Triage row: Pending Approvals (left) + Quick actions (right).
+         Single tabbed card so the layout stays the same shape regardless of how
+         many drafts exist. Companies and Contacts share one entity-style table
+         pattern with sticky header + internal scroll + bottom count footer so
+         100+ records would still feel manageable. items-stretch aligns the
+         bottoms of both cards so the row reads as one finished band. -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-stretch">
       <section class="lg:col-span-2 bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
-          <span class="inline-flex items-center gap-2.5 text-sm font-medium text-navy-900">
-            <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-100">
-              <Icon name="clipboard-check" :size="15"/>
-            </span>
-            Needs attention
-            <span v-if="pendingOnboards.length" class="text-xs text-slate-500 font-normal">({{ pendingOnboards.length }})</span>
-          </span>
-          <router-link v-if="pendingOnboards.length" to="/admin/companies?status=Pending"
-                       class="text-sm text-teal-600 hover:underline focus-ring rounded">View all pending &rarr;</router-link>
-        </header>
-        <div v-if="pendingOnboards.length === 0" class="px-5 py-10 text-center">
-          <Icon name="check-circle-2" :size="28" cls="text-emerald-500 inline-block mb-2"/>
-          <p class="text-sm text-slate-700 font-medium">No pending onboards.</p>
-          <p class="text-xs text-slate-500 mt-1">All accounts are active or disabled.</p>
-        </div>
-        <ul v-else>
-          <li v-for="c in pendingOnboards" :key="c.id" class="border-b border-slate-100 last:border-b-0">
-            <div class="px-5 py-3.5 flex items-center gap-4 flex-wrap">
-              <span :class="['shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg text-white text-xs font-bold tracking-wide', companyGradient(c.name)]">
-                {{ companyInitials(c.name) }}
+
+        <!-- Card header with tabs -->
+        <header class="px-5 pt-4 border-b border-slate-200">
+          <div class="flex items-center justify-between gap-3 flex-wrap mb-3">
+            <div class="flex items-center gap-2.5">
+              <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-amber-50 text-amber-600 ring-1 ring-amber-100">
+                <Icon name="clock" :size="15"/>
               </span>
-              <div class="min-w-0 flex-1">
-                <router-link to="/admin/companies" class="text-base font-medium text-blue-700 hover:underline focus-ring rounded">{{ c.name }}</router-link>
-                <div class="text-sm text-slate-500 mt-0.5">{{ c.primaryContact.name }} &middot; Requested {{ fmtDate(c.created) }}</div>
-              </div>
-              <router-link to="/admin/companies"
-                           class="text-sm text-slate-700 hover:text-teal-600 focus-ring rounded inline-flex items-center gap-1">Open <Icon name="arrow-right" :size="14"/></router-link>
+              <h2 class="text-sm font-semibold text-navy-900">Pending approvals</h2>
+              <span v-if="pendingTotal" class="inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold text-amber-800 bg-amber-100">{{ pendingTotal }}</span>
             </div>
-          </li>
-        </ul>
+            <router-link :to="pendingTab === 'companies' ? '/admin/companies?status=Pending' : '/admin/contacts?status=Pending'"
+                         class="text-sm text-teal-600 hover:underline focus-ring rounded">View all &rarr;</router-link>
+          </div>
+          <div role="tablist" aria-label="Pending approvals" class="flex gap-1 -mb-px">
+            <button type="button" role="tab"
+                    :aria-selected="pendingTab === 'companies'"
+                    :tabindex="pendingTab === 'companies' ? 0 : -1"
+                    @click="pendingTab = 'companies'"
+                    :class="['inline-flex items-center gap-2 px-3 py-2.5 text-sm font-medium border-b-2 focus-ring transition-colors',
+                             pendingTab === 'companies' ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+              <Icon name="building-2" :size="14"/>
+              <span>Companies</span>
+              <span :class="['inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full text-[10px] font-semibold',
+                             pendingTab === 'companies' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600']">{{ pendingCompanies.length }}</span>
+            </button>
+            <button type="button" role="tab"
+                    :aria-selected="pendingTab === 'contacts'"
+                    :tabindex="pendingTab === 'contacts' ? 0 : -1"
+                    @click="pendingTab = 'contacts'"
+                    :class="['inline-flex items-center gap-2 px-3 py-2.5 text-sm font-medium border-b-2 focus-ring transition-colors',
+                             pendingTab === 'contacts' ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+              <Icon name="user-plus" :size="14"/>
+              <span>Contacts</span>
+              <span :class="['inline-flex items-center justify-center min-w-[18px] h-4 px-1 rounded-full text-[10px] font-semibold',
+                             pendingTab === 'contacts' ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600']">{{ pendingContacts.length }}</span>
+            </button>
+          </div>
+        </header>
+
+        <!-- Companies tab -->
+        <div v-show="pendingTab === 'companies'" role="tabpanel">
+          <div v-if="pendingCompanies.length === 0" class="px-5 py-12 text-center">
+            <Icon name="check-circle-2" :size="22" cls="text-emerald-500 inline-block mb-1.5"/>
+            <p class="text-sm text-slate-700 font-medium">No new companies awaiting review.</p>
+            <p class="text-xs text-slate-500 mt-0.5">New self-signups will appear here.</p>
+          </div>
+          <div v-else>
+            <table class="w-full text-sm">
+              <caption class="sr-only">Pending companies</caption>
+              <thead class="bg-slate-50 text-left text-[11px] uppercase tracking-wide text-slate-500 font-semibold border-b border-slate-200">
+                <tr>
+                  <th scope="col" class="px-5 py-2.5 font-semibold">Company</th>
+                  <th scope="col" class="px-5 py-2.5 font-semibold">Primary contact</th>
+                  <th scope="col" class="px-5 py-2.5 font-semibold whitespace-nowrap">Submitted</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="p in pendingCompanies.slice(0, 5)" :key="p.id" class="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                    @click="$router.push(p.link)">
+                  <td class="px-5 py-3">
+                    <router-link :to="p.link" class="inline-flex items-center gap-3 group focus-ring rounded">
+                      <span :class="['shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg text-white text-xs font-bold tracking-wide', companyGradient(p.name)]">
+                        {{ companyInitials(p.name) }}
+                      </span>
+                      <span class="text-sm font-medium text-navy-900 group-hover:underline">{{ p.name }}</span>
+                    </router-link>
+                  </td>
+                  <td class="px-5 py-3 text-sm text-slate-700">{{ p.contactName }}</td>
+                  <td class="px-5 py-3 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(p.created) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="pendingCompanies.length" class="px-5 py-3 border-t border-slate-100 text-xs text-slate-500">
+            <span v-if="pendingCompanies.length > 5">Showing 5 of {{ pendingCompanies.length }} companies awaiting review</span>
+            <span v-else>Showing {{ pendingCompanies.length }} {{ pendingCompanies.length === 1 ? 'company' : 'companies' }} awaiting review</span>
+          </div>
+        </div>
+
+        <!-- Contacts tab -->
+        <div v-show="pendingTab === 'contacts'" role="tabpanel">
+          <div v-if="pendingContacts.length === 0" class="px-5 py-12 text-center">
+            <Icon name="check-circle-2" :size="22" cls="text-emerald-500 inline-block mb-1.5"/>
+            <p class="text-sm text-slate-700 font-medium">No new contacts awaiting review.</p>
+            <p class="text-xs text-slate-500 mt-0.5">Join-existing requests will appear here.</p>
+          </div>
+          <div v-else>
+            <table class="w-full text-sm">
+              <caption class="sr-only">Pending contacts</caption>
+              <thead class="bg-slate-50 text-left text-[11px] uppercase tracking-wide text-slate-500 font-semibold border-b border-slate-200">
+                <tr>
+                  <th scope="col" class="px-5 py-2.5 font-semibold">Contact</th>
+                  <th scope="col" class="px-5 py-2.5 font-semibold">Wants to join</th>
+                  <th scope="col" class="px-5 py-2.5 font-semibold whitespace-nowrap">Submitted</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-slate-100">
+                <tr v-for="p in pendingContacts.slice(0, 5)" :key="p.id" class="hover:bg-slate-50/60 transition-colors cursor-pointer"
+                    @click="$router.push(p.link)">
+                  <td class="px-5 py-3">
+                    <router-link :to="p.link" class="inline-flex items-center gap-3 group focus-ring rounded">
+                      <span :class="['shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-full text-white text-xs font-bold tracking-wide', companyGradient(p.name)]">
+                        {{ companyInitials(p.name) }}
+                      </span>
+                      <span class="text-sm font-medium text-navy-900 group-hover:underline">{{ p.name }}</span>
+                    </router-link>
+                  </td>
+                  <td class="px-5 py-3 text-sm text-slate-700">{{ p.companyName }}</td>
+                  <td class="px-5 py-3 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(p.created) }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div v-if="pendingContacts.length" class="px-5 py-3 border-t border-slate-100 text-xs text-slate-500">
+            <span v-if="pendingContacts.length > 5">Showing 5 of {{ pendingContacts.length }} contacts awaiting review</span>
+            <span v-else>Showing {{ pendingContacts.length }} {{ pendingContacts.length === 1 ? 'contact' : 'contacts' }} awaiting review</span>
+          </div>
+        </div>
+
       </section>
 
-      <!-- Quick actions: text-row list, no colored icon containers -->
-      <section class="lg:col-span-1 bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
-          <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100">
-            <Icon name="zap" :size="15"/>
-          </span>
-          Quick actions
+      <!-- Quick actions: cleaner text-row list -->
+      <section class="lg:col-span-1 bg-white border border-slate-200 rounded-md flex flex-col">
+        <header class="shrink-0 px-5 py-4 border-b border-slate-200">
+          <h2 class="text-sm font-semibold text-navy-900">Quick actions</h2>
         </header>
-        <ul class="py-1">
+        <ul class="flex-1 divide-y divide-slate-100">
           <li>
             <router-link to="/admin/companies/new"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
-              <Icon name="building" :size="16" cls="text-slate-500 shrink-0"/>
-              <span class="flex-1 text-base text-navy-900">Add Company</span>
-              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+              <Icon name="building" :size="16" cls="text-slate-400 shrink-0"/>
+              <span class="flex-1 text-sm font-medium text-navy-900">Add company</span>
+              <Icon name="chevron-right" :size="14" cls="text-slate-300"/>
             </router-link>
           </li>
-          <li class="border-t border-slate-100">
+          <li>
             <router-link to="/admin/contacts/new"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
-              <Icon name="user-plus" :size="16" cls="text-slate-500 shrink-0"/>
-              <span class="flex-1 text-base text-navy-900">Add New Contact</span>
-              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+              <Icon name="user-plus" :size="16" cls="text-slate-400 shrink-0"/>
+              <span class="flex-1 text-sm font-medium text-navy-900">Add contact</span>
+              <Icon name="chevron-right" :size="14" cls="text-slate-300"/>
             </router-link>
           </li>
-          <li class="border-t border-slate-100">
+          <li>
             <router-link to="/admin/companies"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
-              <Icon name="building-2" :size="16" cls="text-slate-500 shrink-0"/>
+              <Icon name="building-2" :size="16" cls="text-slate-400 shrink-0"/>
               <span class="flex-1 min-w-0">
-                <span class="block text-base text-navy-900">Companies</span>
-                <span class="block text-xs text-slate-500">{{ activeCount }} active &middot; {{ disabledCount }} disabled</span>
+                <span class="block text-sm font-medium text-navy-900">Companies</span>
+                <span class="block text-xs text-slate-500">{{ activeCount }} active</span>
               </span>
-              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+              <Icon name="chevron-right" :size="14" cls="text-slate-300"/>
             </router-link>
           </li>
-          <li class="border-t border-slate-100">
+          <li>
             <router-link to="/admin/contacts"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
-              <Icon name="users" :size="16" cls="text-slate-500 shrink-0"/>
+              <Icon name="users" :size="16" cls="text-slate-400 shrink-0"/>
               <span class="flex-1 min-w-0">
-                <span class="block text-base text-navy-900">Contacts</span>
-                <span class="block text-xs text-slate-500">{{ state.companyContacts.length }} {{ state.companyContacts.length === 1 ? 'person' : 'people' }} with portal access</span>
+                <span class="block text-sm font-medium text-navy-900">Contacts</span>
+                <span class="block text-xs text-slate-500">{{ state.companyContacts.length }} people with portal access</span>
               </span>
-              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+              <Icon name="chevron-right" :size="14" cls="text-slate-300"/>
             </router-link>
           </li>
-          <li class="border-t border-slate-100">
+          <li>
             <router-link :to="{ path:'/settings', query:{ tab:'site' } }"
                          class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
-              <Icon name="sliders-horizontal" :size="16" cls="text-slate-500 shrink-0"/>
+              <Icon name="sliders-horizontal" :size="16" cls="text-slate-400 shrink-0"/>
               <span class="flex-1 min-w-0">
-                <span class="block text-base text-navy-900">Site settings</span>
+                <span class="block text-sm font-medium text-navy-900">Site settings</span>
                 <span v-if="state.maintenanceBanner.enabled" class="block text-xs text-slate-500">
-                  Maintenance banner is on &middot; <button type="button" @click.stop.prevent="turnOffBanner" class="text-teal-600 hover:underline focus-ring rounded">Turn off</button>
+                  Maintenance banner on · <button type="button" @click.stop.prevent="turnOffBanner" class="text-teal-600 hover:underline focus-ring rounded">Turn off</button>
                 </span>
-                <span v-else class="block text-xs text-slate-500">Maintenance banner and site-wide notices</span>
+                <span v-else class="block text-xs text-slate-500">Maintenance & site-wide notices</span>
               </span>
-              <Icon name="chevron-right" :size="14" cls="text-slate-400"/>
+              <Icon name="chevron-right" :size="14" cls="text-slate-300"/>
             </router-link>
+          </li>
+          <li>
+            <a href="https://app.exsited.com" target="_blank" rel="noopener"
+               class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
+              <Icon name="external-link" :size="16" cls="text-slate-400 shrink-0"/>
+              <span class="flex-1 min-w-0">
+                <span class="block text-sm font-medium text-navy-900">Exsited</span>
+                <span class="block text-xs text-slate-500">Billing & contracts</span>
+              </span>
+              <Icon name="external-link" :size="12" cls="text-slate-300"/>
+            </a>
           </li>
         </ul>
       </section>
@@ -7036,40 +7597,36 @@ const AdminConsolePage = {
 
     <!-- Recently onboarded (secondary, full width) -->
     <section class="bg-white border border-slate-200 rounded-md">
-      <header class="px-5 py-3 border-b border-slate-200 flex items-center justify-between gap-3">
-        <span class="inline-flex items-center gap-2.5 text-sm font-medium text-navy-900">
-          <span class="inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100">
-            <Icon name="history" :size="15"/>
-          </span>
-          Recently onboarded
-        </span>
-        <router-link to="/admin/companies" class="text-sm text-teal-600 hover:underline focus-ring rounded">View all companies &rarr;</router-link>
+      <header class="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
+        <h2 class="text-sm font-semibold text-navy-900">Recently onboarded</h2>
+        <router-link to="/admin/companies" class="text-sm text-teal-600 hover:underline focus-ring rounded">View all &rarr;</router-link>
       </header>
-      <ul>
-        <li v-for="c in recentlyOnboarded" :key="c.id" class="border-b border-slate-100 last:border-b-0">
-          <div class="px-5 py-3.5 flex items-center gap-4 flex-wrap">
-            <span :class="['shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg text-white text-xs font-bold tracking-wide',
-                           c.status === 'Disabled' ? 'bg-slate-400' : companyGradient(c.name)]">
-              {{ companyInitials(c.name) }}
-            </span>
-            <div class="min-w-0 flex-1">
-              <router-link :to="'/admin/companies/' + c.id" :class="['text-base font-medium hover:underline focus-ring rounded',
-                                                                    c.status === 'Disabled' ? 'text-slate-400' : 'text-blue-700']">{{ c.name }}</router-link>
-              <div class="text-sm text-slate-500 mt-0.5 truncate">{{ c.primaryContact.name }} &middot; {{ c.facilities.length }} {{ c.facilities.length === 1 ? 'site' : 'sites' }} &middot; Created {{ fmtDate(c.created) }}</div>
+      <ul v-if="recentlyOnboarded.length" class="divide-y divide-slate-100">
+        <li v-for="c in recentlyOnboarded" :key="c.id">
+          <router-link :to="'/admin/companies/' + c.id" class="block px-5 py-3.5 hover:bg-slate-50 focus-ring transition-colors">
+            <div class="flex items-center gap-3.5">
+              <span :class="['shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg text-white text-xs font-bold tracking-wide',
+                             c.status === 'Disabled' ? 'bg-slate-400' : companyGradient(c.name)]">
+                {{ companyInitials(c.name) }}
+              </span>
+              <div class="min-w-0 flex-1">
+                <div :class="['text-sm font-medium truncate', c.status === 'Disabled' ? 'text-slate-400' : 'text-navy-900']">{{ c.name }}</div>
+                <div class="text-xs text-slate-500 mt-0.5 truncate">{{ c.primaryContact.name }} · {{ c.facilities.length }} {{ c.facilities.length === 1 ? 'site' : 'sites' }} · Created {{ fmtDate(c.created) }}</div>
+              </div>
+              <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 whitespace-nowrap shrink-0">
+                <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
+                <span>{{ c.status }}</span>
+              </span>
             </div>
-            <span class="inline-flex items-center gap-2 text-sm text-slate-700 whitespace-nowrap">
-              <span :class="['inline-block h-2 w-2 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
-              <span>{{ c.status }}</span>
-            </span>
-          </div>
+          </router-link>
         </li>
       </ul>
+      <div v-else class="px-5 py-10 text-center">
+        <Icon name="building-2" :size="22" cls="text-slate-300 inline-block mb-1.5"/>
+        <p class="text-sm text-slate-700 font-medium">No companies yet.</p>
+        <p class="text-xs text-slate-500 mt-0.5">Onboard or approve one to see it here.</p>
+      </div>
     </section>
-
-    <p class="text-sm text-slate-500">
-      Billing and contracts live in Exsited.
-      <a href="https://app.exsited.com" target="_blank" rel="noopener" class="text-teal-600 hover:underline focus-ring rounded inline-flex items-center gap-1">Open Exsited <Icon name="external-link" :size="12"/></a>
-    </p>
   </div>`
 };
 
@@ -7684,7 +8241,7 @@ const OnboardCompanyPage = {
     statusPill(s){
       return ({
         'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
-        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Pending':    'bg-amber-50 text-amber-700 ring-amber-200',
         'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
       })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
     },
@@ -8002,7 +8559,7 @@ const OnboardCompanyPage = {
         };
         c.facilities = facs;
         c.services = svcArr;
-        const added = this.persistAdditionalContacts(c.id, c.name, facs, svcArr, c.status === 'Pending' ? 'Pending' : 'Active', today);
+        const added = this.persistAdditionalContacts(c.id, c.name, facs, svcArr, 'Active', today);
         showToast(added
           ? `Updated ${c.name}. Added ${added} ${added === 1 ? 'contact' : 'contacts'}.`
           : `Updated ${c.name}.`,
@@ -8030,10 +8587,10 @@ const OnboardCompanyPage = {
         },
         facilities: facs,
         services: svcArr,
-        status: 'Pending',
+        status: 'Active',
         created: today,
       });
-      const added = this.persistAdditionalContacts(newId, newName, facs, svcArr, 'Pending', today);
+      const added = this.persistAdditionalContacts(newId, newName, facs, svcArr, 'Active', today);
       showToast(added
         ? `Invitation sent to ${this.f.email}. Company + ${added} ${added === 1 ? 'contact' : 'contacts'} created.`
         : `Invitation sent to ${this.f.email}. Company record created.`,
@@ -8675,7 +9232,7 @@ const OnboardCompanyContactPage = {
     statusPill(s){
       return ({
         'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
-        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Pending':    'bg-amber-50 text-amber-700 ring-amber-200',
         'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
       })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
     },
@@ -8741,7 +9298,7 @@ const OnboardCompanyContactPage = {
         email: this.f.email.trim(),
         facilities: facs,
         services: Array.from(svcSet),
-        status: 'Pending',
+        status: 'Active',
         created: today,
       });
       showToast(`Invitation sent to ${this.f.email}. Contact added to ${company.name}.`, 'success');
@@ -9004,11 +9561,24 @@ const CompanyDetailPage = {
       editingAccess: false,
       draft: null,
       draftAccess: null,
+      reassignOpen: false,
+      reassignTarget: '',
     };
   },
   computed:{
     state(){ return state; },
     company(){ return state.companies.find(c => c.id === this.$route.params.id) || null; },
+    /* A draft is a self-signup company that hasn't been verified by an admin yet.
+       Admin-created records are always Active from the moment they're created. */
+    isPending(){
+      return !!(this.company && this.company.status === 'Pending');
+    },
+    reassignTargets(){
+      if (!this.company) return [];
+      return state.companies
+        .filter(c => c.id !== this.company.id && c.status === 'Active')
+        .sort((a,b) => a.name.localeCompare(b.name));
+    },
     contacts(){
       if (!this.company) return [];
       return state.companyContacts.filter(ct => ct.companyId === this.company.id);
@@ -9065,7 +9635,7 @@ const CompanyDetailPage = {
     statusPill(s){
       return ({
         'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
-        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Pending':    'bg-amber-50 text-amber-700 ring-amber-200',
         'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
       })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
     },
@@ -9183,6 +9753,54 @@ const CompanyDetailPage = {
       this.draftAccess = null;
       showToast(`Access updated for ${c.name}.`, 'success');
     },
+    /* ---- Draft verification verbs ---- */
+    approveCompany(){
+      const c = this.company;
+      if (!c) return;
+      c.status = 'Active';
+      // After approval the company behaves like an admin-created record, but we keep
+      // `origin` for audit/history so the list pages can still show a "Self-signup" badge.
+      showToast(`${c.name} approved and activated.`, 'success');
+    },
+    rejectCompany(){
+      const c = this.company;
+      if (!c) return;
+      if (!confirm('Reject ' + c.name + '? The draft company and any contacts under it will be removed. This cannot be undone.')) return;
+      // Remove every contact tied to this draft company too — they'd be orphaned otherwise.
+      for (let j = state.companyContacts.length - 1; j >= 0; j--) {
+        if (state.companyContacts[j].companyId === c.id) state.companyContacts.splice(j, 1);
+      }
+      const i = state.companies.findIndex(x => x.id === c.id);
+      if (i >= 0) state.companies.splice(i, 1);
+      showToast(`${c.name} rejected and removed.`, 'success');
+      this.$router.push('/admin/companies');
+    },
+    reassignToCompany(){
+      const c = this.company;
+      const target = state.companies.find(x => x.id === this.reassignTarget);
+      if (!c || !target) return;
+      // Move the draft's primary contact across to the target company as a Draft contact.
+      // The draft company itself is then removed — it was a duplicate of `target`.
+      // The contact remains self-signup, so the admin still gets the verification flow on the new record.
+      const newContact = {
+        id: ('CONT-' + (Math.max(2000, ...state.companyContacts.map(x => parseInt(String(x.id).split('-')[1] || '0', 10)).filter(n => !isNaN(n))) + 1)),
+        companyId: target.id,
+        companyName: target.name,
+        name: c.primaryContact?.name || c.name,
+        phone: c.primaryContact?.phone || c.phone || '',
+        email: c.primaryContact?.email || c.email || '',
+        facilities: target.facilities.slice(0, 1),
+        services: target.services.slice(0, 1),
+        status: 'Pending',
+        created: c.created,
+        origin: 'self-signup',
+      };
+      state.companyContacts.unshift(newContact);
+      const i = state.companies.findIndex(x => x.id === c.id);
+      if (i >= 0) state.companies.splice(i, 1);
+      showToast(`Contact moved to ${target.name}. Draft company removed.`, 'success');
+      this.$router.push('/admin/contacts/' + newContact.id);
+    },
   },
   template:`
     <div v-if="!company" class="p-12 text-sm text-slate-500">Company not found. <router-link to="/admin/companies" class="text-teal-600 hover:underline">&larr; All companies</router-link></div>
@@ -9205,13 +9823,52 @@ const CompanyDetailPage = {
               <span :class="['inline-block h-2 w-2 rounded-full', statusDot(company.status)]" aria-hidden="true"></span>
               <span>{{ company.status }}</span>
             </span>
+            <span v-if="company.origin === 'self-signup'" aria-hidden="true">&middot;</span>
+            <span v-if="company.origin === 'self-signup'" class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-800 bg-amber-100 border border-amber-200 rounded-full px-2 py-0.5">
+              <Icon name="user-plus" :size="10"/> Self-signup
+            </span>
           </p>
         </div>
-        <div v-if="tab === 'profile'" class="flex items-center gap-2 flex-wrap">
+        <div v-if="tab === 'profile' && !isPending" class="flex items-center gap-2 flex-wrap">
           <Btn v-if="!editingDetails && !editingAccess" icon="pencil" kind="secondary" @click="startEdit">Edit details</Btn>
           <Btn v-if="!editingDetails && !editingAccess" icon="shield-check" kind="secondary" @click="startEditAccess">Manage access</Btn>
         </div>
       </div>
+
+      <!-- Draft verification banner — soft accent + status pill, matches ContactDetailPage -->
+      <section v-if="isPending" class="rounded-md border border-amber-200 bg-amber-50/50">
+        <div class="px-5 py-4">
+          <div class="flex items-center gap-2.5 flex-wrap mb-3.5">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide text-amber-800 bg-amber-100 ring-1 ring-amber-200">
+              <Icon name="clock" :size="10"/> Awaiting verification
+            </span>
+            <span class="text-sm text-slate-600">New company submitted by <span class="font-medium text-navy-900">{{ company.primaryContact?.name || 'customer' }}</span></span>
+          </div>
+
+          <div v-if="!reassignOpen" class="flex items-center gap-2 flex-wrap">
+            <Btn icon="check" @click="approveCompany">Approve</Btn>
+            <Btn kind="secondary" icon="pencil" @click="startEdit">Edit</Btn>
+            <Btn kind="secondary" icon="link" @click="reassignOpen = true">Reassign</Btn>
+            <button type="button" @click="rejectCompany"
+                    class="ml-auto inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 rounded-md focus-ring">
+              <Icon name="x" :size="14"/> Reject
+            </button>
+          </div>
+
+          <div v-else class="space-y-3">
+            <div class="text-sm text-slate-700">Already onboarded? Move <span class="font-medium text-navy-900">{{ company.primaryContact?.name }}</span> under an existing company. The draft will be removed.</div>
+            <select v-model="reassignTarget" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base text-slate-900 focus-ring bg-white">
+              <option value="">Select an active company...</option>
+              <option v-for="c in reassignTargets" :key="c.id" :value="c.id">{{ c.name }} &mdash; ABN {{ c.abn }}</option>
+            </select>
+            <div class="flex flex-wrap items-center justify-end gap-2">
+              <button type="button" @click="reassignOpen = false; reassignTarget = ''"
+                      class="text-sm text-slate-700 hover:underline px-3 py-2 focus-ring rounded">Cancel</button>
+              <Btn icon="link" :disabled="!reassignTarget" @click="reassignToCompany">Reassign</Btn>
+            </div>
+          </div>
+        </div>
+      </section>
 
       <div role="tablist" aria-label="Company detail sections" class="border-b border-slate-200">
         <div class="flex flex-wrap gap-1">
@@ -9392,7 +10049,7 @@ const CompanyDetailPage = {
           <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="users" :size="15"/></span>Contacts
           <span class="text-xs text-slate-500 font-normal">({{ contacts.length + 1 }})</span>
           <span class="ml-auto">
-            <Btn as="router-link" :to="{ path:'/admin/contacts/new', query:{ companyId: company.id } }" kind="secondary" icon="user-plus">Add New Contact</Btn>
+            <Btn as="router-link" :to="{ path:'/admin/contacts/new', query:{ companyId: company.id } }" icon="user-plus">Add New Contact</Btn>
           </span>
         </header>
 
@@ -9478,7 +10135,7 @@ const CompanyListPage = {
     pageSize: 10,
   }; },
   created(){
-    // Honour ?status=Pending deep-links from the admin console.
+    // Honour ?status=Pending deep-links from the admin console pending-approvals feed.
     const s = this.$route.query.status;
     if (s) this.statusFilter = s;
   },
@@ -9536,7 +10193,7 @@ const CompanyListPage = {
     statusPill(s){
       return ({
         'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
-        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Pending':    'bg-amber-50 text-amber-700 ring-amber-200',
         'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
       })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
     },
@@ -9617,7 +10274,7 @@ const CompanyListPage = {
 
       <div class="bg-white border border-slate-200 rounded-md p-4">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div class="md:col-span-6">
+          <div class="md:col-span-8">
             <label for="co-search" class="block text-sm font-medium text-slate-700 mb-1.5">Search companies</label>
             <div class="relative">
               <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
@@ -9625,19 +10282,11 @@ const CompanyListPage = {
                      class="w-full h-11 pl-9 pr-3 rounded-md border border-slate-300 text-base focus-ring"/>
             </div>
           </div>
-          <div class="md:col-span-3">
+          <div class="md:col-span-4">
             <label for="co-facility" class="block text-sm font-medium text-slate-700 mb-1.5">Facility</label>
             <select id="co-facility" v-model="facilityFilter" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
               <option value="All">All facilities</option>
               <option v-for="f in facilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
-            </select>
-          </div>
-          <div class="md:col-span-3">
-            <label for="co-status" class="block text-sm font-medium text-slate-700 mb-1.5">Status</label>
-            <select id="co-status" v-model="statusFilter" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
-              <option>All</option>
-              <option>Active</option>
-              <option>Pending</option>
             </select>
           </div>
         </div>
@@ -9653,9 +10302,25 @@ const CompanyListPage = {
               <h3 class="text-base font-semibold text-navy-900 leading-tight">All companies</h3>
               <span class="text-xs text-slate-500">&middot; {{ sortedRows.length }} {{ sortedRows.length === 1 ? 'result' : 'results' }}</span>
             </div>
-            <p class="text-sm text-slate-500 mt-0.5">{{ activeCount }} active &middot; {{ pendingCount }} pending &middot; {{ disabledCount }} disabled.</p>
+            <p class="text-sm text-slate-500 mt-0.5">{{ activeCount }} active &middot; {{ pendingCount }} pending.</p>
           </div>
         </header>
+
+        <!-- Status filter tabs — segmented control on top of the table so counts
+             stay visible at a glance and switching takes one click. -->
+        <div role="tablist" aria-label="Filter companies by status" class="px-5 pt-3 border-b border-slate-200 flex flex-wrap gap-1">
+          <button v-for="t in ['All','Active','Pending']" :key="t" type="button" role="tab"
+                  :aria-selected="statusFilter === t"
+                  @click="statusFilter = t"
+                  :class="['inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border-b-2 -mb-px focus-ring transition-colors',
+                           statusFilter === t ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+            <span>{{ t }}</span>
+            <span :class="['inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold',
+                           statusFilter === t ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600']">
+              {{ t === 'All' ? totalCount : t === 'Active' ? activeCount : pendingCount }}
+            </span>
+          </button>
+        </div>
         <div class="overflow-x-auto">
           <table class="w-full text-base min-w-[1100px]">
             <caption class="sr-only">Companies</caption>
@@ -9701,10 +10366,12 @@ const CompanyListPage = {
                   <div class="text-xs text-slate-500 mt-0.5 truncate max-w-[18rem]">{{ c.primaryContact?.email }}</div>
                 </td>
                 <td class="px-6 py-3.5 whitespace-nowrap">
-                  <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(c.status)]">
-                    <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
-                    {{ c.status }}
-                  </span>
+                  <div class="space-y-0.5">
+                    <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(c.status)]">
+                      <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(c.status)]" aria-hidden="true"></span>
+                      {{ c.status }}
+                    </span>
+                  </div>
                 </td>
                 <td class="px-6 py-3.5 text-sm text-slate-700 whitespace-nowrap">{{ fmtDate(c.created) }}</td>
                 <td class="px-6 py-3.5 text-right whitespace-nowrap relative" @click.stop>
@@ -9773,6 +10440,11 @@ const CompanyListPage = {
 const ContactsListPage = {
   components:{ Icon, Btn },
   data(){ return { q:'', statusFilter:'All', facilityFilter:'All', menuFor:null, page:1, pageSize:10 }; },
+  created(){
+    // Honour ?status=Pending deep-links from the admin console pending-contacts card.
+    const s = this.$route.query.status;
+    if (s) this.statusFilter = s;
+  },
   mounted(){ document.addEventListener('click', this.closeMenu); },
   beforeUnmount(){ document.removeEventListener('click', this.closeMenu); },
   watch:{
@@ -9816,7 +10488,7 @@ const ContactsListPage = {
     statusPill(s){
       return ({
         'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
-        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Pending':    'bg-amber-50 text-amber-700 ring-amber-200',
         'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
       })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
     },
@@ -9897,7 +10569,7 @@ const ContactsListPage = {
       <!-- Search + filters -->
       <div class="bg-white border border-slate-200 rounded-md p-4">
         <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div class="md:col-span-6">
+          <div class="md:col-span-8">
             <label for="ct-search" class="block text-sm font-medium text-slate-700 mb-1.5">Search contacts</label>
             <div class="relative">
               <Icon name="search" :size="16" cls="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"/>
@@ -9905,19 +10577,11 @@ const ContactsListPage = {
                      class="w-full h-11 pl-9 pr-3 rounded-md border border-slate-300 text-base focus-ring"/>
             </div>
           </div>
-          <div class="md:col-span-3">
+          <div class="md:col-span-4">
             <label for="ct-facility" class="block text-sm font-medium text-slate-700 mb-1.5">Facility</label>
             <select id="ct-facility" v-model="facilityFilter" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
               <option value="All">All facilities</option>
               <option v-for="f in facilities" :key="f.code" :value="f.code">{{ f.name }}, {{ f.state }}</option>
-            </select>
-          </div>
-          <div class="md:col-span-3">
-            <label for="ct-status" class="block text-sm font-medium text-slate-700 mb-1.5">Status</label>
-            <select id="ct-status" v-model="statusFilter" class="h-11 px-3 w-full rounded-md border border-slate-300 text-base focus-ring bg-white">
-              <option>All</option>
-              <option>Active</option>
-              <option>Pending</option>
             </select>
           </div>
         </div>
@@ -9934,9 +10598,25 @@ const ContactsListPage = {
               <h3 class="text-base font-semibold text-navy-900 leading-tight">All contacts</h3>
               <span class="text-xs text-slate-500">&middot; {{ rows.length }} {{ rows.length === 1 ? 'result' : 'results' }}</span>
             </div>
-            <p class="text-sm text-slate-500 mt-0.5">{{ activeCount }} active &middot; {{ pendingCount }} pending invitations.</p>
+            <p class="text-sm text-slate-500 mt-0.5">{{ activeCount }} active &middot; {{ pendingCount }} pending.</p>
           </div>
         </header>
+
+        <!-- Status filter tabs — segmented control on top of the table so counts
+             stay visible at a glance and switching takes one click. -->
+        <div role="tablist" aria-label="Filter contacts by status" class="px-5 pt-3 border-b border-slate-200 flex flex-wrap gap-1">
+          <button v-for="t in ['All','Active','Pending']" :key="t" type="button" role="tab"
+                  :aria-selected="statusFilter === t"
+                  @click="statusFilter = t"
+                  :class="['inline-flex items-center gap-2 px-3 py-2 text-sm font-medium border-b-2 -mb-px focus-ring transition-colors',
+                           statusFilter === t ? 'border-amber-500 text-navy-900' : 'border-transparent text-slate-600 hover:text-navy-900 hover:border-slate-300']">
+            <span>{{ t }}</span>
+            <span :class="['inline-flex items-center justify-center min-w-[20px] h-5 px-1.5 rounded-full text-[11px] font-semibold',
+                           statusFilter === t ? 'bg-amber-100 text-amber-800' : 'bg-slate-100 text-slate-600']">
+              {{ t === 'All' ? state.companyContacts.length : t === 'Active' ? activeCount : pendingCount }}
+            </span>
+          </button>
+        </div>
         <div v-if="rows.length" class="overflow-x-auto">
           <table class="w-full text-sm min-w-[900px]">
             <caption class="sr-only">Contacts</caption>
@@ -9975,10 +10655,12 @@ const ContactsListPage = {
                 </td>
                 <!-- Status pill -->
                 <td class="px-6 py-3.5 whitespace-nowrap">
-                  <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(ct.status)]">
-                    <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
-                    {{ ct.status }}
-                  </span>
+                  <div class="space-y-0.5">
+                    <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(ct.status)]">
+                      <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
+                      {{ ct.status }}
+                    </span>
+                  </div>
                 </td>
                 <!-- Actions (3-dot) -->
                 <td class="px-6 py-3.5 text-right whitespace-nowrap relative" @click.stop>
@@ -10057,6 +10739,8 @@ const ContactDetailPage = {
     return {
       editingDetails: false,
       draft: { name:'', phone:'', email:'' },
+      reassignOpen: false,
+      reassignTarget: '',
     };
   },
   created(){
@@ -10075,6 +10759,22 @@ const ContactDetailPage = {
       const c = this.contact;
       return c ? state.companies.find(co => co.id === c.companyId) || null : null;
     },
+    isPending(){
+      return !!(this.contact && this.contact.status === 'Pending');
+    },
+    reassignTargets(){
+      if (!this.contact) return [];
+      return state.companies
+        .filter(co => co.id !== this.contact.companyId && co.status === 'Active')
+        .sort((a,b) => a.name.localeCompare(b.name));
+    },
+    /* All non-primary contacts under the same parent company. Used to render the
+       "Contacts at <company>" section, matching the layout on CompanyDetailPage so the
+       admin sees the same picture from either entry point. */
+    siblingContacts(){
+      if (!this.contact) return [];
+      return state.companyContacts.filter(ct => ct.companyId === this.contact.companyId);
+    },
     facObjs(){
       const c = this.contact;
       if (!c) return [];
@@ -10091,7 +10791,7 @@ const ContactDetailPage = {
     statusPill(s){
       return ({
         'Active':   'bg-emerald-50 text-emerald-700 ring-emerald-200',
-        'Pending':  'bg-amber-50 text-amber-700 ring-amber-200',
+        'Pending':    'bg-amber-50 text-amber-700 ring-amber-200',
         'Disabled': 'bg-slate-100 text-slate-600 ring-slate-200',
       })[s] || 'bg-slate-100 text-slate-600 ring-slate-200';
     },
@@ -10163,6 +10863,35 @@ const ContactDetailPage = {
         this.$router.push('/admin/contacts');
       }
     },
+    /* ---- Draft verification verbs ---- */
+    approveContact(){
+      const c = this.contact;
+      if (!c) return;
+      c.status = 'Active';
+      showToast(`${c.name} approved and activated.`, 'success');
+    },
+    rejectContact(){
+      const c = this.contact;
+      if (!c) return;
+      if (!confirm('Reject the access request from ' + c.name + '? The draft contact will be removed.')) return;
+      const i = state.companyContacts.findIndex(x => x.id === c.id);
+      if (i >= 0) state.companyContacts.splice(i, 1);
+      showToast(`Access request from ${c.name} rejected.`, 'success');
+      this.$router.push('/admin/contacts');
+    },
+    reassignContact(){
+      const c = this.contact;
+      const target = state.companies.find(x => x.id === this.reassignTarget);
+      if (!c || !target) return;
+      c.companyId = target.id;
+      c.companyName = target.name;
+      // Limit access to whatever the new parent company actually has — admin can broaden later.
+      c.facilities = target.facilities.slice(0, 1);
+      c.services = target.services.slice(0, 1);
+      this.reassignOpen = false;
+      this.reassignTarget = '';
+      showToast(`${c.name} reassigned to ${target.name}.`, 'success');
+    },
   },
   template:`
     <div v-if="!contact" class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
@@ -10183,27 +10912,28 @@ const ContactDetailPage = {
         <Icon name="arrow-left" :size="14"/> Back to contacts
       </router-link>
 
-      <!-- Page header: avatar + name + status + company + actions -->
-      <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-        <div class="flex items-center gap-4 min-w-0">
-          <span :class="['shrink-0 inline-flex items-center justify-center h-16 w-16 rounded-full text-white text-xl font-extrabold tracking-wide shadow-md ring-2 ring-white ', contactGradient(contact.name)]">{{ initials(contact.name) }}</span>
-          <div class="min-w-0">
-            <h1 class="text-xl font-semibold text-navy-900 leading-tight truncate">{{ contact.name }}</h1>
-            <div class="flex items-center gap-2 flex-wrap mt-1.5">
-              <span :class="['inline-flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-full ring-1', statusPill(contact.status)]">
-                <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(contact.status)]" aria-hidden="true"></span>
-                {{ contact.status }}
-              </span>
-              <span class="text-sm text-slate-500 inline-flex items-center gap-1.5">
-                <Icon name="building" :size="13" cls="text-slate-400"/>
-                <router-link :to="'/admin/companies/' + contact.companyId" class="hover:text-navy-900 hover:underline">{{ contact.companyName }}</router-link>
-              </span>
-              <span class="text-xs text-slate-400">&middot; {{ contact.id }}</span>
-              <span class="text-xs text-slate-400">&middot; Created {{ fmtDate(contact.created) }}</span>
-            </div>
-          </div>
+      <!-- Page header: matches the CompanyDetailPage layout (no avatar, inline meta + actions) -->
+      <div class="flex items-start justify-between gap-3 flex-wrap">
+        <div>
+          <h1 class="text-xl font-semibold leading-tight text-navy-900">{{ contact.name }}</h1>
+          <p class="text-sm text-slate-500 mt-1 inline-flex items-center gap-2 flex-wrap">
+            <router-link :to="'/admin/companies/' + contact.companyId" class="hover:text-navy-900 hover:underline">{{ contact.companyName }}</router-link>
+            <span aria-hidden="true">&middot;</span>
+            <span>Created {{ fmtDate(contact.created) }}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span class="font-mono text-xs text-slate-400">{{ contact.id }}</span>
+            <span aria-hidden="true">&middot;</span>
+            <span class="inline-flex items-center gap-1.5 text-slate-700">
+              <span :class="['inline-block h-2 w-2 rounded-full', statusDot(contact.status)]" aria-hidden="true"></span>
+              <span>{{ contact.status }}</span>
+            </span>
+            <span v-if="contact.origin === 'self-signup'" aria-hidden="true">&middot;</span>
+            <span v-if="contact.origin === 'self-signup'" class="inline-flex items-center gap-1 text-[11px] font-medium text-amber-800 bg-amber-100 border border-amber-200 rounded-full px-2 py-0.5">
+              <Icon name="user-plus" :size="10"/> Self-signup
+            </span>
+          </p>
         </div>
-        <div class="flex items-center gap-2 flex-wrap">
+        <div v-if="!isPending" class="flex items-center gap-2 flex-wrap">
           <Btn v-if="!editingDetails" icon="pencil" kind="secondary" @click="startEdit">Edit details</Btn>
           <button v-if="!editingDetails" type="button" @click="deleteContact"
                   class="inline-flex items-center gap-2 rounded-lg bg-white text-red-600 ring-1 ring-red-200 hover:bg-red-50 px-3.5 py-2 text-sm font-medium transition-colors focus-ring">
@@ -10212,67 +10942,113 @@ const ContactDetailPage = {
         </div>
       </div>
 
-      <!-- Contact details (view OR edit) -->
-      <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
-          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="user-round" :size="15"/></span>Contact details
-        </header>
+      <!-- Draft verification banner — soft accent + status pill, no verbose header bar -->
+      <section v-if="isPending" class="rounded-md border border-amber-200 bg-amber-50/50">
+        <div class="px-5 py-4">
+          <div class="flex items-center gap-2.5 flex-wrap mb-3.5">
+            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide text-amber-800 bg-amber-100 ring-1 ring-amber-200">
+              <Icon name="clock" :size="10"/> Awaiting verification
+            </span>
+            <span class="text-sm text-slate-600">Access request to join <span class="font-medium text-navy-900">{{ contact.companyName }}</span></span>
+          </div>
 
-        <dl v-if="!editingDetails" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-          <div><dt class="text-slate-500">Name</dt><dd class="mt-0.5 text-base text-navy-900">{{ contact.name }}</dd></div>
-          <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ contact.phone || '—' }}</dd></div>
-          <div class="sm:col-span-2"><dt class="text-slate-500">Email (login)</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ contact.email }}</dd></div>
-        </dl>
+          <div v-if="!reassignOpen" class="flex items-center gap-2 flex-wrap">
+            <Btn icon="check" @click="approveContact">Approve</Btn>
+            <Btn kind="secondary" icon="pencil" @click="startEdit">Edit</Btn>
+            <Btn kind="secondary" icon="link" @click="reassignOpen = true">Reassign</Btn>
+            <button type="button" @click="rejectContact"
+                    class="ml-auto inline-flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-red-700 hover:bg-red-50 rounded-md focus-ring">
+              <Icon name="x" :size="14"/> Reject
+            </button>
+          </div>
 
-        <div v-else class="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
-          <div class="md:col-span-2">
-            <label for="ctd-name" class="block text-sm font-medium text-slate-700 mb-1.5">Name <span class="text-red-500" aria-hidden="true">*</span></label>
-            <div class="relative">
-              <input id="ctd-name" v-model="draft.name" type="text" placeholder="Full name"
-                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+          <div v-else class="space-y-3">
+            <div class="text-sm text-slate-700">Move <span class="font-medium text-navy-900">{{ contact.name }}</span> to which active company?</div>
+            <select v-model="reassignTarget" class="w-full h-11 px-3 rounded-md border border-slate-300 text-base text-slate-900 focus-ring bg-white">
+              <option value="">Select an active company...</option>
+              <option v-for="c in reassignTargets" :key="c.id" :value="c.id">{{ c.name }} &mdash; ABN {{ c.abn }}</option>
+            </select>
+            <div class="flex flex-wrap items-center justify-end gap-2">
+              <button type="button" @click="reassignOpen = false; reassignTarget = ''"
+                      class="text-sm text-slate-700 hover:underline px-3 py-2 focus-ring rounded">Cancel</button>
+              <Btn icon="link" :disabled="!reassignTarget" @click="reassignContact">Reassign</Btn>
             </div>
-          </div>
-          <div>
-            <label for="ctd-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
-            <div class="relative">
-              <input id="ctd-phone" v-model="draft.phone" type="tel" placeholder="+61 ..."
-                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-            </div>
-          </div>
-          <div>
-            <label for="ctd-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email (login) <span class="text-red-500" aria-hidden="true">*</span></label>
-            <div class="relative">
-              <input id="ctd-email" v-model="draft.email" type="email" placeholder="contact@company.com.au"
-                     class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
-            </div>
-          </div>
-          <div class="md:col-span-2 flex items-center justify-end gap-3 pt-1">
-            <button type="button" @click="cancelEdit" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
-            <Btn icon="save" @click="saveEdit">Save changes</Btn>
           </div>
         </div>
       </section>
 
-      <!-- Company (link to the parent company) -->
-      <section class="bg-white border border-slate-200 rounded-md">
-        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
-          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="building-2" :size="15"/></span>Company
-        </header>
-        <div class="p-5">
-          <router-link :to="'/admin/companies/' + contact.companyId"
-                       class="flex items-center justify-between gap-3 bg-white rounded-xl px-4 py-3 shadow-sm ring-1 ring-slate-100 hover:ring-slate-200 hover:shadow-md transition-all">
-            <div class="min-w-0 flex items-center gap-3">
-              <span class="shrink-0 inline-flex items-center justify-center h-10 w-10 rounded-lg bg-slate-100 text-slate-600">
-                <Icon name="building" :size="18"/>
-              </span>
-              <div class="min-w-0">
-                <div class="text-sm font-semibold text-navy-900 truncate leading-tight">{{ contact.companyName }}</div>
-                <div v-if="company" class="text-xs text-slate-500 mt-0.5">ABN {{ company.abn }} &middot; {{ company.email }}</div>
+      <!-- Top section. Always 2-col: Contact details (left) + Primary contact at parent company (right).
+           Same layout for both pending and approved contacts. -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Contact details (view OR edit) -->
+        <section class="bg-white border border-slate-200 rounded-md">
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+            <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="user-round" :size="15"/></span>Contact details
+          </header>
+
+          <dl v-if="!editingDetails" class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+            <div><dt class="text-slate-500">Name</dt><dd class="mt-0.5 text-base text-navy-900">{{ contact.name }}</dd></div>
+            <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ contact.phone || '—' }}</dd></div>
+            <div class="sm:col-span-2"><dt class="text-slate-500">Email (login)</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ contact.email }}</dd></div>
+          </dl>
+
+          <div v-else class="px-6 pb-6 grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-5">
+            <div class="md:col-span-2">
+              <label for="ctd-name" class="block text-sm font-medium text-slate-700 mb-1.5">Name <span class="text-red-500" aria-hidden="true">*</span></label>
+              <div class="relative">
+                <input id="ctd-name" v-model="draft.name" type="text" placeholder="Full name"
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
               </div>
             </div>
-            <span class="shrink-0 text-slate-400"><Icon name="chevron-right" :size="16"/></span>
-          </router-link>
-        </div>
+            <div>
+              <label for="ctd-phone" class="block text-sm font-medium text-slate-700 mb-1.5">Phone</label>
+              <div class="relative">
+                <input id="ctd-phone" v-model="draft.phone" type="tel" placeholder="+61 ..."
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
+            </div>
+            <div>
+              <label for="ctd-email" class="block text-sm font-medium text-slate-700 mb-1.5">Email (login) <span class="text-red-500" aria-hidden="true">*</span></label>
+              <div class="relative">
+                <input id="ctd-email" v-model="draft.email" type="email" placeholder="contact@company.com.au"
+                       class="w-full h-11 px-3 rounded-md border border-slate-300 text-base focus-ring"/>
+              </div>
+            </div>
+            <div class="md:col-span-2 flex items-center justify-end gap-3 pt-1">
+              <button type="button" @click="cancelEdit" class="text-sm text-slate-700 hover:text-navy-900 focus-ring rounded px-3 py-2">Cancel</button>
+              <Btn icon="save" @click="saveEdit">Save changes</Btn>
+            </div>
+          </div>
+        </section>
+
+        <!-- Primary contact at parent company — same card on both draft and approved views. -->
+        <section v-if="company && company.primaryContact" class="bg-white border border-slate-200 rounded-md">
+          <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+            <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="user-round" :size="15"/></span>
+            Primary contact
+          </header>
+          <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+            <div><dt class="text-slate-500">Name</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.primaryContact.name }}</dd></div>
+            <div><dt class="text-slate-500">Phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.primaryContact.phone || '—' }}</dd></div>
+            <div class="sm:col-span-2"><dt class="text-slate-500">Email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ company.primaryContact.email }}</dd></div>
+          </dl>
+        </section>
+      </div>
+
+      <!-- Company details — same structured card on both draft and approved views. The page
+           header already links to the parent company, so no separate link card is needed. -->
+      <section v-if="company" class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="building-2" :size="15"/></span>Company details
+        </header>
+        <dl class="p-5 grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-4 text-sm">
+          <div><dt class="text-slate-500">Company name</dt><dd class="mt-0.5 text-base text-navy-900">
+            <router-link :to="'/admin/companies/' + contact.companyId" class="text-blue-700 hover:underline focus-ring rounded">{{ company.name }}</router-link>
+          </dd></div>
+          <div><dt class="text-slate-500">ABN</dt><dd class="mt-0.5 text-base text-navy-900 tabular-nums">{{ company.abn }}</dd></div>
+          <div><dt class="text-slate-500">Business phone</dt><dd class="mt-0.5 text-base text-navy-900">{{ company.phone || '—' }}</dd></div>
+          <div class="sm:col-span-2"><dt class="text-slate-500">Login email</dt><dd class="mt-0.5 text-base text-navy-900 break-all">{{ company.email }}</dd></div>
+        </dl>
       </section>
 
       <!-- Facility & service access (read-only here) -->
@@ -10299,6 +11075,47 @@ const ContactDetailPage = {
           </ul>
           <p v-else class="text-sm text-slate-500">No facility access granted yet.</p>
         </div>
+      </section>
+
+      <!-- Contacts at the parent company — mirrors the section on CompanyDetailPage so the
+           admin sees the same roster from either entry point. The current contact is tagged
+           with a "Currently viewing" label so it's easy to spot in the list. -->
+      <section v-if="company" class="bg-white border border-slate-200 rounded-md">
+        <header class="px-5 py-3 border-b border-slate-200 text-sm font-medium text-navy-900 flex items-center gap-2.5 flex-wrap">
+          <span class="shrink-0 inline-flex items-center justify-center h-8 w-8 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="users" :size="15"/></span>
+          Contacts at {{ company.name }}
+          <span class="text-xs text-slate-500 font-normal">({{ siblingContacts.length + 1 }})</span>
+          <span class="ml-auto">
+            <Btn as="router-link" :to="{ path:'/admin/contacts/new', query:{ companyId: company.id } }" icon="user-plus">Add New Contact</Btn>
+          </span>
+        </header>
+
+        <ul class="divide-y divide-slate-200">
+          <li class="px-5 py-2 bg-slate-50 text-xs text-slate-500">Primary contact</li>
+          <li class="px-5 py-3 flex items-center justify-between gap-3 text-sm">
+            <div class="min-w-0 flex items-center gap-2">
+              <span :class="['inline-flex items-center justify-center h-7 w-7 rounded-full text-white text-xs font-medium shrink-0', contactGradient(company.primaryContact?.name)]">{{ initials(company.primaryContact?.name) }}</span>
+              <span class="text-navy-900 truncate">{{ company.primaryContact?.name }}</span>
+            </div>
+            <span class="text-xs text-slate-500 shrink-0">Primary</span>
+          </li>
+          <li v-if="siblingContacts.length" class="px-5 py-2 bg-slate-50 text-xs text-slate-500">Additional contacts</li>
+          <li v-for="ct in siblingContacts" :key="ct.id"
+              :class="['px-5 py-3 flex items-center justify-between gap-3 text-sm', ct.id === contact.id ? 'bg-teal-50/40' : '']">
+            <div class="min-w-0 flex items-center gap-2">
+              <span :class="['inline-flex items-center justify-center h-7 w-7 rounded-full text-white text-xs font-medium shrink-0', contactGradient(ct.name)]">{{ initials(ct.name) }}</span>
+              <router-link v-if="ct.id !== contact.id" :to="'/admin/contacts/' + ct.id" class="text-blue-700 hover:underline truncate">{{ ct.name }}</router-link>
+              <span v-else class="text-navy-900 font-medium truncate">{{ ct.name }}</span>
+              <span v-if="ct.id === contact.id" class="inline-flex items-center gap-1 text-[11px] font-medium text-teal-700 bg-teal-50 border border-teal-200 rounded-full px-2 py-0.5">
+                Currently viewing
+              </span>
+            </div>
+            <span class="inline-flex items-center gap-1.5 text-xs text-slate-500 shrink-0">
+              <span :class="['inline-block h-1.5 w-1.5 rounded-full', statusDot(ct.status)]" aria-hidden="true"></span>
+              <span>{{ ct.status }}</span>
+            </span>
+          </li>
+        </ul>
       </section>
     </div>
   `
@@ -10335,7 +11152,6 @@ const CustomerListPage = {
       });
     },
     activeCount(){ return state.customers.filter(c => c.status === 'Active').length; },
-    pendingCount(){ return state.customers.filter(c => c.status === 'Pending').length; },
     disabledCount(){ return state.customers.filter(c => c.status === 'Disabled').length; },
     totalCount(){ return state.customers.length; },
     treatmentLabels(){ return TREATMENT_LABELS; },
@@ -10839,8 +11655,7 @@ const CustomerDetailPage = {
             </span>
             <span class="text-sm text-slate-500">{{ customer.orders }} total</span>
           </header>
-          <div v-if="customer.status === 'Pending'" class="px-5 py-10 text-center text-sm text-slate-500">No orders yet &mdash; customer just signed up.</div>
-          <div v-else class="overflow-x-auto">
+          <div class="overflow-x-auto">
             <table class="w-full text-base">
               <caption class="sr-only">Recent orders</caption>
               <thead class="bg-slate-50 text-left text-[13px] text-slate-600 border-b border-slate-300">
