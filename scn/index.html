@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>SteriScan — Steritech Warehouse App</title>
+<title>SteriScan - Steritech Warehouse App</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Outfit:wght@500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet"/>
@@ -58,7 +58,7 @@
   <h3>Tweaks</h3>
   <label>Jump to Screen</label>
   <select id="tweak-screen">
-    <option value="">— choose —</option>
+    <option value="">- choose -</option>
     <option value="splash">Splash</option>
     <option value="dashboard">Dashboard</option>
     <option value="order_detail">Order Detail</option>
@@ -67,16 +67,16 @@
     <option value="scan_bin">Scan Bin Location</option>
     <option value="summary">Summary</option>
     <option value="receiving_form">Receiving Form</option>
-    <option value="in_storage_unprocessed">In Storage — Unprocessed</option>
+    <option value="in_storage_unprocessed">In Storage - Unprocessed</option>
     <option value="scan_bin_staging">Scan Pallet for Staging</option>
-    <option value="staging_irradiation">Staging — Irradiation</option>
-    <option value="staging_eto">Staging — EtO</option>
-    <option value="staging_packing">Staging — Packing</option>
+    <option value="staging_irradiation">Staging - Irradiation</option>
+    <option value="staging_eto">Staging - EtO</option>
+    <option value="staging_packing">Staging - Packing</option>
     <option value="treatment_active">Treatment Active</option>
-    <option value="process_out_irradiation">Process-Out — Irradiation</option>
-    <option value="process_out_eto">Process-Out — EtO</option>
-    <option value="process_out_packing">Process-Out — Packing</option>
-    <option value="in_storage_processed">In Storage — Processed</option>
+    <option value="process_out_irradiation">Process-Out - Irradiation</option>
+    <option value="process_out_eto">Process-Out - EtO</option>
+    <option value="process_out_packing">Process-Out - Packing</option>
+    <option value="in_storage_processed">In Storage - Processed</option>
     <option value="qa_status">QA Status</option>
     <option value="packing">Packing</option>
     <option value="qa_hold">QA Hold</option>
@@ -93,11 +93,16 @@
     <option value="eto">EtO</option>
     <option value="packing">Packing</option>
   </select>
+  <label>Role (wireframe demo only)</label>
+  <select id="tweak-role">
+    <option value="operator">Warehouse Operator</option>
+    <option value="qa">QA Reviewer</option>
+  </select>
   <button class="close-btn" id="tweaks-close">Close</button>
 </div>
 
 <script type="text/babel">
-// SteriScan — Shared UI Components
+// SteriScan - Shared UI Components
 // ─────────────────────────────────
 
 const C = {
@@ -181,7 +186,7 @@ const NavBar = ({ title, onBack, showLogo = true }) => (
 const PageWrapper = ({ title, onBack, children, bottomBar, showLogo = true, bgColor }) => (
   <div style={{
     display: 'flex', flexDirection: 'column', height: '100%',
-    background: bgColor || C.bg, overflow: 'hidden',
+    background: bgColor || C.bg, overflow: 'hidden', position: 'relative',
   }}>
     <StatusBar />
     <NavBar title={title} onBack={onBack} showLogo={showLogo} />
@@ -204,17 +209,17 @@ const BADGE_MAP = {
   RECEIVED:               { bg: '#E2E8F0', color: '#475569' },
   STAGED:                 { bg: '#FEF3C7', color: '#92400E' },
   IN_TREATMENT:           { bg: '#FEF3C7', color: '#92400E' },
-  PROCESS_OUT:            { bg: '#CCFBF1', color: '#0F766E' },
+  PROCESS_OUT:            { bg: '#FEF3C7', color: '#92400E', label: 'AWAITING QA' },
   QA_RELEASED:            { bg: '#CCFBF1', color: '#0F766E' },
   QA_HOLD:                { bg: '#FEE2E2', color: '#991B1B' },
   SHIPPED:                { bg: '#DCFCE7', color: '#15803D' },
   IN_STORAGE_UNPROCESSED: { bg: '#E2E8F0', color: '#475569' },
-  IN_STORAGE_PROCESSED:   { bg: '#CCFBF1', color: '#0F766E' },
+  IN_STORAGE_PROCESSED:   { bg: '#FEF3C7', color: '#92400E', label: 'AWAITING QA' },
 };
 
 const Badge = ({ state, label }) => {
   const s = BADGE_MAP[state] || { bg: '#E2E8F0', color: '#555' };
-  const text = label || state.replace(/_/g, ' ');
+  const text = label || s.label || state.replace(/_/g, ' ');
   return (
     <span style={{
       background: s.bg, color: s.color,
@@ -494,15 +499,17 @@ Object.assign(window, {
 </script>
 
 <script type="text/babel">
-// SteriScan — Screens A: Auth, Dashboard, Scan, Summary, Receiving, InStorage
+// SteriScan - Screens A: Auth, Dashboard, Scan, Summary, Receiving, InStorage
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SAMPLE_ORDERS = [
-  { id: 'PLT-2026-041', customer: 'MedTech Australia',  pallets: 3, state: 'RECEIVED',    stream: 'irradiation', date: 'Apr 28', product: 'Surgical Instruments — Class II', weight: 142 },
+  { id: 'PLT-2026-041', customer: 'MedTech Australia',  pallets: 3, state: 'RECEIVED',    stream: 'irradiation', date: 'Apr 28', product: 'Surgical Instruments - Class II', weight: 142 },
   { id: 'PLT-2026-038', customer: 'BioPharma Ltd',       pallets: 1, state: 'STAGED',       stream: 'eto',         date: 'Apr 27', product: 'Single-Use Catheters',           weight: 88  },
-  { id: 'PLT-2026-035', customer: 'SurgiCare Corp',      pallets: 5, state: 'IN_TREATMENT', stream: 'irradiation', date: 'Apr 26', product: 'Sterile Gloves — Bulk',           weight: 310 },
+  { id: 'PLT-2026-035', customer: 'SurgiCare Corp',      pallets: 5, state: 'IN_TREATMENT', stream: 'irradiation', date: 'Apr 26', product: 'Sterile Gloves - Bulk',           weight: 310 },
   { id: 'PLT-2026-031', customer: 'HealthPlus Group',    pallets: 2, state: 'PROCESS_OUT',  stream: 'packing',     date: 'Apr 25', product: 'IV Administration Sets',           weight: 95  },
   { id: 'PLT-2026-028', customer: 'NovaMed Supplies',    pallets: 4, state: 'QA_RELEASED',  stream: 'eto',         date: 'Apr 24', product: 'Wound Dressing Packs',            weight: 204 },
+  { id: 'PLT-2026-024', customer: 'CardioCare Health',   pallets: 2, state: 'QA_HOLD',      stream: 'irradiation', date: 'Apr 23', product: 'Cardiac Stents - Box Set',        weight: 64  },
+  { id: 'PLT-2026-019', customer: 'TerraCare Medical',   pallets: 3, state: 'SHIPPED',      stream: 'packing',     date: 'Apr 22', product: 'Disposable Syringes - 5 mL',      weight: 156 },
 ];
 
 // ── Splash Screen ─────────────────────────────
@@ -552,9 +559,9 @@ const SplashScreen = ({ navigate }) => {
 const ScanEmployeeScreen = ({ navigate }) => {
   const [pin, setPin] = React.useState('');
   const [mode, setMode] = React.useState('scan'); // 'scan' | 'pin'
-  const handleScan = () => navigate('dashboard', { operator: 'Pan Xiao' });
+  const handleScan = () => navigate('dashboard', { operator: 'Pan Xiao', role: 'operator' });
   const handlePin = () => {
-    if (pin.length >= 4) navigate('dashboard', { operator: 'Pan Xiao' });
+    if (pin.length >= 4) navigate('dashboard', { operator: 'Pan Xiao', role: 'operator' });
   };
   return (
     <PageWrapper title="Sign In" showLogo={true}>
@@ -579,6 +586,26 @@ const ScanEmployeeScreen = ({ navigate }) => {
             }}>← Back to badge scan</button>
           </>
         )}
+
+        {/* Demo-only shortcut - QA reviewer sign-in (badge scan above = operator) */}
+        <div style={{
+          marginTop: 28, padding: 12, borderRadius: 12,
+          background: '#F8FAFC', border: `1px dashed ${C.border}`,
+        }}>
+          <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 10, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.8, marginBottom: 10, textAlign: 'center' }}>
+            Demo only
+          </div>
+          <button onClick={() => navigate('dashboard', { operator: 'Sarah Mitchell', role: 'qa' })} style={{
+            width: '100%', padding: '12px', borderRadius: 10, cursor: 'pointer',
+            background: '#fff', border: `1.5px solid ${C.border}`,
+            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8,
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M9 12l2 2 4-4"/><path d="M12 3a9 9 0 1 0 9 9 9 9 0 0 0-9-9z"/>
+            </svg>
+            <span style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 14, fontWeight: 700, color: C.text }}>Log in as QA Reviewer</span>
+          </button>
+        </div>
       </div>
     </PageWrapper>
   );
@@ -598,23 +625,40 @@ const KPI = ({ label, value, color }) => (
 
 // ── Dashboard Screen (Orders list, customer-style layout) ─
 const DashboardScreen = ({ navigate, appData }) => {
+  const isQA = appData.role === 'qa';
   const [sort, setSort] = React.useState('date');
-  const [filter, setFilter] = React.useState('all');
+  const [filter, setFilter] = React.useState(isQA ? 'awaiting_qa' : 'all');
+  const [query, setQuery] = React.useState('');
 
-  const filters = [
-    { id: 'all',         label: 'All' },
-    { id: 'in_progress', label: 'In Progress' },
-    { id: 'ready',       label: 'Ready' },
-    { id: 'shipped',     label: 'Shipped' },
+  // QA sees only the states relevant to their review work.
+  const filters = isQA ? [
+    { id: 'all',          label: 'All' },
+    { id: 'awaiting_qa',  label: 'Awaiting QA' },
+    { id: 'ready',        label: 'Released' },
+    { id: 'hold',         label: 'Hold' },
+  ] : [
+    { id: 'all',          label: 'All' },
+    { id: 'in_progress',  label: 'Unprocessed' },
+    { id: 'awaiting_qa',  label: 'Awaiting QA' },
+    { id: 'ready',        label: 'Released' },
+    { id: 'hold',         label: 'Hold' },
+    { id: 'shipped',      label: 'Shipped' },
   ];
-  const inProgress = ['RECEIVED','STAGED','IN_TREATMENT','PROCESS_OUT'];
-  const ready = ['QA_RELEASED'];
+  const inProgress  = ['RECEIVED','STAGED','IN_TREATMENT'];
+  const awaitingQA  = ['PROCESS_OUT','IN_STORAGE_PROCESSED'];
+  const ready       = ['QA_RELEASED'];
 
+  const qaStates = [...awaitingQA, ...ready, 'QA_HOLD'];
+  const q = query.trim().toLowerCase();
   const filtered = SAMPLE_ORDERS.filter(o => {
-    if (filter === 'all') return true;
-    if (filter === 'in_progress') return inProgress.includes(o.state);
-    if (filter === 'ready') return ready.includes(o.state);
-    if (filter === 'shipped') return o.state === 'SHIPPED';
+    // QA only ever sees pallets within their review scope.
+    if (isQA && !qaStates.includes(o.state)) return false;
+    if (filter === 'in_progress' && !inProgress.includes(o.state)) return false;
+    if (filter === 'awaiting_qa' && !awaitingQA.includes(o.state)) return false;
+    if (filter === 'ready' && !ready.includes(o.state)) return false;
+    if (filter === 'hold' && o.state !== 'QA_HOLD') return false;
+    if (filter === 'shipped' && o.state !== 'SHIPPED') return false;
+    if (q && !(o.id.toLowerCase().includes(q) || o.customer.toLowerCase().includes(q) || (o.product || '').toLowerCase().includes(q))) return false;
     return true;
   });
   const sorted = [...filtered].sort((a, b) => {
@@ -627,10 +671,68 @@ const DashboardScreen = ({ navigate, appData }) => {
       <StatusBar />
       <NavBar title={`Hello ${(appData.operator || 'Operator').split(' ')[0]}`} showLogo={true} />
       <div style={{ flex: 1, overflow: 'auto', padding: '16px 16px 8px' }}>
+        <div style={{
+          display: 'flex', alignItems: 'center', gap: 8,
+          background: '#fff', border: `1px solid ${C.border}`, borderRadius: 12,
+          padding: '0 10px 0 12px', height: 44, marginBottom: 12,
+        }}>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+            <circle cx="11" cy="11" r="7"/>
+            <path d="m21 21-4.3-4.3"/>
+          </svg>
+          <input
+            type="text"
+            value={query}
+            onChange={e => setQuery(e.target.value)}
+            placeholder="Search or scan a pallet…"
+            style={{
+              flex: 1, minWidth: 0, border: 'none', outline: 'none',
+              background: 'transparent', height: '100%',
+              fontFamily: 'DM Sans,sans-serif', fontSize: 14, color: C.text,
+            }}
+          />
+          {query && (
+            <button onClick={() => setQuery('')} style={{
+              background: 'none', border: 'none', cursor: 'pointer', padding: 4,
+              display: 'flex', alignItems: 'center', color: C.muted, flexShrink: 0,
+            }} aria-label="Clear">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                <path d="M18 6 6 18M6 6l12 12"/>
+              </svg>
+            </button>
+          )}
+          <button
+            onClick={() => navigate('order_detail', { selectedOrder: SAMPLE_ORDERS[0] })}
+            title="Scan pallet to identify"
+            style={{
+              background: C.brand, border: 'none', borderRadius: 8,
+              height: 32, width: 32, display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer', flexShrink: 0,
+            }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M3 7V5a2 2 0 0 1 2-2h2"/>
+              <path d="M17 3h2a2 2 0 0 1 2 2v2"/>
+              <path d="M21 17v2a2 2 0 0 1-2 2h-2"/>
+              <path d="M7 21H5a2 2 0 0 1-2-2v-2"/>
+              <line x1="7" y1="12" x2="17" y2="12"/>
+            </svg>
+          </button>
+        </div>
+
         <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
-          <KPI label="In Progress" value={SAMPLE_ORDERS.filter(o => inProgress.includes(o.state)).length} color={C.brand} />
-          <KPI label="Ready" value={SAMPLE_ORDERS.filter(o => ready.includes(o.state)).length} color={C.green} />
-          <KPI label="Shipped" value={SAMPLE_ORDERS.filter(o => o.state === 'SHIPPED').length} color={C.muted} />
+          {isQA ? (
+            <>
+              <KPI label="Awaiting QA" value={SAMPLE_ORDERS.filter(o => awaitingQA.includes(o.state)).length} color={C.amber} />
+              <KPI label="Released" value={SAMPLE_ORDERS.filter(o => ready.includes(o.state)).length} color={C.green} />
+              <KPI label="Hold" value={SAMPLE_ORDERS.filter(o => o.state === 'QA_HOLD').length} color={C.red || '#DC2626'} />
+            </>
+          ) : (
+            <>
+              <KPI label="Unprocessed" value={SAMPLE_ORDERS.filter(o => inProgress.includes(o.state)).length} color={C.brand} />
+              <KPI label="Awaiting QA" value={SAMPLE_ORDERS.filter(o => awaitingQA.includes(o.state)).length} color={C.amber} />
+              <KPI label="Released" value={SAMPLE_ORDERS.filter(o => ready.includes(o.state)).length} color={C.green} />
+            </>
+          )}
         </div>
 
         <div style={{ display: 'flex', gap: 6, marginBottom: 12, overflowX: 'auto', paddingBottom: 4 }}>
@@ -693,8 +795,52 @@ const DashboardScreen = ({ navigate, appData }) => {
           })}
         </div>
       </div>
-      <div style={{ background: '#fff', borderTop: `1px solid ${C.border}`, padding: '12px 16px' }}>
-        <Btn label="Start New Scan" onClick={() => navigate('scan_pallet', { selectedOrder: null })} color="blue" large />
+      <div style={{
+        background: '#fff', borderTop: `1px solid ${C.border}`,
+        padding: '6px 4px 10px', display: 'flex',
+      }}>
+        {[
+          {
+            id: 'home', label: 'Home', active: true, onClick: () => {},
+            icon: <><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1V9.5z"/></>,
+          },
+          {
+            id: 'scan', label: 'Scan', active: false, onClick: () => navigate('scan_pallet', { selectedOrder: null }),
+            icon: <><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><line x1="7" y1="12" x2="17" y2="12"/></>,
+          },
+          {
+            id: 'profile', label: 'Profile', active: false, onClick: () => navigate('profile'),
+            icon: <><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></>,
+          },
+        ].map(tab => (
+          <button key={tab.id} onClick={tab.onClick} style={{
+            flex: 1, background: 'none', border: 'none', cursor: 'pointer',
+            display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 4,
+            padding: '6px 4px', position: 'relative',
+            color: tab.active ? C.brand : C.muted,
+          }}>
+            <div style={{ position: 'relative' }}>
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={tab.active ? '2.4' : '2'} strokeLinecap="round" strokeLinejoin="round">
+                {tab.icon}
+              </svg>
+              {tab.badge && (
+                <div style={{
+                  position: 'absolute', top: -3, right: -6,
+                  minWidth: 14, height: 14, padding: '0 4px', borderRadius: 7,
+                  background: C.red, color: '#fff',
+                  fontFamily: 'DM Sans,sans-serif', fontSize: 9, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  border: '1.5px solid #fff',
+                }}>{tab.badge}</div>
+              )}
+            </div>
+            <span style={{
+              fontFamily: 'DM Sans,sans-serif', fontSize: 11,
+              fontWeight: tab.active ? 700 : 500,
+              color: tab.active ? C.brand : C.muted,
+            }}>{tab.label}</span>
+          </button>
+        ))}
       </div>
     </div>
   );
@@ -718,7 +864,7 @@ const OrderDetailScreen = ({ navigate, appData }) => {
   const isShipped = order.state === 'SHIPPED';
 
   const items = [
-    { name: 'Surgical Instruments — Class II', qty: 48, lot: 'LOT-2026-A' },
+    { name: 'Surgical Instruments - Class II', qty: 48, lot: 'LOT-2026-A' },
     { name: 'Sterile Packaging Pouches',        qty: 200, lot: 'LOT-2026-B' },
     { name: 'Indicator Strips',                 qty: 120, lot: 'LOT-2026-C' },
   ];
@@ -729,8 +875,11 @@ const OrderDetailScreen = ({ navigate, appData }) => {
     if (order.state === 'RECEIVED')     return { label: 'Start: Scan Pallet →',     screen: 'scan_pallet' };
     if (order.state === 'STAGED')       return { label: 'Begin Treatment →',         screen: 'treatment_active' };
     if (order.state === 'IN_TREATMENT') return { label: 'View Active Treatment →',   screen: 'treatment_active' };
-    if (order.state === 'PROCESS_OUT')  return { label: 'Process-Out: Scan Bin →',   screen: 'scan_bin', extras: { binPhase: 'post_treatment' } };
+    const qaLabel = appData.role === 'qa' ? 'Review for Release →' : 'Check QA Status →';
+    if (order.state === 'PROCESS_OUT')  return { label: qaLabel, screen: 'qa_status' };
+    if (order.state === 'IN_STORAGE_PROCESSED') return { label: qaLabel, screen: 'qa_status' };
     if (order.state === 'QA_RELEASED')  return { label: 'Continue to Packing →',     screen: 'packing' };
+    if (order.state === 'QA_HOLD')      return { label: 'View QA Hold Details →',    screen: 'qa_hold', extras: { pdrReference: 'PDR-2026-007' } };
     return null;
   })();
 
@@ -811,7 +960,7 @@ const OrderDetailScreen = ({ navigate, appData }) => {
         <SectionTitle title="Order details" />
         <Card style={{ padding: '14px 16px', marginBottom: 12 }}>
           <InfoRow label="Pallets" value={`${order.pallets} × PLT-A04-00${order.pallets}`} />
-          <InfoRow label="Bin Location" value={step >= 5 ? 'Zone C — Bay 02' : 'Zone A — Bay 04'} />
+          <InfoRow label="Bin Location" value={step >= 5 ? 'Zone C - Bay 02' : 'Zone A - Bay 04'} />
           <InfoRow label="Gross Weight" value={`${order.weight} kg`} />
           <InfoRow label="Stream" valueEl={<StreamBadge stream={order.stream} />} />
           <InfoRow label="Target Dose / Cycle" value={order.stream === 'irradiation' ? '25 – 45 kGy' : order.stream === 'eto' ? 'Standard 12hr' : 'Blister Pack'} />
@@ -857,10 +1006,10 @@ const ScanPalletScreen = ({ navigate, appData }) => {
       <div style={{ padding: '28px 20px 0' }}>
         <SectionTitle title="Scan Pallet ID" subtitle="Scan the pallet QR to view its items" />
         {appData.selectedOrder && (
-          <Alert type="info" message={`Order ${appData.selectedOrder.id} — ${appData.selectedOrder.customer}`} />
+          <Alert type="info" message={`Order ${appData.selectedOrder.id} - ${appData.selectedOrder.customer}`} />
         )}
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-          <ScanView onSimulate={handleScan} label="Scan Pallet QR" manualLabel="Enter Pallet ID manually" onManual={handleScan} />
+          <ScanView onSimulate={handleScan} label="Scan Pallet QR" />
         </div>
       </div>
     </PageWrapper>
@@ -875,9 +1024,9 @@ const ScanBinScreen = ({ navigate, appData }) => {
     if (invalid.current) {
       navigate('supervisor_pin', { prevScreen: 'scan_bin', overrideReason: 'Zone mismatch' });
     } else if (phase === 'post_treatment') {
-      navigate('in_storage_processed', { binLocation: 'Zone C — Bay 02' });
+      navigate('in_storage_processed', { binLocation: 'Zone C - Bay 02' });
     } else {
-      navigate('receiving_form', { binLocation: 'Zone A — Bay 04' });
+      navigate('receiving_form', { binLocation: 'Zone A - Bay 04' });
     }
   };
   const subtitle = phase === 'post_treatment'
@@ -886,7 +1035,7 @@ const ScanBinScreen = ({ navigate, appData }) => {
   return (
     <PageWrapper title="Scan Bin Location" onBack={() => navigate(phase === 'post_treatment' ? 'treatment_active' : 'pallet_items')}
       bottomBar={
-        <button onClick={() => { invalid.current = true; navigate('fail', { failMessage: 'Invalid location scan — bin not recognised in system.', retryScreen: 'scan_bin' }); }}
+        <button onClick={() => { invalid.current = true; navigate('fail', { failMessage: 'Invalid location scan - bin not recognised in system.', retryScreen: 'scan_bin' }); }}
           style={{ width:'100%', background:'none', border:'none', color: C.muted, fontFamily:'DM Sans,sans-serif', fontSize:13, cursor:'pointer' }}>
           Simulate Invalid Scan →
         </button>
@@ -895,7 +1044,7 @@ const ScanBinScreen = ({ navigate, appData }) => {
         <SectionTitle title="Scan Bin Location" subtitle={subtitle} />
         <PalletChip id={appData.palletId || 'PLT-A04-001'} />
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-          <ScanView onSimulate={handleScan} label="Scan Bin QR Code" manualLabel="Enter bin manually" onManual={handleScan} />
+          <ScanView onSimulate={handleScan} label="Scan Bin QR Code" />
         </div>
       </div>
     </PageWrapper>
@@ -906,7 +1055,7 @@ const ScanBinScreen = ({ navigate, appData }) => {
 const PalletItemsScreen = ({ navigate, appData }) => {
   const order = appData.selectedOrder || SAMPLE_ORDERS[0];
   const items = [
-    { name: 'Surgical Instruments — Class II', qty: 48, lot: 'LOT-2026-A' },
+    { name: 'Surgical Instruments - Class II', qty: 48, lot: 'LOT-2026-A' },
     { name: 'Sterile Packaging Pouches',        qty: 200, lot: 'LOT-2026-B' },
     { name: 'Indicator Strips',                 qty: 120, lot: 'LOT-2026-C' },
   ];
@@ -953,7 +1102,7 @@ const PalletItemsScreen = ({ navigate, appData }) => {
 const SummaryScreen = ({ navigate, appData }) => {
   const order = appData.selectedOrder || SAMPLE_ORDERS[0];
   const items = [
-    { name: 'Surgical Instruments — Class II', qty: 48, lot: 'LOT-2026-A' },
+    { name: 'Surgical Instruments - Class II', qty: 48, lot: 'LOT-2026-A' },
     { name: 'Sterile Packaging Pouches',        qty: 200, lot: 'LOT-2026-B' },
     { name: 'Indicator Strips',                 qty: 120, lot: 'LOT-2026-C' },
   ];
@@ -970,7 +1119,7 @@ const SummaryScreen = ({ navigate, appData }) => {
         </div>
 
         <Card style={{ padding: '14px 16px', marginBottom: 12 }}>
-          <InfoRow label="Bin Location" value={appData.binLocation || 'Zone A — Bay 04'} />
+          <InfoRow label="Bin Location" value={appData.binLocation || 'Zone A - Bay 04'} />
           <InfoRow label="Stream" valueEl={<StreamBadge stream={order.stream} />} />
           <InfoRow label="Date Received" value={order.date} />
           <InfoRow label="Gross Weight" value={`${order.weight} kg`} />
@@ -998,7 +1147,7 @@ const SummaryScreen = ({ navigate, appData }) => {
 };
 
 // ── Receiving (placeholder dummy) ─────────────
-// ── Receiving — multi-step read-only request review ─
+// ── Receiving - multi-step read-only request review ─
 // 4 steps: Request details · Treatment details · Collection · Documents & declaration
 // All values are read-only (employee is reviewing the customer's submission).
 
@@ -1013,7 +1162,7 @@ const SAMPLE_REQUEST = {
   cheps:        4,
   eta:          '14 Apr 2026, 09:30',
   // Step 2
-  market:       'Domestic — NSW / VIC / QLD',
+  market:       'Domestic - NSW / VIC / QLD',
   pallets: [
     {
       palletSpace: 'PLT-A04-001',
@@ -1022,7 +1171,7 @@ const SAMPLE_REQUEST = {
       cheps:       2,
       cartons:     48,
       commodities: [
-        { commodity: 'Mangoes — Kensington Pride', grower: 'Bowen Farms QLD',     cartons: 24, cheps: 1, pulpMin: '4.0°C', pulpMax: '6.5°C', address: '147 Plantation Rd, Bowen QLD 4805' },
+        { commodity: 'Mangoes - Kensington Pride', grower: 'Bowen Farms QLD',     cartons: 24, cheps: 1, pulpMin: '4.0°C', pulpMax: '6.5°C', address: '147 Plantation Rd, Bowen QLD 4805' },
         { commodity: 'Lychees',                    grower: 'Tropical Acres NT',   cartons: 24, cheps: 1, pulpMin: '3.5°C', pulpMax: '5.0°C', address: '22 Orchard Way, Darwin NT 0810' },
       ],
     },
@@ -1033,7 +1182,7 @@ const SAMPLE_REQUEST = {
       cheps:       2,
       cartons:     36,
       commodities: [
-        { commodity: 'Tomatoes — Truss',           grower: 'SunRipe Growers VIC', cartons: 36, cheps: 2, pulpMin: '8.0°C', pulpMax: '10.0°C', address: '88 Greenhouse Ln, Werribee VIC 3030' },
+        { commodity: 'Tomatoes - Truss',           grower: 'SunRipe Growers VIC', cartons: 36, cheps: 2, pulpMin: '8.0°C', pulpMax: '10.0°C', address: '88 Greenhouse Ln, Werribee VIC 3030' },
       ],
     },
   ],
@@ -1048,12 +1197,12 @@ const SAMPLE_REQUEST = {
     { name: 'Bill of Lading.pdf',            size: '142 KB' },
     { name: 'Packing List.xlsx',             size: '64 KB' },
   ],
-  notes:        'Please prioritise — destined for Sydney Markets Friday delivery. All cartons pre-cooled.',
+  notes:        'Please prioritise - destined for Sydney Markets Friday delivery. All cartons pre-cooled.',
   declaredAt:   '12 Apr 2026, 16:42',
   declaredBy:   'Daniel Hartley',
 };
 
-// Read-only display row — labelled value, no input
+// Read-only display row - labelled value, no input
 const ReadRow = ({ label, value, mono = false }) => (
   <div style={{ marginBottom: 12 }}>
     <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 600, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 3 }}>
@@ -1063,7 +1212,7 @@ const ReadRow = ({ label, value, mono = false }) => (
       fontFamily: mono ? 'ui-monospace,Menlo,monospace' : 'DM Sans,sans-serif',
       fontSize: 14, color: C.text, fontWeight: 500, lineHeight: 1.4,
     }}>
-      {value || <span style={{ color: C.muted, fontStyle: 'italic' }}>—</span>}
+      {value || <span style={{ color: C.muted, fontStyle: 'italic' }}>-</span>}
     </div>
   </div>
 );
@@ -1095,6 +1244,40 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
   const [step, setStep] = React.useState(1);
   const TOTAL = 4;
 
+  // Step 5 - on-arrival capture (operator input)
+  const [extraFiles, setExtraFiles] = React.useState([]);
+  const [truckTemp,  setTruckTemp]  = React.useState('');
+  const [opsNotes,   setOpsNotes]   = React.useState('');
+
+  const addExtra     = () => setExtraFiles(f => [...f, { id: Date.now() + Math.random(), name: `RA-Doc-${String(f.length + 1).padStart(3, '0')}.jpg`, size: '1.2 MB' }]);
+  const removeExtra  = (id) => setExtraFiles(f => f.filter(x => x.id !== id));
+
+  // Edit data flow
+  const [showEdit, setShowEdit] = React.useState(false);
+  const [editDone, setEditDone] = React.useState(false);
+  const [editedPalletSpaces, setEditedPalletSpaces] = React.useState(String(req.palletSpaces));
+  const [editedEta,    setEditedEta]    = React.useState(req.eta);
+  const [editedCartons, setEditedCartons] = React.useState('48');
+
+  const submitEdit = () => {
+    setShowEdit(false);
+    setEditDone(true);
+    setTimeout(() => setEditDone(false), 2400);
+  };
+
+  const [showReport, setShowReport] = React.useState(false);
+  const [reportDone, setReportDone] = React.useState(false);
+  const [reportType, setReportType] = React.useState('Pallet missing');
+  const [reportPallet, setReportPallet] = React.useState('');
+  const [reportNote, setReportNote] = React.useState('');
+
+  const submitReport = () => {
+    setShowReport(false);
+    setReportNote('');
+    setReportDone(true);
+    setTimeout(() => setReportDone(false), 2800);
+  };
+
   const next = () => {
     if (step < TOTAL) setStep(step + 1);
     else navigate('in_storage_unprocessed', {
@@ -1109,10 +1292,10 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
     else navigate('scan_bin');
   };
 
-  const STEP_TITLES = ['Request details', 'Treatment details', 'Collection from Steritech', 'Documents & declaration'];
+  const STEP_TITLES = ['Request details', 'Treatment details', 'Collection from Steritech', 'Documents & receiving check'];
 
   return (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: C.bg }}>
+    <div style={{ height: '100%', display: 'flex', flexDirection: 'column', background: C.bg, position: 'relative' }}>
       <StatusBar />
       <NavBar title={`Receiving · ${order.id}`} onBack={back} showLogo={false} />
       <StepDots step={step} total={TOTAL} />
@@ -1130,19 +1313,86 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
           <PalletChip id="PLT-A04-001" />
         </div>
 
-        {/* Read-only banner */}
+        {/* Read-only banner - applies to customer-submitted sections */}
         <div style={{
-          display: 'flex', alignItems: 'center', gap: 10,
-          background: '#EEF2FF', border: `1px solid #C7D2FE`, borderRadius: 10,
-          padding: '10px 12px', marginBottom: 14,
+          background: '#EEF2FF', border: `1px solid #C7D2FE`, borderRadius: 12,
+          padding: 12, marginBottom: 14,
         }}>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.brand} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
-            <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-          </svg>
-          <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: '#3730A3', lineHeight: 1.4 }}>
-            Read-only — submitted by customer. Verify the request, then continue receiving.
+          <div style={{ display: 'flex', alignItems: 'flex-start', gap: 10 }}>
+            <div style={{
+              width: 28, height: 28, borderRadius: 8, flexShrink: 0,
+              background: '#fff', border: `1px solid #C7D2FE`,
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+            }}>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={C.brand} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+            </div>
+            <div style={{ flex: 1, minWidth: 0 }}>
+              <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, fontWeight: 700, color: '#312E81', marginBottom: 2 }}>
+                Read-only · submitted by customer
+              </div>
+              <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: '#4F46E5', lineHeight: 1.4 }}>
+                Verify the request, then continue receiving.
+              </div>
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
+            <button onClick={() => setShowReport(true)} style={{
+              flex: 1, background: '#fff', border: `1px solid #C7D2FE`, color: C.brand,
+              borderRadius: 9, padding: '9px 10px', cursor: 'pointer',
+              fontFamily: 'DM Sans,sans-serif', fontSize: 12.5, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
+              </svg>
+              Report issue
+            </button>
+            <button onClick={() => setShowEdit(true)} style={{
+              flex: 1, background: C.brand, border: `1px solid ${C.brand}`, color: '#fff',
+              borderRadius: 9, padding: '9px 10px', cursor: 'pointer',
+              fontFamily: 'DM Sans,sans-serif', fontSize: 12.5, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+            }}>
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
+              </svg>
+              Edit
+            </button>
           </div>
         </div>
+
+        {editDone && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: '#F0FDF4', border: `1px solid #86EFAC`, borderRadius: 10,
+            padding: '10px 12px', marginBottom: 14,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#15803D" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: '#15803D', lineHeight: 1.4, fontWeight: 600 }}>
+              Changes saved.
+            </div>
+          </div>
+        )}
+
+        {reportDone && (
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: '#FFF7ED', border: `1px solid #FED7AA`, borderRadius: 10,
+            padding: '10px 12px', marginBottom: 14,
+          }}>
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+            </svg>
+            <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: '#9A3412', lineHeight: 1.4, fontWeight: 600 }}>
+              Issue reported — flagged for the customer & QA.
+            </div>
+          </div>
+        )}
 
         {/* ── STEP 1: Request details ─────────── */}
         {step === 1 && (
@@ -1228,7 +1478,7 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
           <>
             <SectionTitle title="Transport booking" />
             <Card style={{ padding: '14px 16px', marginBottom: 12 }}>
-              <ReadRow label="Collection from Steritech?" value={req.collection === 'yes' ? 'Yes — Steritech to deliver' : 'No — customer to collect'}/>
+              <ReadRow label="Collection from Steritech?" value={req.collection === 'yes' ? 'Yes - Steritech to deliver' : 'No - customer to collect'}/>
             </Card>
 
             {req.collection === 'yes' ? (
@@ -1247,7 +1497,7 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
           </>
         )}
 
-        {/* ── STEP 4: Documents & declaration ─── */}
+        {/* ── STEP 4: Documents & receiving check (customer data + operator on-arrival capture) ─── */}
         {step === 4 && (
           <>
             <SectionTitle title="Attached documents" />
@@ -1283,7 +1533,7 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
             </Card>
 
             <SectionTitle title="Declaration" />
-            <Card style={{ padding: '14px 16px' }}>
+            <Card style={{ padding: '14px 16px', marginBottom: 18 }}>
               <div style={{ display: 'flex', gap: 10, alignItems: 'flex-start' }}>
                 <div style={{
                   width: 22, height: 22, borderRadius: 5, flexShrink: 0,
@@ -1301,6 +1551,117 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
                 </div>
               </div>
             </Card>
+
+            {/* Section divider - handoff to operator */}
+            <div style={{
+              display: 'flex', alignItems: 'center', gap: 10, marginBottom: 12,
+            }}>
+              <div style={{ flex: 1, height: 1, background: C.border }}/>
+              <div style={{
+                fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.orange,
+                textTransform: 'uppercase', letterSpacing: 0.8,
+                background: '#FFF7ED', border: `1px solid #FED7AA`, borderRadius: 999,
+                padding: '4px 10px',
+              }}>Your turn · on-arrival capture</div>
+              <div style={{ flex: 1, height: 1, background: C.border }}/>
+            </div>
+
+            <SectionTitle title="Add files" />
+            <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: C.muted, marginTop: -4, marginBottom: 10 }}>
+              Pallet photo, product label, treatment cert, etc…
+            </div>
+            <div onClick={addExtra} style={{
+              borderRadius: 12, cursor: 'pointer', marginBottom: 10,
+              border: `1.5px dashed #CBD5E1`, background: '#F8FAFC',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: 8,
+              padding: '28px 16px', textAlign: 'center',
+            }}>
+              <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M4 14.9A7 7 0 1 1 15.7 8h1.8a4.5 4.5 0 0 1 2.5 8.2"/>
+                <polyline points="16 16 12 12 8 16"/><line x1="12" y1="12" x2="12" y2="21"/>
+              </svg>
+              <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 14 }}>
+                <span style={{ color: C.brand, fontWeight: 700 }}>Click to upload</span>
+                <span style={{ color: C.muted }}> or drag and drop</span>
+              </div>
+              <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 11, color: C.muted }}>PNG, JPG or PDF</div>
+            </div>
+
+            {extraFiles.length > 0 && (
+              <Card style={{ padding: 0, marginBottom: 10, overflow: 'hidden' }}>
+                {extraFiles.map((f, i) => (
+                  <div key={f.id} style={{
+                    display: 'flex', alignItems: 'center', gap: 10, padding: '10px 12px',
+                    borderBottom: i < extraFiles.length - 1 ? `1px solid ${C.border}` : 'none',
+                  }}>
+                    <div style={{
+                      width: 32, height: 32, borderRadius: 8, flexShrink: 0,
+                      background: '#EEF2FF', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    }}>
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.brand} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>
+                      </svg>
+                    </div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, fontWeight: 600, color: C.text, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{f.name}</div>
+                      <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 11, color: C.muted }}>{f.size}</div>
+                    </div>
+                    <button onClick={() => removeExtra(f.id)} style={{
+                      background: 'none', border: 'none', cursor: 'pointer', padding: 6,
+                      color: C.muted, display: 'flex', alignItems: 'center',
+                    }} aria-label="Remove">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round">
+                        <path d="M18 6 6 18M6 6l12 12"/>
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </Card>
+            )}
+
+            <div style={{ marginBottom: 16 }} />
+
+            <SectionTitle title="Conditions" />
+            <Card style={{ padding: 16, marginBottom: 14 }}>
+              <div>
+                <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Truck temperature</label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    type="number" step="0.1"
+                    value={truckTemp}
+                    onChange={e => setTruckTemp(e.target.value)}
+                    placeholder="e.g. 4.2"
+                    style={{
+                      width: '100%', height: 44, borderRadius: 10, padding: '0 38px 0 12px',
+                      border: `1.5px solid #D1CEC9`, background: '#fff',
+                      fontFamily: 'DM Sans,sans-serif', fontSize: 15, color: C.text,
+                      outline: 'none', boxSizing: 'border-box', WebkitAppearance: 'none',
+                    }}
+                  />
+                  <span style={{
+                    position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)',
+                    fontFamily: 'DM Sans,sans-serif', fontSize: 14, color: C.muted, fontWeight: 600,
+                    pointerEvents: 'none',
+                  }}>°C</span>
+                </div>
+              </div>
+            </Card>
+
+            <SectionTitle title="Operator notes" />
+            <Card style={{ padding: 16, marginBottom: 14 }}>
+              <textarea
+                value={opsNotes}
+                onChange={e => setOpsNotes(e.target.value)}
+                placeholder="e.g. Two cartons on pallet 2 show minor crush damage; flagged for QA inspection."
+                style={{
+                  width: '100%', minHeight: 88, padding: '10px 12px', borderRadius: 10,
+                  border: `1.5px solid #D1CEC9`, background: '#fff', resize: 'vertical',
+                  fontFamily: 'DM Sans,sans-serif', fontSize: 14, color: C.text, lineHeight: 1.45,
+                  outline: 'none', boxSizing: 'border-box',
+                }}
+              />
+            </Card>
+
           </>
         )}
       </div>
@@ -1317,14 +1678,149 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
           fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 700, cursor: 'pointer',
         }}>{step === TOTAL ? 'Confirm Receiving' : 'Continue →'}</button>
       </div>
+
+      {showEdit && (
+        <div onClick={() => setShowEdit(false)} style={{
+          position: 'absolute', inset: 0, background: 'rgba(15,22,35,0.55)',
+          display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', zIndex: 100,
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22,
+            padding: '14px 18px 20px', maxHeight: '88%', overflowY: 'auto',
+            animation: 'slideIn 0.22s cubic-bezier(0.4,0,0.2,1) both',
+          }}>
+            <div style={{ width: 38, height: 4, borderRadius: 2, background: C.border, margin: '0 auto 16px' }}/>
+            <div style={{ fontFamily: 'Outfit,sans-serif', fontSize: 19, fontWeight: 700, color: C.text, marginBottom: 16 }}>
+              Edit fields
+            </div>
+
+            <Field label="Pallet spaces" value={editedPalletSpaces} onChange={e => setEditedPalletSpaces(e.target.value)} />
+            <Field label="ETA" value={editedEta} onChange={e => setEditedEta(e.target.value)} />
+            <Field label="Cartons" value={editedCartons} onChange={e => setEditedCartons(e.target.value)} />
+
+            <div style={{
+              background: '#F5F7FA', border: `1px dashed ${C.border}`, borderRadius: 10,
+              padding: '10px 12px', marginTop: 4, marginBottom: 14,
+              fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: C.muted, lineHeight: 1.45,
+            }}>
+              Editable fields are limited - protected fields (storage temp, customer info) can only be reported via the Report option.
+            </div>
+
+            <div style={{ display: 'flex', gap: 10 }}>
+              <button onClick={() => setShowEdit(false)} style={{
+                flex: '0 0 38%', padding: '13px', borderRadius: 12,
+                background: '#fff', border: `1.5px solid ${C.border}`, color: C.text,
+                fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+              }}>Cancel</button>
+              <button onClick={submitEdit} style={{
+                flex: 1, padding: '13px', borderRadius: 12,
+                background: C.brand, border: 'none', color: '#fff',
+                fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              }}>Save changes</button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showReport && (
+        <div onClick={() => setShowReport(false)} style={{
+          position: 'absolute', inset: 0, background: 'rgba(15,22,35,0.55)',
+          display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', zIndex: 100,
+        }}>
+          <div onClick={e => e.stopPropagation()} style={{
+            background: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22,
+            padding: '14px 18px 20px', maxHeight: '88%', overflowY: 'auto',
+            animation: 'slideIn 0.22s cubic-bezier(0.4,0,0.2,1) both',
+          }}>
+            <div style={{ width: 38, height: 4, borderRadius: 2, background: C.border, margin: '0 auto 16px' }}/>
+            <div style={{ fontFamily: 'Outfit,sans-serif', fontSize: 22, fontWeight: 700, color: C.text, marginBottom: 16 }}>
+              Report an issue
+            </div>
+
+            <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.6px' }}>What's wrong?</label>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
+              {['Pallet missing', "Data doesn't match", 'Other'].map(t => {
+                const sel = reportType === t;
+                return (
+                  <button key={t} onClick={() => setReportType(t)} style={{
+                    display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
+                    padding: '14px 16px', borderRadius: 12, cursor: 'pointer',
+                    border: sel ? `1.5px solid ${C.brand}` : `1.5px solid ${C.border}`,
+                    background: sel ? '#EEF2FF' : '#fff',
+                  }}>
+                    <span style={{
+                      width: 20, height: 20, borderRadius: 10, flexShrink: 0,
+                      border: sel ? `6px solid ${C.brand}` : `2px solid ${C.border}`,
+                      background: '#fff', boxSizing: 'border-box',
+                    }}/>
+                    <span style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 600, color: C.text }}>{t}</span>
+                  </button>
+                );
+              })}
+            </div>
+
+            {reportType !== 'Other' && (
+              <>
+                <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Which pallet?</label>
+                <div style={{ position: 'relative', marginBottom: 18 }}>
+                  <select
+                    value={reportPallet}
+                    onChange={e => setReportPallet(e.target.value)}
+                    style={{
+                      width: '100%', height: 48, borderRadius: 10, padding: '0 38px 0 14px',
+                      border: `1.5px solid #D1CEC9`, background: '#fff', appearance: 'none', WebkitAppearance: 'none',
+                      fontFamily: 'DM Sans,sans-serif', fontSize: 15, color: reportPallet ? C.text : C.muted,
+                      outline: 'none', boxSizing: 'border-box', cursor: 'pointer',
+                    }}>
+                    <option value="">Select pallet…</option>
+                    <option value="PLT-A04-001">PLT-A04-001</option>
+                    <option value="PLT-A04-002">PLT-A04-002</option>
+                    <option value="PLT-A04-003">PLT-A04-003</option>
+                    <option value="all">All / whole consignment</option>
+                  </select>
+                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: 14, top: 15, pointerEvents: 'none' }}>
+                    <polyline points="6 9 12 15 18 9"/>
+                  </svg>
+                </div>
+              </>
+            )}
+
+            <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Notes (optional)</label>
+            <textarea
+              value={reportNote}
+              onChange={e => setReportNote(e.target.value)}
+              placeholder="e.g. Pallet PLT-A04-002 not on truck. Driver confirmed only 1 pallet delivered."
+              style={{
+                width: '100%', minHeight: 92, borderRadius: 10, padding: '12px 14px', marginBottom: 18,
+                border: `1.5px solid #D1CEC9`, background: '#fff', resize: 'vertical',
+                fontFamily: 'DM Sans,sans-serif', fontSize: 14, color: C.text,
+                outline: 'none', boxSizing: 'border-box', lineHeight: 1.45,
+              }}
+            />
+
+            <div style={{ display: 'flex', gap: 12 }}>
+              <button onClick={() => setShowReport(false)} style={{
+                flex: 1, padding: '14px', borderRadius: 12,
+                background: '#fff', border: `1.5px solid ${C.border}`, color: C.text,
+                fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 600, cursor: 'pointer',
+              }}>Cancel</button>
+              <button onClick={submitReport} style={{
+                flex: 1, padding: '14px', borderRadius: 12,
+                background: C.brand, border: 'none', color: '#fff',
+                fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+              }}>Submit report</button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
 
-// ── Success Screen — store after receiving ──
+// ── Success Screen - store after receiving ──
 // (the receiving placeholder will route to in_storage_unprocessed which already exists)
 
-// ── In Storage — Unprocessed (cleanup) ───────
+// ── In Storage - Unprocessed (cleanup) ───────
 const InStorageUnprocessedScreen = ({ navigate, appData }) => {
   const order = appData.selectedOrder || SAMPLE_ORDERS[0];
   const stream = appData.stream || order.stream || 'irradiation';
@@ -1344,8 +1840,8 @@ const InStorageUnprocessedScreen = ({ navigate, appData }) => {
         </div>
 
         <Card style={{ padding: '14px 16px', marginBottom: 14 }}>
-          <InfoRow label="Status" valueEl={<Badge state="RECEIVED" label="IN STORAGE — UNPROCESSED" />} />
-          <InfoRow label="Zone" value="Zone A — Bay 04" />
+          <InfoRow label="Status" valueEl={<Badge state="RECEIVED" label="IN STORAGE - UNPROCESSED" />} />
+          <InfoRow label="Zone" value="Zone A - Bay 04" />
           <InfoRow label="Customer" value={order.customer} />
           <InfoRow label="Product" value={order.product} />
           <InfoRow label="Stream" valueEl={<StreamBadge stream={stream} />} />
@@ -1361,18 +1857,20 @@ const InStorageUnprocessedScreen = ({ navigate, appData }) => {
 // ── Scan for Staging (intermediate step) ──────
 const ScanBinStagingScreen = ({ navigate, appData }) => {
   const stream = appData.stream || (appData.selectedOrder && appData.selectedOrder.stream) || 'irradiation';
-  const handleScan = () => {
+
+  const proceed = () => {
     const dest = { irradiation: 'staging_irradiation', eto: 'staging_eto', packing: 'staging_packing' }[stream] || 'stream_error';
     navigate(dest);
   };
+
   return (
     <PageWrapper title="Scan Pallet" onBack={() => navigate('in_storage_unprocessed')}
       bottomBar={null}>
       <div style={{ padding: '28px 20px 0' }}>
         <SectionTitle title="Scan Pallet for Staging" subtitle="Scan the pallet QR to auto-load the staging form" />
-        <Alert type="info" message={`Stream: ${stream.toUpperCase()} — form will load automatically.`} />
+        <Alert type="info" message={`Stream: ${stream.toUpperCase()} - form will load automatically.`} />
         <div style={{ display: 'flex', justifyContent: 'center', marginTop: 16 }}>
-          <ScanView onSimulate={handleScan} label="Scan Pallet QR" />
+          <ScanView onSimulate={proceed} label="Scan Pallet QR" />
         </div>
       </div>
     </PageWrapper>
@@ -1391,17 +1889,17 @@ Object.assign(window, {
 </script>
 
 <script type="text/babel">
-// SteriScan — Screens B: Staging, Treatment, Process-Out
+// SteriScan - Screens B: Staging, Treatment, Process-Out
 // ────────────────────────────────────────────────────────
 
-// ── Staging Form — Irradiation ────────────────
+// ── Staging Form - Irradiation ────────────────
 const StagingIrradiationScreen = ({ navigate, appData }) => {
   const [carrierId, setCarrierId] = React.useState('');
   const [conveyorRun, setConveyorRun] = React.useState('');
   const [notes, setNotes] = React.useState('');
 
   return (
-    <PageWrapper title="Staging — Irradiation" onBack={() => navigate('in_storage_unprocessed')}
+    <PageWrapper title="Staging - Irradiation" onBack={() => navigate('in_storage_unprocessed')}
       bottomBar={<Btn label="Confirm Staging" onClick={() => navigate('treatment_active', { palletState: 'STAGED', treatmentType: 'irradiation' })} color="orange" disabled={!carrierId || !conveyorRun} />}>
       <div style={{ padding: '20px 16px 8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -1440,7 +1938,7 @@ const StagingIrradiationScreen = ({ navigate, appData }) => {
   );
 };
 
-// ── Staging Form — EtO ────────────────────────
+// ── Staging Form - EtO ────────────────────────
 const StagingEtOScreen = ({ navigate, appData }) => {
   const [chamber, setChamber] = React.useState('CH-03');
   const [cycleType, setCycleType] = React.useState('standard');
@@ -1448,7 +1946,7 @@ const StagingEtOScreen = ({ navigate, appData }) => {
   const [notes, setNotes] = React.useState('');
 
   return (
-    <PageWrapper title="Staging — EtO" onBack={() => navigate('in_storage_unprocessed')}
+    <PageWrapper title="Staging - EtO" onBack={() => navigate('in_storage_unprocessed')}
       bottomBar={<Btn label="Confirm Staging" onClick={() => navigate('treatment_active', { palletState: 'STAGED', treatmentType: 'eto' })} color="orange" />}>
       <div style={{ padding: '20px 16px 8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -1474,7 +1972,7 @@ const StagingEtOScreen = ({ navigate, appData }) => {
   );
 };
 
-// ── Staging Form — Packing ────────────────────
+// ── Staging Form - Packing ────────────────────
 const StagingPackingScreen = ({ navigate, appData }) => {
   const [lineId, setLineId] = React.useState('');
   const [packType, setPackType] = React.useState('blister');
@@ -1482,7 +1980,7 @@ const StagingPackingScreen = ({ navigate, appData }) => {
   const [notes, setNotes] = React.useState('');
 
   return (
-    <PageWrapper title="Staging — Packing" onBack={() => navigate('in_storage_unprocessed')}
+    <PageWrapper title="Staging - Packing" onBack={() => navigate('in_storage_unprocessed')}
       bottomBar={<Btn label="Confirm Staging" onClick={() => navigate('treatment_active', { palletState: 'STAGED', treatmentType: 'packing' })} color="orange" disabled={!lineId} />}>
       <div style={{ padding: '20px 16px 8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -1492,7 +1990,32 @@ const StagingPackingScreen = ({ navigate, appData }) => {
         <PalletChip id={appData.palletId || 'PLT-A04-001'} />
         <div style={{ height: 16 }}/>
         <Card style={{ padding: 16 }}>
-          <Field label="Packing Line ID" value={lineId} onChange={e => setLineId(e.target.value)} placeholder="e.g. LINE-04" />
+          <div style={{ marginBottom: 14 }}>
+            <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 5, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Packing Line ID</label>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <div style={{
+                flex: 1, height: 44, borderRadius: 10, padding: '0 12px',
+                border: `1.5px solid #EBEBEB`, background: '#F4F4F4',
+                display: 'flex', alignItems: 'center',
+                fontFamily: 'DM Sans,sans-serif', fontSize: 15,
+                color: lineId ? C.text : C.muted,
+                fontStyle: lineId ? 'normal' : 'italic',
+              }}>
+                {lineId || 'Tap scan to fill'}
+              </div>
+              <button onClick={() => setLineId('LINE-04')} style={{
+                height: 44, width: 44, borderRadius: 10, border: `1.5px solid ${C.accent}`,
+                background: C.white, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0,
+              }}>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.accent} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <rect x="3" y="3" width="5" height="5" rx="1"/><rect x="16" y="3" width="5" height="5" rx="1"/>
+                  <rect x="3" y="16" width="5" height="5" rx="1"/><rect x="16" y="16" width="5" height="5" rx="1"/>
+                  <line x1="10" y1="5.5" x2="14" y2="5.5"/><line x1="10" y1="18.5" x2="14" y2="18.5"/>
+                  <line x1="5.5" y1="10" x2="5.5" y2="14"/><line x1="18.5" y1="10" x2="18.5" y2="14"/>
+                </svg>
+              </button>
+            </div>
+          </div>
           <Select label="Pack Type" value={packType} onChange={e => setPackType(e.target.value)}
             options={[
               { value: 'blister',  label: 'Blister Pack' },
@@ -1571,7 +2094,7 @@ const TreatmentActiveScreen = ({ navigate, appData }) => {
 
         <Card style={{ padding: '14px 16px' }}>
           <InfoRow label="Treatment Type" valueEl={<StreamBadge stream={type} />} />
-          <InfoRow label="Started" value="Apr 28, 2026 — 07:14" />
+          <InfoRow label="Started" value="Apr 28, 2026 - 07:14" />
           <InfoRow label="Chamber / Line" value={type === 'eto' ? 'CH-03' : type === 'packing' ? 'LINE-04' : 'Conveyor B'} />
           <InfoRow label="Target Dose / Cycle" value={type === 'irradiation' ? '25 – 45 kGy' : type === 'eto' ? 'Standard 12hr' : 'Blister Pack'} />
         </Card>
@@ -1580,76 +2103,52 @@ const TreatmentActiveScreen = ({ navigate, appData }) => {
   );
 };
 
-// ── Process-Out — Irradiation ─────────────────
+// ── Process-Out - Irradiation ─────────────────
 const ProcessOutIrradiationScreen = ({ navigate, appData }) => {
-  const [doseMin, setDoseMin] = React.useState('27.3');
-  const [doseMax, setDoseMax] = React.useState('41.8');
-  const targetMin = 25.0, targetMax = 45.0;
-  const min = parseFloat(doseMin), max = parseFloat(doseMax);
-  const inRange = !isNaN(min) && !isNaN(max) && min >= targetMin && max <= targetMax && min < max;
-
-  const handleConfirm = () => {
-    if (inRange) navigate('scan_bin', { palletState: 'PROCESS_OUT', binPhase: 'post_treatment' });
-    else navigate('qa_hold', { palletState: 'QA_HOLD', pdrReference: 'PDR-2026-007' });
-  };
+  const [scanned, setScanned] = React.useState(false);
+  const palletId = appData.palletId || 'PLT-A04-001';
 
   return (
     <PageWrapper title="Process-Out" onBack={() => navigate('treatment_active')}
       bottomBar={
-        <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-          {!inRange && doseMin && doseMax && (
-            <Btn label="Raise PDR" onClick={() => navigate('qa_hold', { palletState: 'QA_HOLD', pdrReference: 'PDR-2026-007' })} color="darkRed" />
-          )}
-          <Btn label="Confirm Process-Out" onClick={handleConfirm} color={inRange ? 'green' : 'red'} />
-        </div>
+        <Btn
+          label={scanned ? 'Confirm Process-Out →' : 'Confirm Process-Out'}
+          onClick={() => navigate('scan_bin', { palletState: 'PROCESS_OUT', binPhase: 'post_treatment' })}
+          color="green"
+          disabled={!scanned}
+        />
       }>
       <div style={{ padding: '20px 16px 8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
           <SectionTitle title="Irradiation Process-Out" />
           <StreamBadge stream="irradiation" />
         </div>
-        <PalletChip id={appData.palletId || 'PLT-A04-001'} />
+        <PalletChip id={palletId} />
         <div style={{ height: 16 }}/>
 
-        {doseMin && doseMax && (
-          <Alert
-            type={inRange ? 'teal' : 'error'}
-            message={inRange
-              ? `✓ Dosimetry within range (${targetMin}–${targetMax} kGy). Ready to confirm.`
-              : `✗ Dosimetry out of range! Entered: ${doseMin}–${doseMax} kGy. Target: ${targetMin}–${targetMax} kGy.`}
-          />
-        )}
-
-        <Card style={{ padding: 16 }}>
-          <Field label="Dosimetry Min (kGy)" value={doseMin} onChange={e => setDoseMin(e.target.value)} type="number" placeholder="Enter measured min" />
-          <Field label="Dosimetry Max (kGy)" value={doseMax} onChange={e => setDoseMax(e.target.value)} type="number" placeholder="Enter measured max" />
-          <Field label="Target Range Reference" value={`${targetMin} – ${targetMax} kGy (from BC)`} readOnly />
-          <div style={{ marginTop: 8 }}>
-            <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Auto Validation</label>
-            <div style={{
-              display: 'flex', alignItems: 'center', gap: 10, padding: '10px 14px',
-              borderRadius: 10, background: inRange ? '#F0FDF4' : '#FEF2F2',
-              border: `1.5px solid ${inRange ? '#86EFAC' : '#FECACA'}`,
-            }}>
-              <div style={{
-                width: 28, height: 28, borderRadius: 14, flexShrink: 0,
-                background: inRange ? C.green : C.red,
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <span style={{ color: '#fff', fontSize: 14 }}>{inRange ? '✓' : '✗'}</span>
-              </div>
-              <span style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, fontWeight: 600, color: inRange ? '#15803D' : '#991B1B' }}>
-                {inRange ? 'PASS — Within specification' : 'FAIL — Out of specification'}
-              </span>
+        {!scanned ? (
+          <>
+            <Alert type="info" message="Scan the pallet as it exits the chamber to confirm process-out." />
+            <div style={{ display: 'flex', justifyContent: 'center', marginTop: 8 }}>
+              <ScanView onSimulate={() => setScanned(true)} label="Scan Pallet QR" />
             </div>
-          </div>
-        </Card>
+          </>
+        ) : (
+          <>
+            <Alert type="teal" message="✓ Pallet scanned. Ready to confirm process-out." />
+            <Card style={{ padding: 14 }}>
+              <InfoRow label="Pallet ID"        value={palletId} bold />
+              <InfoRow label="Stream"           value="Irradiation" />
+              <InfoRow label="Process-Out Time" value="Now" />
+            </Card>
+          </>
+        )}
       </div>
     </PageWrapper>
   );
 };
 
-// ── Process-Out — EtO ─────────────────────────
+// ── Process-Out - EtO ─────────────────────────
 const ProcessOutEtOScreen = ({ navigate, appData }) => {
   const [duration, setDuration] = React.useState('12.5');
   const [aeration, setAeration] = React.useState('24');
@@ -1657,7 +2156,7 @@ const ProcessOutEtOScreen = ({ navigate, appData }) => {
   const [residue, setResidue] = React.useState('1.2');
 
   return (
-    <PageWrapper title="Process-Out — EtO" onBack={() => navigate('treatment_active')}
+    <PageWrapper title="Process-Out - EtO" onBack={() => navigate('treatment_active')}
       bottomBar={<Btn label="Confirm Process-Out" onClick={() => navigate('scan_bin', { palletState: 'PROCESS_OUT', binPhase: 'post_treatment' })} color="green" disabled={!duration || !aeration} />}>
       <div style={{ padding: '20px 16px 8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -1667,23 +2166,23 @@ const ProcessOutEtOScreen = ({ navigate, appData }) => {
         <PalletChip id={appData.palletId || 'PLT-A04-001'} />
         <div style={{ height: 16 }}/>
         <Card style={{ padding: 16 }}>
-          <Field label="Actual Cycle Duration (hrs)" value={duration} onChange={e => setDuration(e.target.value)} type="number" />
-          <Field label="Aeration Time (hrs)" value={aeration} onChange={e => setAeration(e.target.value)} type="number" />
-          <Field label="Temperature (°C)" value={temp} onChange={e => setTemp(e.target.value)} type="number" />
-          <Field label="Residue Reading (ppm)" value={residue} onChange={e => setResidue(e.target.value)} type="number" />
+          <Field label="Actual Cycle Duration (hrs)" value={duration} readOnly />
+          <Field label="Aeration Time (hrs)" value={aeration} readOnly />
+          <Field label="Temperature (°C)" value={temp} readOnly />
+          <Field label="Residue Reading (ppm)" value={residue} readOnly />
         </Card>
       </div>
     </PageWrapper>
   );
 };
 
-// ── Process-Out — Packing ─────────────────────
+// ── Process-Out - Packing ─────────────────────
 const ProcessOutPackingScreen = ({ navigate, appData }) => {
   const [finalQty, setFinalQty] = React.useState('368');
   const [damaged, setDamaged] = React.useState('0');
 
   return (
-    <PageWrapper title="Process-Out — Packing" onBack={() => navigate('treatment_active')}
+    <PageWrapper title="Process-Out - Packing" onBack={() => navigate('treatment_active')}
       bottomBar={<Btn label="Confirm Process-Out" onClick={() => navigate('scan_bin', { palletState: 'PROCESS_OUT', binPhase: 'post_treatment' })} color="green" disabled={!finalQty} />}>
       <div style={{ padding: '20px 16px 8px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 14 }}>
@@ -1693,8 +2192,8 @@ const ProcessOutPackingScreen = ({ navigate, appData }) => {
         <PalletChip id={appData.palletId || 'PLT-A04-001'} />
         <div style={{ height: 16 }}/>
         <Card style={{ padding: 16 }}>
-          <Field label="Final Packed Quantity" value={finalQty} onChange={e => setFinalQty(e.target.value)} type="number" />
-          <Field label="Damaged Units" value={damaged} onChange={e => setDamaged(e.target.value)} type="number" />
+          <Field label="Final Packed Quantity" value={finalQty} readOnly />
+          <Field label="Damaged Units" value={damaged} readOnly />
           {parseInt(damaged) > 0 && (
             <Alert type="warning" message={`${damaged} damaged unit(s) recorded. This will be flagged in the dispatch report.`} />
           )}
@@ -1713,17 +2212,17 @@ Object.assign(window, {
 </script>
 
 <script type="text/babel">
-// SteriScan — Screens C: Post-Treatment, Errors, Override, Success, Fail
+// SteriScan - Screens C: Post-Treatment, Errors, Override, Success, Fail
 // ────────────────────────────────────────────────────────────────────────
 
-// ── In Storage — Processed ────────────────────
+// ── In Storage - Processed ────────────────────
 const InStorageProcessedScreen = ({ navigate, appData }) => {
   const order = appData.selectedOrder || SAMPLE_ORDERS[0];
 
   return (
-    <PageWrapper title="In Storage — Processed" onBack={() => navigate('dashboard')}
+    <PageWrapper title="In Storage - Processed" onBack={() => navigate('dashboard')}
       bottomBar={
-        <Btn label="Continue to QA →" onClick={() => navigate('qa_status')} color="teal" large />
+        <Btn label="Back to Dashboard" onClick={() => navigate('dashboard')} color="blue" large />
       }>
       <div style={{ padding: '20px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
@@ -1731,15 +2230,15 @@ const InStorageProcessedScreen = ({ navigate, appData }) => {
           <PalletChip id={appData.palletId || 'PLT-A04-001'} />
         </div>
 
-        <Alert type="info" message="Pallet is treated and stored. Continue to QA when ready for review." />
+        <Alert type="info" message="Pallet is treated and stored. Awaiting QA review." />
 
-        <Card style={{ padding: '14px 16px', marginBottom: 14 }}>
-          <InfoRow label="Status" valueEl={<Badge state="IN_STORAGE_PROCESSED" label="PROCESSED — AWAITING QA" />} />
-          <InfoRow label="Zone" value={appData.binLocation || 'Zone C — Bay 02'} />
+        <Card style={{ padding: '14px 16px' }}>
+          <InfoRow label="Status" valueEl={<Badge state="IN_STORAGE_PROCESSED" label="PROCESSED - AWAITING QA" />} />
+          <InfoRow label="Zone" value={appData.binLocation || 'Zone C - Bay 02'} />
           <InfoRow label="Customer" value={order.customer} />
           <InfoRow label="Product" value={order.product} />
           <InfoRow label="Stream" valueEl={<StreamBadge stream={appData.stream || order.stream || 'irradiation'} />} />
-          <InfoRow label="Process-Out" value="Apr 28, 2026 — 14:32" />
+          <InfoRow label="Process-Out" value="Apr 28, 2026 - 14:32" />
         </Card>
       </div>
     </PageWrapper>
@@ -1747,24 +2246,27 @@ const InStorageProcessedScreen = ({ navigate, appData }) => {
 };
 
 // ── QA Status ─────────────────────────────────
-const QAStatusScreen = ({ navigate, appData }) => {
+// View-only - QA action happens off-scanner, not in this app.
+const QAStatusScreen = ({ navigate, appData, setAppData }) => {
   const order = appData.selectedOrder || SAMPLE_ORDERS[0];
-  // demo state: 'pending' | 'released' | 'hold'
   const [qaState, setQaState] = React.useState('pending');
+  const isQA = appData.role === 'qa';
 
   const stateConfig = {
     pending: {
       bg: '#FEF3C7', stroke: '#D97706',
       icon: <><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></>,
       title: 'QA Review Pending',
-      sub: 'Quality Assurance is reviewing this pallet. Continue to packing once released.',
-      badge: { state: 'IN_TREATMENT', label: 'QA PENDING' },
+      sub: isQA
+        ? 'Review the pallet info, then release or raise a hold.'
+        : 'Quality Assurance is reviewing this pallet. Status will update once cleared.',
+      badge: { state: 'PROCESS_OUT', label: 'AWAITING QA' },
     },
     released: {
       bg: '#DCFCE7', stroke: C.green,
       icon: <path d="M20 6L9 17l-5-5"/>,
       title: 'QA Released',
-      sub: 'Pallet is cleared by QA. Proceed to packing.',
+      sub: 'Pallet is cleared by QA. Ready for dispatch.',
       badge: { state: 'QA_RELEASED', label: 'QA RELEASED' },
     },
     hold: {
@@ -1777,21 +2279,58 @@ const QAStatusScreen = ({ navigate, appData }) => {
   };
   const cfg = stateConfig[qaState];
 
+  let bottom;
+  if (qaState === 'released') {
+    bottom = <Btn label="Begin Dispatch →" onClick={() => navigate('packing')} color="green" large />;
+  } else if (qaState === 'hold') {
+    bottom = <Btn label="View QA Hold Details" onClick={() => navigate('qa_hold', { pdrReference: 'PDR-2026-007' })} color="darkRed" large />;
+  } else if (isQA) {
+    // QA reviewer: action buttons
+    bottom = (
+      <div style={{ display: 'flex', gap: 10 }}>
+        <button onClick={() => setQaState('hold')} style={{
+          flex: '0 0 42%', padding: '14px', borderRadius: 12,
+          background: '#fff', border: `1.5px solid ${C.red}`, color: C.red,
+          fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+        }}>Raise Hold</button>
+        <button onClick={() => setQaState('released')} style={{
+          flex: 1, padding: '14px', borderRadius: 12,
+          background: C.green, border: 'none', color: '#fff',
+          fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 700, cursor: 'pointer',
+        }}>Release Pallet</button>
+      </div>
+    );
+  } else {
+    // Operator: view-only
+    bottom = <Btn label="Back to Dashboard" onClick={() => navigate('dashboard')} color="blue" large />;
+  }
+
   return (
-    <PageWrapper title="QA Status" onBack={() => navigate('in_storage_processed')}
-      bottomBar={
-        qaState === 'released'
-          ? <Btn label="Continue to Packing →" onClick={() => navigate('packing')} color="green" large />
-          : qaState === 'hold'
-            ? <Btn label="View QA Hold Details →" onClick={() => navigate('qa_hold', { pdrReference: 'PDR-2026-007' })} color="darkRed" large />
-            : <Btn label="Awaiting QA Release…" disabled color="green" large />
-      }>
+    <PageWrapper title="QA Status" onBack={() => navigate('dashboard')}
+      bottomBar={bottom}>
       <div style={{ padding: '20px 16px' }}>
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
-          <SectionTitle title="QA Review" />
+          <SectionTitle title="QA Review" subtitle="Current QA status" />
           <Badge state={cfg.badge.state} label={cfg.badge.label} />
         </div>
         <PalletChip id={appData.palletId || 'PLT-A04-001'} />
+
+        {/* Role indicator */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap', marginTop: 12 }}>
+          <div style={{
+            display: 'inline-flex', alignItems: 'center', gap: 6,
+            padding: '4px 10px', borderRadius: 999,
+            background: isQA ? '#CCFBF1' : '#F1F5F9',
+            color: isQA ? '#0F766E' : C.muted,
+            fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700,
+            letterSpacing: 0.4,
+          }}>
+            <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/>
+            </svg>
+            {isQA ? 'VIEWING AS QA REVIEWER' : 'VIEWING AS OPERATOR (VIEW ONLY)'}
+          </div>
+        </div>
         <div style={{ height: 18 }}/>
 
         {/* Status card */}
@@ -1816,9 +2355,9 @@ const QAStatusScreen = ({ navigate, appData }) => {
           <InfoRow label="Pallet ID" value={appData.palletId || 'PLT-A04-001'} />
           <InfoRow label="Customer" value={order.customer} />
           <InfoRow label="Stream" valueEl={<StreamBadge stream={appData.stream || order.stream || 'irradiation'} />} />
-          <InfoRow label="Process-Out" value="Apr 28, 2026 — 14:32" />
+          <InfoRow label="Process-Out" value="Apr 28, 2026 - 14:32" />
           {qaState !== 'pending' && <InfoRow label="QA Reviewer" value="Sarah Mitchell" />}
-          {qaState !== 'pending' && <InfoRow label="Reviewed At" value="Apr 28, 2026 — 16:08" />}
+          {qaState !== 'pending' && <InfoRow label="Reviewed At" value="Apr 28, 2026 - 16:08" />}
         </Card>
 
         {/* Demo state switcher */}
@@ -1827,7 +2366,7 @@ const QAStatusScreen = ({ navigate, appData }) => {
           border: `1px dashed ${C.border}`,
         }}>
           <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-            Demo — set QA state
+            Demo - set QA state
           </div>
           <div style={{ display: 'flex', gap: 6 }}>
             {['pending', 'released', 'hold'].map(s => (
@@ -1851,7 +2390,7 @@ const PackingScreen = ({ navigate, appData }) => {
   const order = appData.selectedOrder || SAMPLE_ORDERS[0];
   const [packed, setPacked] = React.useState(false);
   const items = [
-    { name: 'Surgical Instruments — Class II', qty: 48 },
+    { name: 'Surgical Instruments - Class II', qty: 48 },
     { name: 'Sterile Packaging Pouches',        qty: 200 },
     { name: 'Indicator Strips',                 qty: 120 },
   ];
@@ -1938,7 +2477,7 @@ const QAHoldScreen = ({ navigate, appData }) => {
         </div>
 
         <Alert type="error"
-          message="Pallet blocked — awaiting QA review in Business Central. No further movement is permitted until released." />
+          message="Pallet blocked - awaiting QA clearance. No further movement is permitted until released." />
 
         <Card style={{ padding: '14px 16px', marginBottom: 14 }}>
           <InfoRow label="PDR Reference" value={pdr} bold />
@@ -1946,7 +2485,7 @@ const QAHoldScreen = ({ navigate, appData }) => {
           <InfoRow label="Pallet ID" value={appData.palletId || 'PLT-A04-001'} />
           <InfoRow label="Customer" value={order.customer} />
           <InfoRow label="Stream" valueEl={<StreamBadge stream={appData.stream || order.stream || 'irradiation'} />} />
-          <InfoRow label="Raised" value="Apr 28, 2026 — 15:01" />
+          <InfoRow label="Raised" value="Apr 28, 2026 - 15:01" />
         </Card>
 
         <div style={{
@@ -1974,7 +2513,7 @@ const DispatchScreen = ({ navigate, appData }) => {
   const handleConfirm = () => {
     navigate('success', {
       palletState: 'SHIPPED',
-      successMessage: `Pallet ${appData.palletId || 'PLT-A04-001'} dispatched successfully.\nOrder ${order.id} — ${order.customer}`,
+      successMessage: `Pallet ${appData.palletId || 'PLT-A04-001'} dispatched successfully.\nOrder ${order.id} - ${order.customer}`,
       successTitle: 'DISPATCHED!',
     });
   };
@@ -2001,7 +2540,7 @@ const DispatchScreen = ({ navigate, appData }) => {
           <InfoRow label="Product" value={order.product} />
           <InfoRow label="Stream" valueEl={<StreamBadge stream={appData.stream || order.stream || 'irradiation'} />} />
           <InfoRow label="Weight" value={`${order.weight} kg`} />
-          <InfoRow label="QA Released" value="Apr 28, 2026 — 16:20" />
+          <InfoRow label="QA Released" value="Apr 28, 2026 - 16:20" />
         </Card>
 
         <div style={{
@@ -2012,7 +2551,7 @@ const DispatchScreen = ({ navigate, appData }) => {
             <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/>
           </svg>
           <span style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, color: '#166534', fontWeight: 500 }}>
-            All gate checks passed — pallet is QA_RELEASED
+            All gate checks passed - pallet is QA_RELEASED
           </span>
         </div>
       </div>
@@ -2048,7 +2587,7 @@ const SuccessScreen = ({ navigate, appData }) => {
         <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 14, color: C.muted, textAlign: 'center', lineHeight: 1.5, whiteSpace: 'pre-line' }}>{msg}</div>
       </div>
       <div style={{ background: C.white, borderTop: `1px solid ${C.border}`, padding: '12px 20px' }}>
-        <Btn label="Done — Back to Dashboard" onClick={() => navigate('dashboard')} color="green" />
+        <Btn label="Done - Back to Dashboard" onClick={() => navigate('dashboard')} color="green" />
       </div>
     </div>
   );
@@ -2093,7 +2632,7 @@ const StreamErrorScreen = ({ navigate, appData }) => (
   <PageWrapper title="Stream Error" onBack={() => navigate('dashboard')}
     bottomBar={<Btn label="Contact Supervisor" onClick={() => navigate('supervisor_pin', { overrideReason: 'Incomplete receiving data' })} color="red" />}>
     <div style={{ padding: '20px 16px' }}>
-      <Alert type="error" message="Incomplete receiving data — cannot load treatment form. Service stream is missing or unrecognised for this pallet." />
+      <Alert type="error" message="Incomplete receiving data - cannot load treatment form. Service stream is missing or unrecognised for this pallet." />
       <Card style={{ padding: '14px 16px' }}>
         <InfoRow label="Pallet ID" value={appData.palletId || 'PLT-A04-001'} />
         <InfoRow label="Stream" value="UNKNOWN / MISSING" />
@@ -2161,7 +2700,7 @@ const SupervisorPINScreen = ({ navigate, appData }) => {
             </div>
           ))}
         </div>
-        {error && <p style={{ textAlign: 'center', color: C.red, fontFamily: 'DM Sans,sans-serif', fontSize: 13, margin: '-8px 0 16px', fontWeight: 600 }}>Incorrect PIN — try again</p>}
+        {error && <p style={{ textAlign: 'center', color: C.red, fontFamily: 'DM Sans,sans-serif', fontSize: 13, margin: '-8px 0 16px', fontWeight: 600 }}>Incorrect PIN - try again</p>}
 
         {/* Numpad */}
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: 10, marginBottom: 20 }}>
@@ -2228,10 +2767,61 @@ const OverrideConfirmScreen = ({ navigate, appData }) => {
   );
 };
 
+// ── Profile ───────────────────────────────────
+const ProfileScreen = ({ navigate, appData }) => {
+  const operatorName = appData.operator || 'Pan Xiao';
+  const role = appData.role || 'operator';
+  const initials = operatorName.split(' ').map(s => s[0]).join('').slice(0, 2).toUpperCase();
+  const roleLabel = role === 'qa' ? 'QA Reviewer' : 'Warehouse Operator';
+
+  return (
+    <PageWrapper title="Profile" onBack={() => navigate('dashboard')}>
+      <div style={{ padding: '20px 16px' }}>
+        {/* Operator card */}
+        <Card style={{ padding: '18px 16px', marginBottom: 14, textAlign: 'center' }}>
+          <div style={{
+            width: 72, height: 72, borderRadius: 36, margin: '0 auto 12px',
+            background: C.brand, color: '#fff',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            fontFamily: 'Outfit,sans-serif', fontSize: 26, fontWeight: 700,
+          }}>{initials}</div>
+          <div style={{ fontFamily: 'Outfit,sans-serif', fontSize: 18, fontWeight: 700, color: C.text, marginBottom: 4 }}>
+            {operatorName}
+          </div>
+          <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: C.muted }}>
+            EMP-0042
+          </div>
+        </Card>
+
+        {/* Account details */}
+        <Card style={{ padding: '4px 16px', marginBottom: 14 }}>
+          <InfoRow
+            label="Account Type"
+            valueEl={
+              <span style={{
+                display: 'inline-block', padding: '3px 10px', borderRadius: 999,
+                background: role === 'qa' ? '#CCFBF1' : '#EEF2FF',
+                color: role === 'qa' ? '#0F766E' : C.brand,
+                fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700,
+                textTransform: 'uppercase', letterSpacing: 0.5,
+              }}>{roleLabel}</span>
+            }
+          />
+          <InfoRow label="Facility"     value="Steritech Wetherill Park" />
+          <InfoRow label="Email"        value="pan.xiao@steritech.com.au" />
+          <InfoRow label="App version"  value="1.0.0" />
+        </Card>
+
+        <Btn label="Sign Out" onClick={() => navigate('splash', { operator: '', role: 'operator' })} color="red" outline />
+      </div>
+    </PageWrapper>
+  );
+};
+
 Object.assign(window, {
   InStorageProcessedScreen, QAStatusScreen, PackingScreen, QAHoldScreen, DispatchScreen,
   SuccessScreen, FailScreen, StreamErrorScreen,
-  SupervisorPINScreen, OverrideConfirmScreen,
+  SupervisorPINScreen, OverrideConfirmScreen, ProfileScreen,
 });
 
 </script>
@@ -2270,12 +2860,14 @@ const SCREEN_MAP = {
   stream_error:             StreamErrorScreen,
   supervisor_pin:           SupervisorPINScreen,
   override_confirm:         OverrideConfirmScreen,
+  profile:                  ProfileScreen,
 };
 
 function App() {
   const [screen, setScreen] = React.useState('splash');
   const [appData, setAppData] = React.useState({
     operator: '',
+    role: 'operator',
     selectedOrder: SAMPLE_ORDERS[0],
     palletId: 'PLT-A04-001',
     stream: 'irradiation',
@@ -2290,7 +2882,7 @@ function App() {
     supervisorName: '',
     overrideNotes: '',
     pdrReference: null,
-    binLocation: 'Zone A — Bay 04',
+    binLocation: 'Zone A - Bay 04',
   });
 
   const navigate = React.useCallback((s, updates = {}) => {
@@ -2302,6 +2894,7 @@ function App() {
     const panel = document.getElementById('tweaks-panel');
     const screenSel = document.getElementById('tweak-screen');
     const streamSel = document.getElementById('tweak-stream');
+    const roleSel = document.getElementById('tweak-role');
     const closeBtn = document.getElementById('tweaks-close');
 
     const handler = (e) => {
@@ -2317,6 +2910,9 @@ function App() {
     streamSel.addEventListener('change', () => {
       setAppData(prev => ({ ...prev, stream: streamSel.value, selectedOrder: { ...(prev.selectedOrder || SAMPLE_ORDERS[0]), stream: streamSel.value } }));
     });
+    roleSel.addEventListener('change', () => {
+      setAppData(prev => ({ ...prev, role: roleSel.value }));
+    });
     closeBtn.addEventListener('click', () => {
       panel.style.display = 'none';
       window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
@@ -2329,7 +2925,7 @@ function App() {
 
   return (
     <div key={screen} className="screen-enter" style={{ width: '100%', height: '100%' }}>
-      <ScreenComponent navigate={navigate} appData={appData} />
+      <ScreenComponent navigate={navigate} appData={appData} setAppData={setAppData} />
     </div>
   );
 }
