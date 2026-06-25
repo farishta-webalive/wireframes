@@ -746,6 +746,2058 @@ function resetDemoState(){
 }
 rehydrateState();
 
+/* ===========================================================================
+   EULA MODULE  (additive — see STERITECH-EULA.md + STERITECH-EULA-IMPLEMENTATION-PLAN.md)
+   Implements the 3 manager-defined cases without touching any existing
+   field / form / route / workflow:
+     Case 1 — blocking EULA after first login (all 4 signup/login paths)
+     Case 2 — re-acceptance every 90 days, or immediately on version change
+     Case 3 — per-form declaration captured into an exportable audit log
+   The portal is a front-end wireframe with no backend, so acceptance storage,
+   IP, the 90-day clock and exports are mocked in-memory; production specs live
+   in the plan doc. Nothing here persists across a refresh (by design).
+   =========================================================================== */
+
+/* The consolidated EULA, rendered for the in-app viewer/gate. The authoritative
+   source of record is STERITECH-EULA.md — this HTML mirrors it. */
+const EULA_HTML = `
+<div class="eula-doc"><style>
+.eula-doc{color:#1f2733;}
+.eula-doc h1{font-size:1.05rem;font-weight:700;color:#0f2a4a;margin:.6rem 0 .3rem;}
+.eula-doc h1+p{font-size:.8rem;}
+.eula-doc h2{font-size:.95rem;font-weight:600;color:#0f2a4a;border-bottom:1px solid #0f2a4a;padding-bottom:2px;margin:1rem 0 .45rem;}
+.eula-doc h3{font-size:.9rem;font-weight:600;color:#fff;background:#2c5d8a;padding:4px 9px;border-radius:3px;margin:.85rem 0 .45rem;}
+.eula-doc h4{font-size:.82rem;font-weight:700;color:#0f2a4a;margin:.7rem 0 .25rem;}
+.eula-doc p{font-size:.8rem;margin:.35rem 0;line-height:1.5;text-align:justify;}
+.eula-doc ul{font-size:.8rem;margin:.35rem 0 .35rem 1.1rem;list-style:disc;}
+.eula-doc li{margin:.15rem 0;}
+.eula-doc blockquote{border-left:3px solid #94a3b8;padding:2px 10px;color:#475569;margin:.4rem 0;font-size:.8rem;}
+.eula-doc table{border-collapse:collapse;width:100%;margin:.4rem 0 .7rem;font-size:.72rem;}
+.eula-doc th,.eula-doc td{border:1px solid #cbd5e1;padding:4px 6px;vertical-align:top;text-align:left;}
+.eula-doc th{background:#eef2f6;color:#0f2a4a;font-weight:600;}
+.eula-doc table.resp-table{table-layout:fixed;}
+.eula-doc table.resp-table th:nth-child(1),.eula-doc table.resp-table td:nth-child(1){width:44px;text-align:center;}
+.eula-doc table.resp-table th:nth-child(3),.eula-doc table.resp-table td:nth-child(3){width:64px;text-align:center;border-left:2px solid #334155;}
+.eula-doc table.resp-table th:nth-child(4),.eula-doc table.resp-table td:nth-child(4){width:78px;text-align:center;}
+.eula-doc table.resp-table thead th:nth-child(3),.eula-doc table.resp-table thead th:nth-child(4){background:#dbe4ee;}
+</style>
+<p><strong>Steritech Pty Ltd</strong> (ACN 007 308 027), 160 South Gippsland Highway, Dandenong South VIC 3175</p>
+<p>Sections 1 to 6 and Section 8 of this Agreement apply to all Services. Section 7 sets out Schedules A to D. Where a provision of Sections 1 to 6 or Section 8 is inconsistent with a Schedule, the Schedule prevails for the Service to which it relates.</p>
+<hr />
+<h2>Section 1: Document Control</h2>
+<table>
+<thead>
+<tr>
+<th>Field</th>
+<th>Detail</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Document title</td>
+<td>Steritech Quality Service Agreement</td>
+</tr>
+<tr>
+<td>Document owner</td>
+<td>Steritech Quality / Regulatory</td>
+</tr>
+<tr>
+<td>Version</td>
+<td>1.0</td>
+</tr>
+<tr>
+<td>Version date / effective date</td>
+<td>15 June 2026</td>
+</tr>
+<tr>
+<td>Status</td>
+<td>Active</td>
+</tr>
+<tr>
+<td>Source agreements consolidated</td>
+<td>FRM-0060 Rev. 01, Quality Service Agreement for Irradiation Treatment; FRM-0361 Rev. 00, Quality Service Agreement for Ethylene Oxide Treatment; FRM-0232 Rev. 02, Quality GMP Service Agreement for Packing and Labelling of Non-Sterile Medicine Product; FRM-0220 Rev. 03, Quality GMP Service Agreement for Release For Supply of Non-Sterile Medicine Product</td>
+</tr>
+<tr>
+<td>Validity</td>
+<td>36 months from acceptance, subject to the re-acceptance provisions in Section 8</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Revision history</strong></p>
+<table>
+<thead>
+<tr>
+<th>Version</th>
+<th>Date</th>
+<th>Author</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1.0</td>
+<td>15 June 2026</td>
+<td>Steritech Quality</td>
+<td>Initial consolidated agreement. Reproduces FRM-0060 Rev. 01, FRM-0361 Rev. 00, FRM-0232 Rev. 02 and FRM-0220 Rev. 03 as Schedules A to D respectively, with all clauses, responsibility allocations, notes and supply conditions reproduced from the signed source agreements. Consolidated wrapper (Sections 1 to 6) and digital acceptance provisions (Section 8) added.</td>
+</tr>
+</tbody>
+</table>
+<p>Where a new version of this Agreement is published, a row is added to the revision history above, the version number is incremented and a new effective date is set; re-acceptance is then required at the next sign-in in accordance with Section 8.</p>
+<hr />
+<h2>Section 2: Parties and Formation</h2>
+<p>This agreement and understanding is made between <strong>Steritech Pty Ltd</strong> (ACN 007 308 027) of 160 South Gippsland Highway, Dandenong South (“<strong>Steritech</strong>”) and the customer accepting this Agreement (the “<strong>User</strong>”).</p>
+<p>This Agreement is legally binding on both parties and establishes, clarifies, communicates and designates responsibilities as outlined in the applicable regulatory standards. This Agreement, detailing technical and quality requirements, together with each Purchase Order (including related documents) issued by you and accepted by us, and any attached additional user requirements issued by you and accepted by us, shall form the Agreement for the applicable manufacturing step(s) and all associated services to be provided by Steritech for the User (the “<strong>Services</strong>”) on products provided to Steritech by the User (the “<strong>Products</strong>”). If there is any conflict between the terms of the documents listed above, the terms of the document listed first shall prevail to the extent of the inconsistency. The Services will only be provided upon execution of this Agreement by both parties.</p>
+<p>Each Schedule in Section 7 applies only to the Service to which it relates. Where the User requests more than one Service, each applicable Schedule applies concurrently.</p>
+<hr />
+<h2>Section 3: Definitions</h2>
+<table>
+<thead>
+<tr>
+<th>Term</th>
+<th>Meaning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>User</td>
+<td>The company, and its authorised contacts, accepting this Agreement and submitting Products to Steritech for the Services.</td>
+</tr>
+<tr>
+<td>Steritech</td>
+<td>Steritech Pty Ltd (ACN 007 308 027).</td>
+</tr>
+<tr>
+<td>Products</td>
+<td>Goods provided by the User to Steritech for the Services.</td>
+</tr>
+<tr>
+<td>Services</td>
+<td>The treatment and/or manufacturing step(s) and associated services provided by Steritech, being irradiation treatment, ethylene oxide treatment, GMP packing and labelling, and/or GMP release for supply.</td>
+</tr>
+<tr>
+<td>Request Form</td>
+<td>The official form that must accompany each shipment or consignment of Product and convey all critical product and treatment information to Steritech.</td>
+</tr>
+<tr>
+<td>Purchase Order (PO)</td>
+<td>A commercial document that may accompany a consignment solely for the purpose of invoicing. Steritech will not view a PO in place of an official Request Form.</td>
+</tr>
+<tr>
+<td>Authorised Person</td>
+<td>A person qualified and authorised to perform Release For Supply of finished Product.</td>
+</tr>
+<tr>
+<td>cGDP / GMP</td>
+<td>Current Good Distribution Practice / Good Manufacturing Practice.</td>
+</tr>
+<tr>
+<td>COA / COC</td>
+<td>Certificate of Analysis / Certificate of Conformance.</td>
+</tr>
+<tr>
+<td>PQR</td>
+<td>Product Quality Review.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Section 4: Regulatory Framework</h2>
+<p>The intent of this Agreement is to ensure that the relevant activities are conducted in compliance with the latest revision of the relevant, industry specific and where applicable state, national and international legislation. The applicable standards for each Service are set out below.</p>
+<p><strong>Schedule A: Quality Service Agreement for Irradiation Treatment (FRM-0060 Rev. 01)</strong>
+- ISO13485: Medical Devices- Quality Management Systems- Requirements for regulatory purposes
+- ISO11137-1: Sterilization of Healthcare products- Radiation- Part 1: Requirements for the development, validation and routine control of a sterilization process for medical devices
+- ISO11137-2: Sterilization of Healthcare products- Radiation- Part 2: Establishing the sterilization dose
+- ISO11137-3: Sterilization of Healthcare products- Radiation- Part 3: Guidance on dosimetric aspects of development, validation and routine control
+- PIC/S Guide to Good Manufacturing Practise (GMP) for Medicinal Products (Part I) and relevant Annexes
+- PIC/S Guide to Good Manufacturing Practise (GMP) for Medicinal Products (Part II) and relevant Annexes
+- Australian Code of GMP for human blood and blood components, human tissues and human cellular therapy products
+- Australian Phytosanitary Treatment Application Standard for Irradiation
+- Foods Standards Australia and New Zealand (FSANZ)
+- Export Control Act
+- ICA-55
+- Biosecurity Act
+- Approved Arrangements for 4.2- Gamma Irradiation Requirements</p>
+<p><strong>Schedule B: Quality Service Agreement for Ethylene Oxide Treatment (FRM-0361 Rev. 00)</strong>
+- ISO13485: Medical Devices- Quality Management Systems- Requirements for regulatory purposes
+- ISO11135: Sterilization of Healthcare products- Ethylene Oxide- Requirements for the development, validation and routine control of a sterilization process for medical devices
+- ISO11140-1: Sterilization of Healthcare products- Chemical Indicators- Part 1: General requirements
+- PIC/S Guide to Good Manufacturing Practise (GMP) for Medicinal Products (Part I) and relevant Annexes
+- PIC/S Guide to Good Manufacturing Practise (GMP) for Medicinal Products (Part II) and relevant Annexes
+- Australian Code of GMP for human blood and blood components, human tissues and human cellular therapy products
+- Biosecurity Act
+- Approved Arrangements for 4.6- Fumigation Requirements</p>
+<p><strong>Schedule C: Quality GMP Service Agreement for Packing and Labelling of Non-Sterile Medicine Product (FRM-0232 Rev. 02)</strong>
+- PE009 PIC/S Guide to Good Manufacturing Practice (GMP) for Medicinal Products (Part I) and relevant Annexes
+- PE009 PIC/S Guide to Good Manufacturing Practice (GMP) for Medicinal Products (Part II) and relevant Annexes
+- Australian Therapeutics Goods Orders
+- Therapeutic Goods (Poisons and Controlled Drugs) Standard</p>
+<p><strong>Schedule D: Quality GMP Service Agreement for Release For Supply of Non-Sterile Medicine Product (FRM-0220 Rev. 03)</strong>
+- PE009 PIC/S Guide to Good Manufacturing Practice (GMP) for Medicinal Products (Part I) and relevant Annexes
+- PE009 PIC/S Guide to Good Manufacturing Practice (GMP) for Medicinal Products (Part II) and relevant Annexes
+- Australian Therapeutics Goods Orders
+- Therapeutic Goods (Poisons and Controlled Drugs) Standard</p>
+<hr />
+<h2>Section 5: Term and Variation</h2>
+<p>This Agreement is valid for <strong>36 months</strong>, effective from the date of acceptance, and may be altered only <strong>in writing</strong> and signed or accepted by an authorised representative of each of the parties. <strong>Verbal agreements are invalid and not enforceable.</strong></p>
+<p>In respect of the GMP Services (Schedules C and D), review of this Agreement will additionally be completed:</p>
+<ul>
+<li>at least annually, typically as part of the annual Product Quality Review (PQR); and/or</li>
+<li>at any stage by mutual agreement between the contracted parties.</li>
+</ul>
+<p>Re-acceptance is also required in the circumstances set out in Section 8.</p>
+<hr />
+<h2>Section 6: Interpretation of the Responsibility Tables</h2>
+<p>The following symbols and terms are used within the Schedules of this Agreement to define and identify the responsibilities held by the respective parties.</p>
+<table>
+<thead>
+<tr>
+<th>Symbol or term</th>
+<th>Definition</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>✓</td>
+<td>Responsible</td>
+</tr>
+<tr>
+<td>(blank)</td>
+<td>Not Responsible</td>
+</tr>
+</tbody>
+</table>
+<p>The sub-sections in the following tables detail the technical quality agreement clauses as per the regulatory requirements pertaining to the Services, and the party or parties responsible for each activity. Selected clauses below may not be applicable to all industries and their regulations. Where a ✓ appears in both the User and Steritech columns, responsibility for that clause is held by both parties, or, where a clause NOTE so provides, by whichever party's scope the activity falls within.</p>
+<hr />
+<h2>Section 7: Schedules A to D</h2>
+<h3>Schedule A: Quality Service Agreement for Irradiation Treatment</h3>
+<p><em>Source agreement: FRM-0060 Rev. 01</em></p>
+<p>This Schedule sets out the terms applicable to the Service of gamma irradiation treatment.</p>
+<h4>General Access and Quality Conditions</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.1</td>
+<td>Provide reasonable access to the facility where treatment takes place.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.2</td>
+<td>Provide reasonable access to all documents, procedures and records applicable to the treatment processing step and all supporting QMS processes that have been generated, implemented, completed and maintained in accordance to cGDP, all other specific industry regulations and stored for a minimum period of 5 years.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.3</td>
+<td>Generation, maintenance and storage of all product manufacturing records (excluding treatment processing records) for the minimum period as defined in accordance to applicable law.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.4</td>
+<td>If required under relevant regulations, maintain an appropriate Quality System so that all necessary controls and procedures are in place to ensure that the Product is treated in accordance to the required specifications.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.5</td>
+<td>Ensure Steritechs most current and valid relevant manufacturing / operating licences/ certifications are made visible to the other party.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.6</td>
+<td>Immediately notify the other party, through writing, in the event any of the relevant operating licences are revoked or suspended by regulatory authorities.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.7</td>
+<td>Ensure only trained and competent employees, through skills, educational background and/ or experience, execute this treatment step.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.8</td>
+<td>Notify the other party, through writing, of any proposed changes to the treatment processes that may affect processing quality or product realisation. Formal acknowledgement of the communicated change should be obtained from the user prior to implementation. NOTE: no acknowledgment from the User within 30 days (for changes that have a tie to security, this period may be less) of notification is interpreted as implied acknowledgement and acceptance.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.9</td>
+<td>Immediately notify the other party, through writing, of any changes to signatories or to any of the contact details, stated below.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Supplier Management</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.10</td>
+<td>Maintain a documented procedure for the identification, approval and management of suppliers providing critical materials (e.g., cobalt-60, dosimeters etc) and/ or service (e.g., calibration, maintenance etc) specific to the treatment step.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.11</td>
+<td>Ensure that agreements with suppliers are established, where required, to clarify and communicate responsibilities for all relevant activities, including the notification of changes.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.12</td>
+<td>Ensure that agreements with suppliers, where established, are maintained, accurate and valid for all relevant activities, including the notification of changes.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.13</td>
+<td>Conduct initial and ongoing quality evaluation assessments and approvals on suppliers of critical materials (e.g., cobalt-60, dosimeters etc) and critical services (e.g., calibration etc), as required. Changing the supplier of critical materials to be actioned through change control.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.14</td>
+<td>Maintain a comprehensive up to date list of all suppliers deemed approved for routine use.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.15</td>
+<td>Immediate notification to the other party in the event of a significant quality, safety issue or regulatory investigation relating to critical equipment or service, where product quality may be compromised.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Treatment</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.16</td>
+<td>Establish a unique lot numbering system for each consignment of product processed and is to appear on all traceability/ processing records for that related consignment.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.17</td>
+<td>Provide an official Request Form to accompany each shipment/ consignment of product and each package/ pallet to be clearly marked for easy identification. The official Request Form must contain, at a minimum, and advise Steritech of: • customer name and address • category and name of the Product • quantity of packages/ pallets • breakdown of the batch numbers comprising said consignment • dangerous good classification in relation to the Products • storage and handling requirements in relation to the Products • minimum reference dose required • maximum reference dose (for validated Products only) • whether a line clearance is needed (for an initial validation only) • details of biosecurity, quarantine and relevant conditions (if applicable) An official Purchase Order may accompany each consignment solely for the purpose of invoicing. Steritech will not view a PO in place of an official Request Form.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.18</td>
+<td>Selection of the minimum required product dose and, if compliance to ISO11137 or PIC/S Annex 12 is required, establishment of all of the maximum allowable accumulated dose, routine dosimetry limits and loading pattern required for the Product intended for treatment.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.19</td>
+<td>Should the User request for a non-validated treatment, but require Steritech to adhere to a User owned loading pattern (i.e., not the output of a dose mapping activity), the User must attach a copy of this loading pattern to and reference it on the Request Form for each consignment where it is to be followed by Steritech. NOTE: if no document is provided, Steritech will conduct loading as per unvalidated procedural requirements.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.20</td>
+<td>Determine the stability, useability and efficacy of the Product to be treated (including its packaging) for the relevant required total accumulated dose to be delivered to the Product.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.21</td>
+<td>Define and communicate to the other party, through writing on the Request Form, all relevant process specifications as per applicable regulations for the Product received by Steritech to be treated.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.22</td>
+<td>Routinely and consistently present the Product for treatment in accordance to all predetermined and/or validated specifications, marking and making easily accessible cartons representative of worst case for density verification check purposes. It shall be noted that products that contain any liquid, viscous or other, must be completely sealed to prevent leakage. Any pallets must be tightly secured using pallet shrink wrap to reduce the risk of dislodgment, which could lead to pallet collapse.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.23</td>
+<td>If the Product requires irradiation processing in compliance to ISO11137 or PIC/S Annex 12, adherence by the User to all clauses in this agreement under their responsibility is required, including immediately notifying Steritech, in writing, when Products are presented for treatment outside the current validated process specifications.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.24</td>
+<td>Certified delivery of the radiation dose to the reference/ routine dosimeter, located in the nominated position, to a specified level in compliance with User and regulatory requirements. See Supply Conditions below (clause 1.61).</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.25</td>
+<td>Labelling of Products as required by law, including placement of irradiation sticker labels on Products inside the cartons, if required. NOTE: Steritech does not take into consideration any markings or information on the Product or carton labels. All communication of critical product/ treatment information must be relayed to Steritech by the User on the request form only. Information communicated via any other platform will not be considered by Steritech.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.26</td>
+<td>Placement of irradiation sticker labels on the outside of the individual cartons/ pallets, upon request by the User, if not already applied by the User.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.27</td>
+<td>Quality control of the Irradiation process and review of all agreed / regulatory required process parameters and processing reports prior to the return of Product to the User. Maintenance of third party accreditation to applicable standards.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.28</td>
+<td>Strive to ensure that the Product delivered back to the User conforms to the specified requirements including in the same visual condition in which it arrived at the Steritech facility. Any damage to the Product is investigated by Steritech and requires formal customer disposition. Ensure that any rework/ re-processing conducted under instruction by the User must meet the acceptance criteria and that all batch documentation has been reviewed. Refer to clauses 1.48 and 1.49 for further details on logistics.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.29</td>
+<td>Quality control of the Product including taking and keeping retention samples of each category of Product, and chemical or biological testing as may be required for product sterility testing.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.30</td>
+<td>Responsible for release for sale or supply to market of the processed Products, and if necessary, registration/ listing of the Product. Ensure that all, including but not limited to, product packaging, labelling identification, integrity and security that pertain to the relevant export/ treatment pathways are adhered to.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<h4>Validation and Qualifications</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.31</td>
+<td>Maintain a set of technical documentation for facilities and service equipment (including software and computer systems, if applicable), defined as critical under Steritechs Quality System, including installation and operational qualifications. Ensure that validated systems are maintained and periodically evaluated or revalidated, as required.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.32</td>
+<td>Executing initial plant/ equipment installation and operational qualifications and subsequent installation and operational re-qualifications and validations following process modifications (e.g., replenishment of the cobalt-60 source).</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.33</td>
+<td>Notifying the other party, in writing, prior to such equipment qualification and re-qualification events following process modifications (e.g., replenishment of the cobalt-60 source), where the changes pose major or critical service impact.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.34</td>
+<td>Establishing a written validation protocol for each equipment/ process qualification specifying all critical steps, acceptance criteria and reference documentation. Any variations must be documented and justified.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.35</td>
+<td>Generating and filing an equipment qualification summary report by collating all related and supporting validation documents and cross referencing the corresponding protocol.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.36</td>
+<td>Distribute chamber and source replenishment qualification reports to the User for their records as applicable, and where requested.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.37</td>
+<td>Initial qualification/ validation of the process or processing cycle for the given Product, and re-qualification of the process following a modification to the process specification, cobalt-60 replenishment or routinely after a specified period, if treatment is to be in accordance to either ISO11137 or PIC/S Annex 12. NOTE: these regulations require initial validation activities to be performed and as such must be crosschecked and performed prior to requesting routine treatment. Refer to clause 1.59 for further details.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.38</td>
+<td>Calibration and monitoring of the dosimetry system and Irradiation chamber traceable to a national standard.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.39</td>
+<td>Records of validation and use of critical equipment must be retained and traceable to the particular manufacturing operation stage and piece of equipment.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.40</td>
+<td>Ensuring effective systems are used and documented for ensuring the premises and facility for where treatment takes place are well maintained and cleaned with records identifying cleaning status readily available.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.41</td>
+<td>Ensure adequate process controls are implemented and carried out between batches of different Products to prevent cross contamination.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.42</td>
+<td>Ensure effective systems are used and documented for ensuring contaminated or potentially contaminated Products are appropriately handled to mitigate cross contamination with other Products, work environment or personnel.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Storage and Handling- Logistics</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.43</td>
+<td>Ensure that all critical materials (e.g., cobalt-60, dosimeters etc) are in compliance with the specifications detailed in the associated COA/ COC obtained from the approved supplier for each consignment/ delivery, and that, where applicable, it matches the relevant material specification.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.44</td>
+<td>Ensure that all incoming critical materials (e.g., cobalt-60, dosimeters etc) have been physically or administratively segregated until they have been approved and released for routine use with appropriate documentation.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.45</td>
+<td>Ensure that all critical materials (e.g., cobalt-60, dosimeters etc) are stored, whilst onsite at Steritech, under any specialised conditions (e.g., temperature requirements) as detailed on the packaging label, incoming COA/ COC or as per suppliers instruction. These conditions are required to be controlled to ensure the material quality is maintained and fit for optimum use.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.46</td>
+<td>Regarding Products intended for treatment, notify Steritech, in writing, of handling and storage precautions for hazardous or fragile material. See clauses 1.17 and 1.25 for further details regarding the required communication platform.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.47</td>
+<td>Regarding Products intended for treatment, notify Steritech, in writing, at least 7 days ahead of Product delivery of all specialised handling and storage requirements including temperature (i.e., chilled or frozen). These instructions must also be recorded on the approved Request form for each consignment. See clauses 1.17 and 1.25 for further details. NOTE: not all Steritech sites hold the capability to store Products as frozen. Refer to the request form for such limitation. Also unless otherwise advised on the request form only, Steritech will store the Product in the open floor warehouse under uncontrolled conditions.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.48</td>
+<td>Delivery to and from the Steritech facility and the defining of shipping specifications, including ensuring appropriate transportation conditions are maintained up until arrival to the Steritech facility and from the moment Product is dispatched from the same facility, and all moments thereafter. The User will be responsible for and bear the cost of this transportation. It shall be noted that goods will only be released for dispatch upon a valid lot number of invoice number presented by the driver.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.49</td>
+<td>Ensure that appropriate product storage conditions are maintained from the point of arrival at the Steritech facility to the moment of Product dispatch from the same Steritech facility.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Inspections</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.50</td>
+<td>Conduct internal audits on the facility authorised to perform treatment to ensure these processes are appropriately implemented and effectively executed in accordance to Code to ensure that product quality is maintained.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.51</td>
+<td>Conduct external/ supplier audits on the facility authorised to perform treatment to ensure these processes are appropriately implemented and effectively executed in accordance to Code to ensure that product quality is maintained, where regulation dictates.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.52</td>
+<td>Immediately notify the audited party, in writing, in the event any non-conformance or deficiency identified is deemed to potentially affect the quality of the Product.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.53</td>
+<td>Distribute audit report to the audited organisation in order for the audited organisation to generate and provide formal responses (including investigational reports, root cause assessments, CAPAs and proposed target dates for rectification actions) to the identified deficiencies/ non-conformances, where regulation dictates.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Deviations, Complaints and Recall</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.54</td>
+<td>Investigate, assess, record and respond to all deviations made and complaints issued from the User pertaining to the treatment service provided and/or the resulting Product.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.55</td>
+<td>Investigate, assess, record and respond to all deviations made and complaints issued from the service provider pertaining to the nature of the Product, packaging and/or documentation sent for treatment.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<h4>Additional User Requirements and Supply Conditions</h4>
+<p><strong>1.56.</strong> It shall be noted that Steritech does not claim sterility of the Product. This responsibility lies with the User.</p>
+<p><strong>1.57.</strong> It shall be noted that Steritech will not be held liable for any claims made in relation to physical effects from ionising radiation provided that Steritech is not in breach to neither of this Agreement nor the Terms and Conditions displayed on the Steritech website at Terms and Conditions – Steritech.</p>
+<p><strong>1.58.</strong> It shall be noted that Steritech does not temperature map its facilities. In the event a customer nominates a specialised storage condition (i.e., chilled or frozen), Steritech will, where the service is available, store the Product in a location with the temperature set to within the Request Forms stipulated range.</p>
+<p><strong>1.59.</strong> It shall be noted that where treatment is requested in accordance to ISO11137 or PIC/S Annex 12, Steritech mandates the requirement for Users to initially validate their Product and process, and as such Steritech will not process a Product where no initial validation has been executed in accordance to that regulations requirements. Re-validation activities, unless a requirement under the stated regulation, will not be mandated by Steritech. This decision lies with the User. Should no re-validation be requested by the User, Steritech cannot provide confirmation that the entire product load has received a distribution of radiation dose within the treatment specification limits.</p>
+<p><strong>1.60.</strong> It shall be noted that Steritech may consolidate the Product with similar products (from other customers) in terms of density, exposure requirements or product nature, unless otherwise directed in writing on the Request Form (e.g., requesting that a line clearance is needed). Steritech reserves the right to adjust the price should the user request the product be non-consolidated.</p>
+<p><strong>1.61.</strong> It shall be noted that Steritech’s certificate of processing is the User’s evidence that the Product has been processed as per this Agreement. Steritech personnel physically verify each delivery for the identity of the client, the quantity treated, the carton density, and a client supplied reference number such as a purchase order number. Other details, such as batch code, may be transcribed from the client documentation for convenience but is not verified by Steritech.</p>
+<p><strong>1.62.</strong> It shall be noted that Technical Arrangements are stored in Steritech’s Customer Requirements database and the User must specify in this agreement (see below for designated field) any special requirements relating to the Services and/or Products that are not specifically mentioned above. Steritech reserves the right to accept or reject the requested additional technical arrangements at its discretion.</p>
+<p><strong>1.63.</strong> It shall be noted that in relation to the treatment of Products for human consumption, it is the Users responsibility to ensure that: A. each Product requiring irradiation is not prohibited from irradiation and has permission to be irradiated and then consumed by the relevant national food safety authority in the country where the Product will be consumed, and B. produce to be irradiated is sourced from growers and packers that maintain all required approvals, certifications and/or registrations for the intended export/ treatment pathway and, in cases where the treatment facility is required to maintain copies of these, ensure a copy is forwarded to Steritech prior to the delivery of the produce for treatment. The User warrants that the User will fulfill all required responsibilities stated within this agreement and that the Products comply with the restrictions in the Food Standards Code and foods for human consumption are accepted for irradiation in reliance on this warranty. The User must also ensure that the irradiation dose requested complies with the relevant requirements, taking into consideration the Product, market and all other required information.</p>
+<p><strong>1.64.</strong> It shall be noted that Steritech reserves the right to examine the contents of any Product(s) in the event such Product has resided on hold at any Steritech facility for a time period exceeding six months. Steritech will then coordinate with an authorised and licenced third party to undertake appropriate disposal of said Product.</p>
+<p><strong>1.65.</strong> It shall be noted that each Steritech site carries sizing and weight limitations for their irradiator and conveyer systems (Steritech site can provide these limitations upon enquiry from the customer), for which the customer must adhere to when preparing their consignments for delivery to Steritech. Consignments that exceed these limitations may require manual intervention in which case may incur additional costs, or could be rejected at receipt and returned to the customer for re-work. It shall also be noted that for Occupational Health and Safety purposes, an individual carton must not exceed 25kg in weight, and where possible be marked as heavy.</p>
+<p><strong>1.66.</strong> It shall be noted that should the User wish to propose any addendums to this agreement or to the detail in any clauses above, these must be communicated to Steritech (see below for designated field) and will be assessed for suitability prior to countersigning this agreement. Steritech reserves the right to accept or reject the requested addendums at its discretion.</p>
+<hr />
+<h3>Schedule B: Quality Service Agreement for Ethylene Oxide Treatment</h3>
+<p><em>Source agreement: FRM-0361 Rev. 00</em></p>
+<p>This Schedule sets out the terms applicable to the Service of ethylene oxide treatment.</p>
+<h4>General Access and Quality Conditions</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.1</td>
+<td>Provide reasonable access to the facility where treatment takes place.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.2</td>
+<td>Provide reasonable access to all documents, procedures and records applicable to the treatment processing step and all supporting QMS processes that have been generated, implemented, completed and maintained in accordance to cGDP, all other specific industry regulations and stored for a minimum period of 5 years.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.3</td>
+<td>Generation, maintenance and storage of all product manufacturing records (excluding treatment processing records) for the minimum period as defined in accordance to applicable law.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.4</td>
+<td>If required under relevant regulations, maintain an appropriate Quality System so that all necessary controls and procedures are in place to ensure that the Product is treated in accordance to the required specifications.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.5</td>
+<td>Ensure Steritechs most current and valid relevant manufacturing / operating licences/ certifications are made visible to the other party.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.6</td>
+<td>Immediately notify the other party, through writing, in the event any of the relevant operating licences are revoked or suspended by regulatory authorities.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.7</td>
+<td>Ensure only trained and competent employees, through skills, educational background and/ or experience, execute this treatment step.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.8</td>
+<td>Notify the other party, through writing, of any proposed changes to the treatment processes that may affect processing quality or product realisation. Formal acknowledgement of the communicated change should be obtained from the user prior to implementation. NOTE: no acknowledgment from the User within 30 days of notification is interpreted as implied acknowledgement and acceptance.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.9</td>
+<td>Immediately notify the other party, through writing, of any changes to signatories or to any of the contact details, stated below.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Supplier Management</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.10</td>
+<td>Maintain a documented procedure for the identification, approval and management of suppliers providing critical materials (e.g., EO gas, biological indicators etc) and/ or service (e.g., calibration, maintenance etc) specific to the treatment step.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.11</td>
+<td>Ensure that agreements with suppliers are established, where required, to clarify and communicate responsibilities for all relevant activities, including the notification of changes.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.12</td>
+<td>Ensure that agreements with suppliers, where established, are maintained, accurate and valid for all relevant activities, including the notification of changes.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.13</td>
+<td>Conduct initial and ongoing quality evaluation assessments and approvals on suppliers of critical materials (e.g., EO gas, biological indicators etc) and critical services (e.g., calibration etc), as required. Changing the supplier of critical materials to be actioned through change control.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.14</td>
+<td>Maintain a comprehensive up to date list of all suppliers deemed approved for routine use.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.15</td>
+<td>Immediate notification to the other party in the event of a significant quality, safety issue or regulatory investigation relating to critical equipment or service, where product quality may be compromised.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Treatment</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.16</td>
+<td>Establish a unique lot numbering system for each consignment of product processed and is to appear on all traceability/ processing records for that related consignment.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.17</td>
+<td>Provide an official Request Form to accompany each shipment/ consignment of product and each package/ pallet to be clearly marked for easy identification. The official Request Form must contain, at a minimum, and advise Steritech of: • customer name and address • category and name of the Product • quantity of packages/ pallets • breakdown of the batch numbers comprising said consignment • dangerous good classification in relation to the Products • storage and handling requirements in relation to the Products • EO cycle required • details of biosecurity, quarantine and relevant conditions (if applicable) An official Purchase Order may accompany each consignment solely for the purpose of invoicing. Steritech will not view a PO in place of an official Request Form.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.18</td>
+<td>Selection of the EO recipe and cycle parameter specifications required for the Product intended for treatment, and if compliance to ISO11135 is required, establishment of validated process specifications.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.19</td>
+<td>Determine the stability, useability and efficacy of the Product to be treated (including its packaging) for the specified EO recipe and cycle parameters.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.20</td>
+<td>Define and communicate to the other party, through writing on the Request Form, all relevant process specifications as per applicable regulations for the Product received by Steritech to be treated.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.21</td>
+<td>Routinely and consistently present the Product for treatment in accordance to all predetermined and/or validated specifications. It shall be noted that products that contain any liquid, viscous or other, must be completely sealed to prevent leakage. Any pallets must be tightly secured using pallet shrink wrap to reduce the risk of dislodgment, which could lead to pallet collapse.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.22</td>
+<td>If the Product requires EO processing in compliance to ISO11135, adherence by the User to all clauses in this agreement under their responsibility is required, including immediately notifying Steritech, in writing, when Products are presented for treatment outside the current validated process specifications.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.23</td>
+<td>Certified delivery of the EO cycle recipe to the User’s Product using the User’s nominated cycle parameters. See Supply Conditions below (clause 1.61).</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.24</td>
+<td>Labelling of Products as required by law, including placement of EO sticker labels on Products inside the cartons, if required. NOTE: Steritech does not take into consideration any markings or information on the Product or carton labels. All communication of critical product/ treatment information must be relayed to Steritech by the User on the request form only. Information communicated via any other platform will not be considered by Steritech.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.25</td>
+<td>Placement of EO sticker labels on the outside of the individual cartons/ pallets, upon request by the User, if not already applied by the User.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.26</td>
+<td>Specification of any supplementary parameters to comply with ISO11135 or other regulatory requirements including preconditioning time, post sterilization aeration time, biological indicator placement and any other requirements.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.27</td>
+<td>Quality control of the EO process and review of all agreed / regulatory required process parameters and processing reports prior to the return of Product to the User. Maintenance of third party accreditation to applicable standards.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.28</td>
+<td>Strive to ensure that the Product delivered back to the User conforms to the specified requirements including in the same visual condition in which it arrived at the Steritech facility. Any damage to the Product is investigated by Steritech and requires formal customer disposition. Ensure that any rework/ re-processing conducted under instruction by the User must meet the acceptance criteria and that all batch documentation has been reviewed. Refer to clauses 1.48 and 1.49 for further details on logistics.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.29</td>
+<td>Quality control of the Product including taking and keeping retention samples of each category of Product, and chemical or biological testing as may be required for product sterility testing.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.30</td>
+<td>Responsible for release for sale or supply to market of the processed Products, and if necessary, registration/ listing of the Product. Ensure that all, including but not limited to, product packaging, labelling identification, integrity and security that pertain to the relevant export/ treatment pathways are adhered to.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<h4>Validation and Qualifications</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.31</td>
+<td>Maintain a set of technical documentation for facilities and service equipment (including software and computer systems, if applicable), defined as critical under Steritechs Quality System, including installation and operational qualifications. Ensure that validated systems are maintained and periodically evaluated or revalidated, as required.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.32</td>
+<td>Executing initial plant/ equipment installation and operational qualifications and subsequent installation and operational re-qualifications and validations following process modifications.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.33</td>
+<td>Notifying the other party, in writing, prior to such equipment qualification and re-qualification events following process modifications.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.34</td>
+<td>Establishing a written validation protocol for each equipment/ process qualification specifying all critical steps, acceptance criteria and reference documentation. Any variations must be documented and justified.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.35</td>
+<td>Generating and filing an equipment qualification summary report by collating all related and supporting validation documents and cross referencing the corresponding protocol.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.36</td>
+<td>Distribute chamber qualification reports to the User for their records, where requested.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.37</td>
+<td>Initial qualification/ validation of the process or processing cycle for the given Product, and re-qualification of the process following a modification to the process specification, or routinely after a specified period, if treatment is to be in accordance to ISO11135. NOTE: this regulation require initial validation activities to be performed and as such must be crosschecked and performed prior to requesting routine treatment. Refer to clause 1.59 for further details.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.38</td>
+<td>Calibration and monitoring of the EO chambers and EO process traceable to a national standard.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.39</td>
+<td>Records of validation and use of critical equipment must be retained and traceable to the particular manufacturing operation stage and piece of equipment.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.40</td>
+<td>Ensuring effective systems are used and documented for ensuring the premises and facility for where treatment takes place are well maintained and cleaned with records identifying cleaning status readily available.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.41</td>
+<td>Ensure adequate process controls are implemented and carried out between batches of different Products to prevent cross contamination.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.42</td>
+<td>Ensure effective systems are used and documented for ensuring contaminated or potentially contaminated Products are appropriately handled to mitigate cross contamination with other Products, work environment or personnel.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Storage and Handling- Logistics</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.43</td>
+<td>Ensure that all critical materials (e.g., EO gas, biological indicators etc) are in compliance with the specifications detailed in the associated COA/COC obtained from the approved supplier for each consignment/ delivery, and that it matches the relevant material specifications.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.44</td>
+<td>Ensure that all incoming critical materials (e.g., EO gas, biological indicators etc) have been physically or administratively segregated until they have been approved and released for routine use with appropriate documentation.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.45</td>
+<td>Ensure that all critical materials (e.g., EO gas, biological indicators etc) are stored, whilst onsite at Steritech, under any specialised conditions (e.g., temperature requirements) as detailed on the packaging label, incoming COA/COC or as per suppliers instruction. These conditions are required to be controlled to ensure the material quality is maintained and fit for optimum use.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.46</td>
+<td>Regarding Products intended for treatment, notify Steritech, in writing, of handling and storage precautions for hazardous or fragile material. See clauses 1.17 and 1.24 for further details regarding the required communication platform.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.47</td>
+<td>Regarding Products intended for treatment, notify Steritech, in writing, at least 7 days ahead of Product delivery of all specialised handling and storage requirements including temperature (i.e., chilled). These instructions must also be recorded on the approved Request form for each consignment. See clauses 1.17 and 1.24 for further details. NOTE: unless otherwise advised on the request form only, Steritech will store the Product in the open floor warehouse under uncontrolled conditions.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.48</td>
+<td>Delivery to and from the Steritech facility and the defining of shipping specifications, including ensuring appropriate transportation conditions are maintained up until arrival to the Steritech facility and from the moment Product is dispatched from the same facility, and all moments thereafter. The User will be responsible for and bear the cost of this transportation. It shall be noted that goods will only be released for dispatch upon a valid lot number of invoice number presented by the driver.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.49</td>
+<td>Ensure that appropriate product storage conditions are maintained from the point of arrival at the Steritech facility to the moment of Product dispatch from the same Steritech facility.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Inspections</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.50</td>
+<td>Conduct internal audits on the facility authorised to perform treatment to ensure these processes are appropriately implemented and effectively executed in accordance to Code to ensure that product quality is maintained.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.51</td>
+<td>Conduct external/ supplier audits on the facility authorised to perform treatment to ensure these processes are appropriately implemented and effectively executed in accordance to Code to ensure that product quality is maintained, where regulation dictates.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.52</td>
+<td>Immediately notify the audited party, in writing, in the event any non-conformance or deficiency identified is deemed to potentially affect the quality of the Product.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.53</td>
+<td>Distribute audit report to the audited organisation in order for the audited organisation to generate and provide formal responses (including investigational reports, root cause assessments, CAPAs and proposed target dates for rectification actions) to the identified deficiencies/ non-conformances, where regulation dictates.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Deviations, Complaints and Recall</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.54</td>
+<td>Investigate, assess, record and respond to all deviations made and complaints issued from the User pertaining to the treatment service provided and/or the resulting Product.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.55</td>
+<td>Investigate, assess, record and respond to all deviations made and complaints issued from the service provider pertaining to the nature of the Product, packaging and/or documentation sent for treatment.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<h4>Additional User Requirements and Supply Conditions</h4>
+<p><strong>1.56.</strong> It shall be noted that Steritech does not claim sterility of the Product. This responsibility lies with the User.</p>
+<p><strong>1.57.</strong> It shall be noted that Steritech will not be held liable for any claims made in relation to physical effects from EO exposure provided that Steritech is not in breach to neither of this Agreement nor the Terms and Conditions displayed on the Steritech website at Terms and Conditions – Steritech.</p>
+<p><strong>1.58.</strong> It shall be noted that Steritech does not temperature map its facilities. In the event a customer nominates a specialised storage condition (i.e., chilled), Steritech will, where the service is available, store the Product in a location with the temperature set to within the Request Forms stipulated range.</p>
+<p><strong>1.59.</strong> It shall be noted that where treatment is requested in accordance to ISO11135, Steritech mandates the requirement for Users to initially validate their Product and process, and as such Steritech will not process a Product where no initial validation has been executed in accordance to that regulations requirements. Re-validation activities, unless a requirement under the stated regulation, will not be mandated by Steritech. This decision lies with the User. Should no re-validation be requested by the User, Steritech cannot provide confirmation that the entire product load has received a distribution of gas exposure within the treatment specification limits.</p>
+<p><strong>1.60.</strong> It shall be noted that where regulation allows, Steritech may consolidate the Product with similar products (from other customers) in terms of exposure requirements, EO cycle parameters or product nature, unless otherwise directed in writing on the Request Form.</p>
+<p><strong>1.61.</strong> It shall be noted that Steritech’s certificate of processing is the User’s evidence that the Product has been processed as per this Agreement. Steritech personnel physically verify each delivery for the identity of the client, the quantity treated and a client supplied reference number such as a purchase order number. Other details, such as batch code, may be transcribed from the client documentation for convenience but is not verified by Steritech.</p>
+<p><strong>1.62.</strong> It shall be noted that there are APVMA restrictions on EO processing for quarantine purposes. Steritech can provide information about this to the User.</p>
+<p><strong>1.63.</strong> It shall be noted that Technical Arrangements are stored in Steritech’s Customer Requirements database and the User must specify in this agreement (see below for designated field) any special requirements relating to the Services and/or Products that are not specifically mentioned above. Steritech reserves the right to accept or reject the requested additional technical arrangements at its discretion.</p>
+<p><strong>1.64.</strong> The User acknowledges and agrees that: A. Ethylene Oxide (EO) gas is extremely flammable and requires absolute protection against energy discharges in the EO chamber; B. EO processing is not intended for batteries or other stored energy devices.</p>
+<p><strong>1.65.</strong> It shall be noted that Steritech reserves the right to examine the contents of any Product(s) in the event such Product has resided on hold at any Steritech facility for a time period exceeding six months. Steritech will then coordinate with an authorised and licenced third party to undertake appropriate disposal of said Product.</p>
+<p><strong>1.66.</strong> It shall be noted that each Steritech site carries sizing and weight limitations for their chambers and conveyer systems (Steritech site can provide these limitations upon enquiry from the customer), for which the customer must adhere to when preparing their consignments for delivery to Steritech. Consignments that exceed these limitations may require manual intervention in which case may incur additional costs, or could be rejected at receipt and returned to the customer for re-work. It shall also be noted that for Occupational Health and Safety purposes, an individual carton must not exceed 25kg in weight, and where possible be marked as heavy.</p>
+<p><strong>1.67.</strong> It shall be noted that should the User wish to propose any addendums to this agreement or to the detail in any clauses above, these must be communicated to Steritech (see below for designated field) and will be assessed for suitability prior to countersigning this agreement. Steritech reserves the right to accept or reject the requested addendums at its discretion.</p>
+<hr />
+<h3>Schedule C: Quality GMP Service Agreement for Packing and Labelling of Non-Sterile Medicine Product</h3>
+<p><em>Source agreement: FRM-0232 Rev. 02</em></p>
+<p>This Schedule sets out the terms applicable to the Service of GMP packing and labelling of non-sterile medicine Product.</p>
+<h4>General Access and Quality Conditions</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.1</td>
+<td>Provide reasonable access to the facility where packing and labelling takes place.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.2</td>
+<td>Provide reasonable access to all documents, procedures and records applicable to packing and labelling and all supporting QMS processes that have been generated, implemented, completed and maintained in accordance to cGDP and stored for a minimum period of 5 years or for the shelf life of the product, whichever is longer.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.3</td>
+<td>Generation, maintenance and storage of all, if any, product manufacturing records (excluding packing and labelling) for the minimum period as defined in accordance to applicable law, sharing with Steritech as needed.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.4</td>
+<td>Maintain an appropriate Pharmaceutical QMS so that all necessary controls and procedures are in place to ensure that the product manufactured meets the required specifications.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.5</td>
+<td>Provide a copy of the current and valid relevant manufacturing / operating/ handling licences or certifications to the other party, as applicable.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.6</td>
+<td>Immediately notify the other party in the event any of the relevant manufacturing/ operating/ handling licences or certifications are revoked or suspended by regulatory authorities.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.7</td>
+<td>Ensure only trained and competent employees, through skills, educational background and/ or experience, execute these packing and labelling steps.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.8</td>
+<td>Notify the other party, through writing, of any proposed changes to the packing and labelling processes that may affect processing quality or product realisation. Formal acknowledgement of the communicated change should be obtained from the user prior to implementation. NOTE: no acknowledgment from the User within 15 days of notification is interpreted as implied acknowledgement and acceptance.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.9</td>
+<td>Notify the other party, through writing, of any proposed changes to the manufacturing (excluding packing and labelling) processes that may affect processing quality or product realisation. Formal acknowledgement of the communicated change should be obtained from Steritech prior to implementation. NOTE: no acknowledgment from Steritech within 15 days of notification is interpreted as implied acknowledgement and acceptance.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.10</td>
+<td>Immediately notify the other party, through writing, of any changes to signatories or to any of the contact details, stated below.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Supplier Management</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.11</td>
+<td>Maintain a documented procedure for the identification, approval and management of suppliers providing equipment and/ or service pertaining to the packing and labelling steps.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.12</td>
+<td>Ensuring that all GMP agreements are established, where required, to clarify and communicate responsibilities for all relevant GMP related activities, including the notification of changes.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.13</td>
+<td>Ensuring that all GMP agreements, where established, are maintained, accurate and valid for all relevant GMP related activities, including the notification of changes.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.14</td>
+<td>Conducting initial and ongoing quality evaluation assessments (including audits as needed) and approvals for suppliers of raw material (i.e., bulk non-sterile medicine).</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.15</td>
+<td>Conducting initial and ongoing quality evaluation assessments (including audits as needed) and approvals for suppliers of critical consumables (e.g., packaging- primary and secondary, labels). Changing the supplier of critical materials to be actioned through change control. NOTE: this clause is applicable for User, in the cases where the User nominates Steritech to pack into the Users primary packaging, and vice versa, this clause is applicable for Steritech, in the cases where the User nominates Steritech to pack into Steritechs primary packaging.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.16</td>
+<td>Conducting initial and ongoing quality evaluation assessments (including audits as needed) and approvals for suppliers of critical services (e.g., calibration and maintenance of critical equipment). Changing the suppler of critical services to be actioned through change control.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.17</td>
+<td>Maintain a comprehensive up to date list of all suppliers deemed approved for routine use.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.18</td>
+<td>Immediate notification of the other party in the event of a significant quality of safety issue or regulatory investigation relating to starting materials or critical consumables/ services pertaining to the Product.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Product and Materials Receipt</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.19</td>
+<td>Maintain a documented procedure for the process of handling critical consumables prior to arrival (including logistics) to the facility where packing and labelling are to take place. NOTE: this clause is applicable for User, in the cases where the User nominates Steritech to pack into the Users primary packaging, and vice versa, this clause is applicable for Steritech, in the cases where the User nominates Steritech to pack into Steritechs primary packaging.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.20</td>
+<td>Maintain a documented procedure for the process of secure handling raw materials prior to arrival (including logistics) to the facility where packing and labelling are to take place.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.21</td>
+<td>Ensure that all critical consumables used during packing and labelling are in compliance with the material specifications obtained from the approved suppliers. Reduced testing may be permitted for suppliers that have been appropriately qualified or have a good history of supply. NOTE: this clause is applicable for User, in the cases where the User nominates Steritech to pack into the Users primary packaging, and vice versa, this clause is applicable for Steritech, in the cases where the User nominates Steritech to pack into Steritechs primary packaging.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.22</td>
+<td>Ensure that all raw materials used during packing and labelling are in compliance with the material specifications obtained from the approved suppliers. Reduced testing may be permitted for suppliers that have been appropriately qualified or have a good history of supply. NOTE: if required testing was not performed, or performed by a non-GMP approved laboratory, the User acknowledges that Steritech will send bulk raw material for required testing prior to packing at the Users expense.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.23</td>
+<td>Maintain a documented procedure for the process of handling and storing (i.e., inventory management) critical consumables and raw materials upon arrival at the facility where packing and labelling are to take place.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.24</td>
+<td>Ensure that all incoming critical consumables and raw materials have been physically or administratively segregated until clauses 1.25 and 1.26 below have been undertaken.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.25</td>
+<td>Ensure that all critical consumables are verified compliant at receipt and released into storage in a timely manner with appropriate documentation, in preparation for picking into production.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.26</td>
+<td>Ensure that all raw materials verified compliant at receipt and released into secure and temperature monitored storage in a timely manner with appropriate documentation, in preparation for picking into production.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Packing and Labelling</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.27</td>
+<td>Maintain a documented procedure for the packing and labelling activities on the Product, with no activities to be outsourced unless prior approval is obtained, in writing, from the other party.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.28</td>
+<td>Ensure that packing and labelling activities do not adversely affect the quality of the finished Product.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.29</td>
+<td>Ensure that the artwork and content of finished product labels on primary (and secondary if applicable) packed Finished Product units is compliant to the required standards and regulations, with the exception of batch and expiry.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.30</td>
+<td>Ensure that an appropriate shelf life and storage condition is assigned to the Finished Product and supported by the relevant stability data. NOTE: this responsibility belongs to Steritech if the User nominates that Steritech undertake Release For Supply. If the User is to conduct Release For Supply, this responsibility lies with the User.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.31</td>
+<td>Print batch and expiry details onto the finished product labels.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.32</td>
+<td>Ensure the finished Product packaging (including primary and if requested, secondary packaging, as well as dispatch cartons) are visually clean and undamaged at the time of dispatch.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.33</td>
+<td>Ensure that finished Product is stacked into labelled dispatch cartons in an orderly fashion, neatly presented, and secured by means of carton fillers to mitigate movement or collapse during transport. Ensure tamper evident seals are applied to dispatch cartons at all potential entry points.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.34</td>
+<td>Ensure that appropriate storage conditions are maintained for the raw material/ finished Product, from the point of arrival at the facility performing packing and labelling (Steritech), to the moment of product dispatch from that same Steritech facility.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.35</td>
+<td>Delivery to and from the Steritech facility and the defining of shipping specifications, including ensuring appropriate transportation conditions are maintained up until arrival to the Steritech facility, and from the moment product is dispatched from the same facility, and all moments thereafter.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+</tbody>
+</table>
+<h4>Batch Release</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.36</td>
+<td>Establish and maintain a system to trace all production consumables and raw materials from supplier to product realization defining the extent of traceability and the records required, based on risk assessment.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.37</td>
+<td>Establish a unique batch numbering system for each batch of manufactured finished Product, ensuring clear and traceable links to raw and, if applicable, intermediate material. This batch number must appear on all batch records specific to that related batch.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.38</td>
+<td>Certify that Steritech operations and manufacturing steps have been performed in accordance with GMP requirements. Certificate of Conformance (COC) to include at a minimum: • batch number of starting material • batch number and expiry date of finished Product • product name and description • primary packaging and finished Product label descriptions • date of manufacture • storage conditions • release date • quantity on finished Product units • fill volume (weight or other suitable unit) • signed declaration.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.39</td>
+<td>Ensure that the product delivered back to the User conforms to the specified requirements including in a condition where the outer packaging is dry and free from dirt or damage. Any damage to the Product is investigated by Steritech and requires formal customer disposition. Ensure that any rework/ re-processing conducted under instruction by the User must meet the acceptance criteria and that all batch documentation has been reviewed.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.40</td>
+<td>Verify that the product delivered back to the User conforms to the specified requirements including in a condition where the outer packaging is dry and free from dirt or damage, and any rework/ repairs meets the acceptance criteria of the supply agreement.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.41</td>
+<td>Successfully performing the relevant testing and monitoring on each finished Product batch prior to release. NOTE: this responsibility belongs to Steritech if the User nominates that Steritech undertake Release For Supply. If the User is to conduct Release For Supply, this responsibility lies with the User.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.42</td>
+<td>Responsible for final inspection prior to batch release on finished Product and ensuring that release is based on appropriate documentation. NOTE: this responsibility belongs to Steritech if the User nominates that Steritech undertake Release For Supply. If the User is to conduct Release For Supply, this responsibility lies with the User.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.43</td>
+<td>Establish and maintain a documented procedure for managing how returned finished Products are received, uniquely identified as On Hold, segregated from normal production with access restricted to authorised personnel only, and investigated.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.44</td>
+<td>Should the User nominate that Steritech perform Release For Supply on any given batch of manufactured finished Product, both parties hold the responsibility to ensure that the Release For Supply service agreement is signed and countersigned. That Agreement is in addition to this agreement.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Validation, Cleaning and other Controls</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.45</td>
+<td>Maintain a set of technical documentation for facilities and service equipment (including software and computer systems, if applicable), defined as critical under Steritechs Quality System, including installations and operational qualifications. Ensure that validated systems are maintained and periodically evaluated or revalidated, if required.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.46</td>
+<td>Executing initial facility/ equipment installation and operational qualifications and subsequent installation and operational re-qualifications and validations following process modifications.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.47</td>
+<td>Establishing written validation protocols specifying all critical steps, acceptance criteria, reference documentation and must be executed on at least three batches of product or as per agreed process validation approach subject to process capability and risk assessment. Any variations must be documented and justified.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.48</td>
+<td>Generating and filing validation summary reports by collating all related and supporting validation documents and cross referencing the corresponding protocols.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.49</td>
+<td>Calibration, maintenance and monitoring performance of critical equipment traceable to a national standard.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.50</td>
+<td>Ensuring effective systems are used and documented for confirming all areas of a new or modified facility are suitable for an ISO 8 cleanroom classification, including a validated cleaning procedure.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.51</td>
+<td>Production process and controlled environmental conditions must be agreed upon by both parties prior to receiving products for packing and labelling.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.52</td>
+<td>Maintain a documented procedure for each of cleaning, validations (including a validation master plan) and gowning etc, clearly stipulating the requirements for health, cleanliness, dress code and access control of personnel. If the work environment can have an adverse effect on the product, the appropriate conditions and effectiveness monitoring control must also be defined.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.53</td>
+<td>Ensuring effective systems are used and documented for ensuring the premises and facility for where packing and labelling takes place are well maintained, cleaned and, where required, disinfected, with records identifying cleaning status readily available.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.54</td>
+<td>Records of equipment and process validations including the use of critical equipment must be retained. Cleaning and maintenance records filed in sequence with the manufacturing operations. All records must be traceable to the particular manufacturing operation and piece of equipment.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.55</td>
+<td>Ensure adequate process controls are validated, implemented and carried out between batches of different products to prevent cross contamination.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.56</td>
+<td>Execute and record line clearance activities between the processing of each different batch of product to remove all materials and documentation not required for the next operation.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.57</td>
+<td>Ensure effective systems are used and documented for ensuring contaminated or potentially contaminated products are appropriately handled to mitigate cross contamination with other products, work environment or personnel.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.58</td>
+<td>Isolate non-conforming raw material or finished Product and facilitate its controlled disposal, upon request by an authorised party, through a licenced and approved third party.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Inspections</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.59</td>
+<td>Conduct internal audits on the facility authorised to perform packing and labelling to ensure these processes are appropriately implemented and effectively executed in accordance to Code to ensure that product quality is maintained.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.60</td>
+<td>Conduct external/ supplier audits on the facility authorised to perform packing and labelling to ensure these processes are appropriately implemented and effectively executed in accordance to Code to ensure that product quality is maintained.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.61</td>
+<td>Immediately notify the audited party in the event any non-conformance or deficiency identified is deemed to potentially affect the quality of the product or expiry date.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.62</td>
+<td>Distribute audit report to the audited organisation in order for the audited organisation to generate and provide formal responses (including investigational reports, root cause assessments, CAPAs and proposed target dates for rectification actions) to the identified deficiencies/ non-conformances.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Deviations, Complaints and Recall</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.63</td>
+<td>Maintain a documented procedure for each of product recall, deviation and complaint management.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.64</td>
+<td>Notify the other party in the event any non-conformance relating to the step of packing or labelling Product, which is deemed to potentially affect safety, identity, strength, purity or quality of the product.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.65</td>
+<td>Investigate, assess, record and respond to all deviations made and complaints received pertaining to the packing and labelling service and/or resulting Product.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.66</td>
+<td>Investigate, assess, record and respond to all deviations made and complaints issued from the service provider pertaining to the nature of the Product, packaging and/or documentation sent for packing and labelling.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.67</td>
+<td>Within 24 Hours, communicate any concern related to packing or labelling of the product that had the potential for Return or Recall.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Additional User Requirements and Conditions</h4>
+<p><strong>1.68.</strong> It shall be noted that should the User wish to propose any addendums to this agreement or to the detail in any clauses above, these must be communicated to Steritech (see below for designated field) and will be assessed for suitability prior to countersigning this agreement. Steritech reserves the right to accept or reject the requested addendums at its discretion.</p>
+<hr />
+<h3>Schedule D: Quality GMP Service Agreement for Release For Supply of Non-Sterile Medicine Product</h3>
+<p><em>Source agreement: FRM-0220 Rev. 03</em></p>
+<p>This Schedule sets out the terms applicable to the Service of GMP Release For Supply of non-sterile medicine Product. Where the User nominates Steritech to perform Release For Supply, this Schedule applies in addition to Schedule C.</p>
+<h4>General Access and Quality Conditions</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.1</td>
+<td>Provide reasonable access to the facility where release for supply takes place.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.2</td>
+<td>Provide reasonable access to all documents, procedures and records applicable to release for supply and all supporting QMS processes that have been generated, implemented, completed and maintained in accordance to cGDP and stored for a minimum period of 5 years or for the shelf life of the product, whichever is longer.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.3</td>
+<td>Generation, maintenance and storage of, if any, all non Steritech executed product manufacturing records for the minimum period as defined in accordance to applicable law, and sharing with Steritech.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.4</td>
+<td>Generation, maintenance and storage of all Steritech executed product manufacturing records for the minimum period as defined in accordance to applicable law.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.5</td>
+<td>Maintain an appropriate Pharmaceutical QMS so that all necessary controls and procedures are in place to ensure that the finished product meets the required specifications.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.6</td>
+<td>Provide a copy of the current and valid relevant manufacturing / operating/ handling licences or certifications to the other party, as applicable.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.7</td>
+<td>Immediately notify the other party in the event any of the relevant manufacturing/ operating/ handling licences or certifications are revoked or suspended by regulatory authorities.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.8</td>
+<td>Ensure only trained and competent employees, through skills, educational background and/ or experience, execute this release for supply step.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.9</td>
+<td>Notify the other party, through writing, of any proposed changes to the Release For Supply processes that may affect processing quality or product realisation. Formal acknowledgement of the communicated change should be obtained from the user prior to implementation. NOTE: no acknowledgment from the User within 15 days of notification is interpreted as implied acknowledgement and acceptance.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.10</td>
+<td>Notify the other party, through writing, of any proposed changes to the manufacturing (excluding Steritech executed product manufacturing) processes that may affect processing quality or product realisation. Formal acknowledgement of the communicated change should be obtained from Steritech prior to implementation. NOTE: no acknowledgment from Steritech within 15 days of notification is interpreted as implied acknowledgement and acceptance.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.11</td>
+<td>Immediately notify the other party, through writing, of any changes to signatories or to any of the contact details, stated below.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>GMP Agreements</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.12</td>
+<td>Ensuring that all GMP agreements are established, where required, to clarify and communicate responsibilities for all relevant GMP related activities, including the notification of changes.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.13</td>
+<td>Ensuring that all GMP agreements, where established, are accurately maintained, accurate and valid for all relevant GMP related activities, including the notification of changes.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Stability Data and Updates</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.14</td>
+<td>Provide Authorised Personnel with a copy of the applicable finished product stability report(s) and all associated reference documentation, or a detailed summary report that supports assigned shelf life of finished Product. NOTE: should the report belong to the User, the User holds responsibility for this clause. If the report belongs to Steritech, Steritech holds responsibility.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.15</td>
+<td>Ensure stability data that a finished Product is released against is relevant and compliant to ICH requirements. Ensure that shelf life has been appropriately assigned, and storage conditions are defined for that batch of finished Product in alignment to that stability report.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.16</td>
+<td>Maintain a documented procedure for an ongoing stability program to monitor finished Product stability. NOTE: should stability belong to the User, the User holds responsibility for this clause. If the stability belongs to Steritech, Steritech holds responsibility.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.17</td>
+<td>Define and place the specific number of batches on the stability program or as required by the relevant regulatory authorities. NOTE: should stability belong to the User, the User holds responsibility for this clause. If the stability belongs to Steritech, Steritech holds responsibility.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.18</td>
+<td>Coordinate with a GMP approved laboratory the execution of stability protocols and programs, filing and sharing raw data with the Authorised Person conducting Release For Supply. NOTE: should stability belong to the User, the User holds responsibility for this clause. If the stability belongs to Steritech, Steritech holds responsibility.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.19</td>
+<td>Notify the other party of any issues that arise during the stability program that may potentially impact product expiry date. NOTE: should stability belong to the User, the User holds responsibility for this clause. If the stability belongs to Steritech, Steritech holds responsibility.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Product Quality Review (PQR)</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.20</td>
+<td>Maintain a documented procedure for PQR, supporting the other party by supplying relevant supply and manufacturing chain records, upon request.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.21</td>
+<td>Conduct PQR in line with PIC/S PE009 as per defined frequency.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.22</td>
+<td>Distribute PQR report to the other party upon request.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Release</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.23</td>
+<td>Maintain a documented procedure for Release For Supply of finished Product to market.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.24</td>
+<td>Maintain a documented procedure defining how the User will support Steritech in conducting Release For Supply of finished product to market.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.25</td>
+<td>Certify that Steritech operations and manufacturing steps have been performed in accordance with GMP requirements.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.26</td>
+<td>Certify that the User operations and manufacturing steps have been performed in accordance with GMP requirements.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.27</td>
+<td>Certification of finished product by an Authorised Person for release for supply.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Inspections</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.28</td>
+<td>Conduct internal audits on the facility authorised to perform Release For Supply to ensure this process is appropriately implemented and effectively executed in accordance to Code to ensure that product quality is maintained.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.29</td>
+<td>Conduct external/ supplier audits on the facility authorised to perform Release For Supply to ensure this process is appropriately implemented and effectively executed in accordance to Code to ensure that product quality is maintained.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.30</td>
+<td>Immediately notify the audited party in the event any non-conformance or deficiency identified is deemed to potentially affect the quality of the product or expiry date.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.31</td>
+<td>Distribute audit report to the audited organisation in order for the audited organisation to generate and provide formal responses (including investigational reports, root cause assessments, CAPAs and proposed target dates for rectification actions) to the identified deficiencies/ non-conformances.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Deviations, Complaints and Recalls</h4>
+<table>
+<thead>
+<tr>
+<th style="text-align: center;">Clause</th>
+<th>Responsibility</th>
+<th style="text-align: center;">User</th>
+<th style="text-align: center;">Steritech</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: center;">1.32</td>
+<td>Maintain a documented procedure for product recall, deviation and complaint management.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.33</td>
+<td>Notify the other party in the event any non-conformance from any executed step impacting release for supply which is deemed to potentially affect safety, identity, strength, purity or quality of the product.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.34</td>
+<td>Investigate, assess, record and respond to all deviations made and complaints received pertaining to product and/or release for supply service.</td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;">✓</td>
+</tr>
+<tr>
+<td style="text-align: center;">1.35</td>
+<td>Investigate, assess, record and respond to all deviations made and complaints issued from the service provider pertaining to the nature of the Product, packaging and/or documentation sent for release for supply.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;"></td>
+</tr>
+<tr>
+<td style="text-align: center;">1.36</td>
+<td>Within 24 Hours, communicate any concern related to irradiation, packing, other process and/or materials involved in the manufacturing of the product that has the potential for Return or Recall. Responsibility assigned to both parties depending on which activities fall with the service scope of the User and Steritech.</td>
+<td style="text-align: center;">✓</td>
+<td style="text-align: center;">✓</td>
+</tr>
+</tbody>
+</table>
+<h4>Additional User Requirements and Conditions</h4>
+<p><strong>1.37.</strong> It shall be noted that should the User wish to propose any addendums to this agreement or to the detail in any clauses above, these must be communicated to Steritech (see below for designated field) and will be assessed for suitability prior to countersigning this agreement. Steritech reserves the right to accept or reject the requested addendums at its discretion.</p>
+<hr />
+<h2>Section 8: Digital Acceptance and Re-acceptance</h2>
+<p>This Section governs electronic acceptance of this Agreement through the Steritech Customer Portal. It is additional to, and does not vary, the responsibilities set out in the Schedules in Section 7.</p>
+<p><strong>8.1 Acceptance.</strong> Acceptance of this Agreement is given electronically through the Steritech Customer Portal by selecting the acceptance checkbox (“I have read and agree to the Steritech Quality Service Agreement”) and selecting “Accept and continue”. By doing so, the accepting person agrees to be bound by this Agreement on behalf of the User company that person represents.</p>
+<p><strong>8.2 Legal effect of electronic acceptance.</strong> The accepting person confirms that they are authorised to accept this Agreement for the User and that this electronic acceptance has the same legal effect as a handwritten signature. Electronic acceptance through the Portal satisfies the execution requirement of this Agreement.</p>
+<p><strong>8.3 Effect of non-acceptance.</strong> If the User does not accept this Agreement, the User will not be able to access the Customer Portal or request Services, and should select “Decline”.</p>
+<p><strong>8.4 Audit logging.</strong> Each acceptance is recorded and retained as the audit trail of acceptance, capturing at a minimum the EULA version accepted, the accepting contact's user identity and User company, the date and time of acceptance, the IP address, and the device or user-agent.</p>
+<p><strong>8.5 Re-acceptance triggers.</strong> Re-acceptance of this Agreement is required when:</p>
+<ul>
+<li>(a) a contact signs in for the first time and has no prior acceptance on record;</li>
+<li>(b) 90 days have elapsed since that contact's last acceptance; or</li>
+<li>(c) Steritech publishes a new version of this Agreement, in which case a version change requires immediate re-acceptance at the next sign-in, overriding the 90-day cycle.</li>
+</ul>
+<p><strong>8.6 Per-submission declarations.</strong> The declaration a User confirms when submitting a treatment or GMP request through the Portal is separate from this Agreement and is captured and retained for each submission, in addition to this Agreement.</p></div>
+`;
+
+const EULA_VERSION_HISTORY = [
+  { version:'1.0', date:'2026-06-15', note:'Initial consolidated agreement. Merges the four FRM service agreements and adds digital acceptance, 90-day re-acceptance and audit logging.' },
+];
+
+/* New reactive state (added to the existing reactive object — no existing key touched) */
+state.eula = { version:'1.0', date:'2026-06-15', title:'Steritech Quality Service Agreement', html: EULA_HTML };
+state.eulaConfig = { reacceptDays: 90 };
+state.eulaVersionHistory = EULA_VERSION_HISTORY;
+state.eulaAcceptances = [];     // audit log — append-only {id,userId,userName,companyName,version,reason,acceptedAt,ip,userAgent}
+state.formDeclarations = [      // audit log — append-only {id,orderId,formCode,formName,facility,treatment,userId,userName,companyName,statement,method,signatureValue,acceptedAt,ip}
+  // Demo seed: sample per-submission declarations so the audit log is populated in the wireframe.
+  // Attributed to other customers (not the signed-in user) so the EULA gate still triggers normally.
+  { id:'DECL-018330', orderId:'STR-25-018330', formCode:'FRM-0241', formName:'Blood Serum', facility:'NAR', treatment:'Gamma',
+    userId:'hannah.cole@bioseq.com.au', userName:'Hannah Cole', companyName:'BioSeq Pty Ltd',
+    statement:'I confirm the information provided is true and correct, and I authorise Steritech to treat the goods described in accordance with the Steritech Quality Service Agreement.',
+    method:'checkbox', signatureValue:'Agreed (checkbox)', acceptedAt:'2026-04-15T14:38:00.000Z', ip:'203.0.113.77' },
+  { id:'DECL-018336', orderId:'STR-25-018336', formCode:'FRM-0092', formName:'Ethylene Oxide Treatment', facility:'DAN', treatment:'ETO',
+    userId:'marco@bellarinebotanics.com.au', userName:'Marco Reyes', companyName:'Bellarine Botanics',
+    statement:'I confirm the information provided is true and correct, and I authorise Steritech to treat the goods described in accordance with the Steritech Quality Service Agreement.',
+    method:'checkbox', signatureValue:'Agreed (checkbox)', acceptedAt:'2026-04-16T09:15:00.000Z', ip:'198.51.100.23' },
+  { id:'DECL-018339', orderId:'STR-25-018339', formCode:'FRM-0121', formName:'Bee Equipment Irradiation', facility:'MER', treatment:'Gamma',
+    userId:'jake@topendapiaries.com.au', userName:'Jake Marsh', companyName:'Top End Apiaries',
+    statement:'I confirm the information provided is true and correct, and I authorise Steritech to treat the goods described in accordance with the Steritech Quality Service Agreement.',
+    method:'signature', signatureValue:'Signature captured', acceptedAt:'2026-04-17T10:42:00.000Z', ip:'203.0.113.51' },
+];
+state.eulaReturnTo = null;      // intended destination captured by the gate
+
+function eulaUserId(){ return (state.profile.email || 'current-user').toLowerCase(); }
+function eulaMockIp(){
+  // Deterministic-ish mock IP per user so the audit log looks realistic.
+  const s = eulaUserId(); let h = 0; for (let i=0;i<s.length;i++) h = (h*31 + s.charCodeAt(i)) & 255;
+  return '203.0.113.' + (h || 7);
+}
+function eulaDaysSince(iso){
+  if (!iso) return Infinity;
+  return Math.floor((Date.now() - new Date(iso).getTime()) / 86400000);
+}
+function eulaLatestAcceptance(){
+  const uid = eulaUserId();
+  const mine = state.eulaAcceptances.filter(a => a.userId === uid);
+  return mine.length ? mine[mine.length - 1] : null;
+}
+/* Case 1 + Case 2 decision. Returns {required, reason}. Admins are never gated by the customer EULA. */
+function eulaStatus(){
+  if (state.role !== 'customer') return { required:false, reason:null };
+  const acc = eulaLatestAcceptance();
+  if (!acc)                                  return { required:true,  reason:'first' };
+  if (acc.version !== state.eula.version)    return { required:true,  reason:'version' };   // overrides 90-day rule
+  if (eulaDaysSince(acc.acceptedAt) >= state.eulaConfig.reacceptDays) return { required:true, reason:'periodic' };
+  return { required:false, reason:null };
+}
+/* Open a clean, print-ready copy of the agreement (for "Download PDF" / keep-a-copy).
+   Renders the live in-app agreement (state.eula.html) so the copy always matches the
+   accepted version. Does not alter the agreement content. */
+function openAgreementForPrint(){
+  const e = state.eula || {};
+  const name = e.title || 'Steritech Quality Service Agreement';
+  const dt = e.date ? new Date(e.date).toLocaleDateString('en-AU',{day:'numeric',month:'long',year:'numeric'}) : '';
+  const sub = 'Version ' + (e.version || '') + (dt ? ' · effective ' + dt : '');
+  const html =
+    '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>' + name + (e.version ? ' v' + e.version : '') + '</title>' +
+    '<style>@page{size:A4;margin:14mm 13mm;}' +
+    '*{ -webkit-print-color-adjust:exact !important; print-color-adjust:exact !important; }' +
+    'html,body{margin:0;padding:0;background:#fff;}' +
+    'body{font-family:Arial,Helvetica,sans-serif;font-size:16px;color:#334155;line-height:1.6;}' +
+    '.doc-title{font-size:20px;font-weight:700;color:#0f2a4a;margin:0 0 2px;}' +
+    '.doc-sub{font-size:12px;color:#475569;border-bottom:2px solid #0f2a4a;padding-bottom:8px;margin-bottom:12px;}' +
+    '.eula-doc table{page-break-inside:auto;}.eula-doc tr{page-break-inside:avoid;}.eula-doc thead{display:table-header-group;}' +
+    '.eula-doc h1,.eula-doc h2,.eula-doc h3,.eula-doc h4{page-break-after:avoid;}</style></head>' +
+    '<body><h1 class="doc-title">' + name + '</h1><div class="doc-sub">' + sub + '</div>' + (e.html || '') + '</body></html>';
+  // Print via an off-screen iframe (real A4 dimensions so content renders) — no extra tab, nothing left behind.
+  const iframe = document.createElement('iframe');
+  iframe.setAttribute('aria-hidden', 'true');
+  iframe.style.cssText = 'position:fixed;left:-10000px;top:0;width:794px;height:1123px;border:0;';
+  document.body.appendChild(iframe);
+  const w = iframe.contentWindow;
+  const doc = w.document;
+  doc.open(); doc.write(html); doc.close();
+  const cleanup = function(){ setTimeout(function(){ if (iframe.parentNode) iframe.parentNode.removeChild(iframe); }, 1000); };
+  w.onafterprint = cleanup;
+  setTimeout(function(){ try { w.focus(); w.print(); } catch (err) { cleanup(); } setTimeout(cleanup, 60000); }, 400);
+}
+function eulaRecordAcceptance(reason){
+  state.eulaAcceptances.push({
+    id: 'ACC-' + Date.now(),
+    userId: eulaUserId(),
+    userName: state.profile.contact || '—',
+    companyName: state.profile.company || '—',
+    version: state.eula.version,
+    reason: reason || 'first',
+    acceptedAt: new Date().toISOString(),
+    ip: eulaMockIp(),
+    userAgent: (navigator.userAgent || '').slice(0, 120),
+  });
+}
+/* Demo-only helpers (wireframe) so reviewers can trigger Cases 1, 2b, 2c on demand. */
+function eulaDemoReset(){
+  const uid = eulaUserId();
+  state.eulaAcceptances = state.eulaAcceptances.filter(a => a.userId !== uid);
+}
+function eulaDemoSimulate90(){
+  const acc = eulaLatestAcceptance();
+  if (acc) acc.acceptedAt = new Date(Date.now() - 91*86400000).toISOString();
+  else eulaRecordAcceptance('first'), (eulaLatestAcceptance().acceptedAt = new Date(Date.now() - 91*86400000).toISOString());
+}
+function eulaDemoPublishNewVersion(){
+  const parts = String(state.eula.version).split('.');
+  const next = parts[0] + '.' + ((parseInt(parts[1]||'0',10)) + 1);
+  const today = new Date().toISOString().slice(0,10);
+  state.eula.version = next;
+  state.eula.date = today;
+  state.eulaVersionHistory.unshift({ version: next, date: today, note: 'New version published (demo) — forces immediate re-acceptance for all users.' });
+}
+
 let _toastTimer = null;
 function showToast(message, kind='success'){
   state.toast = { message, kind };
@@ -757,7 +2809,7 @@ function currentFacility() { return FACILITIES.find(f => f.code === state.profil
 function formByRoute(facilityCode, formKey) {
   return FORM_CATALOG.find(f => f.facility === facilityCode && f.key === formKey);
 }
-function fmtDate(iso) { if (!iso) return '—'; const d = new Date(iso); return d.toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric' }); }
+function fmtDate(iso) { if (!iso) return '-'; const d = new Date(iso); return d.toLocaleDateString('en-AU', { day:'2-digit', month:'short', year:'numeric' }); }
 function fmtMoney(n) { return new Intl.NumberFormat('en-AU', { style:'currency', currency:'AUD' }).format(n||0); }
 function nextOrderId() {
   const last = state.orders[0]?.id || 'STR-25-018342';
@@ -2616,6 +4668,7 @@ const Sidebar = {
       return [
         { to:'/admin/companies',         label:'Companies',           icon:'building-2' },
         { to:'/admin/contacts',          label:'Contacts',            icon:'users' },
+        { to:'/admin/eula',              label:'Service Agreement',   icon:'file-text' },
         { to:'/settings',                label:'Settings',            icon:'settings-2' },
       ];
     }
@@ -2759,7 +4812,19 @@ const DemoPanel = {
       state.authed = false;
       this.open = false;
       this.$router.push('/login');
-    }
+    },
+    /* EULA demo triggers (wireframe). Each sets customer role then navigates so
+       the global guard shows the blocking EULA gate for the relevant case. */
+    eulaTriggerFirst(){
+      state.role = 'customer'; eulaDemoReset(); this.open = false; this.$router.push('/dashboard');
+    },
+    eulaTrigger90(){
+      state.role = 'customer'; eulaDemoSimulate90(); this.open = false; this.$router.push('/dashboard');
+    },
+    eulaTriggerVersion(){
+      state.role = 'customer'; eulaDemoPublishNewVersion(); this.open = false;
+      showToast('Published EULA v'+state.eula.version+'.', 'success'); this.$router.push('/dashboard');
+    },
   },
   template:`
   <div v-if="state.authed" class="fixed bottom-4 right-4 z-[60]">
@@ -2808,6 +4873,24 @@ const DemoPanel = {
             <option value="warning">Warning (amber)</option>
             <option value="critical">Critical (red)</option>
           </select>
+        </div>
+
+        <div class="border-t border-slate-200 pt-4">
+          <div class="text-xs font-medium text-slate-700 mb-1.5">Agreement triggers <span class="text-slate-400 font-normal">(switches to customer)</span></div>
+          <div class="space-y-2">
+            <button type="button" @click="eulaTriggerFirst"
+                    class="w-full inline-flex items-center justify-center gap-2 h-9 rounded-md border border-slate-300 text-xs text-navy-900 hover:bg-slate-50 focus-ring">
+              <Icon name="log-in" :size="13" aria-hidden="true"/> First login (not yet accepted)
+            </button>
+            <button type="button" @click="eulaTrigger90"
+                    class="w-full inline-flex items-center justify-center gap-2 h-9 rounded-md border border-slate-300 text-xs text-navy-900 hover:bg-slate-50 focus-ring">
+              <Icon name="calendar-clock" :size="13" aria-hidden="true"/> 90 days elapsed
+            </button>
+            <button type="button" @click="eulaTriggerVersion"
+                    class="w-full inline-flex items-center justify-center gap-2 h-9 rounded-md border border-slate-300 text-xs text-navy-900 hover:bg-slate-50 focus-ring">
+              <Icon name="upload" :size="13" aria-hidden="true"/> New version published
+            </button>
+          </div>
         </div>
 
         <div class="border-t border-slate-200 pt-4 space-y-2">
@@ -2964,6 +5047,90 @@ const LoginPage = {
   </div>`
 };
 
+/* ---------- Page: EULA gate (blocking — Case 1 & Case 2) -------------------- */
+/* Full-screen, no shell/nav so it cannot be skipped. Reached via the global
+   router guard whenever a signed-in customer needs to accept the current EULA. */
+const EulaGatePage = {
+  components:{ Icon, Btn },
+  data(){ return { agreed:false, declined:false }; },
+  computed:{
+    state(){ return state; },
+    status(){ return eulaStatus(); },
+    eula(){ return state.eula; },
+    reasonText(){
+      return ({
+        first:    'Please review and accept our Quality Service Agreement to continue.',
+        version:  'Our Quality Service Agreement has been updated. Please review and accept the new version to continue.',
+        periodic: 'It has been over ' + state.eulaConfig.reacceptDays + ' days since you last accepted. Please re-confirm our Quality Service Agreement to continue.',
+      })[this.status.reason] || 'Please review and accept our Quality Service Agreement to continue.';
+    },
+  },
+  methods:{
+    accept(){
+      if (!this.agreed) return;
+      eulaRecordAcceptance(this.status.reason);
+      const dest = state.eulaReturnTo || '/dashboard';
+      state.eulaReturnTo = null;
+      this.$router.push(dest);
+    },
+    decline(){ this.declined = true; },
+    review(){ this.declined = false; },
+    downloadCopy(){ openAgreementForPrint(); },
+    signOut(){ state.authed = false; this.$router.push('/login'); },
+  },
+  template:`
+  <div class="fixed inset-0 z-[80] bg-slate-900/60 flex items-center justify-center p-4 sm:p-6 overflow-y-auto" role="dialog" aria-modal="true" aria-labelledby="eula-title">
+    <div class="bg-white rounded-lg w-full max-w-2xl shadow-2xl my-4 flex flex-col max-h-[92vh]">
+
+      <!-- Declined state -->
+      <div v-if="declined" class="p-8 text-center">
+        <span class="inline-flex items-center justify-center h-12 w-12 rounded-full bg-red-50 text-red-600 ring-1 ring-red-100 mb-4"><Icon name="shield-alert" :size="22"/></span>
+        <h2 class="text-lg font-semibold text-navy-900">You must accept the Quality Service Agreement to continue</h2>
+        <p class="text-sm text-slate-600 mt-2 leading-relaxed">Access to the Steritech Customer Portal requires acceptance of the current Quality Service Agreement. You can review it again, or sign out.</p>
+        <div class="flex items-center justify-center gap-3 mt-6">
+          <Btn kind="outline" icon="arrow-left" @click="review">Review again</Btn>
+          <Btn kind="ghost" icon="log-out" @click="signOut">Sign out</Btn>
+        </div>
+      </div>
+
+      <!-- Acceptance state -->
+      <template v-else>
+        <header class="px-6 pt-5 pb-4 border-b border-slate-200">
+          <div class="flex items-center gap-3">
+            <img src="assets/steritech-mark-blue.png" alt="Steritech" class="h-8 w-auto" draggable="false"/>
+            <div>
+              <h2 id="eula-title" class="text-base font-semibold text-navy-900 leading-tight">{{ eula.title }}</h2>
+              <p class="text-xs text-slate-500">Version {{ eula.version }} · effective {{ fmt(eula.date) }}</p>
+            </div>
+          </div>
+          <div class="mt-3 rounded-md border border-teal-200 bg-teal-50/70 px-3 py-2 flex gap-2 items-start">
+            <Icon name="info" :size="15" cls="mt-0.5 shrink-0 text-teal-600"/>
+            <p class="text-sm text-teal-900">{{ reasonText }}</p>
+          </div>
+        </header>
+
+        <div class="px-6 py-4 overflow-y-auto text-sm text-slate-700 leading-relaxed space-y-1.5 eula-body" v-html="eula.html"></div>
+
+        <footer class="px-6 py-4 border-t border-slate-200 bg-slate-50 rounded-b-lg">
+          <label class="flex items-start gap-2.5 text-sm text-slate-800 select-none cursor-pointer">
+            <input type="checkbox" v-model="agreed" class="h-4 w-4 mt-0.5 rounded border-slate-300"/>
+            <span>I have read and agree to the Steritech Quality Service Agreement, and I am authorised to accept it on behalf of my company.</span>
+          </label>
+          <p class="text-xs text-slate-500 mt-2">By continuing, you agree to be bound by this Agreement. Your acceptance is recorded with the version, date/time, your IP address and user ID.</p>
+          <div class="flex items-center justify-between gap-3 mt-4">
+            <Btn kind="outline" icon="download" @click="downloadCopy">Download PDF</Btn>
+            <div class="flex items-center gap-3">
+              <Btn kind="ghost" @click="decline">Decline</Btn>
+              <Btn kind="primary" icon="check" :disabled="!agreed" @click="accept">Accept &amp; continue</Btn>
+            </div>
+          </div>
+        </footer>
+      </template>
+    </div>
+  </div>`,
+};
+EulaGatePage.methods.fmt = function(d){ if(!d) return '-'; const dt=new Date(d); return dt.toLocaleDateString('en-AU',{day:'numeric',month:'short',year:'numeric'}); };
+
 /* ---------- Page: Signup ---------------------------------------------------- */
 
 /* Facility services map (single source of truth for the location step) */
@@ -3008,7 +5175,7 @@ const SignupPage = {
         existingCompanyId:'', existingCompanyQuery:'',
       },
       manualPick: false,
-      selected: 'MER',
+      selectedCodes: [],
       autoSelectedNote: false,
       submitted: null,                      // populated on 'done' — drives the confirmation screen
     };
@@ -3029,13 +5196,19 @@ const SignupPage = {
       if (a.includes('VIC')) return 'MER';
       return null;
     },
-    effectiveSelected(){
-      // Invited mode forces the admin-assigned facility from the token.
-      if (this.invited) return this.invite.assignedFacility;
-      // If user manually picked, respect it. Otherwise mirror auto.
-      if (this.manualPick) return this.selected;
-      return this.autoFromAddress || this.selected;
+    /* selectedCodes is the single source of truth — bound directly to the checkboxes
+       via v-model so the DOM and state can never drift apart. Self-signup customers
+       can pick one OR several facilities (or all). Invited customers stay locked to
+       the single admin-assigned facility from their token. */
+    effectiveSelectedCodes(){
+      if (this.invited) return [this.invite.assignedFacility];
+      return this.selectedCodes;
     },
+    effectiveSelected(){ return this.effectiveSelectedCodes[0]; },
+    selectedFacilities(){
+      return this.facilities.filter(f => this.effectiveSelectedCodes.includes(f.code));
+    },
+    allSelected(){ return !this.invited && this.selectedCodes.length === this.facilities.length; },
     services(){ return FACILITY_SERVICES; },
     distance(){ return FACILITY_DISTANCE_KM; },
     treatmentStyles(){ return TREATMENT_STYLES; },
@@ -3114,8 +5287,16 @@ const SignupPage = {
           this.f.phone = ''; this.f.address = ''; this.f.abn = '';
           this.step = 'choose';
           this.mode = null;
+          this.selectedCodes = [];
+          this.manualPick = false;
         }
       },
+    },
+    /* Pre-select the facility the typed address points to — but only until the
+       customer manually edits the selection (then we stop overriding their choice). */
+    autoFromAddress(code){
+      if (this.invited || this.manualPick) return;
+      this.selectedCodes = code ? [code] : [];
     },
   },
   methods:{
@@ -3129,10 +5310,17 @@ const SignupPage = {
       this.step = 'form';
       window.scrollTo({ top: 0, behavior: 'smooth' });
     },
-    pickCard(code){
+    // Fired on every checkbox change — once the customer touches the list we stop
+    // letting the address auto-suggestion override their choice. (v-model handles
+    // the actual add/remove on selectedCodes, so the DOM and state stay in sync.)
+    markManualPick(){
+      this.manualPick = true;
+      this.autoSelectedNote = false;
+    },
+    toggleAll(){
       if (this.invited) return;
       this.manualPick = true;
-      this.selected = code;
+      this.selectedCodes = this.allSelected ? [] : this.facilities.map(f => f.code);
       this.autoSelectedNote = false;
     },
     pickExistingCompany(c){
@@ -3148,8 +5336,9 @@ const SignupPage = {
       this.$router.replace({ path: '/signup', query: q });
     },
     submitForm(){
-      if (!this.invited && this.mode === 'new' && !this.manualPick && !this.autoFromAddress){
-        this.autoSelectedNote = true;
+      if (!this.invited && this.mode === 'new' && this.selectedCodes.length === 0){
+        showToast('Please select at least one facility.', 'error');
+        return;
       }
       // Invited customers skip review — admin already pre-approved them.
       if (this.invited){
@@ -3193,7 +5382,8 @@ const SignupPage = {
       // They wait for an admin to verify the record from /admin → Pending Approvals.
       const today = this.todayIso();
       if (this.mode === 'new'){
-        const chosen = this.effectiveSelected;
+        const chosenCodes = this.effectiveSelectedCodes.slice();
+        const aggregatedServices = [...new Set(chosenCodes.flatMap(c => FACILITY_SERVICES[c] || []))];
         const newCompany = {
           id: this.nextCompanyId,
           name: this.f.company.trim(),
@@ -3206,8 +5396,8 @@ const SignupPage = {
             email: this.f.email.trim(),
             address: this.f.address.trim(),
           },
-          facilities: [chosen],
-          services: (FACILITY_SERVICES[chosen] || []).slice(0, 1),
+          facilities: chosenCodes,
+          services: aggregatedServices,
           status: 'Pending',
           created: today,
           origin: 'self-signup',
@@ -3372,9 +5562,9 @@ const SignupPage = {
             <div class="px-5 sm:px-7 pt-6 pb-4 border-b border-slate-100">
               <div class="flex items-center gap-2 text-navy-900">
                 <Icon name="map-pin" :size="18" cls="text-slate-500"/>
-                <h2 class="text-lg font-semibold">{{ invited ? 'Your assigned facility' : 'Choose facility' }}</h2>
+                <h2 class="text-lg font-semibold">{{ invited ? 'Your assigned facility' : 'Choose facilities' }}</h2>
               </div>
-              <p class="text-sm text-slate-600 mt-1">{{ invited ? 'Your account manager assigned this facility. You can request a change later.' : 'You will see the forms and services available at this facility after signing in.' }}</p>
+              <p class="text-sm text-slate-600 mt-1">{{ invited ? 'Your account manager assigned this facility. You can request a change later.' : 'Select one or more facilities &mdash; pick all that apply. You will see the forms and services available at each after signing in.' }}</p>
             </div>
 
             <div v-if="invited" class="px-5 sm:px-7 py-6">
@@ -3412,16 +5602,22 @@ const SignupPage = {
 
               <fieldset class="space-y-2.5">
                 <legend class="sr-only">Available facilities</legend>
+                <div class="flex items-center justify-between gap-3 pb-0.5">
+                  <span class="text-xs text-slate-500">{{ effectiveSelectedCodes.length }} of {{ facilities.length }} selected</span>
+                  <button type="button" @click="toggleAll"
+                          class="text-sm font-medium text-teal-600 hover:underline focus-ring rounded px-1 -mx-1">
+                    {{ allSelected ? 'Clear all' : 'Select all' }}
+                  </button>
+                </div>
                 <label v-for="fac in facilities" :key="fac.code"
                   :for="'signup-fac-'+fac.code"
                   :class="['flex items-start gap-3 rounded-md border p-4 cursor-pointer transition',
-                    effectiveSelected === fac.code
+                    effectiveSelectedCodes.includes(fac.code)
                       ? 'border-teal-500 bg-teal-50/40'
                       : 'border-slate-200 bg-white hover:border-slate-300']">
-                  <input type="radio" name="signup-facility" :id="'signup-fac-'+fac.code" :value="fac.code"
-                         :checked="effectiveSelected === fac.code"
-                         @change="pickCard(fac.code)"
-                         class="mt-1 h-4 w-4 text-teal-600 border-slate-300 focus:ring-teal-500"/>
+                  <input type="checkbox" name="signup-facility" :id="'signup-fac-'+fac.code" :value="fac.code"
+                         v-model="selectedCodes" @change="markManualPick"
+                         class="mt-1 h-4 w-4 rounded text-teal-600 border-slate-300 focus:ring-teal-500"/>
                   <div class="flex-1 min-w-0">
                     <div class="flex flex-wrap items-baseline gap-x-2">
                       <span class="text-base font-semibold text-navy-900">{{ fac.name }}</span>
@@ -3540,7 +5736,7 @@ const SignupPage = {
               <Icon name="arrow-left" :size="14"/> Back to sign in
             </router-link>
             <Btn size="lg" :block="true" iconRight="arrow-right"
-                 :disabled="!invited && mode === 'existing' && !f.existingCompanyId"
+                 :disabled="!invited && ((mode === 'existing' && !f.existingCompanyId) || (mode === 'new' && !selectedCodes.length))"
                  @click="submitForm" class="sm:!w-auto">{{ invited ? 'Set password and continue' : 'Review your details' }}</Btn>
           </div>
         </form>
@@ -3579,15 +5775,17 @@ const SignupPage = {
 
               <div class="px-6 sm:px-8 py-5 border-t border-slate-100">
                 <div class="flex items-center justify-between gap-2 mb-3">
-                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">Facility</div>
+                  <div class="text-xs uppercase tracking-wide text-slate-500 font-medium">{{ selectedFacilities.length > 1 ? 'Facilities' : 'Facility' }}</div>
                   <button type="button" @click="editFromReview" class="text-sm text-teal-600 hover:underline font-medium">Change</button>
                 </div>
-                <div class="flex items-center gap-3 flex-wrap text-sm">
-                  <span class="text-navy-900 font-medium">{{ assignedFacility.name }}, {{ assignedFacility.state }}</span>
-                  <span class="flex flex-wrap gap-1.5">
-                    <TreatmentChip v-for="s in services[assignedFacility.code]" :key="s" :treatment="s" :small="true"/>
-                  </span>
-                </div>
+                <ul class="space-y-2.5">
+                  <li v-for="fac in selectedFacilities" :key="fac.code" class="flex items-center gap-3 flex-wrap text-sm">
+                    <span class="text-navy-900 font-medium">{{ fac.name }}, {{ fac.state }}</span>
+                    <span class="flex flex-wrap gap-1.5">
+                      <TreatmentChip v-for="s in services[fac.code]" :key="s" :treatment="s" :small="true"/>
+                    </span>
+                  </li>
+                </ul>
               </div>
             </template>
 
@@ -4755,10 +6953,37 @@ const FormRenderer = {
           collection: this.data.deliveryDate || today,
         };
         state.orders.unshift(newOrder);
+        this.logFormDeclaration(id, newOrder);
         state.lastSubmissionId = id;
         this.submitting = false;
         this.$router.push('/submitted/'+id);
       }, 900);
+    },
+    /* Case 3 — capture the existing per-form declaration into the audit log.
+       Additive only: reads the declaration section that already renders on the
+       form; does not add or modify any field. */
+    logFormDeclaration(orderId, order){
+      const sec = (this.schema?.sections || []).find(s => s.id === 'declaration' || s.id === 'authorisation');
+      if (!sec) return;
+      const sigField = (sec.fields || []).find(f => f.type === 'signature');
+      const method = this.declarationOpts.type;   // 'checkbox' | 'signature'
+      const sigVal = sigField ? this.data[sigField.key] : null;
+      state.formDeclarations.push({
+        id: 'DECL-' + Date.now(),
+        orderId,
+        formCode: order.formCode || '—',
+        formName: order.formName || this.schema?.title || '—',
+        facility: order.facility || '—',
+        treatment: order.treatment || '—',
+        userId: eulaUserId(),
+        userName: state.profile.contact || '—',
+        companyName: state.profile.company || '—',
+        statement: sec.legal || sec.agreeText || 'I agree to the declaration above.',
+        method,
+        signatureValue: method === 'checkbox' ? (sigVal === 'YES' ? 'Agreed (checkbox)' : String(sigVal||'—')) : 'Signature captured',
+        acceptedAt: new Date().toISOString(),
+        ip: eulaMockIp(),
+      });
     },
     resolveSourceLabel(source, id){
       const item = (this.sourceLists[source]||[]).find(x => x.id === id);
@@ -6445,6 +8670,7 @@ const SettingsPage = {
       consigneeSearch: '',
       drawer: { open:false, kind:'commodity', mode:'add', original:null, working:{} },
       del:    { open:false, kind:'commodity', row:null },
+      showFullEula: false,
     };
   },
   computed:{
@@ -6476,6 +8702,11 @@ const SettingsPage = {
       const q = this.consigneeSearch.toLowerCase();
       return state.consignees.filter(r => [r.name,r.contact,r.phone,r.address].some(v => String(v||'').toLowerCase().includes(q)));
     },
+    eula(){ return state.eula; },
+    myAcceptances(){
+      const uid = (state.profile.email||'').toLowerCase();
+      return state.eulaAcceptances.filter(a => a.userId === uid).slice().reverse();
+    },
     tabs(){
       const customerTabs = [
         { id:'profile',     label:'Profile',     icon:'user' },
@@ -6483,6 +8714,7 @@ const SettingsPage = {
         { id:'commodities', label:'Commodities', icon:'package' },
         { id:'consignors',  label:'Consignors',  icon:'warehouse' },
         { id:'consignees',  label:'Consignees',  icon:'truck' },
+        { id:'terms',       label:'Service Agreement', icon:'file-text' },
       ];
       const adminTabs = [
         { id:'site',        label:'Site',        icon:'sliders-horizontal', adminOnly:true },
@@ -6538,7 +8770,10 @@ const SettingsPage = {
       if (idx >= 0) list.splice(idx, 1);
       this.del.open = false;
       showToast('Removed. Past orders are unchanged.', 'success');
-    }
+    },
+    fmtDT(iso){ if(!iso) return '-'; const d=new Date(iso); return d.toLocaleString('en-AU',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); },
+    eulaReasonLabel(r){ return ({ first:'First acceptance', periodic:'90-day re-acceptance', version:'Updated version' })[r] || 'Acceptance'; },
+    downloadCopy(){ openAgreementForPrint(); },
   },
   template:`
   <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
@@ -6806,6 +9041,47 @@ const SettingsPage = {
 
     <!-- Site (admin-only): site-wide settings, e.g. maintenance banner -->
     <SiteSettingsPage v-if="tab==='site' && isAdmin"/>
+
+    <!-- Terms & Agreements (customer) — view the active EULA + your acceptance history -->
+    <div v-if="tab==='terms' && !isAdmin" role="tabpanel" id="settings-panel-terms" aria-labelledby="settings-tab-terms" class="space-y-6 max-w-3xl">
+      <section class="bg-white border border-slate-200 rounded-md p-5">
+        <div class="flex items-start justify-between gap-4 flex-wrap">
+          <div class="flex items-center gap-3">
+            <span class="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="file-text" :size="17"/></span>
+            <div>
+              <h2 class="text-base font-semibold text-navy-900 leading-tight">{{ eula.title }}</h2>
+              <p class="text-sm text-slate-500">Version {{ eula.version }} · effective {{ fmtDT(eula.date).split(',')[0] }}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <Btn kind="outline" :icon="showFullEula ? 'chevron-up' : 'eye'" @click="showFullEula = !showFullEula">{{ showFullEula ? 'Hide' : 'View full agreement' }}</Btn>
+            <Btn kind="outline" icon="download" @click="downloadCopy">Download PDF</Btn>
+          </div>
+        </div>
+        <div v-if="showFullEula" class="mt-4 border-t border-slate-200 pt-4 max-h-[420px] overflow-y-auto text-sm text-slate-700 leading-relaxed space-y-1.5 eula-body" v-html="eula.html"></div>
+      </section>
+
+      <section class="bg-white border border-slate-200 rounded-md p-5">
+        <h3 class="text-sm font-semibold text-navy-900">Your acceptance history</h3>
+        <p class="text-xs text-slate-500 mt-0.5 mb-3">Each time you accept the agreement it is recorded for compliance. Re-acceptance is requested every {{ state.eulaConfig.reacceptDays }} days, and immediately whenever a new version is published.</p>
+        <div v-if="myAcceptances.length" class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead><tr class="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200">
+              <th class="py-2 pr-4 font-medium">Version</th><th class="py-2 pr-4 font-medium">Accepted</th><th class="py-2 pr-4 font-medium">Reason</th><th class="py-2 pr-4 font-medium">IP</th>
+            </tr></thead>
+            <tbody>
+              <tr v-for="a in myAcceptances" :key="a.id" class="border-b border-slate-100">
+                <td class="py-2 pr-4 font-medium text-navy-900">v{{ a.version }}</td>
+                <td class="py-2 pr-4 text-slate-700">{{ fmtDT(a.acceptedAt) }}</td>
+                <td class="py-2 pr-4 text-slate-600">{{ eulaReasonLabel(a.reason) }}</td>
+                <td class="py-2 pr-4 text-slate-500 tabular-nums">{{ a.ip }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <p v-else class="text-sm text-slate-500 py-4 text-center">No acceptance recorded yet in this session.</p>
+      </section>
+    </div>
 
     <!-- Right-side edit drawer (shared across Commodities / Consignors / Consignees) -->
     <transition name="fade">
@@ -7267,6 +9543,231 @@ const OnboardingIncompletePage = {
 
 /* ---------- Page: Admin Console (landing) ---------------------------------- */
 
+/* ---------- Admin: EULA version manager (/admin/eula) ----------------------- */
+const AdminEulaPage = {
+  components:{ Icon, Btn, RouterLink },
+  data(){ return { showPreview:false }; },
+  computed:{
+    state(){ return state; },
+    eula(){ return state.eula; },
+    acceptCount(){ return state.eulaAcceptances.filter(a => a.version === state.eula.version).length; },
+  },
+  methods:{
+    fmtDT(iso){ if(!iso) return '-'; const d=new Date(iso); return d.toLocaleString('en-AU',{day:'numeric',month:'short',year:'numeric'}); },
+    publish(){
+      eulaDemoPublishNewVersion();
+      showToast('New EULA version '+state.eula.version+' published. All customers will be asked to re-accept at next sign-in.', 'success');
+    },
+  },
+  template:`
+  <div class="p-6 sm:p-8 max-w-4xl space-y-6 text-base text-slate-800">
+    <div class="flex items-center gap-2 text-sm text-slate-500">
+      <router-link to="/admin" class="hover:text-navy-900 focus-ring rounded">Admin console</router-link>
+      <Icon name="chevron-right" :size="14"/><span class="text-navy-900 font-medium">Service Agreement</span>
+    </div>
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Service Agreement</h1>
+        <p class="text-sm text-slate-500 mt-1">Manage the Quality Service Agreement and publish new versions.</p>
+      </div>
+      <router-link to="/admin/eula/logs"><Btn kind="outline" icon="list">Acceptance logs</Btn></router-link>
+    </div>
+
+    <section class="bg-white border border-slate-200 rounded-md p-5">
+      <div class="flex items-start justify-between gap-4 flex-wrap">
+        <div class="flex items-center gap-3">
+          <span class="shrink-0 inline-flex items-center justify-center h-9 w-9 rounded-lg bg-teal-50 text-teal-600 ring-1 ring-teal-100"><Icon name="file-check" :size="17"/></span>
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-base font-semibold text-navy-900">{{ eula.title }}</h2>
+              <span class="text-xs font-medium px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200">Active</span>
+            </div>
+            <p class="text-sm text-slate-500">Version {{ eula.version }} · effective {{ fmtDT(eula.date) }} · {{ acceptCount }} acceptance(s) on this version</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <Btn kind="outline" :icon="showPreview ? 'chevron-up' : 'eye'" @click="showPreview = !showPreview">{{ showPreview ? 'Hide' : 'Preview' }}</Btn>
+          <Btn kind="primary" icon="upload" @click="publish">Publish new version</Btn>
+        </div>
+      </div>
+      <div v-if="showPreview" class="mt-4 border-t border-slate-200 pt-4 max-h-[420px] overflow-y-auto text-sm text-slate-700 leading-relaxed space-y-1.5 eula-body" v-html="eula.html"></div>
+      <p v-else class="text-xs text-slate-500 mt-3">Publishing a new version sets it active and forces every customer to re-accept at next sign-in (overriding the {{ state.eulaConfig.reacceptDays }}-day cycle). In production this uploads the new agreement content; in this wireframe it bumps the version for demonstration.</p>
+    </section>
+
+    <section class="bg-white border border-slate-200 rounded-md p-5">
+      <h3 class="text-sm font-semibold text-navy-900 mb-3">Revision history</h3>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200">
+            <th class="py-2 pr-4 font-medium">Version</th><th class="py-2 pr-4 font-medium">Effective</th><th class="py-2 font-medium">Summary</th>
+          </tr></thead>
+          <tbody>
+            <tr v-for="(v,i) in state.eulaVersionHistory" :key="v.version" class="border-b border-slate-100">
+              <td class="py-2 pr-4 font-medium text-navy-900 whitespace-nowrap">v{{ v.version }} <span v-if="i===0 && v.version===eula.version" class="text-emerald-600 text-xs">(active)</span></td>
+              <td class="py-2 pr-4 text-slate-700 whitespace-nowrap">{{ fmtDT(v.date) }}</td>
+              <td class="py-2 text-slate-600">{{ v.note }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>`
+};
+
+/* ---------- Admin: EULA acceptance & declaration logs (/admin/eula/logs) ----- */
+const AdminEulaLogsPage = {
+  components:{ Icon, Btn, RouterLink },
+  data(){ return { logTab:'acceptances', search:'' }; },
+  computed:{
+    state(){ return state; },
+    acceptances(){
+      const q = this.search.trim().toLowerCase();
+      const rows = state.eulaAcceptances.slice().reverse();
+      if (!q) return rows;
+      return rows.filter(a => [a.userName,a.companyName,a.version,a.ip].some(v => String(v||'').toLowerCase().includes(q)));
+    },
+    declarations(){
+      const q = this.search.trim().toLowerCase();
+      const rows = state.formDeclarations.slice().reverse();
+      if (!q) return rows;
+      return rows.filter(d => [d.userName,d.companyName,d.formCode,d.formName,d.orderId].some(v => String(v||'').toLowerCase().includes(q)));
+    },
+  },
+  methods:{
+    fmtDT(iso){ if(!iso) return '-'; const d=new Date(iso); return d.toLocaleString('en-AU',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'}); },
+    csvCell(v){ const s = String(v==null?'':v).replace(/"/g,'""'); return /[",\n]/.test(s) ? '"'+s+'"' : s; },
+    downloadCsv(filename, headers, rows){
+      const lines = [headers.join(',')].concat(rows.map(r => r.map(this.csvCell).join(',')));
+      const blob = new Blob([lines.join('\n')], { type:'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a'); a.href = url; a.download = filename; document.body.appendChild(a); a.click();
+      document.body.removeChild(a); URL.revokeObjectURL(url);
+      showToast('Exported '+rows.length+' row(s) to CSV.', 'success');
+    },
+    exportAcceptances(){
+      this.downloadCsv('eula-acceptances.csv',
+        ['User','Company','Version','Reason','Accepted at','IP','User agent'],
+        this.acceptances.map(a => [a.userName, a.companyName, a.version, a.reason, a.acceptedAt, a.ip, a.userAgent]));
+    },
+    exportDeclarations(){
+      this.downloadCsv('form-declarations.csv',
+        ['Order ID','Form code','Form name','Facility','Treatment','User','Company','Statement','Method','Signature','Accepted at','IP'],
+        this.declarations.map(d => [d.orderId,d.formCode,d.formName,d.facility,d.treatment,d.userName,d.companyName,d.statement,d.method,d.signatureValue,d.acceptedAt,d.ip]));
+    },
+    exportPdf(){
+      const isAcc = this.logTab === 'acceptances';
+      const title = isAcc ? 'Agreement Acceptance Log' : 'Form Declaration Log';
+      const cols = isAcc
+        ? ['User','Company','Version','Reason','Accepted at','IP']
+        : ['Order','Form','User','Company','Method','Accepted at','IP'];
+      const rows = isAcc
+        ? this.acceptances.map(a => [a.userName, a.companyName, 'v'+a.version, a.reason, this.fmtDT(a.acceptedAt), a.ip])
+        : this.declarations.map(d => [d.orderId, d.formCode+' · '+d.formName, d.userName, d.companyName, d.method, this.fmtDT(d.acceptedAt), d.ip]);
+      const esc = s => String(s==null?'':s).replace(/[&<>]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));
+      const head = cols.map(c => '<th>'+esc(c)+'</th>').join('');
+      const body = rows.length
+        ? rows.map(r => '<tr>'+r.map(c => '<td>'+esc(c)+'</td>').join('')+'</tr>').join('')
+        : '<tr><td colspan="'+cols.length+'" style="text-align:center;color:#64748b;padding:24px">No records.</td></tr>';
+      const now = new Date().toLocaleString('en-AU',{day:'numeric',month:'short',year:'numeric',hour:'2-digit',minute:'2-digit'});
+      const meta = 'Agreement: '+esc(state.eula.title)+' (v'+esc(state.eula.version)+') · Exported '+esc(now)+' · '+rows.length+' record(s)'+(this.search ? ' · filtered by "'+esc(this.search)+'"' : '');
+      const win = window.open('', '_blank');
+      if (!win) { showToast('Pop-up blocked. Allow pop-ups for this site to export PDF.', 'error'); return; }
+      win.document.write(
+        '<!doctype html><html lang="en"><head><meta charset="utf-8"><title>'+esc(title)+'</title>'+
+        '<style>@page{size:A4 landscape;margin:14mm;}*{box-sizing:border-box;}'+
+        'body{font-family:Arial,Helvetica,sans-serif;color:#1f2733;margin:0;}'+
+        '.hdr{border-bottom:2px solid #0f2a4a;padding-bottom:10px;margin-bottom:12px;}'+
+        '.hdr h1{font-size:18px;color:#0f2a4a;margin:0 0 2px;}.hdr .sub{font-size:11px;color:#475569;}'+
+        '.meta{font-size:11px;color:#475569;margin-bottom:10px;}'+
+        'table{border-collapse:collapse;width:100%;font-size:11px;}'+
+        'th,td{border:1px solid #cbd5e1;padding:5px 7px;text-align:left;vertical-align:top;}'+
+        'th{background:#eef2f6;color:#0f2a4a;}tr{page-break-inside:avoid;}thead{display:table-header-group;}'+
+        '</style></head><body>'+
+        '<div class="hdr"><h1>Steritech '+esc(title)+'</h1>'+
+        '<div class="sub">Permanent audit trail for compliance and government audits</div></div>'+
+        '<div class="meta">'+meta+'</div>'+
+        '<table><thead><tr>'+head+'</tr></thead><tbody>'+body+'</tbody></table>'+
+        '</body></html>');
+      win.document.close();
+      win.focus();
+      setTimeout(() => { win.print(); }, 300);
+    },
+  },
+  template:`
+  <div class="p-6 sm:p-8 max-w-full space-y-6 text-base text-slate-800">
+    <div class="flex items-center gap-2 text-sm text-slate-500">
+      <router-link to="/admin" class="hover:text-navy-900 focus-ring rounded">Admin console</router-link>
+      <Icon name="chevron-right" :size="14"/>
+      <router-link to="/admin/eula" class="hover:text-navy-900 focus-ring rounded">Service Agreement</router-link>
+      <Icon name="chevron-right" :size="14"/><span class="text-navy-900 font-medium">Acceptance logs</span>
+    </div>
+    <div class="flex items-start justify-between gap-4 flex-wrap">
+      <div>
+        <h1 class="text-xl font-semibold text-navy-900 leading-tight">Acceptance &amp; declaration logs</h1>
+        <p class="text-sm text-slate-500 mt-1">Permanent, exportable audit trail for compliance and government audits.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <Btn kind="outline" icon="download" @click="logTab==='acceptances' ? exportAcceptances() : exportDeclarations()">Export CSV</Btn>
+        <Btn kind="ghost" icon="printer" @click="exportPdf">Export PDF</Btn>
+      </div>
+    </div>
+
+    <div class="flex items-center gap-1 border-b border-slate-200">
+      <button type="button" @click="logTab='acceptances'" :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', logTab==='acceptances' ? 'border-teal-600 text-navy-900' : 'border-transparent text-slate-500 hover:text-navy-900']">Agreement acceptances ({{ state.eulaAcceptances.length }})</button>
+      <button type="button" @click="logTab='declarations'" :class="['px-4 py-2 text-sm font-medium border-b-2 -mb-px', logTab==='declarations' ? 'border-teal-600 text-navy-900' : 'border-transparent text-slate-500 hover:text-navy-900']">Form declarations ({{ state.formDeclarations.length }})</button>
+      <div class="ml-auto py-1.5">
+        <div class="relative">
+          <Icon name="search" :size="15" cls="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400"/>
+          <input v-model="search" type="search" placeholder="Search…" class="h-9 w-56 pl-8 pr-3 rounded-md border border-slate-300 text-sm focus-ring"/>
+        </div>
+      </div>
+    </div>
+
+    <section v-if="logTab==='acceptances'" class="bg-white border border-slate-200 rounded-md overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200 bg-slate-50">
+            <th class="py-2.5 px-4 font-medium">User</th><th class="py-2.5 px-4 font-medium">Company</th><th class="py-2.5 px-4 font-medium">Version</th><th class="py-2.5 px-4 font-medium">Reason</th><th class="py-2.5 px-4 font-medium">Accepted at</th><th class="py-2.5 px-4 font-medium">IP</th>
+          </tr></thead>
+          <tbody>
+            <tr v-for="a in acceptances" :key="a.id" class="border-b border-slate-100 hover:bg-slate-50/60">
+              <td class="py-2.5 px-4 text-navy-900 font-medium">{{ a.userName }}</td>
+              <td class="py-2.5 px-4 text-slate-700">{{ a.companyName }}</td>
+              <td class="py-2.5 px-4 text-slate-700">v{{ a.version }}</td>
+              <td class="py-2.5 px-4 text-slate-600">{{ a.reason }}</td>
+              <td class="py-2.5 px-4 text-slate-700 whitespace-nowrap">{{ fmtDT(a.acceptedAt) }}</td>
+              <td class="py-2.5 px-4 text-slate-500 tabular-nums">{{ a.ip }}</td>
+            </tr>
+            <tr v-if="!acceptances.length"><td colspan="6" class="py-10 text-center text-slate-500 text-sm">No agreement acceptances recorded yet in this session.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section v-else class="bg-white border border-slate-200 rounded-md overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead><tr class="text-left text-xs uppercase tracking-wide text-slate-500 border-b border-slate-200 bg-slate-50">
+            <th class="py-2.5 px-4 font-medium">Order</th><th class="py-2.5 px-4 font-medium">Form</th><th class="py-2.5 px-4 font-medium">User</th><th class="py-2.5 px-4 font-medium">Company</th><th class="py-2.5 px-4 font-medium">Method</th><th class="py-2.5 px-4 font-medium">Accepted at</th><th class="py-2.5 px-4 font-medium">IP</th>
+          </tr></thead>
+          <tbody>
+            <tr v-for="d in declarations" :key="d.id" class="border-b border-slate-100 hover:bg-slate-50/60">
+              <td class="py-2.5 px-4 text-navy-900 font-medium whitespace-nowrap">{{ d.orderId }}</td>
+              <td class="py-2.5 px-4 text-slate-700">{{ d.formCode }} <span class="text-slate-400">·</span> {{ d.formName }}</td>
+              <td class="py-2.5 px-4 text-slate-700">{{ d.userName }}</td>
+              <td class="py-2.5 px-4 text-slate-700">{{ d.companyName }}</td>
+              <td class="py-2.5 px-4 text-slate-600">{{ d.method }}</td>
+              <td class="py-2.5 px-4 text-slate-700 whitespace-nowrap">{{ fmtDT(d.acceptedAt) }}</td>
+              <td class="py-2.5 px-4 text-slate-500 tabular-nums">{{ d.ip }}</td>
+            </tr>
+            <tr v-if="!declarations.length"><td colspan="7" class="py-10 text-center text-slate-500 text-sm">No form declarations recorded yet. Submit a request form to capture one.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </div>`
+};
+
 const AdminConsolePage = {
   components:{ Icon, Btn, RouterLink },
   data(){ return { pendingTab: 'companies' }; },
@@ -7565,6 +10066,17 @@ const AdminConsolePage = {
                   Maintenance banner on · <button type="button" @click.stop.prevent="turnOffBanner" class="text-teal-600 hover:underline focus-ring rounded">Turn off</button>
                 </span>
                 <span v-else class="block text-xs text-slate-500">Maintenance & site-wide notices</span>
+              </span>
+              <Icon name="chevron-right" :size="14" cls="text-slate-300"/>
+            </router-link>
+          </li>
+          <li>
+            <router-link to="/admin/eula"
+                         class="flex items-center gap-3 px-5 py-3 hover:bg-slate-50 focus-ring">
+              <Icon name="file-text" :size="16" cls="text-slate-400 shrink-0"/>
+              <span class="flex-1 min-w-0">
+                <span class="block text-sm font-medium text-navy-900">Service Agreement</span>
+                <span class="block text-xs text-slate-500">v{{ state.eula.version }} active · {{ state.eulaAcceptances.length }} acceptance(s) logged</span>
               </span>
               <Icon name="chevron-right" :size="14" cls="text-slate-300"/>
             </router-link>
@@ -11981,6 +14493,7 @@ const router = createRouter({
   routes: [
     { path:'/login',    component: LoginPage },
     { path:'/signup',   component: SignupPage },
+    { path:'/eula',     component: EulaGatePage },
     { path:'/onboarding/incomplete', component: OnboardingIncompletePage },
     { path:'/',          component: Shell, beforeEnter: requireAuth,
       children: [
@@ -12000,6 +14513,8 @@ const router = createRouter({
         { path:'/admin/contacts',                   component: ContactsListPage,            beforeEnter: requireAdmin },
         { path:'/admin/contacts/new',               component: OnboardCompanyContactPage,   beforeEnter: requireAdmin },
         { path:'/admin/contacts/:id',               component: ContactDetailPage,           beforeEnter: requireAdmin },
+        { path:'/admin/eula',                       component: AdminEulaPage,               beforeEnter: requireAdmin },
+        { path:'/admin/eula/logs',                  component: AdminEulaLogsPage,           beforeEnter: requireAdmin },
         // Legacy customer routes — kept for any links still referencing them, but not in nav.
         { path:'/admin/customers',                  component: CustomerListPage,    beforeEnter: requireAdmin },
         { path:'/admin/customers/:id',              component: CustomerDetailPage,  beforeEnter: requireAdmin },
@@ -12010,6 +14525,20 @@ const router = createRouter({
     },
     { path: '/:pathMatch(.*)*', redirect:'/dashboard' }
   ]
+});
+
+/* EULA enforcement (Case 1 & 2) — additive global guard. Customers must have a
+   current acceptance before reaching any protected view; admins are exempt.
+   Public routes (login/signup/onboarding) and the gate itself are never blocked. */
+const EULA_PUBLIC_PATHS = ['/login', '/signup', '/onboarding/incomplete', '/eula'];
+router.beforeEach((to, from, next) => {
+  if (!state.authed) return next();
+  if (EULA_PUBLIC_PATHS.includes(to.path)) return next();
+  if (eulaStatus().required) {
+    state.eulaReturnTo = to.fullPath;
+    return next('/eula');
+  }
+  next();
 });
 
 /* ---------- Boot ------------------------------------------------------------ */
