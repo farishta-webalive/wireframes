@@ -503,13 +503,13 @@ Object.assign(window, {
 // ─────────────────────────────────────────────────────────────────────────────
 
 const SAMPLE_ORDERS = [
-  { id: 'PLT-2026-041', customer: 'MedTech Australia',  pallets: 3, state: 'RECEIVED',    stream: 'irradiation', date: 'Apr 28', product: 'Surgical Instruments - Class II', weight: 142 },
-  { id: 'PLT-2026-038', customer: 'BioPharma Ltd',       pallets: 1, state: 'STAGED',       stream: 'eto',         date: 'Apr 27', product: 'Single-Use Catheters',           weight: 88  },
-  { id: 'PLT-2026-035', customer: 'SurgiCare Corp',      pallets: 5, state: 'IN_TREATMENT', stream: 'irradiation', date: 'Apr 26', product: 'Sterile Gloves - Bulk',           weight: 310 },
-  { id: 'PLT-2026-031', customer: 'HealthPlus Group',    pallets: 2, state: 'PROCESS_OUT',  stream: 'packing',     date: 'Apr 25', product: 'IV Administration Sets',           weight: 95  },
-  { id: 'PLT-2026-028', customer: 'NovaMed Supplies',    pallets: 4, state: 'QA_RELEASED',  stream: 'eto',         date: 'Apr 24', product: 'Wound Dressing Packs',            weight: 204 },
-  { id: 'PLT-2026-024', customer: 'CardioCare Health',   pallets: 2, state: 'QA_HOLD',      stream: 'irradiation', date: 'Apr 23', product: 'Cardiac Stents - Box Set',        weight: 64  },
-  { id: 'PLT-2026-019', customer: 'TerraCare Medical',   pallets: 3, state: 'SHIPPED',      stream: 'packing',     date: 'Apr 22', product: 'Disposable Syringes - 5 mL',      weight: 156 },
+  { id: 'PLT-2026-041', customer: 'MedTech Australia',  pallets: 3, state: 'RECEIVED',    stream: 'irradiation', date: 'Apr 28', product: 'Surgical Instruments - Class II', weight: 142, assignee: 'Pan Xiao' },
+  { id: 'PLT-2026-038', customer: 'BioPharma Ltd',       pallets: 1, state: 'STAGED',       stream: 'eto',         date: 'Apr 27', product: 'Single-Use Catheters',           weight: 88, assignee: 'Pan Xiao'  },
+  { id: 'PLT-2026-035', customer: 'SurgiCare Corp',      pallets: 5, state: 'IN_TREATMENT', stream: 'irradiation', date: 'Apr 26', product: 'Sterile Gloves - Bulk',           weight: 310, assignee: 'Liam Carter' },
+  { id: 'PLT-2026-031', customer: 'HealthPlus Group',    pallets: 2, state: 'PROCESS_OUT',  stream: 'packing',     date: 'Apr 25', product: 'IV Administration Sets',           weight: 95, assignee: 'Pan Xiao'  },
+  { id: 'PLT-2026-028', customer: 'NovaMed Supplies',    pallets: 4, state: 'QA_RELEASED',  stream: 'eto',         date: 'Apr 24', product: 'Wound Dressing Packs',            weight: 204, assignee: 'Pan Xiao' },
+  { id: 'PLT-2026-024', customer: 'CardioCare Health',   pallets: 2, state: 'QA_HOLD',      stream: 'irradiation', date: 'Apr 23', product: 'Cardiac Stents - Box Set',        weight: 64, assignee: 'Pan Xiao' },
+  { id: 'PLT-2026-019', customer: 'TerraCare Medical',   pallets: 3, state: 'SHIPPED',      stream: 'packing',     date: 'Apr 22', product: 'Disposable Syringes - 5 mL',      weight: 156, assignee: 'Liam Carter' },
 ];
 
 // ── Splash Screen ─────────────────────────────
@@ -777,6 +777,20 @@ const DashboardScreen = ({ navigate, appData }) => {
                   </div>
                 </div>
                 <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, color: C.text, marginBottom: 10 }}>{order.product}</div>
+                {!isQA && (order.state === 'QA_RELEASED' || order.state === 'QA_HOLD') && (
+                  <div style={{
+                    display: 'inline-flex', alignItems: 'center', gap: 5, marginBottom: 10,
+                    padding: '3px 9px', borderRadius: 999,
+                    background: order.state === 'QA_HOLD' ? '#FEF2F2' : '#ECFDF5',
+                    color: order.state === 'QA_HOLD' ? '#B91C1C' : '#15803D',
+                    fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700,
+                  }}>
+                    <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.6" strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+                    </svg>
+                    Returned by QA
+                  </div>
+                )}
                 <div style={{ display: 'flex', gap: 3, marginBottom: 10 }}>
                   {[...Array(8)].map((_, i) => (
                     <div key={i} style={{ flex: 1, height: 4, borderRadius: 2, background: i < step ? C.brand : C.border }}/>
@@ -870,15 +884,17 @@ const OrderDetailScreen = ({ navigate, appData }) => {
   ];
 
 
+  const isQA = appData.role === 'qa';
   // Decide next action based on state
   const action = (() => {
     if (order.state === 'RECEIVED')     return { label: 'Start: Scan Pallet →',     screen: 'scan_pallet' };
     if (order.state === 'STAGED')       return { label: 'Begin Treatment →',         screen: 'treatment_active' };
     if (order.state === 'IN_TREATMENT') return { label: 'View Active Treatment →',   screen: 'treatment_active' };
-    const qaLabel = appData.role === 'qa' ? 'Review for Release →' : 'Check QA Status →';
+    const qaLabel = isQA ? 'Review for Release →' : 'Check QA Status →';
     if (order.state === 'PROCESS_OUT')  return { label: qaLabel, screen: 'qa_status' };
     if (order.state === 'IN_STORAGE_PROCESSED') return { label: qaLabel, screen: 'qa_status' };
-    if (order.state === 'QA_RELEASED')  return { label: 'Continue to Packing →',     screen: 'packing' };
+    // QA only does QA — once released, packing/dispatch returns to the original operator.
+    if (order.state === 'QA_RELEASED')  return isQA ? null : { label: 'Continue to Packing →', screen: 'packing' };
     if (order.state === 'QA_HOLD')      return { label: 'View QA Hold Details →',    screen: 'qa_hold', extras: { pdrReference: 'PDR-2026-007' } };
     return null;
   })();
@@ -888,6 +904,29 @@ const OrderDetailScreen = ({ navigate, appData }) => {
       <StatusBar />
       <NavBar title={order.id} onBack={() => navigate('dashboard')} showLogo={false} />
       <div style={{ flex: 1, overflow: 'auto', padding: '16px' }}>
+        {/* Explicit hand-back from QA — the original operator picks it back up here */}
+        {!isQA && (order.state === 'QA_RELEASED' || order.state === 'QA_HOLD') && (
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: 11, marginBottom: 14,
+            background: order.state === 'QA_HOLD' ? '#FEF2F2' : '#ECFDF5',
+            border: `1px solid ${order.state === 'QA_HOLD' ? '#FECACA' : '#A7F3D0'}`,
+            borderRadius: 12, padding: '12px 14px',
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={order.state === 'QA_HOLD' ? C.red : C.green} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+            </svg>
+            <div>
+              <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, fontWeight: 700, color: order.state === 'QA_HOLD' ? '#B91C1C' : '#15803D' }}>
+                Returned to you by QA
+              </div>
+              <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12.5, color: C.text, marginTop: 2, lineHeight: 1.5 }}>
+                {order.state === 'QA_HOLD'
+                  ? 'QA raised a hold (PDR). This pallet is back with you — action the hold before it can proceed.'
+                  : 'QA cleared this pallet. It is back with you — continue to packing and dispatch.'}
+              </div>
+            </div>
+          </div>
+        )}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 14 }}>
           <div>
             <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: C.muted, fontWeight: 600 }}>{order.customer}</div>
@@ -986,11 +1025,25 @@ const OrderDetailScreen = ({ navigate, appData }) => {
         </div>
       </div>
 
-      {action && (
+      {action ? (
         <div style={{ background: '#fff', borderTop: `1px solid ${C.border}`, padding: '12px 16px' }}>
           <Btn label={action.label} onClick={() => navigate(action.screen, { selectedOrder: order, palletId: 'PLT-A04-001', ...(action.extras || {}) })} color="orange" large />
         </div>
-      )}
+      ) : (isQA && order.state === 'QA_RELEASED') ? (
+        <div style={{ background: '#fff', borderTop: `1px solid ${C.border}`, padding: '12px 16px' }}>
+          <div style={{
+            display: 'flex', alignItems: 'center', gap: 10,
+            background: '#DCFCE7', border: '1px solid #86EFAC', borderRadius: 12, padding: '12px 14px',
+          }}>
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke={C.green} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
+              <path d="M20 6L9 17l-5-5"/>
+            </svg>
+            <span style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, color: '#15803D', fontWeight: 600 }}>
+              QA complete — released and handed back to the operator for dispatch.
+            </span>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
@@ -2266,14 +2319,18 @@ const QAStatusScreen = ({ navigate, appData, setAppData }) => {
       bg: '#DCFCE7', stroke: C.green,
       icon: <path d="M20 6L9 17l-5-5"/>,
       title: 'QA Released',
-      sub: 'Pallet is cleared by QA. Ready for dispatch.',
+      sub: isQA
+        ? 'Pallet cleared. QA is done here — it now returns to the operator for dispatch.'
+        : 'Pallet is cleared by QA and handed back to you. Ready for dispatch.',
       badge: { state: 'QA_RELEASED', label: 'QA RELEASED' },
     },
     hold: {
       bg: '#FEE2E2', stroke: C.red,
       icon: <><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></>,
       title: 'QA Hold Raised',
-      sub: 'A PDR has been raised. This pallet cannot proceed until cleared.',
+      sub: isQA
+        ? 'PDR raised. QA is done here — the pallet returns to the operator, blocked until cleared.'
+        : 'A PDR has been raised by QA. This pallet cannot proceed until cleared.',
       badge: { state: 'QA_HOLD', label: 'QA HOLD' },
     },
   };
@@ -2281,9 +2338,16 @@ const QAStatusScreen = ({ navigate, appData, setAppData }) => {
 
   let bottom;
   if (qaState === 'released') {
-    bottom = <Btn label="Begin Dispatch →" onClick={() => navigate('packing')} color="green" large />;
+    // QA only does QA: once released the pallet hands back to the operator.
+    // QA exits to dashboard; the original operator picks it up and dispatches.
+    bottom = isQA
+      ? <Btn label="Done — Back to Dashboard" onClick={() => navigate('dashboard')} color="blue" large />
+      : <Btn label="Begin Dispatch →" onClick={() => navigate('packing')} color="green" large />;
   } else if (qaState === 'hold') {
-    bottom = <Btn label="View QA Hold Details" onClick={() => navigate('qa_hold', { pdrReference: 'PDR-2026-007' })} color="darkRed" large />;
+    // QA's part is done after raising the PDR; the operator handles the hold.
+    bottom = isQA
+      ? <Btn label="Done — Back to Dashboard" onClick={() => navigate('dashboard')} color="blue" large />
+      : <Btn label="View QA Hold Details" onClick={() => navigate('qa_hold', { pdrReference: 'PDR-2026-007' })} color="darkRed" large />;
   } else if (isQA) {
     // QA reviewer: action buttons
     bottom = (
@@ -2358,28 +2422,47 @@ const QAStatusScreen = ({ navigate, appData, setAppData }) => {
           <InfoRow label="Process-Out" value="Apr 28, 2026 - 14:32" />
           {qaState !== 'pending' && <InfoRow label="QA Reviewer" value="Sarah Mitchell" />}
           {qaState !== 'pending' && <InfoRow label="Reviewed At" value="Apr 28, 2026 - 16:08" />}
+          {qaState !== 'pending' && <InfoRow label="Returned to" value={`${order.assignee || 'Operator'} (operator)`} />}
         </Card>
 
-        {/* Demo state switcher */}
-        <div style={{
-          background: C.surface, borderRadius: 12, padding: '10px 12px',
-          border: `1px dashed ${C.border}`,
-        }}>
-          <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
-            Demo - set QA state
+        {/* Explicit hand-back confirmation — QA's part ends here */}
+        {qaState !== 'pending' && (
+          <div style={{
+            display: 'flex', alignItems: 'flex-start', gap: 10, marginBottom: 14,
+            background: '#EEF2FF', border: '1px solid #C7D2FE', borderRadius: 12, padding: '12px 14px',
+          }}>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.brand} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0, marginTop: 1 }}>
+              <polyline points="9 14 4 9 9 4"/><path d="M20 20v-7a4 4 0 0 0-4-4H4"/>
+            </svg>
+            <span style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, color: '#3730A3', lineHeight: 1.5 }}>
+              QA step complete. This pallet has been handed back to <strong>{order.assignee || 'the operator'}</strong> to {qaState === 'hold' ? 'action the hold' : 'continue to dispatch'}.
+            </span>
           </div>
-          <div style={{ display: 'flex', gap: 6 }}>
-            {['pending', 'released', 'hold'].map(s => (
-              <button key={s} onClick={() => setQaState(s)} style={{
-                flex: 1, padding: '7px 8px', borderRadius: 8,
-                border: qaState === s ? `1.5px solid ${C.brand}` : `1px solid ${C.border}`,
-                background: qaState === s ? '#EEF2FF' : '#fff',
-                fontFamily: 'DM Sans,sans-serif', fontSize: 12, fontWeight: 600,
-                color: qaState === s ? C.brand : C.text, cursor: 'pointer', textTransform: 'capitalize',
-              }}>{s}</button>
-            ))}
+        )}
+
+        {/* Demo state switcher — QA only. Operators don't set QA state;
+            they see Released/Hold pallets via the dashboard filters instead. */}
+        {isQA && (
+          <div style={{
+            background: C.surface, borderRadius: 12, padding: '10px 12px',
+            border: `1px dashed ${C.border}`,
+          }}>
+            <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>
+              Demo - set QA state
+            </div>
+            <div style={{ display: 'flex', gap: 6 }}>
+              {['pending', 'released', 'hold'].map(s => (
+                <button key={s} onClick={() => setQaState(s)} style={{
+                  flex: 1, padding: '7px 8px', borderRadius: 8,
+                  border: qaState === s ? `1.5px solid ${C.brand}` : `1px solid ${C.border}`,
+                  background: qaState === s ? '#EEF2FF' : '#fff',
+                  fontFamily: 'DM Sans,sans-serif', fontSize: 12, fontWeight: 600,
+                  color: qaState === s ? C.brand : C.text, cursor: 'pointer', textTransform: 'capitalize',
+                }}>{s}</button>
+              ))}
+            </div>
           </div>
-        </div>
+        )}
       </div>
     </PageWrapper>
   );
