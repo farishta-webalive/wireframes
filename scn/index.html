@@ -1220,7 +1220,7 @@ const SAMPLE_REQUEST = {
     {
       palletSpace: 'PLT-A04-001',
       noOfSpaces:  1,
-      storageTemp: '+2°C to +8°C',
+      storageTemp: '5°C - 10°C',
       cheps:       2,
       cartons:     48,
       commodities: [
@@ -1231,7 +1231,7 @@ const SAMPLE_REQUEST = {
     {
       palletSpace: 'PLT-A04-002',
       noOfSpaces:  1,
-      storageTemp: '+2°C to +8°C',
+      storageTemp: '5°C - 10°C',
       cheps:       2,
       cartons:     36,
       commodities: [
@@ -1305,30 +1305,19 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
   const addExtra     = () => setExtraFiles(f => [...f, { id: Date.now() + Math.random(), name: `RA-Doc-${String(f.length + 1).padStart(3, '0')}.jpg`, size: '1.2 MB' }]);
   const removeExtra  = (id) => setExtraFiles(f => f.filter(x => x.id !== id));
 
-  // Edit data flow
+  // Edit data flow — per-step editable fields. Only fields that are EDITABLE in the
+  // Steritech portal's Domestic ICA-55 form are shown here; portal-locked / system
+  // fields (company info, pallet spaces, CHEPs, pallet cartons, expected delivery) stay read-only.
   const [showEdit, setShowEdit] = React.useState(false);
   const [editDone, setEditDone] = React.useState(false);
-  const [editedPalletSpaces, setEditedPalletSpaces] = React.useState(String(req.palletSpaces));
-  const [editedEta,    setEditedEta]    = React.useState(req.eta);
-  const [editedCartons, setEditedCartons] = React.useState('48');
+  const [editVals, setEditVals] = React.useState({});
+  const setEV = (k, v) => setEditVals(s => ({ ...s, [k]: v }));
+  const ev = (k, fallback) => (editVals[k] !== undefined ? editVals[k] : fallback);
 
   const submitEdit = () => {
     setShowEdit(false);
     setEditDone(true);
     setTimeout(() => setEditDone(false), 2400);
-  };
-
-  const [showReport, setShowReport] = React.useState(false);
-  const [reportDone, setReportDone] = React.useState(false);
-  const [reportType, setReportType] = React.useState('Pallet missing');
-  const [reportPallet, setReportPallet] = React.useState('');
-  const [reportNote, setReportNote] = React.useState('');
-
-  const submitReport = () => {
-    setShowReport(false);
-    setReportNote('');
-    setReportDone(true);
-    setTimeout(() => setReportDone(false), 2800);
   };
 
   const next = () => {
@@ -1391,25 +1380,14 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 8, marginTop: 12 }}>
-            <button onClick={() => setShowReport(true)} style={{
-              flex: 1, background: '#fff', border: `1px solid #C7D2FE`, color: C.brand,
-              borderRadius: 9, padding: '9px 10px', cursor: 'pointer',
-              fontFamily: 'DM Sans,sans-serif', fontSize: 12.5, fontWeight: 700,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
-            }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-                <path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z"/><line x1="4" y1="22" x2="4" y2="15"/>
-              </svg>
-              Report issue
-            </button>
+          <div style={{ marginTop: 12 }}>
             <button onClick={() => setShowEdit(true)} style={{
-              flex: 1, background: C.brand, border: `1px solid ${C.brand}`, color: '#fff',
-              borderRadius: 9, padding: '9px 10px', cursor: 'pointer',
-              fontFamily: 'DM Sans,sans-serif', fontSize: 12.5, fontWeight: 700,
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 6,
+              width: '100%', background: C.brand, border: `1px solid ${C.brand}`, color: '#fff',
+              borderRadius: 9, padding: '11px 10px', cursor: 'pointer',
+              fontFamily: 'DM Sans,sans-serif', fontSize: 13.5, fontWeight: 700,
+              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7,
             }}>
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>
               </svg>
               Edit
@@ -1428,21 +1406,6 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
             </svg>
             <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: '#15803D', lineHeight: 1.4, fontWeight: 600 }}>
               Changes saved.
-            </div>
-          </div>
-        )}
-
-        {reportDone && (
-          <div style={{
-            display: 'flex', alignItems: 'center', gap: 10,
-            background: '#FFF7ED', border: `1px solid #FED7AA`, borderRadius: 10,
-            padding: '10px 12px', marginBottom: 14,
-          }}>
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={C.orange} strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}>
-              <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-            </svg>
-            <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: '#9A3412', lineHeight: 1.4, fontWeight: 600 }}>
-              Issue reported — flagged for the customer & QA.
             </div>
           </div>
         )}
@@ -1744,20 +1707,87 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
           }}>
             <div style={{ width: 38, height: 4, borderRadius: 2, background: C.border, margin: '0 auto 16px' }}/>
             <div style={{ fontFamily: 'Outfit,sans-serif', fontSize: 19, fontWeight: 700, color: C.text, marginBottom: 16 }}>
-              Edit fields
+              Edit · {STEP_TITLES[step - 1]}
             </div>
 
-            <Field label="Pallet spaces" value={editedPalletSpaces} onChange={e => setEditedPalletSpaces(e.target.value)} />
-            <Field label="ETA" value={editedEta} onChange={e => setEditedEta(e.target.value)} />
-            <Field label="Cartons" value={editedCartons} onChange={e => setEditedCartons(e.target.value)} />
+            {step === 1 && (
+              <>
+                <Field label="Purchase order" value={ev('po', req.poNumber)} onChange={e => setEV('po', e.target.value)} />
+                <Field label="ETA" value={ev('eta', req.eta)} onChange={e => setEV('eta', e.target.value)} />
+              </>
+            )}
 
-            <div style={{
-              background: '#F5F7FA', border: `1px dashed ${C.border}`, borderRadius: 10,
-              padding: '10px 12px', marginTop: 4, marginBottom: 14,
-              fontFamily: 'DM Sans,sans-serif', fontSize: 12, color: C.muted, lineHeight: 1.45,
-            }}>
-              Editable fields are limited - protected fields (storage temp, customer info) can only be reported via the Report option.
-            </div>
+            {step === 2 && (
+              <>
+                <Field label="Destination market" value={ev('market', req.market)} onChange={e => setEV('market', e.target.value)} />
+                {req.pallets.map((p, pi) => (
+                  <div key={pi} style={{ borderTop: `1px solid ${C.border}`, paddingTop: 12, marginTop: 4 }}>
+                    <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, textTransform: 'uppercase', letterSpacing: 0.5, marginBottom: 8 }}>Pallet {pi + 1} · {p.palletSpace}</div>
+                    <Field label="No. of spaces" type="number" value={ev(`p${pi}_spaces`, String(p.noOfSpaces))} onChange={e => setEV(`p${pi}_spaces`, e.target.value)} />
+                    <Select label="Storage temp" value={ev(`p${pi}_temp`, p.storageTemp)} onChange={e => setEV(`p${pi}_temp`, e.target.value)} options={[
+                      { value: '', label: 'Select' },
+                      { value: '1°C - 4°C', label: '1°C - 4°C' },
+                      { value: '5°C - 10°C', label: '5°C - 10°C' },
+                      { value: '11°C - 16°C', label: '11°C - 16°C' },
+                    ]} />
+                    {p.commodities.map((c, ci) => (
+                      <div key={ci} style={{ background: '#FAFBFC', borderRadius: 10, border: `1px solid ${C.border}`, padding: '10px 12px', marginBottom: 8 }}>
+                        <div style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 13, fontWeight: 700, color: C.text, marginBottom: 8 }}>{c.commodity}</div>
+                        <Field label="Grower" value={ev(`p${pi}c${ci}_grower`, c.grower)} onChange={e => setEV(`p${pi}c${ci}_grower`, e.target.value)} />
+                        <Field label="Cartons" type="number" value={ev(`p${pi}c${ci}_cartons`, String(c.cartons))} onChange={e => setEV(`p${pi}c${ci}_cartons`, e.target.value)} />
+                        <Field label="CHEPs" type="number" value={ev(`p${pi}c${ci}_cheps`, String(c.cheps))} onChange={e => setEV(`p${pi}c${ci}_cheps`, e.target.value)} />
+                        <Field label="Pulp min" value={ev(`p${pi}c${ci}_pmin`, c.pulpMin)} onChange={e => setEV(`p${pi}c${ci}_pmin`, e.target.value)} />
+                        <Field label="Pulp max" value={ev(`p${pi}c${ci}_pmax`, c.pulpMax)} onChange={e => setEV(`p${pi}c${ci}_pmax`, e.target.value)} />
+                        <Field label="Address" value={ev(`p${pi}c${ci}_addr`, c.address)} onChange={e => setEV(`p${pi}c${ci}_addr`, e.target.value)} />
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </>
+            )}
+
+            {step === 3 && (
+              <>
+                <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Collection from Steritech?</label>
+                <div style={{ display: 'flex', gap: 8, marginBottom: 14 }}>
+                  {[{ v: 'yes', l: 'Yes' }, { v: 'no', l: 'No' }].map(o => {
+                    const sel = ev('collection', req.collection) === o.v;
+                    return (
+                      <button key={o.v} onClick={() => setEV('collection', o.v)} style={{
+                        flex: 1, padding: '11px', borderRadius: 10, cursor: 'pointer',
+                        border: sel ? `1.5px solid ${C.brand}` : `1.5px solid ${C.border}`,
+                        background: sel ? '#EEF2FF' : '#fff',
+                        fontFamily: 'DM Sans,sans-serif', fontSize: 14, fontWeight: 600, color: sel ? C.brand : C.text,
+                      }}>{o.l}</button>
+                    );
+                  })}
+                </div>
+                {ev('collection', req.collection) === 'yes' ? (
+                  <>
+                    <Field label="Delivery address" value={ev('deliveryAddress', req.deliveryAddress)} onChange={e => setEV('deliveryAddress', e.target.value)} />
+                    <Field label="Expected delivery date" type="date" value={ev('expectedDelivery', '2026-04-14')} onChange={e => setEV('expectedDelivery', e.target.value)} />
+                    <Field label="Charge" value={ev('charge', 'STERITECH')} onChange={e => setEV('charge', e.target.value)} />
+                  </>
+                ) : (
+                  <>
+                    <Field label="Address" value={ev('deliveryAddress', req.deliveryAddress)} onChange={e => setEV('deliveryAddress', e.target.value)} />
+                    <Field label="Expected dispatch date" type="date" value={ev('expectedDispatch', '')} onChange={e => setEV('expectedDispatch', e.target.value)} />
+                    <Field label="Third party truck company name" value={ev('thirdPartyTruck', '')} onChange={e => setEV('thirdPartyTruck', e.target.value)} placeholder="Company name" />
+                  </>
+                )}
+              </>
+            )}
+
+            {step === 4 && (
+              <>
+                <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Customer notes</label>
+                <textarea value={ev('notes', req.notes)} onChange={e => setEV('notes', e.target.value)} style={{
+                  width: '100%', minHeight: 92, borderRadius: 10, padding: '12px 14px', marginBottom: 14,
+                  border: `1.5px solid #D1CEC9`, background: '#fff', resize: 'vertical',
+                  fontFamily: 'DM Sans,sans-serif', fontSize: 14, color: C.text, outline: 'none', boxSizing: 'border-box', lineHeight: 1.45,
+                }}/>
+              </>
+            )}
 
             <div style={{ display: 'flex', gap: 10 }}>
               <button onClick={() => setShowEdit(false)} style={{
@@ -1775,97 +1805,6 @@ const ReceivingFormScreen = ({ navigate, appData }) => {
         </div>
       )}
 
-      {showReport && (
-        <div onClick={() => setShowReport(false)} style={{
-          position: 'absolute', inset: 0, background: 'rgba(15,22,35,0.55)',
-          display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', zIndex: 100,
-        }}>
-          <div onClick={e => e.stopPropagation()} style={{
-            background: '#fff', borderTopLeftRadius: 22, borderTopRightRadius: 22,
-            padding: '14px 18px 20px', maxHeight: '88%', overflowY: 'auto',
-            animation: 'slideIn 0.22s cubic-bezier(0.4,0,0.2,1) both',
-          }}>
-            <div style={{ width: 38, height: 4, borderRadius: 2, background: C.border, margin: '0 auto 16px' }}/>
-            <div style={{ fontFamily: 'Outfit,sans-serif', fontSize: 22, fontWeight: 700, color: C.text, marginBottom: 16 }}>
-              Report an issue
-            </div>
-
-            <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 8, textTransform: 'uppercase', letterSpacing: '0.6px' }}>What's wrong?</label>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 10, marginBottom: 18 }}>
-              {['Pallet missing', "Data doesn't match", 'Other'].map(t => {
-                const sel = reportType === t;
-                return (
-                  <button key={t} onClick={() => setReportType(t)} style={{
-                    display: 'flex', alignItems: 'center', gap: 12, width: '100%', textAlign: 'left',
-                    padding: '14px 16px', borderRadius: 12, cursor: 'pointer',
-                    border: sel ? `1.5px solid ${C.brand}` : `1.5px solid ${C.border}`,
-                    background: sel ? '#EEF2FF' : '#fff',
-                  }}>
-                    <span style={{
-                      width: 20, height: 20, borderRadius: 10, flexShrink: 0,
-                      border: sel ? `6px solid ${C.brand}` : `2px solid ${C.border}`,
-                      background: '#fff', boxSizing: 'border-box',
-                    }}/>
-                    <span style={{ fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 600, color: C.text }}>{t}</span>
-                  </button>
-                );
-              })}
-            </div>
-
-            {reportType !== 'Other' && (
-              <>
-                <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Which pallet?</label>
-                <div style={{ position: 'relative', marginBottom: 18 }}>
-                  <select
-                    value={reportPallet}
-                    onChange={e => setReportPallet(e.target.value)}
-                    style={{
-                      width: '100%', height: 48, borderRadius: 10, padding: '0 38px 0 14px',
-                      border: `1.5px solid #D1CEC9`, background: '#fff', appearance: 'none', WebkitAppearance: 'none',
-                      fontFamily: 'DM Sans,sans-serif', fontSize: 15, color: reportPallet ? C.text : C.muted,
-                      outline: 'none', boxSizing: 'border-box', cursor: 'pointer',
-                    }}>
-                    <option value="">Select pallet…</option>
-                    <option value="PLT-A04-001">PLT-A04-001</option>
-                    <option value="PLT-A04-002">PLT-A04-002</option>
-                    <option value="PLT-A04-003">PLT-A04-003</option>
-                    <option value="all">All / whole consignment</option>
-                  </select>
-                  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke={C.muted} strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" style={{ position: 'absolute', right: 14, top: 15, pointerEvents: 'none' }}>
-                    <polyline points="6 9 12 15 18 9"/>
-                  </svg>
-                </div>
-              </>
-            )}
-
-            <label style={{ display: 'block', fontFamily: 'DM Sans,sans-serif', fontSize: 11, fontWeight: 700, color: C.muted, marginBottom: 6, textTransform: 'uppercase', letterSpacing: '0.6px' }}>Notes (optional)</label>
-            <textarea
-              value={reportNote}
-              onChange={e => setReportNote(e.target.value)}
-              placeholder="e.g. Pallet PLT-A04-002 not on truck. Driver confirmed only 1 pallet delivered."
-              style={{
-                width: '100%', minHeight: 92, borderRadius: 10, padding: '12px 14px', marginBottom: 18,
-                border: `1.5px solid #D1CEC9`, background: '#fff', resize: 'vertical',
-                fontFamily: 'DM Sans,sans-serif', fontSize: 14, color: C.text,
-                outline: 'none', boxSizing: 'border-box', lineHeight: 1.45,
-              }}
-            />
-
-            <div style={{ display: 'flex', gap: 12 }}>
-              <button onClick={() => setShowReport(false)} style={{
-                flex: 1, padding: '14px', borderRadius: 12,
-                background: '#fff', border: `1.5px solid ${C.border}`, color: C.text,
-                fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 600, cursor: 'pointer',
-              }}>Cancel</button>
-              <button onClick={submitReport} style={{
-                flex: 1, padding: '14px', borderRadius: 12,
-                background: C.brand, border: 'none', color: '#fff',
-                fontFamily: 'DM Sans,sans-serif', fontSize: 15, fontWeight: 700, cursor: 'pointer',
-              }}>Submit report</button>
-            </div>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
